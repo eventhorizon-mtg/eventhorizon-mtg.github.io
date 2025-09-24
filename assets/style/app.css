@@ -13,7 +13,8 @@
 
 /* COMPONENTS */
 @import "components/_buttons.css"  layer(components);
-@import "components/_cards.css"    layer(components); 
+@import "components/_cards.css"    layer(components);
+@import "components/_links.css"    layer(components);
 @import "components/_contacts.css" layer(components);
 
 /* UTILITIES */
