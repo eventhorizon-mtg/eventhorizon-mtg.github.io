@@ -69,7 +69,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&display=swap">
+      href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 
 <!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
@@ -108,4 +108,27 @@
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
   <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
+{{- end -}}
+
+{{/* ---------------------------------------
+     CSS specifico Archivio (solo per pagine di tipo "archivio")
+     Percorsi: style/pages/archive.base.css, archive.mobile.css, archive.desktop.css
+---------------------------------------- */}}
+{{- if eq .Type "archivio" -}}
+  {{- $archivePaths := slice
+      "style/pages/archive.base.css"
+      "style/pages/archive.mobile.css"
+      "style/pages/archive.desktop.css"
+  -}}
+  {{- $.Scratch.Set "archiveParts" (slice) -}}
+  {{- range $ap := $archivePaths -}}
+    {{- with resources.Get $ap -}}
+      {{- $.Scratch.Add "archiveParts" (slice .) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $archiveParts := $.Scratch.Get "archiveParts" -}}
+  {{- if gt (len $archiveParts) 0 -}}
+    {{- $archiveBundle := ($archiveParts | resources.Concat "style/archive-bundle.css") | resources.Minify | resources.Fingerprint -}}
+    <link rel="stylesheet" href="{{ $archiveBundle.RelPermalink }}" integrity="{{ $archiveBundle.Data.Integrity }}">
+  {{- end -}}
 {{- end -}}

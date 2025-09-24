@@ -1,0 +1,96 @@
+/* ============================================================
+   /pages/archive.desktop.css — regole desktop (≥1024px)
+   ============================================================ */
+
+@media (min-width: 1024px){
+
+  /* ----- Barra ricerca: 3 colonne (Input | Cerca | Reset) ----- */
+  .archive-search .container{
+    padding: 12px var(--container-pad-x, 16px);
+  }
+  .archive-search__form{
+    grid-template-columns: 1fr auto auto auto; /* q | kind | submit | reset */
+    gap: 8px;
+  }
+  /* Su desktop il filtro (select) è sempre visibile */
+  .archive-search__select{ display: block; }
+  /* Nascondi il bottone filtro su desktop (il select è visibile) */
+  .archive-search__filter-toggle{ display: none; }
+
+  /* ----- Item layout: niente colonna 'pill', dropdown full-width ----- */
+  .archive-item .item{
+    display: grid;
+    grid-template-columns: 128px minmax(0,1fr) auto;      /* thumb | testo | chevron */
+    grid-template-areas:
+      "thumb text chevron"
+      "details details details";                          /* dropdown sotto a tutta larghezza */
+    column-gap: 18px;
+    row-gap: 12px;
+    padding: 10px 12px;
+  }
+
+  /* Colonna testo */
+  .item-head{
+    grid-area: text;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding-inline-end: 0;
+    min-width: 0; /* prevenire overflow titolo */
+  }
+  .item-overline{ grid-area: unset; }
+  .item-title{
+    grid-area: unset;
+    letter-spacing: var(--trk-tight-lg, -0.5px);
+  }
+
+  /* Thumb allineato al centro: non condiziona l'altezza del dropdown */
+  .item-thumb{ align-self: center; }
+
+  /* Chevron a destra: stile coerente con i controlli */
+  .item-actions-summary{
+    grid-area: chevron;
+    justify-self: end;
+    align-self: end;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-grid; place-items: center;
+    background: transparent; border: 0;
+  }
+  .item-actions-summary::after{ font-size: 19px; }
+  .item-actions-summary:hover{ background: transparent; }
+
+  /* Dropdown in flow e full-width sotto l’item */
+  /* .item-details display spostato in base */
+  /* Pannello: visibilità via [hidden] (senza animazioni) */
+  /* Allinea il contenuto del pannello sotto la colonna testo:
+     128px (thumb) + 18px (gap) + 12px (padding orizzontale dell'item) = 158px */
+  .item-panel{ margin-top: 0; padding: 0 12px 8px 158px; }
+  .item-panel .item-descbar{ margin-bottom: 12px; }
+
+  /* Sposta descrizione e pills nella colonna testo */
+  .item-panel .item-summary{ margin: 0; width: 100%; max-width: none; }
+  .item-panel .item-ctas{
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  /* Variante 'content': nessuna costa/ombra decorativa su desktop */
+  .archive-item.is-content .item{
+    box-shadow: none !important;
+    border-left: none !important;
+  }
+  .archive-item.is-content .item::before{ content: none !important; }
+
+  /* Spazio inferiore condizionale (se vuoi enfatizzare l’apertura)
+     – applicabile se aggiungi una classe .is-open via JS al container
+  */
+  .archive-item .item{ padding-bottom: 0; }
+  .archive-item .item.is-open{ padding-bottom: 10px; }
+}
+/* ============================================================
+   Fine regole desktop
+   ============================================================ */
