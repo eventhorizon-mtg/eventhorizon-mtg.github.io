@@ -10,3 +10,19 @@ enableRobotsTXT = true
 [taxonomies]
   tag = "tags"
   category = "categories"
+
+[params]
+  siteName = "EventHorizon.mtg"
+
+  # Open Graph (fallback globali; sovrascrivibili per pagina con front matter)
+  [params.og]
+    title = "EventHorizon.mtg"
+    description = "Magic: The Gathering • Guide, video e risorse selezionate."
+    image = "/assets/social/og-image.jpg"
+    locale = "it_IT"
+
+  # UI
+  themeColor = "#0E0F1A"
+
+  # Preload hero LCP (opzionale: lascia o cambia path)
+  preloadHero = "/assets/bg_image.webp"

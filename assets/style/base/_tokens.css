@@ -1,0 +1,87 @@
+/* Design Tokens */
+:root{
+  /* Indigo */
+  --indigo-900: #2F2760;
+  --indigo-700: #5B4E9D;
+  --indigo-600: #4A3F81; /* colore da riconsiderare */
+  --indigo-500: #9F7BB8;
+
+  /* Neutral */
+  --neutral-00:  #FFFFFF;
+  --neutral-50:  #F3F2F7;
+  --neutral-900: #0E0F1A;
+
+  /* Teal CTA */
+  --teal-300: #00ADB1;
+  --teal-600: #007A7C;
+  --teal-700: #006668;
+
+  /* Gold */
+  --gold-600: #E0A402;
+  --gold-500: #E0A402;
+  --gold-700: #A37500;
+
+  /* Pink */
+  --pink-600: #D00093;
+  --pink-700: #B3007F;
+
+  /* Orange */
+  --orange-600: #DB6A1A;
+  --orange-500: #FE771D;
+
+  /* Acid */
+  --acid-600: #5CC800;
+  --acid-hover: #EC3DE6;
+
+  /* Tipografia */
+  --font-sans: "Lexend Deca", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-display: "Lexend Giga", var(--font-sans);
+
+  /* Scala font */
+  --fs-h1: clamp(2rem, 4.5vw + 0.3rem, 3.25rem);
+  --fs-h2: clamp(1.5rem, 2.8vw + 0.25rem, 2.25rem);
+  --fs-h3: clamp(1.25rem, 2vw + 0.2rem, 1.75rem);
+  --fs-body: clamp(1rem, 0.5vw + 0.9rem, 1.125rem);
+
+  /* Line-height & weight */
+  --lh-tight: 1.15;
+  --lh-normal: 1.45;
+  --fw-medium: 500;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  /* Spaziature */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px;
+
+  /* Raggi */
+  --radius-s: 8px;
+
+  /* Ombre */
+  --shadow-nav: 0 8px 20px rgba(0,0,0,0.16);
+  --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.22);
+
+  /* Motion */
+  --dur-1: 140ms;
+  --dur-2: 180ms;
+  --ease-standard: cubic-bezier(.2,.8,.2,1);
+
+  /* Z */
+  --z-nav: 1000;
+  --z-hero-img: 1;
+  --z-hero-content: 2;
+
+  /* Container */
+  --container-pad-x: 16px;
+  --container-max: 1200px;
+
+  /* Hero bg */
+  --hero-bg-opacity: 0.5;
+  --hero-bg-url: none;
+
+  /* Tracking */
+  --trk-tight: -0.4px;
+  --trk-tight-lg: -0.6px;
+  --trk-slight: -0.2px;
+  --trk-wide:  0.04em;
+}
