@@ -78,9 +78,6 @@
 
 {{/* ---------------------------------------
      CSS bundle via Hugo Pipes (robusto ai file mancanti)
-     1) Elenco PATH relativi a /assets
-     2) resources.Get condizionale (with)
-     3) Concat → Minify → Fingerprint
 ---------------------------------------- */}}
 {{- $cssPaths := slice
     "style/base/_tokens.css"
@@ -107,6 +104,6 @@
 {{- end -}}
 
 {{- if gt (len $parts) 0 -}}
-  {{- $bundle := (resources.Concat "style/bundle.css" $parts) | resources.Minify | resources.Fingerprint -}}
+  {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
   <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
 {{- end -}}
