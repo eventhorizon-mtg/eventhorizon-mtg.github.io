@@ -78,10 +78,9 @@
 
 {{/* ---------------------------------------
      CSS bundle via Hugo Pipes (robusto ai file mancanti)
-     1) Definiamo i PATH (relativi a /assets)
-     2) resources.Get su ciascuno
-     3) Rimuoviamo i nil (collections.Compact)
-     4) Concat → Minify → Fingerprint
+     1) Elenco PATH relativi a /assets
+     2) resources.Get condizionale (with)
+     3) Concat → Minify → Fingerprint
 ---------------------------------------- */}}
 {{- $cssPaths := slice
     "style/base/_tokens.css"
@@ -99,9 +98,15 @@
 
     "style/utilities/_a11y.css"
 -}}
-{{- $cssList := apply $cssPaths "resources.Get" "." -}}
-{{- $cssList = $cssList | collections.Compact -}}
-{{- if gt (len $cssList) 0 -}}
-  {{- $bundle := (resources.Concat "style/_bundle.css" $cssList) | resources.Minify | resources.Fingerprint -}}
+
+{{- $parts := slice -}}
+{{- range $p := $cssPaths -}}
+  {{- with resources.Get $p -}}
+    {{- $parts = append $parts . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if gt (len $parts) 0 -}}
+  {{- $bundle := (resources.Concat "style/bundle.css" $parts) | resources.Minify | resources.Fingerprint -}}
   <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
 {{- end -}}
