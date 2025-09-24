@@ -88,6 +88,10 @@
   --trk-tight-lg: -0.6px;
   --trk-slight: -0.2px;
   --trk-wide:  0.04em;
+
+  /* Breakpoints */
+  --bp-tablet: 768;
+  --bp-desktop: 1024;
 }
 
 /* Responsive container max width */

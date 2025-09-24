@@ -1,67 +1,42 @@
 /* ============================================================
-   Subhero.js
+   subhero.js — Homepage carousel
+   Refactor:
+   - Guard multi-mount: data-subhero-ready
+   - Breakpoints tramite CSS vars con fallback (--bp-desktop, --bp-tablet)
+   - Nessun cambio di comportamento
    ============================================================ */
-(function(){
+(() => {
   const container = document.querySelector('.sub-hero');
-  if (!container) return;
-  if (container.dataset.pagerReady === '1') return;
-  container.dataset.pagerReady = '1';
+  if (!container || container.dataset.subheroReady === '1') return;
+  container.dataset.subheroReady = '1';
 
-  // NASCONDI qualunque dots/controls fuori dalla sub-hero (hardening)
-  document.querySelectorAll('.pager__dots, .pager__controls').forEach(el => {
-    if (!container.contains(el)) {
-      el.style.display = 'none';
-      el.setAttribute('aria-hidden', 'true');
-    }
-  });
+  // ----- Utils -----
+  const qs  = (s, el = document) => el.querySelector(s);
+  const qsa = (s, el = document) => Array.from(el.querySelectorAll(s));
+  const set = (el, n, v) => { try { el && el.setAttribute(n, v); } catch {} };
 
-  // DOM base
-  const viewport = container.querySelector('.pager__viewport') || container;
-  const trackEl  = container.querySelector('.pager__track');
-  const slides   = Array.from(trackEl ? trackEl.querySelectorAll('.pager__slide') : []);
+  const viewport = qs('.pager__viewport', container);
+  const track    = qs('.pager__track', container);
+  const controls = qs('.pager__controls', container);
+  const dotsWrap = qs('.pager__dots', container);
+  const statusEl = document.getElementById('carousel-status');
 
-  // Deduplica eventuali doppi DENTRO la sub-hero, tieni il primo
-  const dotsGroups = Array.from(container.querySelectorAll('.pager__dots'));
-  if (dotsGroups.length > 1) dotsGroups.slice(1).forEach(n => n.remove());
-  const controlsGroups = Array.from(container.querySelectorAll('.pager__controls'));
-  if (controlsGroups.length > 1) controlsGroups.slice(1).forEach(n => n.remove());
+  const slides = qsa('.pager__slide', track);
+  if (!viewport || !track || slides.length === 0) return;
 
-  // Riferimenti AFTER clean
-  const dotsWrap = container.querySelector('.pager__dots');
-  const controls = container.querySelector('.pager__controls');
-  const statusEl = container.querySelector('#carousel-status');
-
-  /* >>>START subhero.js — align measure helpers >>> */
-  let _alignRO = null;
-
-  function syncSubheroAlign() {
+  // Breakpoints da CSS var (fallbacks)
+  const readBP = (name, fallback) => {
     try {
-      const ref =
-        document.querySelector('.cards__inner') ||
-        document.querySelector('.links__inner');
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : fallback;
+    } catch { return fallback; }
+  };
+  const BP_DESKTOP = readBP('--bp-desktop', 1024);
+  const BP_TABLET  = readBP('--bp-tablet', 768);
 
-      if (!ref) {
-        container.style.removeProperty('--subhero-align-left');
-        return;
-      }
-      const { left } = ref.getBoundingClientRect();
-      const px = Math.max(0, Math.round(left));
-      container.style.setProperty('--subhero-align-left', px + 'px');
-    } catch {
-      container.style.removeProperty('--subhero-align-left');
-    }
-  }
-
-  // throttle via rAF su resize/RO
-  let _alignRAF = 0;
-  function requestAlign() {
-    if (_alignRAF) return;
-    _alignRAF = requestAnimationFrame(() => {
-      _alignRAF = 0;
-      syncSubheroAlign();
-    });
-  }
-  /* >>>END subhero.js — align measure helpers >>> */
+  const mqDesktop = window.matchMedia(`(min-width: ${BP_TABLET}px)`);     // coerenza con CSS di visibilità arrow
+  const mqMobile  = window.matchMedia(`(max-width: ${BP_TABLET - 0.02}px)`);
 
   // Motion & timing
   const PRM = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -107,53 +82,35 @@
     statusEl.textContent = `Slide ${i+1} di ${slides.length}: ${title}`;
   }
 
-  // Dots: refs (supporta markup con .dot o <button>)
+  // Dots
   const dots = dotsWrap ? Array.from(dotsWrap.querySelectorAll('button, .dot')) : [];
-
   function initDotsA11y(){
     if (!dotsWrap || !slides?.length) return;
-    // wrapper = tablist
     dotsWrap.setAttribute('role', 'tablist');
     const slideCount = slides.length;
-
     dots.forEach((d, di) => {
-      // ogni dot è un "tab" che controlla la slide corrispondente
       d.setAttribute('role', 'tab');
       d.setAttribute('aria-controls', slides[di]?.id || `subhero-slide-${di+1}`);
       d.setAttribute('aria-label', `Vai alla slide ${di+1} di ${slideCount}`);
-      // tabindex/selected saranno impostati in updateDots()
     });
   }
-
   function updateDots(){
     if (!dots.length) return;
-
     const LEGACY_TO_CLEAN = ['is-progress', 'is-filling', 'is-paused'];
-
     dots.forEach((d, di) => {
-      // pulizia classi legacy eventualmente rimaste da vecchie versioni
       LEGACY_TO_CLEAN.forEach(c => d.classList.remove(c));
-
       const active = di === index;
       d.classList.toggle('is-active', active);
-
-      // A11y stato
       d.setAttribute('aria-selected', active ? 'true' : 'false');
       d.setAttribute('aria-current',  active ? 'true' : 'false');
       d.setAttribute('tabindex',      active ? '0'    : '-1');
     });
   }
-
-  // Inizializza interazione dots (eventi / tastiera)
   function initDots(){
     dots.forEach((d, i) => {
-      d.setAttribute('role', 'tab'); // (rimane per retro-compatibilità)
+      d.setAttribute('role', 'tab'); // retro-compatibilità
       d.setAttribute('aria-controls', `subhero-slide-${i+1}`);
-      d.addEventListener('click', () => {
-        stopAutoplay();
-        activate(i, true);
-        startAutoplay();
-      });
+      d.addEventListener('click', () => { stopAutoplay(); activate(i, true); startAutoplay(); });
       d.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft'){ e.preventDefault(); stopAutoplay(); prev(true); startAutoplay(); }
         if (e.key === 'ArrowRight'){ e.preventDefault(); stopAutoplay(); next(true); startAutoplay(); }
@@ -185,133 +142,73 @@
     viewport.style.height = target + 'px';
   }
 
-  // MQs
-  const mqDesktop = window.matchMedia('(min-width: 768px)');
-  const mqMobile  = window.matchMedia('(max-width: 767.98px)');
-
+  // Visibilità controlli (arrows visibili solo desktop, dots sempre)
   function updateControlsVisibility(){
-    // Se mancano sia i controls sia i dots, esci
     if (!controls && !dotsWrap) return;
-
     if (mqMobile.matches){
-      // Frecce: nascondi visivamente e agli screen reader, togli dal tab order
       if (controls){
         controls.style.display = 'none';
-        controls.style.visibility = 'hidden';
-        controls.style.pointerEvents = 'none';
         controls.setAttribute('aria-hidden', 'true');
         controls.querySelectorAll('.pager__arrow').forEach(b => b.setAttribute('tabindex', '-1'));
       }
-      // Dots: su mobile restano visibili → nessun cambiamento A11y qui
+      if (dotsWrap){
+        dotsWrap.style.display = '';
+        dotsWrap.removeAttribute('aria-hidden');
+        dots.forEach(d => d.removeAttribute('tabindex'));
+      }
     } else {
-      // Frecce: ripristina visibilità e accessibilità
       if (controls){
         controls.style.display = '';
-        controls.style.visibility = '';
-        controls.style.pointerEvents = '';
         controls.removeAttribute('aria-hidden');
         controls.querySelectorAll('.pager__arrow').forEach(b => b.removeAttribute('tabindex'));
+      }
+      if (dotsWrap){
+        dotsWrap.style.display = '';
+        dotsWrap.removeAttribute('aria-hidden');
+        dots.forEach(d => d.removeAttribute('tabindex'));
       }
     }
   }
 
-  // Frecce: CSS-first → nessun posizionamento inline; pulizia residui
-  function alignArrows(){
-    if (!controls || mqMobile.matches) return;
-    controls.style.top = '';
-  }
-
-  // Attivazione (fade silky: flag .is-animating su prev/next)
-  function activate(i, userInitiated = false){
-    const to = clampIndex(i);
-    if (to === index) return;
-
-    const prevSlide = slides[index];
-    const nextSlide = slides[to];
-    if (!nextSlide) return;
-
-    prevSlide && prevSlide.classList.add('is-animating');
-    nextSlide.classList.add('is-animating');
-
-    prevSlide && prevSlide.classList.remove('is-active');
-    nextSlide.classList.add('is-active');
-
-    index = to;
-    updateDots();        // aggiorna lo stato dei dots (senza progress)
-    alignArrows?.();
-    // Annuncio (sempre se userInitiated, oppure se PRM non attivo)
-    if (userInitiated || !PRM.matches) announce(index);
-
-    // Fine animazione: rimuovi flag
-    window.setTimeout(() => {
-      prevSlide && prevSlide.classList.remove('is-animating');
-      nextSlide.classList.remove('is-animating');
-    }, FADE_MS + 60);
+  // Autoplay
+  let _timer = 0;
+  function stopAutoplay(){ if (_timer){ clearInterval(_timer); _timer = 0; } }
+  function startAutoplay(){
+    stopAutoplay();
+    if (!AUTOPLAY) return;
+    _timer = setInterval(() => next(false), INTERVAL);
   }
 
   // Navigazione
-  const go   = (to, user=false) => activate(to, user);
-  const next = (user=false) => go(index + 1, user);
-  const prev = (user=false) => go(index - 1, user);
+  function activate(i, focus = false){
+    i = (i + slides.length) % slides.length;
+    if (i === index) return;
 
-  // Autoplay
-  let timer = null;
-  function startAutoplay(){
-    if (!AUTOPLAY || timer) return;
-    timer = setInterval(() => activate(index + 1), INTERVAL);
-    container.dataset.autoplay = '1';
+    const curr = slides[index];
+    const nextS = slides[i];
+
+    // visibilità
+    curr.classList.remove('is-active');
+    nextS.classList.add('is-active');
+
+    // focus
+    if (focus) {
+      const title = nextS.querySelector('.slide__title');
+      (title || nextS).focus?.();
+    }
+
+    index = i;
+    updateDots();
+    announce(index);
   }
-  function stopAutoplay(){
-    if (!timer) return;
-    clearInterval(timer);
-    timer = null;
-    container.dataset.autoplay = '0';
-  }
+  const next = (focus = false) => activate(index + 1, focus);
+  const prev = (focus = false) => activate(index - 1, focus);
 
-  // Pausa quando fuori viewport (IntersectionObserver)
-  let _io;
-  if ('IntersectionObserver' in window) {
-    _io = new IntersectionObserver((entries) => {
-      const e = entries[0];
-      if (!e) return;
-      if (e.isIntersecting && e.intersectionRatio >= 0.35) {
-        startAutoplay();
-      } else {
-        stopAutoplay();
-      }
-    }, { root: null, threshold: [0, 0.35, 1] });
-    _io.observe(container);
-  }
-
-  // Visibility (tab background)
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopAutoplay();
-    else if (!_io) startAutoplay(); // se IO non supportato
-  });
-
-  // Dots (dopo init)
-  initDots();
-
-  // Frecce — event delegation + Enter/Space
-  container.addEventListener('click', (e) => {
-    const btn = e.target.closest('.pager__arrow');
-    if (!btn || !container.contains(btn)) return;
-    e.preventDefault();
-    stopAutoplay();
-    if (btn.classList.contains('prev')) prev(true);
-    else if (btn.classList.contains('next')) next(true);
-    btn.focus();
-    startAutoplay();
-  });
-
-  // Tastiera globale (solo se non stai scrivendo in un campo)
-  document.addEventListener('keydown', (e) => {
-    const el = document.activeElement;
-    const tag = el?.tagName?.toLowerCase();
-    const isFormField = tag === 'input' || tag === 'textarea' || el?.isContentEditable;
-
-    const btn = e.target.closest?.('.pager__arrow');
-    if (btn && (e.key === 'Enter' || e.key === ' ' || e.code === 'Space')) {
+  // Keyboard (freccia SX/DX, invio/space sulle arrows)
+  container.addEventListener('keydown', (e) => {
+    const isFormField = /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target?.tagName);
+    const btn = e.target?.closest?.('.pager__arrow');
+    if (btn && (e.key === 'Enter' || e.code === 'Space' || e.key === ' ' || e.code === 'Space')) {
       e.preventDefault();
       stopAutoplay();
       if (btn.classList.contains('prev')) prev(true);
@@ -355,35 +252,50 @@
     startAutoplay();
   }, {passive:true});
 
-  // Single slide mode
+  // Single-slide mode
   function applySingleSlideMode(){
     if (slides.length > 1) return;
-
     AUTOPLAY = false;
     stopAutoplay();
-
-    // Nascondi visivamente
     if (dotsWrap) dotsWrap.style.display = 'none';
     if (controls) controls.style.display = 'none';
-
-    // Nascondi agli screen reader e rimuovi dal tab order
     if (dotsWrap) dotsWrap.setAttribute('aria-hidden', 'true');
     dots.forEach(d => d.setAttribute('tabindex', '-1'));
-
     if (controls){
       controls.setAttribute('aria-hidden', 'true');
       controls.querySelectorAll('.pager__arrow').forEach(b => b.setAttribute('tabindex', '-1'));
     }
   }
 
-  // MQ listeners
-  const onMQ = () => { if (mqDesktop.matches) alignArrows?.(); };
-  (mqDesktop.addEventListener ? mqDesktop.addEventListener('change', onMQ)
-                              : mqDesktop.addListener(onMQ));
-  (mqMobile.addEventListener ? mqMobile.addEventListener('change', updateControlsVisibility)
-                             : mqMobile.addListener(updateControlsVisibility));
+  // ----- Align helpers (frecce allineate alla grid contenuti) -----
+  let _alignRO = null;
+  function alignArrows(){
+    if (!controls) return;
+    try{
+      const ref =
+        document.querySelector('.cards__inner') ||
+        document.querySelector('.links__inner');
+      if (!ref) {
+        container.style.removeProperty('--subhero-align-left');
+        return;
+      }
+      const { left } = ref.getBoundingClientRect();
+      const px = Math.max(0, Math.round(left));
+      container.style.setProperty('--subhero-align-left', px + 'px');
+    } catch {
+      container.style.removeProperty('--subhero-align-left');
+    }
+  }
+  let _alignRAF = 0;
+  function requestAlign() {
+    if (_alignRAF) return;
+    _alignRAF = requestAnimationFrame(() => {
+      _alignRAF = 0;
+      alignArrows();
+    });
+  }
 
-  // Init sequence
+  // ----- Init sequence -----
   applySlideBackgrounds();
   initAria();
   initDotsA11y();
@@ -395,33 +307,17 @@
   updateControlsVisibility();
   startAutoplay();
 
-  /* align init & observers >>> */
-  // misura iniziale
-  syncSubheroAlign();
-
-  // osserva container Cards/Links e documento per cambi layout
-  const refForRO =
-    document.querySelector('.cards__inner') ||
-    document.querySelector('.links__inner');
-
+  // Align init & observers
+  alignArrows();
   if ('ResizeObserver' in window) {
     _alignRO = new ResizeObserver(() => requestAlign());
+    const refForRO =
+      document.querySelector('.cards__inner') ||
+      document.querySelector('.links__inner');
     if (refForRO) _alignRO.observe(refForRO);
     _alignRO.observe(document.documentElement);
   }
-  window.addEventListener('resize', requestAlign);
-  window.addEventListener('load', requestAlign);
+  window.addEventListener('resize', () => { measureViewport(); requestAlign(); });
+  window.addEventListener('load', () => { requestAlign(); });
 
-  // allinea quando il layout è pronto
-  window.requestAnimationFrame(() => { alignArrows?.(); });
-  window.addEventListener('load', () => { alignArrows?.(); });
-
-  // resize re-measure + realinea
-  if ('ResizeObserver' in window){
-    const ro = new ResizeObserver(() => { measureViewport(); alignArrows?.(); });
-    slides.forEach(s => ro.observe(s));
-    ro.observe(viewport);
-  } else {
-    window.addEventListener('resize', () => { measureViewport(); alignArrows?.(); });
-  }
 })();

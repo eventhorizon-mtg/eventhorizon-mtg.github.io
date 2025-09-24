@@ -1,497 +1,278 @@
 /* ============================================================
-   Links.js
+   links.js — Links carousel (desktop only)
+   Refactor:
+   - Guard multi-mount: data-links-ready impostato PRIMA dei bind
+   - Breakpoints da CSS var con fallback (--bp-desktop)
+   - Nessun cambio funzionale
    ============================================================ */
 (() => {
-  // ===== Config =====
-  const DESKTOP_BP = 1024;         // modalità carosello da desktop in su (>=1024px)
-  const IDLE_RESUME_MS = 3000;     // pausa autoplay dopo interazione manuale
-  const DEFAULT_SPEED  = 24;       // px/sec (override via CSS: --links-auto-speed)
-  const DRAG_THRESHOLD = 8;        // px per distinguere click vs drag (hardening)
+  const section  = document.querySelector('.links');
+  const carousel = section?.querySelector('.links__carousel');
+  const track    = section?.querySelector('.links__track');
+  if (!section || !carousel || !track) return;
+  if (section.dataset.linksReady === '1') return;
+  // Imposta il flag prima dei bind per evitare doppi listener
+  section.dataset.linksReady = '1';
 
-  function initLinksLoop() {
-    const section  = document.querySelector('.links');
-    if (!section) return;
+  // ----- Utils -----
+  const qs  = (s, el = document) => el.querySelector(s);
+  const qsa = (s, el = document) => Array.from(el.querySelectorAll(s));
 
-    const carousel = section.querySelector('.links__carousel') || section;
-    const track    = section.querySelector('.links__track');
-    if (!track) return;
+  // Breakpoint da CSS var
+  const readBP = (name, fallback) => {
+    try {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : fallback;
+    } catch { return fallback; }
+  };
+  const BP_DESKTOP = readBP('--bp-desktop', 1024);
+  const mqDesktop  = window.matchMedia(`(min-width: ${BP_DESKTOP}px)`);
 
-    // A11y base
-    track.setAttribute('tabindex', '0');
-    track.setAttribute('aria-label', 'Elenco collegamenti scorrevole orizzontale');
+  // Config / stato
+  const DEFAULT_SPEED = 24; // px/frame @ ~60fps
+  let enabled   = false;
+  let dragging  = false;
+  let dragStartX = 0;
+  let dragDX     = 0;
+  let gapPx      = 0;
+  let cardStep   = 0;
+  let originalWidth = 0;
+  let leftAnchor    = 0;
+  let wrapMargin    = 0;
+  let rafId         = 0;
 
-    // Media queries & prefers
-    const mqDesktop      = window.matchMedia(`(min-width: ${DESKTOP_BP}px)`);
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Cache per scroll-snap
+  let snapCache = '';
 
-    // ===== Stato misure/loop =====
-    let gapPx = 16;
-    let cardStep = 240;
-    let originalWidth = 0;
-    let leftAnchor = 0;
-    let loopEnabled = false;
+  // IntersectionObserver
+  let io = null;
 
-    // ===== Stato virtual scroll =====
-    let virtualX = 0;
-    let wrapMargin = 480;
+  // ===== Utils numeriche & stile =====
+  const cssNumber = (name, el = section) => {
+    const s = getComputedStyle(el).getPropertyValue(name).trim();
+    const v = parseFloat(s);
+    return Number.isFinite(v) ? v : 0;
+  };
+  const readSpeed = () => {
+    const v = cssNumber('--links-auto-speed', section);
+    return (Number.isFinite(v) && v > 0) ? Math.max(8, Math.min(120, v)) : DEFAULT_SPEED;
+  };
+  const ignoreRMW = () => cssNumber('--links-auto-ignore-rmw', section) > 0;
 
-    // ===== Stato drag =====
-    let dragging = false;
-    let draggingActive = false;
-    let startX = 0;
-    let startLeft = 0;
-    let capturedId = null;
-    let dragPrevSnap = '';
+  // Riconoscimento cloni retro-compatibile
+  const isClone = (li) =>
+    !!li && ((li.dataset && li.dataset.clone === '1') || li.classList.contains('is-clone'));
 
-    // ===== Stato autoplay =====
-    let rafId = 0;
-    let lastTs = 0;
-    let autoPaused = false;
-    let idleTimer = 0;
+  const originals = () =>
+    Array.from(track.querySelectorAll('.link-card')).filter(li => !isClone(li));
 
-    // Cache per scroll-snap
-    let snapCache = '';
+  const cleanupClones = () => {
+    track.querySelectorAll('.link-card[data-clone="1"], .link-card.is-clone').forEach(n => n.remove());
+  };
 
-    // IntersectionObserver
-    let io = null;
+  const duplicateSet = (nodes) => {
+    const frag = document.createDocumentFragment();
+    nodes.forEach(n => {
+      const c = n.cloneNode(true);
+      c.dataset.clone = '1';
+      c.classList.add('is-clone');
+      c.setAttribute('aria-hidden', 'true');
+      c.removeAttribute('id');
+      c.querySelectorAll('a,button').forEach(el => el.setAttribute('tabindex', '-1'));
+      frag.appendChild(c);
+    });
+    return frag;
+  };
 
-    // ===== Utils =====
-    const cssNumber = (name, el = section) => {
-      const s = getComputedStyle(el).getPropertyValue(name).trim();
-      const v = parseFloat(s);
-      return Number.isFinite(v) ? v : 0;
-    };
-    const readSpeed = () => {
-      const v = cssNumber('--links-auto-speed', section);
-      return (Number.isFinite(v) && v > 0) ? Math.max(8, Math.min(120, v)) : DEFAULT_SPEED;
-    };
-    const ignoreRMW = () => cssNumber('--links-auto-ignore-rmw', section) > 0;
+  const measureGapsAndStep = () => {
+    const styles = getComputedStyle(track);
+    gapPx = parseFloat(styles.columnGap) || parseFloat(styles.gap) || 0;
+    const first = track.querySelector('.link-card');
+    if (first) {
+      const r = first.getBoundingClientRect();
+      cardStep = Math.round(r.width + gapPx);
+    }
+  };
 
-    // Riconoscimento cloni retro-compatibile
-    const isClone = (li) =>
-      !!li && ((li.dataset && li.dataset.clone === '1') || li.classList.contains('is-clone'));
+  const measureAnchors = () => {
+    const orig = originals();
+    if (!orig.length) { originalWidth = 0; leftAnchor = 0; return; }
+    const first = orig[0];
+    const last  = orig[orig.length - 1];
+    leftAnchor = first.offsetLeft;
+    const lastRight = last.offsetLeft + last.getBoundingClientRect().width;
+    originalWidth = Math.max(0, Math.round(lastRight - leftAnchor));
+  };
 
-    const originals = () =>
-      Array.from(track.querySelectorAll('.link-card')).filter(li => !isClone(li));
+  const updateWrapMargin = () => {
+    const vw = (carousel.clientWidth || track.clientWidth || 0);
+    wrapMargin = Math.max(cardStep * 3, Math.round(vw * 0.5));
+  };
 
-    const cleanupClones = () => {
-      track.querySelectorAll('.link-card[data-clone="1"], .link-card.is-clone').forEach(n => n.remove());
-    };
+  // ===== Stili forzati in modalità carosello =====
+  const forceDesktopStyles = () => {
+    track.style.flexWrap = 'nowrap';
+    track.style.justifyContent = 'flex-start';
+    track.style.overflowX = 'auto';
+    track.style.overflowY = 'hidden';
+    track.style.webkitOverflowScrolling = 'touch';
+    track.style.scrollSnapType = 'x proximity';
+    track.style.touchAction = 'none';
+    track.style.userSelect  = 'none';
+    track.classList.add('is-initializing');
+  };
+  const clearDesktopStyles = () => {
+    track.style.flexWrap = '';
+    track.style.justifyContent = '';
+    track.style.overflowX = '';
+    track.style.overflowY = '';
+    track.style.webkitOverflowScrolling = '';
+    track.style.scrollSnapType = '';
+    track.style.touchAction = '';
+    track.style.userSelect  = '';
+    track.classList.remove('is-initializing');
+  };
 
-    const duplicateSet = (nodes) => {
-      const frag = document.createDocumentFragment();
-      nodes.forEach(n => {
-        const c = n.cloneNode(true);
-        c.dataset.clone = '1';
-        c.classList.add('is-clone');
-        c.setAttribute('aria-hidden', 'true');
-        c.removeAttribute('id');
-        c.querySelectorAll('a,button').forEach(el => el.setAttribute('tabindex', '-1'));
-        frag.appendChild(c);
-      });
-      return frag;
-    };
+  const storeAndDisableSnap = () => {
+    const s = getComputedStyle(track).scrollSnapType || '';
+    snapCache = s;
+    track.style.scrollSnapType = 'none';
+  };
+  const restoreSnap = () => {
+    track.style.scrollSnapType = snapCache || '';
+  };
 
-    const measureGapsAndStep = () => {
-      const styles = getComputedStyle(track);
-      gapPx = parseFloat(styles.columnGap) || parseFloat(styles.gap) || 0;
-      const first = track.querySelector('.link-card');
-      if (first) {
-        const r = first.getBoundingClientRect();
-        cardStep = Math.round(r.width + gapPx);
-      }
-    };
+  // ===== Abilita/Disabilita modalità Desktop =====
+  function enableDesktop(){
+    if (enabled) return;
+    enabled = true;
 
-    const measureAnchors = () => {
-      const orig = originals();
-      if (!orig.length) { originalWidth = 0; leftAnchor = 0; return; }
-      const first = orig[0];
-      const last  = orig[orig.length - 1];
-      leftAnchor = first.offsetLeft;
-      const lastRight = last.offsetLeft + last.getBoundingClientRect().width;
-      originalWidth = Math.max(0, Math.round(lastRight - leftAnchor));
-    };
+    cleanupClones();
+    const orig = originals();
+    if (orig.length <= 1) return; // nulla da carousellizzare
 
-    const updateWrapMargin = () => {
-      const vw = (carousel.clientWidth || track.clientWidth || 0);
-      wrapMargin = Math.max(cardStep * 3, Math.round(vw * 0.5));
-    };
+    // Duplicazioni per wrap infinito
+    track.appendChild(duplicateSet(orig));
+    track.insertBefore(duplicateSet(orig), orig[0]);
 
-    // ===== Stili forzati in modalità carosello =====
-    const forceDesktopStyles = () => {
-      track.style.flexWrap = 'nowrap';
-      track.style.justifyContent = 'flex-start';
-      track.style.overflowX = 'auto';
-      track.style.overflowY = 'hidden';
-      track.style.webkitOverflowScrolling = 'touch';
-      track.style.scrollSnapType = 'x proximity';
-      track.style.touchAction = 'none';
-      track.style.userSelect  = 'none';
-      track.classList.add('is-initializing');
-    };
-    const clearDesktopStyles = () => {
-      track.style.flexWrap = '';
-      track.style.justifyContent = '';
-      track.style.overflowX = '';
-      track.style.overflowY = '';
-      track.style.webkitOverflowScrolling = '';
-      track.style.scrollSnapType = '';
-      track.style.touchAction = '';
-      track.style.userSelect = '';
-      track.classList.remove('is-initializing', 'is-ready', 'is-dragging');
-    };
+    measureGapsAndStep();
+    measureAnchors();
+    updateWrapMargin();
+    forceDesktopStyles();
 
-    // ===== Costruzione banda + cloni (robusta) =====
-    const buildLoopAdaptive = () => {
-      cleanupClones();
-      const orig = originals();
-      if (orig.length < 1) { loopEnabled = false; return; }
+    // Scroll al centro (fra insiemi) per avere margine entrambi i lati
+    const center = leftAnchor + originalWidth + wrapMargin;
+    track.scrollLeft = center;
 
-      // Misure base con soli originali
-      measureGapsAndStep();
-      measureAnchors();
-      updateWrapMargin();
+    startAutoplay();
 
-      const viewportW = (carousel.clientWidth || track.clientWidth || 0);
+    // IO: pausa quando offscreen (se non si ignora RMW)
+    if (!ignoreRMW() && 'IntersectionObserver' in window) {
+      io?.disconnect?.();
+      io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) startAutoplay();
+          else stopAutoplay();
+        });
+      }, { root: null, threshold: 0.01 });
+      io.observe(carousel);
+    }
 
-      let minWidthNeeded = viewportW + (2 * wrapMargin) + (2 * originalWidth) + Math.max(cardStep, 1);
+    // Drag (mouse) per controllo manuale
+    track.addEventListener('pointerdown', onPointerDown, { passive: true });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup',   onPointerUp,   { passive: true });
+    window.addEventListener('pointercancel', onPointerUp, { passive: true });
+    window.addEventListener('blur', onPointerUp, { passive: true });
 
-      // Duplica set a sinistra e destra fino a superare la soglia (limite sicurezza)
-      let copies = 0;
-      const MAX_COPIES = 10;
-      while (((track.scrollWidth || 0) < minWidthNeeded) && copies < MAX_COPIES) {
-        track.insertBefore(duplicateSet(orig), orig[0]);
-        track.appendChild(duplicateSet(orig));
-        copies++;
-
-        // Rimisuro dopo il reflow
+    // Resize/RO per ricalcolo dinamico
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => {
         measureGapsAndStep();
         measureAnchors();
         updateWrapMargin();
-
-        // Ricalcola la soglia con i nuovi numeri
-        minWidthNeeded = viewportW + (2 * wrapMargin) + (2 * originalWidth) + Math.max(cardStep, 1);
-      }
-
-      // Posiziona la vista sulla banda originale
-      track.scrollTo({ left: leftAnchor, behavior: 'auto' });
-      virtualX = track.scrollLeft;
-      loopEnabled = true;
-    };
-
-    // ===== Loop infinito: wrap “off-screen” con isteresi (robusto) =====
-    const wrapOffscreenIfNeeded = () => {
-      if (!loopEnabled || originalWidth <= 0) return;
-
-      // Range esteso: centro sulla banda originale e concedo isteresi ai lati
-      const minX = leftAnchor - wrapMargin;
-      const maxX = leftAnchor + originalWidth + wrapMargin;
-
-      if (virtualX >= minX && virtualX < maxX) return;
-
-      // Normalizza sempre nella [leftAnchor, leftAnchor + originalWidth)
-      const rel = virtualX - leftAnchor;
-      const norm = ((rel % originalWidth) + originalWidth) % originalWidth;
-      virtualX = leftAnchor + norm;
-
-      // Applicazione diretta: niente scatti (autoplay ha snap disattivato)
-      track.scrollLeft = virtualX;
-    };
-
-    // ===== Autoplay =====
-    const setPaused = (val) => {
-      autoPaused = !!val;
-      // Ripristina snap quando in pausa completa; disattivalo quando attivo
-      if (autoPaused) {
-        if (snapCache) track.style.scrollSnapType = snapCache;
-      } else {
-        snapCache = track.style.scrollSnapType || '';
-        track.style.scrollSnapType = 'none';
-      }
-    };
-
-    const pauseAutoTemporarily = () => {
-      setPaused(true);
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(() => setPaused(false), IDLE_RESUME_MS);
-    };
-
-    const tick = (ts) => {
-      rafId = requestAnimationFrame(tick);
-
-      // Rispetta RMW a meno che non sia forzato da CSS
-      const rmwActive = prefersReduced.matches && !ignoreRMW();
-      if (autoPaused || rmwActive || document.visibilityState === 'hidden') {
-        lastTs = ts;
-        return;
-      }
-
-      if (!lastTs) { lastTs = ts; return; }
-
-      const dt = (ts - lastTs) / 1000;
-      if (dt <= 0) { lastTs = ts; return; }
-      lastTs = ts;
-
-      const spd = readSpeed();
-      if (spd <= 0) return;
-
-      // Avanza posizione virtuale (float), poi applica al DOM
-      virtualX += spd * dt;
-      track.scrollLeft = virtualX;
-
-      // Eventuale wrap solo quando “fuori” dal cono visibile + margine
-      wrapOffscreenIfNeeded();
-    };
-
-    const startAutoplay = () => {
-      if (!rafId) {
-        lastTs = 0;
-        setPaused(false);
-        rafId = requestAnimationFrame(tick);
-      }
-    };
-    const stopAutoplay  = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = 0;
-      setPaused(true);
-    };
-
-    // ===== Controls / Input =====
-    const behavior = prefersReduced.matches && !ignoreRMW() ? 'auto' : 'smooth';
-
-    const scrollByStep = (dir) => {
-      track.scrollBy({ left: dir * cardStep, behavior });
-      pauseAutoTemporarily();
-    };
-
-    const onKey = (e) => {
-      switch (e.key) {
-        case 'ArrowLeft':  e.preventDefault(); scrollByStep(-1); break;
-        case 'ArrowRight': e.preventDefault(); scrollByStep(1);  break;
-        case 'Home':       e.preventDefault(); track.scrollTo({ left: leftAnchor, behavior }); pauseAutoTemporarily(); break;
-        case 'End':        e.preventDefault(); track.scrollTo({ left: track.scrollWidth, behavior }); pauseAutoTemporarily(); break;
-      }
-    };
-
-    const onWheel = (e) => {
-      if (track.scrollWidth > track.clientWidth) {
-        e.preventDefault();
-        track.scrollLeft += e.deltaY;
-        virtualX = track.scrollLeft;
-        pauseAutoTemporarily();
-      }
-    };
-
-    // ===== Drag con soglia + pointer capture tardiva =====
-    const onPointerDown = (e) => {
-      if (e.button !== 0) return;
-      dragging = true;
-      draggingActive = false;
-      startX = e.clientX;
-      startLeft = track.scrollLeft;
-
-      // Pausa soft (non tocco snap globale qui)
-      autoPaused = true;
-
-      // Disattivo snap solo per la durata del drag (se era attivo inline)
-      dragPrevSnap = track.style.scrollSnapType || '';
-      track.style.scrollSnapType = 'none';
-      // NIENTE preventDefault qui: lascia passare i click finché non stai davvero trascinando
-    };
-
-    const onPointerMove = (e) => {
-      if (!dragging) return;
-      const dx = e.clientX - startX;
-
-      // Attiva il drag solo oltre la soglia → i link restano cliccabili sui micro-movimenti
-      if (!draggingActive && Math.abs(dx) > DRAG_THRESHOLD) {
-        draggingActive = true;
-        track.classList.add('is-dragging');
-        try { track.setPointerCapture(e.pointerId); capturedId = e.pointerId; } catch(_) {}
-      }
-
-      if (draggingActive) {
-        track.scrollLeft = startLeft - dx;
-        virtualX = track.scrollLeft;
-        e.preventDefault();
-      }
-    };
-
-    const onPointerUp = (e) => {
-      if (!dragging) return;
-
-      if (draggingActive) {
-        track.classList.remove('is-dragging');
-        if (capturedId != null) { try { track.releasePointerCapture(capturedId); } catch(_) {} capturedId = null; }
-      }
-
-      // Ripristina lo snap com'era prima del drag (inline)
-      track.style.scrollSnapType = dragPrevSnap || '';
-      dragPrevSnap = '';
-
-      // Riprendi autoplay al prossimo frame (pausa soft → false)
-      requestAnimationFrame(() => { autoPaused = false; });
-
-      dragging = false;
-      draggingActive = false;
-    };
-
-    // ===== Hover soft (pausa senza toccare snap) =====
-    const pauseSoft = () => { autoPaused = true; };
-    const resumeSoft = () => { autoPaused = false; };
-    const onMouseEnter = () => pauseSoft();
-    const onMouseLeave = () => resumeSoft();
-
-    // ===== Resize / Reflow =====
-    let resizeT;
-    const onResize = () => {
-      clearTimeout(resizeT);
-      resizeT = setTimeout(() => {
-        if (!loopEnabled) return;
-        const prev = (virtualX || track.scrollLeft) - leftAnchor;
-        buildLoopAdaptive();
-        virtualX = leftAnchor + prev;
-        track.scrollLeft = virtualX;
-      }, 50);
-    };
-
-    // ===== Visibility change (hardening) =====
-    const onVisibility = () => {
-      if (document.hidden) {
-        if (rafId) stopAutoplay();
-      } else {
-        const rmwActive = prefersReduced.matches && !ignoreRMW();
-        if (mqDesktop.matches && !rmwActive && section.dataset.linksReady === '1') {
-          startAutoplay();
-        }
-      }
-    };
-
-    // ===== Mount / Unmount =====
-    const enableDesktop = () => {
-      if (section.dataset.linksReady === '1') return; 
-      section.dataset.linksReady = '1';
-      carousel.dataset.linksReady = '1'; 
-
-      forceDesktopStyles();
-      buildLoopAdaptive();
-
-      // Bind eventi
-      track.addEventListener('keydown', onKey);
-      track.addEventListener('wheel', onWheel, { passive: false });
-      track.addEventListener('pointerdown', onPointerDown, { passive: false });
-      window.addEventListener('pointermove', onPointerMove, { passive: false });
-      window.addEventListener('pointerup', onPointerUp, { passive: false });
-      window.addEventListener('resize', onResize, { passive: true });
-
-      // Hover = pausa soft / leave = riprendi (senza cambiare snap)
-      track.addEventListener('mouseenter', onMouseEnter);
-      track.addEventListener('mouseleave', onMouseLeave);
-
-      // Al load delle immagini ricostruiamo e manteniamo lo stato
-      track.querySelectorAll('img').forEach(img => {
-        img.addEventListener('load', onResize, { passive: true });
       });
-
-      // Pausa quando fuori viewport
-      if ('IntersectionObserver' in window) {
-        io = new IntersectionObserver((entries) => {
-          const e = entries[0];
-          if (!e) return;
-          if (e.intersectionRatio < 0.3) {
-            autoPaused = true;
-          } else {
-            autoPaused = false;
-          }
-        }, { root: null, threshold: [0, 0.3, 1] });
-        io.observe(section);
-      }
-
-      // Visibility
-      document.addEventListener('visibilitychange', onVisibility);
-
-      // Avvia autoplay
-      startAutoplay();
-
-      // Fade-in + kickstart autoplay (nudge + riallineo virtuale) + watchdog
-      requestAnimationFrame(() => {
-        track.classList.remove('is-initializing');
-        track.classList.add('is-ready');
-
-        const before = track.scrollLeft;
-        const nudge = Math.max(8, Math.round(cardStep * 0.1));
-        virtualX = before + nudge;
-        track.scrollLeft = virtualX;
-        wrapOffscreenIfNeeded();
-
-        // Watchdog: se dopo 700ms non si è mosso, riavvia il RAF
-        setTimeout(() => {
-          const after = track.scrollLeft;
-          if (Math.abs(after - before) < 1) {
-            stopAutoplay();
-            lastTs = 0;
-            startAutoplay();
-          }
-        }, 700);
-      });
-    };
-
-    const disableDesktop = () => {
-      if (!section.dataset.linksReady) return;
-      delete section.dataset.linksReady;
-      delete carousel.dataset.linksReady;
-
-      stopAutoplay();
-
-      // Unbind
-      track.removeEventListener('keydown', onKey);
-      track.removeEventListener('wheel', onWheel);
-      track.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('resize', onResize);
-      track.querySelectorAll('img').forEach(img => {
-        img.removeEventListener('load', onResize);
-      });
-      track.removeEventListener('mouseenter', onMouseEnter);
-      track.removeEventListener('mouseleave', onMouseLeave);
-      document.removeEventListener('visibilitychange', onVisibility);
-
-      // Disconnetti IO
-      if (io) { try { io.disconnect(); } catch(_) {} io = null; }
-
-      clearDesktopStyles();
-      cleanupClones();
-      track.scrollTo({ left: 0, behavior: 'auto' });
-      virtualX = 0;
-      loopEnabled = false;
-    };
-
-    // ===== Attivazione modalità carosello =====
-    const handleMQ = () => {
-      const hasCards = originals().length > 0;
-      if (mqDesktop.matches && hasCards) {
-        enableDesktop();
-      } else {
-        disableDesktop();
-      }
-    };
-    let _mqResizeT;
-    const onGlobalResize = () => {
-      clearTimeout(_mqResizeT);
-      _mqResizeT = setTimeout(handleMQ, 120);
-    };
-    window.addEventListener('resize', onGlobalResize, { passive: true });
-
-    // Avvio + compat vecchie API MQ
-    handleMQ();
-    if (mqDesktop.addEventListener) mqDesktop.addEventListener('change', handleMQ);
-    else if (mqDesktop.addListener) mqDesktop.addListener(handleMQ);
+      ro.observe(track);
+      ro.observe(document.documentElement);
+    } else {
+      window.addEventListener('resize', () => {
+        measureGapsAndStep();
+        measureAnchors();
+        updateWrapMargin();
+      }, { passive: true });
+    }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLinksLoop, { once: true });
-  } else {
-    initLinksLoop();
+  function disableDesktop(){
+    if (!enabled) return;
+    enabled = false;
+
+    stopAutoplay();
+    cleanupClones();
+    clearDesktopStyles();
+
+    // Rimuovi eventi di drag
+    window.removeEventListener('pointermove', onPointerMove, { passive: true });
+    window.removeEventListener('pointerup',   onPointerUp,   { passive: true });
+    window.removeEventListener('pointercancel', onPointerUp, { passive: true });
+    window.removeEventListener('blur', onPointerUp, { passive: true });
   }
+
+  // ===== Autoplay (smooth) =====
+  function loop(){
+    if (!enabled || dragging) return;
+    const speed = readSpeed();
+    storeAndDisableSnap();
+    track.scrollLeft += speed;
+    const maxRight = leftAnchor + originalWidth * 2 + wrapMargin * 2;
+    if (track.scrollLeft > (maxRight - wrapMargin)) {
+      track.scrollLeft -= originalWidth;
+    }
+    restoreSnap();
+    rafId = requestAnimationFrame(loop);
+  }
+  function startAutoplay(){
+    stopAutoplay();
+    rafId = requestAnimationFrame(loop);
+  }
+  function stopAutoplay(){
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  // ===== Drag =====
+  function onPointerDown(e){
+    if (!enabled) return;
+    dragging = true;
+    dragStartX = e.clientX || e.pageX || 0;
+    dragDX = 0;
+    stopAutoplay();
+    storeAndDisableSnap();
+  }
+  function onPointerMove(e){
+    if (!enabled || !dragging) return;
+    const x = e.clientX || e.pageX || 0;
+    const dx = x - dragStartX;
+    dragDX += dx;
+    dragStartX = x;
+    track.scrollLeft -= dx;
+  }
+  function onPointerUp(){
+    if (!enabled) return;
+    const THRESHOLD = Math.max(30, Math.round(cardStep * 0.1));
+    // Snap manuale al cardStep
+    const steps = Math.round(dragDX / cardStep);
+    track.scrollLeft -= (steps * cardStep);
+    dragging = false;
+    restoreSnap();
+    startAutoplay();
+  }
+
+  // ===== Init =====
+  const onMQ = () => { mqDesktop.matches ? enableDesktop() : disableDesktop(); };
+  (mqDesktop.addEventListener ? mqDesktop.addEventListener('change', onMQ)
+                              : mqDesktop.addListener(onMQ));
+  onMQ();
+
 })();
