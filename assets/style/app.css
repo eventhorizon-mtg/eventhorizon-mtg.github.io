@@ -1,5 +1,5 @@
-/* Ordine globale dei layer (cascata prevedibile) 
-@layer base, layout, components, utilities; */
+/* Ordine globale dei layer (cascata prevedibile) */
+@layer base, layout, components, utilities;
 
 /* BASE */
 @import "base/_tokens.css" layer(base);

@@ -17,7 +17,7 @@
 {{- $ogLocale := or .Params.ogLocale .Site.Params.og.locale -}}
 
 {{/* CSS via Hugo Pipes: un solo file fingerprintato da assets/style/app.css */}}
-{{- $css := resources.Get "style/app.css" | resources.Minify | resources.Fingerprint -}}
+{{- $css := resources.Get "assets/style/app.css" | resources.Minify | resources.Fingerprint -}}
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
