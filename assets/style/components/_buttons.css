@@ -173,7 +173,7 @@
 }
 
 /* =======================
-   Stato disabilitato (reintrodotto)
+   Stato disabilitato
    ======================= */
 .btn--disabled1{
   background: #af6e43;
@@ -189,3 +189,7 @@
     transition: background-color 0.001s linear !important;
   }
 }
+
+/* ============================================================
+   Fine Buttons
+   ============================================================ */

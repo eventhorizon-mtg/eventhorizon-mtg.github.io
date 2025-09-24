@@ -1,4 +1,6 @@
-/* Footer */
+/* ============================================================
+   Footer styles
+   ============================================================ */
 .site-footer{
   background: var(--neutral-900, #0E0F1A);
   color: var(--neutral-50, #F3F2F7);
@@ -76,3 +78,7 @@ footer .footer__nav a, .site-footer .footer__nav a{
 @media (prefers-reduced-motion: reduce){
   footer *{ transition: none !important; }
 }
+
+/* ============================================================
+   Fine Footer
+   ============================================================ */

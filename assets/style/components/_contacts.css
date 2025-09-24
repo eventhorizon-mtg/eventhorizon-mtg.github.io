@@ -1,4 +1,6 @@
-/* Contacts section */
+/* ============================================================
+   Contacts styles
+   ============================================================ */
 .contacts{
   background: var(--neutral-50);
   color: var(--indigo-900);
@@ -73,3 +75,7 @@
   .icon-discord::before{   background-image: url("/assets/icons/discord.svg"); }
   .icon-tiktok::before{    background-image: url("/assets/icons/tiktok.svg"); }
 }
+
+/* ============================================================
+   Fine Contacts
+   ============================================================ */

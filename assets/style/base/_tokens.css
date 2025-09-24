@@ -1,10 +1,13 @@
-/* Design Tokens */
+/* ============================================================
+   Design Tokens
+   ============================================================ */
+
 :root{
   /* Indigo */
   --indigo-900: #2F2760;
   --indigo-700: #5B4E9D;
-  --indigo-600: #4A3F81; /* colore da riconsiderare */
   --indigo-500: #9F7BB8;
+  --indigo-600: #4A3F81; /* hover alphab codice del colore da riconsiderare */
 
   /* Neutral */
   --neutral-00:  #FFFFFF;
@@ -16,7 +19,7 @@
   --teal-600: #007A7C;
   --teal-700: #006668;
 
-  /* Gold */
+  /* Gold (focus) */
   --gold-600: #E0A402;
   --gold-500: #E0A402;
   --gold-700: #A37500;
@@ -47,10 +50,11 @@
   --lh-tight: 1.15;
   --lh-normal: 1.45;
   --fw-medium: 500;
+  --fw-semibold: 600;
   --fw-bold: 700;
   --fw-black: 800;
 
-  /* Spaziature */
+  /* Spaziature (4pt) */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
   --space-4: 16px; --space-5: 20px; --space-6: 24px;
 
@@ -66,7 +70,7 @@
   --dur-2: 180ms;
   --ease-standard: cubic-bezier(.2,.8,.2,1);
 
-  /* Z */
+  /* Z-index */
   --z-nav: 1000;
   --z-hero-img: 1;
   --z-hero-content: 2;
@@ -79,9 +83,21 @@
   --hero-bg-opacity: 0.5;
   --hero-bg-url: none;
 
-  /* Tracking */
+  /* Tracking (letter-spacing) */
   --trk-tight: -0.4px;
   --trk-tight-lg: -0.6px;
   --trk-slight: -0.2px;
   --trk-wide:  0.04em;
 }
+
+/* Responsive container max width */
+@media (min-width: 1280px){
+  :root{ --container-max: 1200px; }
+}
+@media (min-width: 1536px){
+  :root{ --container-max: 1320px; }
+}
+
+/* ============================================================
+   Fine Design Tokens
+   ============================================================ */

@@ -1,4 +1,6 @@
-/* Cards */
+/* ============================================================
+   Card components
+   ============================================================ */
 /* Sezione + variabili (dimensioni card e gap) */
 .cards{
   background: var(--neutral-50, #F3F2F7);
@@ -572,3 +574,7 @@
 .cards .card__overline{ letter-spacing: var(--trk-wide); }
 .cards .card__title{    letter-spacing: var(--trk-slight); }
 .cards .card__desc{     letter-spacing: 0; }
+
+/* ============================================================
+   Fine Cards
+   ============================================================ */
