@@ -1,16 +1,30 @@
+{{/* ---------------------------------------
+     Canonical & Open Graph (fallback-safe)
+---------------------------------------- */}}
+{{- $canonical := .Permalink -}}
+{{- with .Params.canonical -}}
+  {{- $canonical = . | safeURL -}}
+{{- end -}}
+
+{{- $ogTitle  := or .Params.ogTitle  .Site.Params.ogTitle  .Site.Title -}}
+{{- $ogDesc   := or .Params.ogDesc   .Site.Params.ogDesc   "" -}}
+{{- $ogImage  := or .Params.ogImage  .Site.Params.ogImage  "" -}}
+{{- $ogLocale := or .Params.ogLocale .Site.Params.ogLocale "it_IT" -}}
+{{- $ogImageAbs := cond (hasPrefix (lower $ogImage) "http") $ogImage ($ogImage | absURL) -}}
+
 <!-- Base meta -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="{{ .Site.Params.ogDesc }}">
+{{- if $ogDesc }}<meta name="description" content="{{ $ogDesc }}">{{ end }}
 
 <!-- Canonical -->
-<link rel="canonical" href="{{ .Permalink }}">
+<link rel="canonical" href="{{ $canonical }}">
 
 <!-- Manifest PWA -->
 <link rel="manifest" href="/site.webmanifest">
 
 <!-- Theme color -->
-<meta name="theme-color" content="#0E0F1A">
+<meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
 <!-- Favicons -->
 <link rel="icon" href="/assets/favicon/favicon.ico" sizes="any">
@@ -26,30 +40,36 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="{{ .Site.Params.ogTitle }}">
-<meta property="og:description" content="{{ .Site.Params.ogDesc }}">
-<meta property="og:url" content="{{ .Permalink }}">
-<meta property="og:image" content="{{ .Site.Params.ogImage }}">
+<meta property="og:title" content="{{ $ogTitle }}">
+{{- if $ogDesc }}<meta property="og:description" content="{{ $ogDesc }}">{{ end -}}
+<meta property="og:url" content="{{ $canonical }}">
+{{- if $ogImageAbs }}<meta property="og:image" content="{{ $ogImageAbs }}">{{ end -}}
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:locale" content="it_IT">
-<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:locale" content="{{ $ogLocale }}">
+<meta property="og:site_name" content="{{ or .Site.Params.siteName .Site.Title }}">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ .Site.Params.ogTitle }}">
-<meta name="twitter:description" content="{{ .Site.Params.ogDesc }}">
-<meta name="twitter:image" content="{{ .Site.Params.ogImage }}">
+<meta name="twitter:title" content="{{ $ogTitle }}">
+{{- if $ogDesc }}<meta name="twitter:description" content="{{ $ogDesc }}">{{ end -}}
+{{- if $ogImageAbs }}<meta name="twitter:image" content="{{ $ogImageAbs }}">{{ end -}}
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&display=swap">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&display=swap">
 
-<!-- Preload hero image -->
-<link rel="preload" as="image" href="/assets/bg_image.webp">
+<!-- Preload hero image (facoltativo) -->
+{{ with .Site.Params.preloadHero }}
+<link rel="preload" as="image" href="{{ . }}">
+{{ end }}
 
-<!-- CSS bundle via Hugo Pipes -->
+{{/* ---------------------------------------
+     CSS bundle via Hugo Pipes
+     ATTENZIONE: percorsi relativi a /assets
+---------------------------------------- */}}
 {{- $cssFiles := slice
     (resources.Get "style/base/_tokens.css")
     (resources.Get "style/base/_base.css")
@@ -66,5 +86,5 @@
 
     (resources.Get "style/utilities/_a11y.css")
 -}}
-{{- $bundle := resources.Concat $cssFiles | resources.Minify | resources.Fingerprint -}}
+{{- $bundle := (resources.Concat "style/_bundle.css" $cssFiles) | resources.Minify | resources.Fingerprint -}}
 <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
