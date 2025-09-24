@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  {{ partial "meta-head.html" . }}
+</head>
+<body>
+  {{ partial "navbar.html" . }}
+
+  <main id="main" role="main">
+    {{ block "main" . }}{{ end }}
+  </main>
+
+  {{ partial "footer.html" . }}
+  {{ partial "scripts.html" . }}
+</body>
+</html>
