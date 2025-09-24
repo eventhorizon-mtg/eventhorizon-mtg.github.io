@@ -1,0 +1,20 @@
+{{ define "main" }}
+<section class="tax-term container">
+  <h1 class="tax-ttl">{{ .Title }}</h1>
+
+  {{ if not .Pages }}
+    <p>Nessun contenuto per questo termine.</p>
+  {{ else }}
+    <ul class="tax-term__list">
+      {{ range .Pages }}
+        <li class="tax-term__item">
+          <a class="tax-term__link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          {{ with .Params.description }}
+            <p class="tax-term__desc">{{ . }}</p>
+          {{ end }}
+        </li>
+      {{ end }}
+    </ul>
+  {{ end }}
+</section>
+{{ end }}
