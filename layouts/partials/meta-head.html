@@ -1,15 +1,25 @@
 {{/* ---------------------------------------
      Canonical & Open Graph (fallback-safe)
+     Supporta params sia piatti che annidati:
+     - .Site.Params.ogTitle / ogDesc / ogImage / ogLocale
+     - .Site.Params.og.title / .og.description / .og.image / .og.locale
 ---------------------------------------- */}}
 {{- $canonical := .Permalink -}}
 {{- with .Params.canonical -}}
   {{- $canonical = . | safeURL -}}
 {{- end -}}
 
-{{- $ogTitle  := or .Params.ogTitle  .Site.Params.ogTitle  .Site.Title -}}
-{{- $ogDesc   := or .Params.ogDesc   .Site.Params.ogDesc   "" -}}
-{{- $ogImage  := or .Params.ogImage  .Site.Params.ogImage  "" -}}
-{{- $ogLocale := or .Params.ogLocale .Site.Params.ogLocale "it_IT" -}}
+{{- $siteOG := .Site.Params.og -}}
+{{- $siteOgTitle   := cond (and $siteOG (isset $siteOG "title"))   $siteOG.title   "" -}}
+{{- $siteOgDesc    := cond (and $siteOG (isset $siteOG "description")) $siteOG.description "" -}}
+{{- $siteOgImage   := cond (and $siteOG (isset $siteOG "image"))   $siteOG.image   "" -}}
+{{- $siteOgLocale  := cond (and $siteOG (isset $siteOG "locale"))  $siteOG.locale  "" -}}
+
+{{- $ogTitle  := or .Params.ogTitle  .Site.Params.ogTitle  $siteOgTitle  .Site.Title -}}
+{{- $ogDesc   := or .Params.ogDesc   .Site.Params.ogDesc   $siteOgDesc   "" -}}
+{{- $ogImage  := or .Params.ogImage  .Site.Params.ogImage  $siteOgImage  "" -}}
+{{- $ogLocale := or .Params.ogLocale .Site.Params.ogLocale $siteOgLocale "it_IT" -}}
+
 {{- $ogImageAbs := cond (hasPrefix (lower $ogImage) "http") $ogImage ($ogImage | absURL) -}}
 
 <!-- Base meta -->
@@ -26,7 +36,7 @@
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
-<!-- Favicons -->
+<!-- Favicons (assicurati che esistano sotto /static/assets/favicon/ ...) -->
 <link rel="icon" href="/assets/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16.png">
@@ -61,16 +71,16 @@
 <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&display=swap">
 
-<!-- Preload hero image (facoltativo) -->
+<!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
 <link rel="preload" as="image" href="{{ . }}">
 {{ end }}
 
 {{/* ---------------------------------------
-     CSS bundle via Hugo Pipes
-     ATTENZIONE: percorsi relativi a /assets
+     CSS bundle via Hugo Pipes (concat → minify → fingerprint)
+     I path qui sotto sono relativi alla cartella /assets
 ---------------------------------------- */}}
-{{- $cssFiles := slice
+{{- $bundle := (slice
     (resources.Get "style/base/_tokens.css")
     (resources.Get "style/base/_base.css")
 
@@ -85,6 +95,5 @@
     (resources.Get "style/components/_contacts.css")
 
     (resources.Get "style/utilities/_a11y.css")
--}}
-{{- $bundle := (resources.Concat "style/_bundle.css" $cssFiles) | resources.Minify | resources.Fingerprint -}}
+  ) | resources.Concat "style/_bundle.css" | resources.Minify | resources.Fingerprint -}}
 <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
