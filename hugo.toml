@@ -1,3 +1,12 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+baseURL = "https://eventhorizonmtg.netlify.app/"
+languageCode = "it-it"
+title = "EventHorizon.mtg"
+
+# Facoltativo ma utile subito
+paginate = 12
+enableRobotsTXT = true
+
+# In futuro useremo le tassonomie per tag/categorie
+[taxonomies]
+  tag = "tags"
+  category = "categories"
