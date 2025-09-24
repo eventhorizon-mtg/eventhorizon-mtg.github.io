@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
   {{ partial "meta-head.html" . }}
+  {{ block "head_extra" . }}{{ end }}
 </head>
 <body>
   {{ partial "navbar.html" . }}
@@ -11,6 +12,9 @@
   </main>
 
   {{ partial "footer.html" . }}
-  {{ partial "scripts.html" . }}
+
+  {{ block "scripts" . }}
+    {{ partial "scripts.html" . }}
+  {{ end }}
 </body>
 </html>

@@ -1,1 +1,31 @@
-<script src="/script/script.js"></script>
+{{/* layouts/partials/scripts.html
+     Bundle JS via Hugo Pipes (robusto ai file mancanti)
+     Ordine preservato: script.js → subhero.js → links.js → archive.js
+     Sorgenti attesi in: /assets/script/
+*/}}
+
+{{- $jsPaths := slice
+    "script/script.js"
+    "script/subhero.js"
+    "script/links.js"
+    "script/archive.js"
+-}}
+
+{{- /* Costruzione lista parts con Scratch per evitare problemi di scope */ -}}
+{{- $.Scratch.Set "jsParts" (slice) -}}
+{{- range $p := $jsPaths -}}
+  {{- with resources.Get $p -}}
+    {{- $.Scratch.Add "jsParts" (slice .) -}}
+  {{- else -}}
+    {{- /* File mancante: non interrompere la build */ -}}
+    {{- warnf "scripts.html: risorsa JS non trovata: %s" $p -}}
+  {{- end -}}
+{{- end -}}
+{{- $parts := $.Scratch.Get "jsParts" -}}
+
+{{- if gt (len $parts) 0 -}}
+  {{- $bundle := ($parts | resources.Concat "script/bundle.js") | resources.Minify | resources.Fingerprint -}}
+  <script defer src="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous"></script>
+{{- else -}}
+  {{- /* Nessun JS disponibile: niente output */ -}}
+{{- end -}}
