@@ -1,0 +1,398 @@
+/* Subhero */
+.sub-hero{
+  --dur-fade: 420ms;
+
+  /* Dots */
+  --dot-visible: 8px;
+  --dot-hit: 18px;
+  --dot-gap: 6px;
+
+  /* Overlay generale del blocco */
+  --veil: 0.20;
+
+  /* Durata default, usata anche dallo script */
+  --pager-dur: 7s;
+
+  /* Ritmo sezione (riusato dagli script) */
+  --subhero-pad-x: clamp(12px, 2vw, 24px); /* L/R */
+  --subhero-pad-y: clamp(16px, 4vw, 32px); /* T/B */
+  --subhero-gap:   clamp(8px,  1.6vw, 12px);
+}
+
+/* SAFETY SCOPE: mostra dots/controls SOLO dentro la .sub-hero */
+.pager__dots,
+.pager__controls{
+  display: none !important;
+}
+.sub-hero .pager__dots{
+  display: flex !important;
+}
+.sub-hero .pager__controls{
+  display: flex !important;
+}
+
+.sub-hero{
+  position: relative;
+  overflow: hidden;
+  background-color: #0E0F1A;
+  width: 100%;
+
+  /* Ritmo sezione (riusato anche dagli script) */
+  /* (split pad) */
+  --subhero-pad-x: clamp(12px, 2vw, 24px); /* L/R */
+  --subhero-pad-y: clamp(16px, 4vw, 32px); /* T/B */
+  --subhero-gap: clamp(8px, 1.6vw, 12px);
+}
+.sub-hero::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,var(--veil));
+  z-index: 0;
+}
+.sub-hero:focus-visible{
+  outline: 2px solid #E0A402;
+  outline-offset: 4px;
+}
+
+.pager__viewport,
+.pager__track,
+.pager__slide{
+  position: relative;
+  z-index: 1;
+}
+.pager__viewport{
+  width: 100%;
+  min-height: clamp(200px, 30vh, 350px);
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  padding-inline: 0;
+}
+.pager__track{ margin: 0; padding: 0; width: 100%; height: 100%; }
+
+/* Slide: GRID a 3 righe (titolo | desc 1fr | CTA) — 1 colonna */
+.pager__slide{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fade) ease;
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  row-gap: var(--subhero-gap);
+  justify-items: start;
+  align-items: start;
+
+  padding: var(--subhero-pad-y) var(--subhero-pad-x);
+  color: #fff;
+}
+.pager__slide.is-active{ opacity: 1; pointer-events: auto; }
+
+/* Tipografia (no margini default) */
+.slide__title{
+  grid-row: 1; grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 60ch;
+}
+.slide__desc{
+  grid-row: 2; grid-column: 1 / -1;
+  margin: 0;
+  opacity: .92;
+  line-height: 1.4;
+  max-width: 68ch;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* CTA: wrapper consigliato per stabilità su mobile */
+.slide__cta{
+  grid-row: 3; grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Background immagini (mapping variabili) */
+.pager__slide { --slide-bg-url: var(--slide-bg-mobile-url); }
+@media (min-width: 768px){
+  .pager__slide { --slide-bg-url: var(--slide-bg-desktop-url); }
+}
+.pager__slide::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--slide-bg-url);
+  background-size: cover;
+  background-position: center;
+  opacity: .38;
+}
+
+/* Overlay diagonale per contrasto testo */
+.pager__slide::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    to top right,
+    rgba(25, 26, 35, 0.85) 0%,
+    rgba(25, 26, 35, 0.6) 40%,
+    rgba(25, 26, 35, 0.0) 75%
+  );
+  pointer-events: none;
+}
+
+.pager__slide > *{ position: relative; z-index: 1; }
+
+/* Dots container */
+.pager__dots{
+  position: absolute;
+  left: 0; right: 0;
+  bottom: clamp(8px, 2vh, 16px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--dot-gap);
+  z-index: 2;
+}
+
+/* >>> Dots: bottone = hit-area; pallino visivo centrato via ::after <<< */
+.pager__dots .dot{
+  width: var(--dot-hit, 24px);
+  height: var(--dot-hit, 24px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pager__dots .dot::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--dot-visible, 10px);
+  height: var(--dot-visible, 10px);
+  margin: auto;
+  border-radius: 50%;
+  background: rgba(255,255,255,.35);
+  transform: scale(1);
+  transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.pager__dots .dot.is-active::after,
+.pager__dots .dot[aria-current="true"]::after,
+.pager__dots .dot[aria-selected="true"]::after{
+  background: #fff;
+  transform: scale(1.18);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.15);
+}
+@media (hover:hover){
+  .pager__dots .dot:hover::after{
+    background: rgba(255,255,255,.6);
+  }
+}
+.pager__dots .dot:focus{ outline: none; }
+.pager__dots .dot:focus-visible::after{
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.35),
+    0 0 0 5px rgba(0,0,0,.28);
+  transform: scale(1.18);
+}
+
+/* Frecce (desktop): riabilitate in .sub-hero via scope sopra
+   e ancorate SOLO in CSS */
+.pager__controls{
+  position: absolute;
+  right: var(--subhero-pad-x);
+  bottom: var(--subhero-pad-y);
+  top: auto;
+  transform: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  z-index: 2;
+}
+.pager__controls.glass{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.pager__arrow{
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.88);
+  font-size: 20px;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease, background-color 120ms ease;
+}
+.pager__arrow:hover{ background: rgba(255,255,255,0.08); }
+.pager__arrow:active{ transform: translateY(1px) scale(.98); }
+.pager__arrow:focus-visible{
+  outline: 2px solid #E0A402;
+  outline-offset: 2px;
+  background: rgba(255,255,255,0.10);
+}
+
+/* sr-only */
+.sr-only{
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Mobile: CTA centrata in basso, controls nascosti
+   + spacing compattato (~ -30%) */
+@media (max-width: 767.98px){
+  .sub-hero .pager__slide{
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(var(--subhero-pad-y) + 28px); /* spazio riservato ai dots */
+    gap: calc(var(--subhero-gap, 16px) * .7);         /* compact spacing */
+  }
+
+  .sub-hero .slide__cta{
+    margin-top: auto;        /* fissa la CTA in basso */
+    margin-bottom: 12px;     /* margine minimo sopra i dots */
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .sub-hero .pager__dots{
+    display: flex !important;
+    bottom: var(--subhero-pad-y);
+    z-index: 3;
+    pointer-events: auto;
+    gap: calc(var(--dot-gap, 8px) * .85);
+  }
+
+  .sub-hero .pager__controls{
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* Breakpoints: affina ritmo */
+@media (min-width: 768px){
+  .sub-hero{
+    --subhero-pad-x: clamp(14px, 2.8vw, 28px);
+    --subhero-pad-y: clamp(20px, 3.5vw, 40px);
+    --subhero-gap: clamp(10px, 1.4vw, 16px);
+  }
+}
+@media (min-width: 1280px){
+  .sub-hero{
+    --subhero-pad-x: clamp(16px, 2.4vw, 32px);
+    --subhero-pad-y: clamp(24px, 3vw, 48px);
+    --subhero-gap: clamp(12px, 1.2vw, 20px);
+  }
+}
+
+/* PRM: riduci transizioni */
+@media (prefers-reduced-motion: reduce){
+  .pager__slide{ transition: opacity 1ms linear !important; }
+}
+
+/* Viewport: edge-fade (lasciato, ma senza padding laterale) */
+.sub-hero .pager__viewport {
+  position: relative;
+  overflow: hidden; /* sicurezza */
+}
+
+.sub-hero .pager__viewport::before,
+.sub-hero .pager__viewport::after{
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inline-size: 28px; /* intensità dissolvenza */
+  pointer-events: none;
+  z-index: 1;
+}
+.sub-hero .pager__viewport::before{
+  inset-inline-start: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.22), rgba(0,0,0,0));
+  mix-blend-mode: multiply;
+}
+.sub-hero .pager__viewport::after{
+  inset-inline-end: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.22), rgba(0,0,0,0));
+  mix-blend-mode: multiply;
+}
+
+/* Contenuto slide: gap verticali più compatti e coesi */
+.sub-hero .pager__slide .slide__title { margin-block-end: 6px; }
+.sub-hero .pager__slide .slide__desc  { margin-block: 0 10px; }
+.sub-hero .pager__slide .slide__cta   { margin-block-start: 8px; }
+
+/* Motion silky: solo transform/opacity; will-change solo durante animazione */
+.sub-hero .pager__slide {
+  will-change: auto;
+  transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sub-hero .pager__slide.is-animating {
+  will-change: transform, opacity;
+}
+
+/* PRM: riduci a passaggi discreti */
+@media (prefers-reduced-motion: reduce){
+  .sub-hero .pager__slide { transition: none; }
+}
+
+@media (min-width: 1280px){
+  /* Allinea gli elementi interni alla stessa colonna sinistra di Cards/Links */
+  .sub-hero .pager__slide{
+    padding-left: max(var(--subhero-pad-x), var(--subhero-align-left, 0px));
+  }
+
+  /* Frecce allineate al bordo destro del container Cards */
+  .sub-hero .pager__controls{
+    right: max(var(--subhero-pad-x), var(--subhero-align-left, 0px));
+  }
+
+  /* Dots centrati ma rispettando il gutter del container */
+  .sub-hero .pager__dots{
+    left:  max(var(--subhero-pad-x), var(--subhero-align-left, 0px));
+    right: max(var(--subhero-pad-x), var(--subhero-align-left, 0px));
+  }
+}
+
+/* Progress interno al dot (riempimento) — DISABILITATO esplicitamente */
+.sub-hero .pager__dots button::before,
+.sub-hero .pager__dots .dot::before{
+  content: none !important;
+  animation: none !important;
+  display: none !important;
+}
+
+/* Manteniamo solo l'effetto attivo classico (coerente con ::after) */
+.sub-hero .pager__dots button.is-active,
+.sub-hero .pager__dots .dot.is-active{
+  transform: scale(1.0);
+}

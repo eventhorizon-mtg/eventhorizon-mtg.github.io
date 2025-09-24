@@ -1,15 +1,24 @@
-@import "base/_tokens.css";
-@import "base/_base.css";
+/* Ordine globale dei layer (cascata prevedibile) */
+@layer base, layout, components, utilities;
 
-@import "layout/_navbar.css";
-@import "layout/_hero.css";
-@import "layout/_footer.css";
+/* BASE */
+@import "base/_tokens.css" layer(base);
+@import "base/_base.css"   layer(base);
 
-@import "components/_buttons.css";
-@import "components/_contacts.css";
+/* LAYOUT */
+@import "layout/_navbar.css"  layer(layout);
+@import "layout/_hero.css"    layer(layout);
+@import "layout/_subhero.css" layer(layout);
+@import "layout/_footer.css"  layer(layout);
 
-@import "utilities/_a11y.css";
+/* COMPONENTS */
+@import "components/_buttons.css"  layer(components);
+@import "components/_contacts.css" layer(components);
+
+/* UTILITIES */
+@import "utilities/_a11y.css" layer(utilities);
+
 /* Pagine future:
-   @import "pages/_archive.css";
-   @import "pages/_home.css";
+   @import "pages/_archive.css" layer(components);
+   @import "pages/_home.css"    layer(components);
 */
