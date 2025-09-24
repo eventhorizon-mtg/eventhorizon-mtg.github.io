@@ -1,15 +1,28 @@
-/* Buttons base */
+/* ============================================================
+   Buttons
+   ============================================================ */
+
 .btn{
-  --btn-radius: var(--radius-s);
-  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  --btn-radius: var(--radius-s, 8px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
   padding: 10px 16px;
-  min-height: 45px; min-width: 149px;
+  min-height: 45px;
+  min-width: 149px;
+
+  border: 0;
   border-radius: var(--btn-radius);
-  text-decoration: none; color: #fff;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.25);
-  transition: transform var(--dur-1) var(--ease-standard),
-              background-color var(--dur-1) var(--ease-standard),
-              box-shadow var(--dur-1) var(--ease-standard);
+  text-decoration: none;
+  color: #fff;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition:
+    transform var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1)),
+    background-color var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1)),
+    box-shadow var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1));
 }
 
 /* Teal (default) */
@@ -22,75 +35,73 @@
 .btn--gold:hover{ background: var(--gold-700); transform: scale(0.99); }
 .btn--gold:focus-visible{ outline: 2px solid var(--gold-500); outline-offset: 2px; }
 
-/* Base (Indigo) */
-.btn--base{ background: var(--indigo-900); color:#FFFFFF; }
+/* Base Indigo */
+.btn--base{ background: var(--indigo-900); color: #FFF; }
 .btn--base:hover{ background: var(--indigo-700); transform: scale(0.99); }
 .btn--base:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
-/* AlphaB (Indigo) */
-.btn--alphab{ background: var(--indigo-700); color:#FFFFFF; }
+/* AlphaB Indigo */
+.btn--alphab{ background: var(--indigo-700); color: #FFF; }
 .btn--alphab:hover{ background: var(--indigo-600); transform: scale(0.99); }
 .btn--alphab:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
 /* Acid */
-.btn--acid{ background: var(--acid-600); color:#202020; }
-.btn--acid:hover{ background: var(--acid-hover); color:#FFFFFF; transform: scale(0.99); }
+.btn--acid{ background: var(--acid-600); color: #202020; }
+.btn--acid:hover{ background: var(--acid-hover); color: #FFF; transform: scale(0.99); }
 .btn--acid:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
 /* Pink */
-.btn--pink{ background: var(--pink-600); color:#FFFFFF; }
+.btn--pink{ background: var(--pink-600); color: #FFF; }
 .btn--pink:hover{ background: var(--pink-700); transform: scale(0.99); }
 .btn--pink:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
 /* Orange */
-.btn--orange{ background: var(--orange-600); color:#FFFFFF; }
+.btn--orange{ background: var(--orange-600); color: #FFF; }
 .btn--orange:hover{ background: var(--orange-500); transform: scale(0.99); }
 .btn--orange:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
-/* Indigo Stroke */
+/* Indigo Stroke (bianco con bordo/testo indigo) */
 .btn--indigostroke{
   background: #FFFFFF;
   color: var(--indigo-700);
   border: 2px solid var(--indigo-700);
 }
 .btn--indigostroke:hover{
-  background: #5B4E9D; color: var(--neutral-00);
+  background: #5B4E9D;
+  color: var(--neutral-00);
   border-color: var(--indigo-900);
   transform: scale(0.99);
 }
-.btn--indigostroke:focus-visible{
-  outline: 2px solid var(--gold-600);
-  outline-offset: 2px;
-}
+.btn--indigostroke:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
-/* Teal Stroke (FIX: classe dedicata + gold-600) */
+/* Teal Stroke (se presente nel progetto) */
 .btn--tealstroke{
   background: #FFFFFF;
   color: var(--teal-600);
   border: 2px solid var(--teal-600);
 }
 .btn--tealstroke:hover{
-  background: #007A7C; color: var(--neutral-00);
+  background: var(--teal-600);
+  color: var(--neutral-00);
   border-color: var(--teal-700);
   transform: scale(0.99);
 }
-.btn--tealstroke:focus-visible{
-  outline: 2px solid var(--gold-600);
-  outline-offset: 2px;
-}
+.btn--tealstroke:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
 
 /* Variante “liquid glass” */
 .btn.btn--liquid{
   --liquid-blur: 12px;
-  --liquid-alpha: 0.18;
-  --liquid-border: 0.38;
-  --liquid-shadow: 0.28;
+  --liquid-alpha: 0.18;   /* opacità del velo */
+  --liquid-border: 0.38;  /* intensità bordo esterno */
+  --liquid-shadow: 0.28;  /* intensità ombra esterna */
 
   color: #fff;
   text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+
   background: rgba(255,255,255,var(--liquid-alpha));
   border: 1px solid rgba(255,255,255,var(--liquid-border));
   border-radius: var(--btn-radius);
+
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.22),
     0 4px 12px rgba(0,0,0,var(--liquid-shadow));
@@ -106,11 +117,7 @@
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.28),
     0 6px 18px rgba(0,0,0, calc(var(--liquid-shadow) + 0.10));
-  transform: translateY(0px);
-  transition:
-    transform var(--dur-1) var(--ease-standard),
-    background-color var(--dur-1) var(--ease-standard),
-    box-shadow var(--dur-1) var(--ease-standard);
+  transform: translateY(0);
 }
 .btn.btn--liquid:active{
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.02));
@@ -124,19 +131,21 @@
   outline-offset: 3px;
 }
 
-/* Variante scura */
+/* Variante liquid “dark” per sfondi chiari */
 .btn.btn--liquid.btn--dark{
   --liquid-blur: 12px;
   --liquid-alpha: 0.22;
   --liquid-border: 0.32;
   --liquid-shadow: 0.22;
 
-  color: #1a1a1a; text-shadow: none;
+  color: #1a1a1a;
+  text-shadow: none;
+
   background: rgba(255,255,255,var(--liquid-alpha));
   border: 1px solid rgba(255,255,255,var(--liquid-border));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.18),
-    0 4px 12px rgba(0,0,0,var(--liquid-shadow));
+    0 4px 12px rgba(0,0,0,0.22);
 }
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)){
   .btn.btn--liquid.btn--dark{
@@ -148,17 +157,35 @@
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.08));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.24),
-    0 6px 16px rgba(0,0,0, calc(var(--liquid-shadow) + 0.08));
+    0 6px 16px rgba(0,0,0,0.30);
   transform: translateY(-1px);
 }
 .btn.btn--liquid.btn--dark:active{
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.04));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.26),
-    0 3px 8px rgba(0,0,0, calc(var(--liquid-shadow) + 0.02));
+    0 3px 8px rgba(0,0,0,0.24);
   transform: translateY(0);
 }
 .btn.btn--liquid.btn--dark:focus-visible{
   outline: 2px solid var(--indigo-600, #5B4E9D);
   outline-offset: 3px;
+}
+
+/* =======================
+   Stato disabilitato (reintrodotto)
+   ======================= */
+.btn--disabled1{
+  background: #af6e43;
+  color: #ffecd4;
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Riduzione motion */
+@media (prefers-reduced-motion: reduce){
+  .btn{
+    transition: background-color 0.001s linear !important;
+  }
 }
