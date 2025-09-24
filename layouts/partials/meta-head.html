@@ -78,6 +78,7 @@
 
 {{/* ---------------------------------------
      CSS bundle via Hugo Pipes (robusto ai file mancanti)
+     Costruzione lista con Scratch (evita problemi di scope/append)
 ---------------------------------------- */}}
 {{- $cssPaths := slice
     "style/base/_tokens.css"
@@ -96,12 +97,13 @@
     "style/utilities/_a11y.css"
 -}}
 
-{{- $parts := slice -}}
+{{- $.Scratch.Set "parts" (slice) -}}
 {{- range $p := $cssPaths -}}
   {{- with resources.Get $p -}}
-    {{- $parts = append $parts . -}}
+    {{- $.Scratch.Add "parts" (slice .) -}}
   {{- end -}}
 {{- end -}}
+{{- $parts := $.Scratch.Get "parts" -}}
 
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
