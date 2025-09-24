@@ -1,0 +1,574 @@
+/* Cards */
+/* Sezione + variabili (dimensioni card e gap) */
+.cards{
+  background: var(--neutral-50, #F3F2F7);
+  color: var(--neutral-900, #191A23);
+  padding: clamp(32px, 6vw, 72px) 0;
+
+  /* Card fisse per breakpoint */
+  --card-w: 320px;
+  --card-h: 447px;
+  --grid-gap: 16px;
+
+  /* Max container per 4 colonne */
+  --container-max: calc(
+    (4 * var(--card-w)) +
+    (3 * var(--grid-gap)) +
+    (2 * var(--container-pad-x, 16px))
+  );
+}
+@media (min-width: 480px){
+  .cards{
+    --card-w: 340px;
+    --card-h: 474px;
+    --grid-gap: 20px;
+    --container-max: calc(
+      (4 * var(--card-w)) +
+      (3 * var(--grid-gap)) +
+      (2 * var(--container-pad-x, 16px))
+    );
+  }
+}
+@media (min-width: 1024px){
+  .cards{
+    --card-w: 360px;
+    --card-h: 501px;
+    --grid-gap: 22px;
+    --container-max: calc(
+      (4 * var(--card-w)) +
+      (3 * var(--grid-gap)) +
+      (2 * var(--container-pad-x, 16px))
+    );
+  }
+}
+
+.cards__inner{
+  width: min(100%, var(--container-max));
+  margin-inline: auto;
+  padding-inline: var(--container-pad-x, 16px);
+}
+
+.cards__title{
+  margin: 0 0 16px;
+  font-family: var(--font-sans, "Lexend Deca", system-ui, sans-serif);
+  font-weight: var(--fw-black, 900);
+  font-size: var(--fs-h2, clamp(1.5rem, 1.1vw + 1.2rem, 2rem));
+  line-height: var(--lh-tight, 1.15);
+}
+
+/* ===== Griglia: Flexbox con wrap ===== */
+.cards__grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--grid-gap);
+  justify-content: center;   /* ultima riga centrata */
+  align-items: stretch;
+}
+
+/* Singola card */
+.card{
+  width: var(--card-w);
+  height: var(--card-h);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-0, #FFFFFF);
+  border-radius: 16px;
+  box-shadow:
+    0 0.5px 1px rgba(0,0,0,0.03),
+    0 8px 24px rgba(0,0,0,0.07);
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
+  transition:
+    box-shadow 240ms ease,
+    transform 240ms ease;
+}
+.card:hover{
+  transform: translateY(0);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 14px 32px rgba(0,0,0,0.12);
+}
+.card:active{ transform: translateY(0); }
+.card:focus-within{ outline: none; }
+
+/* Media 16:9 (base) */
+.card__media{
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--card-bg, #C8C6D8) center / cover no-repeat;
+}
+.card__media::before{ content: none; }
+.card__media > *{ position: absolute; inset: 0; }
+
+/* Supporto <img> interno senza toccare la logica esistente */
+.card__media .card__img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay opzionale sulla media */
+.card__media-overlay{
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(53.91% 66.35% at 50% 50%,
+    rgba(25, 26, 35, 0.38) 0%,
+    rgba(25, 26, 35, 0.00) 100%);
+}
+
+/* Pulsante Play — base */
+.card__play{ display: grid; place-items: center; }
+.card__play .sr-only{
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+.card__play-icon{
+  width: clamp(48px, 7vw, 64px);
+  height: clamp(48px, 7vw, 64px);
+  transition: transform 220ms ease, filter 220ms ease;
+  fill: white;
+  stroke: rgba(0,0,0,0.25);
+  stroke-width: 1px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.card__play:hover .card__play-icon{ transform: scale(1.04); }
+.card__play:active .card__play-icon{ transform: scale(0.97); }
+.card__play:focus-visible{
+  outline: 2px solid var(--gold-600, #E0A402);
+  outline-offset: 4px;
+  border-radius: 9999px;
+}
+
+/* Corpo testo — griglia 3 righe con titolo = 2 righe minime */
+.card__body{
+  padding: 16px;
+  display: grid;
+  grid-template-rows: auto minmax(calc(1.25em * 2), auto) auto;
+  row-gap: 10px;
+  flex: 1;
+  min-height: 0;
+  justify-items: start;
+  align-content: start;
+  text-align: left;
+}
+.card__overline{
+  grid-row: 1;
+  margin: 0;
+  font-family: var(--font-sans, "Lexend Deca", system-ui, sans-serif);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+.card__title{
+  grid-row: 2;
+  margin: 0;
+  font-family: var(--font-sans, "Lexend Deca", system-ui, sans-serif);
+  font-weight: var(--fw-bold, 700);
+  line-height: 1.25;
+  font-size: clamp(1.05rem, 1vw + 0.9rem, 1.25rem);
+  min-height: calc(1.25em * 2);                 /* 2 righe minime */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card__desc{
+  grid-row: 3;
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Azioni “pinnate” in basso (default) */
+.card__actions{
+  margin-top: auto;
+  padding: 0 16px 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Riduzione motion */
+@media (prefers-reduced-motion: reduce){
+  .card,
+  .card__play-icon{
+    transition: none !important;
+  }
+}
+
+/* ============================================================
+   Variante: .card.is-video
+   ============================================================ */
+.cards .card.is-video .card__media{
+  background: var(--card-bg, #C8C6D8) center / cover no-repeat;
+}
+.cards .card.is-video .card__media::before{ content: none; }
+
+/* Overline Indigo + testo più vicino */
+.card.is-video .card__overline{
+  color: var(--indigo-700);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9rem);
+}
+.card.is-video .card__title{ line-height: 1.2; }
+.card.is-video .card__desc{
+  line-height: 1.45;
+  -webkit-line-clamp: unset; /* mobile */
+}
+@media (min-width: 768px){
+  .card.is-video .card__desc{ -webkit-line-clamp: unset; }
+}
+
+/* Play centrato nella media, cerchio glass + triangolo interno */
+.card.is-video .card__media{ position: relative; z-index: 0; }
+.card.is-video .card__media-overlay{ z-index: 0; } /* sotto al play */
+.card.is-video .card__play{
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 64px;     /* hit-area M */
+  height: 64px;
+  display: grid;
+  place-items: center;
+  z-index: 2;      /* sopra overlay media */
+}
+.card.is-video .card__play::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;                 /* cerchio esterno */
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  transition: background 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+  z-index: 0;                         /* sotto l'icona */
+}
+.card.is-video .card__play-icon{
+  position: relative;
+  z-index: 1;                         /* sopra al cerchio glass */
+}
+.card.is-video .card__play:hover::before{
+  background: rgba(220,38,38,0.9);    /* red-600 */
+  box-shadow: 0 0 12px rgba(220,38,38,0.7);
+}
+.card.is-video .card__play:active::before{
+  background: rgba(185,28,28,0.95);   /* red-700 */
+  box-shadow: 0 0 20px 4px rgba(239,68,68,0.5); /* red-500 glow */
+}
+
+/* SVG interno: preferenza triangolo. Se l'SVG usa classi dedicate: */
+.card.is-video .card__play-circle{
+  fill: none !important;
+  stroke: none !important;
+  opacity: 0 !important;
+}
+.card.is-video .card__play-tri{
+  fill: #FFF !important;
+  stroke: #FFF !important;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transform: scale(1.25) translateX(3%); /* allineamento ottico di base */
+  transform-origin: center;
+}
+/* Fallback: se lo sprite non ha classi, prova con selettori generici */
+.card.is-video .card__play-icon polygon{
+  fill: #FFF;
+  stroke: #FFF;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+}
+.card.is-video .card__play-icon circle{
+  opacity: 0;
+}
+
+/* ============================================================
+   Variante: .card.is-content
+   ============================================================ */
+
+.card.is-content {
+  /* Inherit aspetto base della .card (niente full-cover, niente glass) */
+}
+
+/* Media 16:9 in testa, come nei video */
+.card.is-content .card__media {
+  /* usa il layout base 16:9 definito per .card__media */
+  background: var(--card-bg, #C8C6D8) center / cover no-repeat;
+}
+
+/* Overlay radiale: leggermente più soft rispetto a .is-video */
+.card.is-content .card__media-overlay{
+  background: radial-gradient(53.91% 66.35% at 50% 50%,
+    rgba(25, 26, 35, 0.28) 0%,
+    rgba(25, 26, 35, 0.00) 100%);
+}
+
+/* Body testo: usa struttura base; manteniamo la caratterizzazione cromatica */
+.card.is-content .card__body {
+  position: relative;
+  z-index: 1;
+  /* il resto (grid, padding) eredita da .card__body */
+}
+
+.card.is-content .card__overline {
+  color: var(--teal-700);
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.card.is-content .card__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 1vw + 1rem, 1.4rem);
+  line-height: 1.3;
+  min-height: calc(1.3em * 2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Desc: torna "normale" sotto al titolo (no assoluti, no text-stroke) */
+.card.is-content .card__desc {
+  position: static;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  width: auto;
+  z-index: auto;
+  text-align: left;
+  font-weight: 400;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+/* CTA: usa il default .card__actions (nessun posizionamento assoluto) */
+.card.is-content .card__actions {
+  position: static;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  margin-top: auto;              /* pin in basso come default .card__actions */
+  padding: 0 16px 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Nessun Play nella variante content (l'elemento non è presente in HTML) */
+.card.is-content .card__play { display: none; }
+/* Mantieni l'overlay visibile (rimosso il vecchio display:none) */
+
+/* ============================================================
+   Variante: .card.is-portal
+   ============================================================ */
+
+/* >>> LIQUID GLASS (no border) >>> */
+.card.is-portal {
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+
+  /* Liquid Glass controls (override inline per-card) */
+  --glass-top: 10%;
+  --glass-bot: 52%;
+  --glass-feather: 22%;
+  --glass-blur: 2px;
+  --glass-alpha: 0.12;
+  --glass-sheen: 0.08;
+  --glass-tilt: 28deg;
+
+  /* Frost */
+  --frost-alpha: 0.10;
+  --frost-tint: rgba(30,25,35,var(--frost-alpha));
+
+  box-shadow:
+    0 0.5px 1px rgba(30,25,35,0.03),
+    0 6px 16px rgba(30,25,35,0.06);
+}
+
+.card.is-portal:hover {
+  box-shadow:
+    0 1px 2px rgba(30,25,35,0.05),
+    0 10px 24px rgba(30,25,35,0.10);
+  transform: none;
+}
+
+/* Media full cover */
+.card.is-portal .card__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+/* LIQUID GLASS */
+.card.is-portal .card__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      var(--glass-tilt),
+      rgba(255,255,255,calc(var(--glass-sheen))) 0%,
+      rgba(255,255,255,0) 55%
+    ),
+    rgba(255,255,255,var(--glass-alpha));
+
+  -webkit-mask:
+    linear-gradient(
+      to bottom,
+      #000 0,
+      #000 calc(var(--glass-top) - var(--glass-feather)),
+      transparent calc(var(--glass-top) + var(--glass-feather))
+    ),
+    linear-gradient(
+      to top,
+      #000 0,
+      #000 calc(var(--glass-bot) - var(--glass-feather)),
+      transparent calc(var(--glass-bot) + var(--glass-feather))
+    );
+  mask:
+    linear-gradient(
+      to bottom,
+      #000 0,
+      #000 calc(var(--glass-top) - var(--glass-feather)),
+      transparent calc(var(--glass-top) + var(--glass-feather))
+    ),
+    linear-gradient(
+      to top,
+      #000 0,
+      #000 calc(var(--glass-bot) - var(--glass-feather)),
+      transparent calc(var(--glass-bot) + var(--glass-feather))
+    );
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .card.is-portal .card__media::before {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.06) contrast(1.02);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.06) contrast(1.02);
+  }
+}
+
+/* Frost overlay minimal (no blur) */
+.card.is-portal .card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -8px 24px rgba(0,0,0,0.18);
+}
+
+/* Body testo */
+.card.is-portal .card__body {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+  display: grid;
+  grid-template-rows: auto minmax(calc(1.3em * 2), auto) auto;
+  row-gap: 10px;
+  text-align: left;
+  color: var(--neutral-900);
+}
+
+.card.is-portal .card__overline {
+  color: var(--teal-700);
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.card.is-portal .card__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 1vw + 1rem, 1.4rem);
+  line-height: 1.3;
+  min-height: calc(1.3em * 2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Desc */
+.card.is-portal .card__desc {
+  position: absolute;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96%;
+  z-index: 3;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(0.9rem, 0.5vw + 0.8rem, 1rem);
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--neutral-900);
+
+  padding-inline: 8px;
+  padding-block: 2px;
+
+  -webkit-text-stroke: 2px #fff;
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 2px rgba(0,0,0,0.18),
+    0 2px 6px rgba(0,0,0,0.12);
+}
+
+@media (max-width: 480px) {
+  .card.is-portal .card__desc {
+    -webkit-text-stroke: 3px #fff;
+  }
+}
+
+/* CTA in basso (allineata a is-video) */
+.card.is-portal .card__actions {
+  position: absolute;
+  bottom: var(--cta-bottom, clamp(12px, 2.5vw, 20px));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+}
+
+/* Nessun Play */
+.card.is-portal .card__play,
+.card.is-portal .card__media-overlay {
+  display: none !important;
+}
+
+/* Tracking coerente */
+.cards .card__overline{ letter-spacing: var(--trk-wide); }
+.cards .card__title{    letter-spacing: var(--trk-slight); }
+.cards .card__desc{     letter-spacing: 0; }
