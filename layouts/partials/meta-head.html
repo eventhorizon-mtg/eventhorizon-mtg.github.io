@@ -10,10 +10,10 @@
 {{- end -}}
 
 {{- $siteOG := .Site.Params.og -}}
-{{- $siteOgTitle   := cond (and $siteOG (isset $siteOG "title"))   $siteOG.title   "" -}}
-{{- $siteOgDesc    := cond (and $siteOG (isset $siteOG "description")) $siteOG.description "" -}}
-{{- $siteOgImage   := cond (and $siteOG (isset $siteOG "image"))   $siteOG.image   "" -}}
-{{- $siteOgLocale  := cond (and $siteOG (isset $siteOG "locale"))  $siteOG.locale  "" -}}
+{{- $siteOgTitle   := cond (and $siteOG (isset $siteOG "title"))        $siteOG.title       "" -}}
+{{- $siteOgDesc    := cond (and $siteOG (isset $siteOG "description"))  $siteOG.description "" -}}
+{{- $siteOgImage   := cond (and $siteOG (isset $siteOG "image"))        $siteOG.image       "" -}}
+{{- $siteOgLocale  := cond (and $siteOG (isset $siteOG "locale"))       $siteOG.locale      "" -}}
 
 {{- $ogTitle  := or .Params.ogTitle  .Site.Params.ogTitle  $siteOgTitle  .Site.Title -}}
 {{- $ogDesc   := or .Params.ogDesc   .Site.Params.ogDesc   $siteOgDesc   "" -}}
@@ -36,7 +36,7 @@
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
-<!-- Favicons (assicurati che esistano sotto /static/assets/favicon/ ...) -->
+<!-- Favicons (assicurati che i file esistano sotto /static/assets/favicon/ ...) -->
 <link rel="icon" href="/assets/favicon/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16.png">
@@ -77,23 +77,31 @@
 {{ end }}
 
 {{/* ---------------------------------------
-     CSS bundle via Hugo Pipes (concat → minify → fingerprint)
-     I path qui sotto sono relativi alla cartella /assets
+     CSS bundle via Hugo Pipes (robusto ai file mancanti)
+     1) Definiamo i PATH (relativi a /assets)
+     2) resources.Get su ciascuno
+     3) Rimuoviamo i nil (collections.Compact)
+     4) Concat → Minify → Fingerprint
 ---------------------------------------- */}}
-{{- $bundle := (slice
-    (resources.Get "style/base/_tokens.css")
-    (resources.Get "style/base/_base.css")
+{{- $cssPaths := slice
+    "style/base/_tokens.css"
+    "style/base/_base.css"
 
-    (resources.Get "style/layout/_navbar.css")
-    (resources.Get "style/layout/_hero.css")
-    (resources.Get "style/layout/_subhero.css")
-    (resources.Get "style/layout/_footer.css")
+    "style/layout/_navbar.css"
+    "style/layout/_hero.css"
+    "style/layout/_subhero.css"
+    "style/layout/_footer.css"
 
-    (resources.Get "style/components/_buttons.css")
-    (resources.Get "style/components/_cards.css")
-    (resources.Get "style/components/_links.css")
-    (resources.Get "style/components/_contacts.css")
+    "style/components/_buttons.css"
+    "style/components/_cards.css"
+    "style/components/_links.css"
+    "style/components/_contacts.css"
 
-    (resources.Get "style/utilities/_a11y.css")
-  ) | resources.Concat "style/_bundle.css" | resources.Minify | resources.Fingerprint -}}
-<link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
+    "style/utilities/_a11y.css"
+-}}
+{{- $cssList := apply $cssPaths "resources.Get" "." -}}
+{{- $cssList = $cssList | collections.Compact -}}
+{{- if gt (len $cssList) 0 -}}
+  {{- $bundle := (resources.Concat "style/_bundle.css" $cssList) | resources.Minify | resources.Fingerprint -}}
+  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
+{{- end -}}
