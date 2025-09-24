@@ -1,16 +1,17 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  {{ partial "meta-head.html" . }}
-</head>
-<body>
-  {{ partial "navbar.html" . }}
+<!doctype html>
+<html lang="{{ .Site.LanguageCode | default "it" }}">
+  <head>
+    {{ partial "meta-head.html" . }}
+    {{ block "head" . }}{{ end }}
+  </head>
+  <body class="{{ .Kind }} {{ .Type }}">
+    {{ partial "navbar.html" . }}
 
-  <main id="main" role="main">
-    {{ block "main" . }}{{ end }}
-  </main>
+    <main id="main" role="main" tabindex="-1">
+      {{ block "main" . }}{{ .Content }}{{ end }}
+    </main>
 
-  {{ partial "footer.html" . }}
-  {{ partial "scripts.html" . }}
-</body>
+    {{ partial "footer.html" . }}
+    {{ partial "scripts.html" . }}
+  </body>
 </html>
