@@ -1,0 +1,125 @@
+# data/archive/items.yaml
+- id: "Video001"
+  kind: "video"
+  date: "2025-08-19"
+  title: "La Guerra dei Fratelli"
+  overline: "LA STORIA DI MAGIC - EPISODIO #06"
+  desc: "Approfondimento sulla leggendaria guerra tra Urza e Mishra."
+  thumb: "/assets/thumbs/video001.webp"
+  card: "/assets/cards/card001.webp"
+  tags: ["urza", "mishra", "brothers war"]
+  links:
+    - label: "YouTube"
+      href: "https://www.youtube.com/watch?v=abcd1234"
+      btn_class: "btn--primary btn--yt"
+      sort_order: 10
+    - label: "Scryfall"
+      href: "https://scryfall.com/card/bro"
+      btn_class: "btn--scry"
+      sort_order: 20
+
+- id: "Video002"
+  kind: "video"
+  date: "2025-08-12"
+  title: "Phyrexia Compleated"
+  overline: "STORIE DI MTG"
+  desc: "Come i Phyrexiani hanno tentato di conquistare il Multiverso."
+  thumb: "/assets/thumbs/video002.webp"
+  tags: ["phyrexia", "yawg", "urabrask"]
+  links:
+    - label: "YouTube"
+      href: "https://www.youtube.com/watch?v=efgh5678"
+      btn_class: "btn--primary btn--yt"
+      sort_order: 10
+
+- id: "Content003"
+  kind: "content"
+  date: "2025-07-30"
+  title: "Guida al Commander"
+  overline: "FORMATI"
+  desc: "Una guida completa al formato Commander / EDH."
+  thumb: "/assets/thumbs/content003.webp"
+  tags: ["commander", "edh", "guide"]
+  links:
+    - label: "Moxfield"
+      href: "https://www.moxfield.com/decks/xyz"
+      btn_class: "btn--mox"
+      sort_order: 10
+    - label: "Archidekt"
+      href: "https://archidekt.com/decks/xyz"
+      btn_class: "btn--arch"
+      sort_order: 20
+
+- id: "Video004"
+  kind: "video"
+  date: "2025-07-21"
+  title: "Il Ritorno di Nicol Bolas"
+  overline: "PLANESWALKER"
+  desc: "Analisi narrativa e carte chiave legate a Nicol Bolas."
+  thumb: "/assets/thumbs/video004.webp"
+  tags: ["nicol", "bolas", "nicol bolas"]
+  links:
+    - label: "YouTube"
+      href: "https://www.youtube.com/watch?v=ijkl9012"
+      btn_class: "btn--primary btn--yt"
+      sort_order: 10
+    - label: "EDHREC"
+      href: "https://edhrec.com/commanders/nicol-bolas"
+      btn_class: "btn--edhrec"
+      sort_order: 20
+
+- id: "Content005"
+  kind: "content"
+  date: "2025-07-10"
+  title: "Five Color Decks"
+  overline: "DECKBUILDING"
+  desc: "Strategie per costruire mazzi a cinque colori in Commander."
+  thumb: "/assets/thumbs/content005.webp"
+  tags: ["five colors", "wubrg"]
+  links:
+    - label: "Archidekt"
+      href: "https://archidekt.com/decks/abc"
+      btn_class: "btn--primary btn--arch"
+      sort_order: 10
+
+- id: "Video006"
+  kind: "video"
+  date: "2025-06-28"
+  title: "Urza vs Mishra"
+  overline: "SAGHE DI DOMINARIA"
+  desc: "Conflitto epico tra i fratelli Urza e Mishra raccontato nel dettaglio."
+  thumb: "/assets/thumbs/video006.webp"
+  tags: ["urza", "mishra", "dominaria"]
+  links:
+    - label: "YouTube"
+      href: "https://www.youtube.com/watch?v=mnop3456"
+      btn_class: "btn--primary btn--yt"
+      sort_order: 10
+
+- id: "Content007"
+  kind: "content"
+  date: "2025-06-12"
+  title: "Carte Iconiche"
+  overline: "TOP LIST"
+  desc: "Una selezione delle carte più iconiche della storia di Magic."
+  thumb: "/assets/thumbs/content007.webp"
+  tags: ["iconic", "classic cards"]
+  links:
+    - label: "Scryfall"
+      href: "https://scryfall.com/card/iconic"
+      btn_class: "btn--scry"
+      sort_order: 10
+
+- id: "Video008"
+  kind: "video"
+  date: "2025-06-01"
+  title: "Yawmoth e la Nuova Phyrexia"
+  overline: "LEGGENDE"
+  desc: "Dalla nascita di Yawgmoth fino alla Nuova Phyrexia."
+  thumb: "/assets/thumbs/video008.webp"
+  tags: ["yawmoth", "phyrexia", "legends"]
+  links:
+    - label: "YouTube"
+      href: "https://www.youtube.com/watch?v=qrst7890"
+      btn_class: "btn--primary btn--yt"
+      sort_order: 10
