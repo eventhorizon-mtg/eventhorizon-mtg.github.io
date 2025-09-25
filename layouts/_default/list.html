@@ -51,10 +51,20 @@
       {{ $items = sort $items "date" "desc" }}
 
       {{ range $i, $it := $items }}
-        {{ $tagsStr := cond (isset $it "tags") (delimit $it.tags ",") "" }}
-        {{ $links  := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) }}
-        {{ $primary := (where $links "primary" true) | first }}
+        <!-- >>> START: prep variabili sicure -->
+        {{ $tagsStr := "" }}
+        {{ with $it.tags }}
+          {{ $tagsStr = delimit . "," }}
+        {{ end }}
+
+        {{ $links := slice }}
+        {{ with $it.links }}
+          {{ $links = sort . "sort_order" "asc" }}
+        {{ end }}
+
+        {{ $primaries := where $links "primary" true }}
         {{ $thumb := or $it.thumb "/img/placeholders/fblthp_placeholder.webp" }}
+        <!-- <<< END: prep variabili sicure -->
 
         <li class="item is-{{ $it.kind }}"
             data-id="{{ $it.id }}"
@@ -64,8 +74,9 @@
             data-desc="{{ $it.desc }}"
             data-tags="{{ $tagsStr }}">
           <div class="item-thumb">
-            {{ if $primary }}
-              <a href="{{ $primary.href }}" class="thumb-link" aria-label="Apri: {{ $it.title }}">
+            {{ if gt (len $primaries) 0 }}
+              {{ $p := index $primaries 0 }}
+              <a href="{{ $p.href }}" class="thumb-link" aria-label="Apri: {{ $it.title }}">
                 <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
               </a>
             {{ else }}
