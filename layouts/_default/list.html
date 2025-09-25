@@ -51,7 +51,7 @@
       {{ $items = sort $items "date" "desc" }}
 
       {{ range $i, $it := $items }}
-        <!-- >>> START: prep variabili sicure -->
+        {{/* >>> START: prep variabili sicure (no | first) */}}
         {{ $tagsStr := "" }}
         {{ with $it.tags }}
           {{ $tagsStr = delimit . "," }}
@@ -63,8 +63,13 @@
         {{ end }}
 
         {{ $primaries := where $links "primary" true }}
+        {{ $hasPrimary := gt (len $primaries) 0 }}
+        {{ if $hasPrimary }}
+          {{ $p := index $primaries 0 }}
+        {{ end }}
+
         {{ $thumb := or $it.thumb "/img/placeholders/fblthp_placeholder.webp" }}
-        <!-- <<< END: prep variabili sicure -->
+        {{/* <<< END: prep variabili sicure */}}
 
         <li class="item is-{{ $it.kind }}"
             data-id="{{ $it.id }}"
@@ -74,7 +79,7 @@
             data-desc="{{ $it.desc }}"
             data-tags="{{ $tagsStr }}">
           <div class="item-thumb">
-            {{ if gt (len $primaries) 0 }}
+            {{ if $hasPrimary }}
               {{ $p := index $primaries 0 }}
               <a href="{{ $p.href }}" class="thumb-link" aria-label="Apri: {{ $it.title }}">
                 <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
@@ -100,7 +105,7 @@
                 {{ end }}
               </div>
 
-              <!-- Chevron/button per aprire il bottom-sheet; testo vuoto (solo icona via CSS), con ARIA -->
+              <!-- Chevron/button per aprire il bottom-sheet; testo vuoto (icona via CSS), con ARIA -->
               <button type="button"
                       class="item-actions-summary"
                       aria-label="Dettagli e link"
