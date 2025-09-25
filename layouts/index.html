@@ -1,4 +1,220 @@
 {{ define "main" }}
-  <h1>Hello EventHorizon</h1>
-  <p>Se vedi questo, Hugo + Netlify funzionano 🎉</p>
+<main id="home" class="home">
+
+  <!-- ========================== HERO ========================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__inner">
+      <h1 id="hero-title" class="hero__title">EventHorizon.mtg</h1>
+      <p class="hero__subtitle">Beyond the Horizon — Commander, decklist, lore e risorse</p>
+      <div class="hero__actions">
+        <a class="btn btn--indigo" href="{{ "/archive/" | relURL }}">Vai all’Archivio</a>
+        <a class="btn btn--teal" href="#links">Link utili</a>
+      </div>
+    </div>
+    <!-- Se usi un’immagine di sfondo via CSS, lasciamo vuoto -->
+  </section>
+
+  <!-- ====================== SUB-HERO / SLIDER ====================== -->
+  <section class="sub-hero" aria-labelledby="sub-hero-title">
+    <h2 id="sub-hero-title" class="sr-only">In evidenza</h2>
+
+    <div class="pager" aria-roledescription="carousel">
+      <!-- Viewport + Track -->
+      <div class="pager__viewport" tabindex="0" aria-live="polite">
+        <div class="pager__track">
+          <!-- Slide 1 -->
+          <article class="pager__slide">
+            <div class="slide__media">
+              <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+            </div>
+            <div class="slide__body">
+              <h3 class="slide__title">Benvenuto su EventHorizon.mtg</h3>
+              <p class="slide__desc">Guide, video e raccolte tematiche sul formato Commander (EDH).</p>
+              <div class="slide__actions">
+                <a class="btn btn--teal" href="{{ "/archive/" | relURL }}">Esplora l’Archivio</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Slide 2 -->
+          <article class="pager__slide">
+            <div class="slide__media">
+              <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+            </div>
+            <div class="slide__body">
+              <h3 class="slide__title">Decklist & Risorse</h3>
+              <p class="slide__desc">Link diretti a Moxfield, EDHREC, Scryfall e altro.</p>
+              <div class="slide__actions">
+                <a class="btn btn--indigo" href="#links">Vedi i Link</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Slide 3 -->
+          <article class="pager__slide">
+            <div class="slide__media">
+              <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+            </div>
+            <div class="slide__body">
+              <h3 class="slide__title">Video & Contenuti</h3>
+              <p class="slide__desc">Playlist, analisi e approfondimenti sul metagame.</p>
+              <div class="slide__actions">
+                <a class="btn btn--teal" href="{{ "/archive/" | relURL }}">Vai ai Contenuti</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="pager__controls" aria-label="Controlli carosello">
+        <div class="pager__arrows">
+          <button type="button" class="pager__arrow prev" aria-label="Slide precedente"></button>
+          <button type="button" class="pager__arrow next" aria-label="Slide successiva"></button>
+        </div>
+        <div class="pager__dots" aria-label="Seleziona slide"></div>
+        <span id="carousel-status" class="sr-only" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SEZIONE “ESPLORA” / CARDS ===================== -->
+  <section class="cards" aria-labelledby="cards-title">
+    <div class="section-head">
+      <h2 id="cards-title" class="section-title">Esplora</h2>
+      <p class="section-desc">Tre percorsi rapidi per iniziare.</p>
+    </div>
+
+    <div class="cards__inner">
+      <!-- Card: Video -->
+      <article class="card is-video">
+        <div class="card__thumb">
+          <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="card__body">
+          <div class="card__overline">YouTube • Guide</div>
+          <h3 class="card__title">Introduzione a Commander</h3>
+          <p class="card__desc">Concetti base, regole e consigli per iniziare a giocare.</p>
+          <div class="card__actions">
+            <a class="btn btn--yt" href="#" aria-label="Guarda su YouTube">Guarda</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card: Contenuti -->
+      <article class="card is-content">
+        <div class="card__thumb">
+          <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="card__body">
+          <div class="card__overline">Approfondimenti</div>
+          <h3 class="card__title">Articoli & Analisi</h3>
+          <p class="card__desc">Interpretazioni, sinergie e tech di costruzione dei mazzi.</p>
+          <div class="card__actions">
+            <a class="btn btn--teal" href="{{ "/archive/" | relURL }}">Leggi</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card: Portale -->
+      <article class="card is-portal">
+        <div class="card__thumb">
+          <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="card__body">
+          <div class="card__overline">Link utili</div>
+          <h3 class="card__title">Portale Risorse</h3>
+          <p class="card__desc">Scryfall, EDHREC, Moxfield e altre risorse essenziali.</p>
+          <div class="card__actions">
+            <a class="btn btn--neutral" href="#links">Apri</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== LINKS / CAROUSEL ===================== -->
+  <section id="links" class="links" aria-labelledby="links-title">
+    <div class="section-head">
+      <h2 id="links-title" class="section-title">Link & Portali</h2>
+      <p class="section-desc">Raccolta di riferimenti esterni.</p>
+    </div>
+
+    <div class="links__inner">
+      <div class="links__carousel" aria-roledescription="carousel">
+        <div class="links__track">
+          <!-- Ogni .link-card è una slide/elemento; i cloni li gestisce links.js -->
+          <article class="link-card">
+            <a class="link-card__body" href="#" target="_blank" rel="noopener">
+              <div class="link-card__thumb">
+                <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+              </div>
+              <div class="link-card__meta">
+                <h3 class="link-card__title">Scryfall</h3>
+                <p class="link-card__desc">Database carte e immagini HD.</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="link-card">
+            <a class="link-card__body" href="#" target="_blank" rel="noopener">
+              <div class="link-card__thumb">
+                <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+              </div>
+              <div class="link-card__meta">
+                <h3 class="link-card__title">EDHREC</h3>
+                <p class="link-card__desc">Statistiche del meta Commander.</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="link-card">
+            <a class="link-card__body" href="#" target="_blank" rel="noopener">
+              <div class="link-card__thumb">
+                <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+              </div>
+              <div class="link-card__meta">
+                <h3 class="link-card__title">Moxfield</h3>
+                <p class="link-card__desc">Deckbuilding avanzato e condivisione.</p>
+              </div>
+            </a>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PARTNERS ===================== -->
+  <section class="partners" aria-labelledby="partners-title">
+    <div class="section-head">
+      <h2 id="partners-title" class="section-title">Amici & Partners</h2>
+    </div>
+    <div class="partners__grid">
+      <a class="partner" href="#" target="_blank" rel="noopener" aria-label="DungeonStreet FLGS">
+        <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+      </a>
+      <a class="partner" href="#" target="_blank" rel="noopener" aria-label="BØØSE MTG">
+        <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+      </a>
+      <a class="partner" href="#" target="_blank" rel="noopener" aria-label="Community MTG">
+        <img src="/img/placeholders/fblthp_placeholder.webp" alt="" loading="lazy" decoding="async">
+      </a>
+    </div>
+  </section>
+
+  <!-- ===================== CONTATTI ===================== -->
+  <section class="contacts" aria-labelledby="contacts-title">
+    <div class="section-head">
+      <h2 id="contacts-title" class="section-title">Contatti</h2>
+      <p class="section-desc">Seguimi o scrivimi sui social.</p>
+    </div>
+    <ul class="contacts__list">
+      <li><a class="btn btn--neutral" href="#" aria-label="YouTube">YouTube</a></li>
+      <li><a class="btn btn--neutral" href="#" aria-label="Instagram">Instagram</a></li>
+      <li><a class="btn btn--neutral" href="#" aria-label="Telegram">Telegram</a></li>
+      <li><a class="btn btn--neutral" href="#" aria-label="Discord">Discord</a></li>
+    </ul>
+  </section>
+
+</main>
 {{ end }}
