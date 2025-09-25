@@ -86,7 +86,7 @@
           {{ $desc := or $it.desc "" }}
 
           {{/* Thumb: path web (accetta assoluti o relativi che iniziano con /) */}}
-          {{ $thumbDb := trim (or $it.thumb "") }}
+          {{ $thumbDb := strings.TrimSpace (or $it.thumb "") }}
           {{ $thumbWeb := "" }}
           {{ if ne $thumbDb "" }}
             {{ if or (hasPrefix $thumbDb "http://") (hasPrefix $thumbDb "https://") }}
