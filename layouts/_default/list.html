@@ -1,133 +1,217 @@
 {{ define "main" }}
-<!-- build-id: layouts/archive/list.html (safe, no | first) -->
-<section class="archive" aria-labelledby="archive-title">
-  <!-- Mini hero -->
-  <header class="mini-hero">
-    <h1 id="archive-title" class="page-title">{{ .Title }}</h1>
-    {{ with .Params.description }}
-      <p class="page-desc">{{ . }}</p>
+<!-- Archivio (migrazione fedele da archivio.php) -->
+
+<!-- Mini-hero Archivio -->
+<header class="archive-hero" aria-label="Archivio contenuti"
+        style="
+          --archive-hero-bg-mobile: url('https://images.ctfass...cb6291e687b3dc/teferi-master-of-time_m21_iphone_wallpaper.jpg');
+          --archive-hero-bg-tablet: url('https://images.ctfass...8fdbb464278c56/teferi-master-of-time_m21_tablet_wallpaper.jpg');
+          --archive-hero-bg-desktop: url('https://images.ctfas...c99f56895f7/teferi-master-of-time_m21_1920x1080_wallpaper.jpg');
+          --archive-hero-bg-opacity: 0.35;
+          --archive-hero-bg-pos-y-tablet: -150px;
+          --archive-hero-bg-pos-y-desktop: -70px;
+        ">
+  <div class="container">
+    {{/* totale elementi (senza separatore migliaia; opzionale aggiungerlo dopo) */}}
+    {{ $all := slice }}
+    {{ range $k, $v := .Site.Data.archive.items }}
+      {{ if not $v.draft }}{{ $all = $all | append $v }}{{ end }}
     {{ end }}
-  </header>
+    {{ $total := len $all }}
 
-  <!-- Controlli / Ricerca -->
-  <section class="archive-controls" aria-label="Filtri e ricerca">
-    <details class="archive-search">
-      <summary class="archive-search__filter-toggle" role="button" aria-label="Mostra o nascondi i filtri">
-        Filtri
-      </summary>
+    <h1 class="page-title">Archivio</h1>
+    <p class="filter-note">
+      Cerca tra video e contenuti. Totale risultati:
+      <strong aria-live="polite">{{ $total }}</strong>
+    </p>
+  </div>
+</header>
 
-      <form class="archive-search__form" role="search" novalidate autocomplete="off">
-        <div class="field">
-          <label for="q">Cerca</label>
-          <input type="search" name="q" id="q" placeholder="Cerca per titolo, descrizione o tag">
-        </div>
+<!-- Barra ricerca -->
+<section class="archive-search" aria-label="Ricerca Archivio">
+  <div class="container">
+    <form id="archive-search-form" class="archive-search__form" method="get" action="{{ .RelPermalink }}">
+      <input
+        id="q"
+        name="q"
+        class="archive-search__input"
+        type="search"
+        placeholder="Cerca per titolo, descrizione o tag&hellip;"
+        aria-label="Cerca"
+        value=""
+        inputmode="search"
+      >
+      <label for="kind" class="sr-only">Tipo</label>
+      <select id="kind" name="kind" class="archive-search__select" aria-label="Tipo contenuto">
+        <option value="">Tutti</option>
+        <option value="content">Contenuti</option>
+        <option value="video">Video</option>
+      </select>
+      <button class="archive-search__btn btn btn--gold" type="submit" aria-label="Cerca">
+        <img src="/assets/icons/search.svg" class="icon icon--search" alt="" aria-hidden="true">
+      </button>
+      <button class="archive-search__filter-toggle" type="button" aria-label="Filtri" aria-controls="kind" aria-expanded="false">
+        <img src="/assets/icons/filter.svg" class="icon icon--filter" alt="" aria-hidden="true">
+      </button>
+      <button class="archive-search__reset" type="button" aria-label="Svuota ricerca">
+        <img src="/assets/icons/reset.svg" class="icon icon--reset" alt="" aria-hidden="true">
+      </button>
+    </form>
+  </div>
+</section>
 
-        <div class="field">
-          <label for="kind">Tipo</label>
-          <select name="kind" id="kind">
-            <option value="">Tutti</option>
-            <option value="video">Video</option>
-            <option value="content">Contenuti</option>
-            <option value="portal">Portali</option>
-          </select>
-        </div>
+<!-- Elenco archivio -->
+<section class="archive" aria-label="Risultati">
+  <div class="container">
 
-        <div class="actions">
-          <button type="reset" class="archive-search__reset">Reset</button>
-        </div>
-      </form>
-    </details>
-  </section>
+    {{/* Collezione ordinata per data, discendente */}}
+    {{ $items := slice }}
+    {{ range $k, $it := .Site.Data.archive.items }}
+      {{ if not $it.draft }}{{ $items = $items | append $it }}{{ end }}
+    {{ end }}
+    {{ $items = sort $items "date" "desc" }}
 
-  <!-- Risultati -->
-  <section class="archive-results" aria-live="polite">
-    <ul class="archive-list" id="archive-list">
-      {{/* Raccogli dagli YAML, escludi draft, ordina per data desc */}}
-      {{ $items := slice }}
-      {{ range $k, $it := .Site.Data.archive.items }}
-        {{ if not $it.draft }}
-          {{ $items = $items | append $it }}
-        {{ end }}
-      {{ end }}
-      {{ $items = sort $items "date" "desc" }}
+    {{ if not (gt (len $items) 0) }}
+      <p class="empty" role="status" aria-live="polite">
+        Nessun risultato per <em id="query-term"></em>.
+      </p>
+    {{ else }}
+      <ol class="archive-timeline">
+        {{ range $i, $it := $items }}
+          {{/* Preparazione variabili coerenti col PHP */}}
+          {{ $idStr := printf "%v" $it.id }}
+          {{ $kindClass := (lower (or $it.kind "")) }}
+          {{ $over := or $it.overline "" }}
+          {{ $tit  := or $it.title "" }}
+          {{ $desc := or $it.desc "" }}
 
-      {{ range $i, $it := $items }}
-        {{/* >>> START: prep variabili sicure (no | first) */}}
-        {{ $tagsStr := "" }}
-        {{ with $it.tags }}
-          {{ $tagsStr = delimit . "," }}
-        {{ end }}
-
-        {{ $links := slice }}
-        {{ with $it.links }}
-          {{ $links = sort . "sort_order" "asc" }}
-        {{ end }}
-
-        {{ $primaries := where $links "primary" true }}
-        {{ $hasPrimary := gt (len $primaries) 0 }}
-        {{ $thumb := or $it.thumb "/img/placeholders/fblthp_placeholder.webp" }}
-        {{/* <<< END: prep variabili sicure */}}
-
-        <li class="item is-{{ $it.kind }}"
-            data-id="{{ $it.id }}"
-            data-kind="{{ $it.kind }}"
-            data-title="{{ $it.title }}"
-            data-overline="{{ $it.overline }}"
-            data-desc="{{ $it.desc }}"
-            data-tags="{{ $tagsStr }}">
-          <div class="item-thumb">
-            {{ if $hasPrimary }}
-              {{ $p := index $primaries 0 }}
-              <a href="{{ $p.href }}" class="thumb-link" aria-label="Apri: {{ $it.title }}">
-                <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
-              </a>
+          {{/* Thumb: path web (accetta assoluti o relativi che iniziano con /) */}}
+          {{ $thumbDb := trim (or $it.thumb "") }}
+          {{ $thumbWeb := "" }}
+          {{ if ne $thumbDb "" }}
+            {{ if or (hasPrefix $thumbDb "http://") (hasPrefix $thumbDb "https://") }}
+              {{ $thumbWeb = $thumbDb }}
             {{ else }}
-              <div class="thumb">
-                <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
-              </div>
+              {{ if hasPrefix $thumbDb "/" }}
+                {{ $thumbWeb = $thumbDb }}
+              {{ else }}
+                {{ $thumbWeb = printf "/%s" $thumbDb }}
+              {{ end }}
             {{ end }}
-          </div>
+          {{ end }}
+          {{ $isLocal := and (ne $thumbWeb "") (not (or (hasPrefix $thumbWeb "http://") (hasPrefix $thumbWeb "https://"))) }}
+          {{ $thumbSrc := cond (ne $thumbWeb "" ) $thumbWeb "/assets/cards/fblthp_placeholder.webp" }}
 
-          <div class="item-content">
-            {{ with $it.overline }}<div class="item-overline">{{ . }}</div>{{ end }}
-            <h3 class="item-title">{{ $it.title }}</h3>
-            {{ with $it.desc }}<p class="item-desc">{{ . }}</p>{{ end }}
+          {{/* Links: ordina per sort_order; individua primary e altri */}}
+          {{ $links := slice }}
+          {{ with $it.links }}{{ $links = sort . "sort_order" "asc" }}{{ end }}
+          {{ $primaries := where $links "primary" true }}
+          {{ $hasPrimary := gt (len $primaries) 0 }}
+          {{ $primary := cond $hasPrimary (index $primaries 0) (dict) }}
+          {{ $primaryUrl := cond $hasPrimary $primary.href "" }}
+          {{ $primaryHasClass := cond $hasPrimary (ne (or $primary.btn_class "") "") false }}
 
-            <div class="item-actions">
-              <div class="item-pills">
-                {{ range $l := $links }}
-                  {{ if not $l.primary }}
-                    <a href="{{ $l.href }}" class="btn {{ $l.btn_class }}">{{ $l.label }}</a>
-                  {{ end }}
+          {{/* Altri link (pill) escluso il primary */}}
+          {{ $otherPills := slice }}
+          {{ range $l := $links }}
+            {{ if not $l.primary }}
+              {{ $lab := or $l.label "" }}
+              {{ $url := or $l.href "" }}
+              {{ $cls := or $l.btn_class "btn btn--neutral" }}
+              {{ $otherPills = $otherPills | append (dict "lab" $lab "url" $url "cls" $cls) }}
+            {{ end }}
+          {{ end }}
+          {{ $otherCount := len $otherPills }}
+
+          {{/* ID pannello link */}}
+          {{ $linksId := printf "links-%s" $idStr }}
+
+          <li class="archive-item is-{{ $kindClass }}">
+            <article class="item" data-item-id="{{ $idStr }}" data-kind="{{ $kindClass }}">
+              <!-- Header: overline + titolo -->
+              <header class="item-head">
+                {{ if ne $over "" }}<p class="item-overline">{{ $over }}</p>{{ end }}
+                <h2 class="item-title">{{ $tit }}</h2>
+              </header>
+
+              <!-- Thumbnail: se esiste un link primario, il thumb diventa cliccabile -->
+              {{ if ne $primaryUrl "" }}
+                <a class="item-thumb{{ if $primaryHasClass }} primary{{ end }}"
+                   href="{{ $primaryUrl }}"
+                   target="_blank" rel="noopener"
+                   aria-label="{{ printf "Apri: %s" $tit }}">
+                  <img
+                    src="{{ $thumbSrc }}"
+                    alt="{{ printf "Anteprima: %s" $tit }}"
+                    loading="lazy" decoding="async">
+                </a>
+              {{ else }}
+                <figure class="item-thumb">
+                  <img
+                    src="{{ $thumbSrc }}"
+                    alt="{{ printf "Anteprima: %s" $tit }}"
+                    loading="lazy" decoding="async">
+                </figure>
+              {{ end }}
+
+              <!-- Azioni/card footer -->
+              <div class="item-actions">
+                {{/* Bottone che apre/chiude il pannello desktop (e bottom-sheet su mobile via JS) */}}
+                {{ $summaryLabel := "Dettagli e collegamenti" }}
+                <button class="item-actions-summary" type="button" aria-controls="{{ $linksId }}" aria-expanded="false">
+                  <span class="sr-only">{{ $summaryLabel }}</span>
+                </button>
+              </div>
+            </article>
+
+            {{/* Pannello full-width (desktop); nascosto su mobile */}}
+            {{ $hasDropdown := or (ne $desc "") (gt $otherCount 0) }}
+            {{ if $hasDropdown }}
+              <div class="item-panel" id="{{ $linksId }}" hidden>
+                {{ if ne $desc "" }}
+                  <div class="item-descbar">
+                    <p class="item-summary">{{ $desc }}</p>
+                  </div>
+                {{ end }}
+
+                {{ if gt $otherCount 0 }}
+                  <div class="item-ctas" role="group" aria-label="Collegamenti">
+                    {{ range $P := $otherPills }}
+                      <a class="{{ $P.cls }}"
+                         href="{{ $P.url }}"
+                         target="_blank" rel="noopener"
+                         title="{{ $P.lab }}">{{ $P.lab }}</a>
+                    {{ end }}
+                  </div>
                 {{ end }}
               </div>
-
-              <!-- Chevron/button per aprire il bottom-sheet; testo vuoto (icona via CSS), con ARIA -->
-              <button type="button"
-                      class="item-actions-summary"
-                      aria-label="Dettagli e link"
-                      data-item-id="{{ $it.id }}"></button>
-            </div>
-          </div>
-        </li>
-      {{ end }}
-    </ul>
-
-    <div class="archive-empty" id="archive-empty" hidden>Nessun elemento trovato.</div>
-  </section>
-
-  <!-- Bottom sheet (overlay dettagli) -->
-  <div class="archive-sheet-backdrop" hidden></div>
-  <aside class="archive-sheet" role="dialog" aria-modal="true" aria-hidden="true">
-    <button type="button" class="archive-sheet__close" aria-label="Chiudi">×</button>
-    <div class="item-details"><!-- popolato da JS --></div>
-  </aside>
-
-  <!-- Contenuto opzionale dalla pagina -->
-  {{ with .Content }}
-    <div class="page-content">
-      {{ . }}
-    </div>
-  {{ end }}
+            {{ end }}
+          </li>
+        {{ end }}
+      </ol>
+    {{ end }}
+  </div>
 </section>
+
+<!-- Paginazione (markup presente; logica lato client o da aggiungere con Hugo Paginate) -->
+<nav class="archive-pager" aria-label="Paginazione risultati">
+  <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina precedente" rel="prev">« Prec</a>
+  <span class="curr" aria-current="page">Pag. 1 / 1</span>
+  <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina successiva" rel="next">Succ »</a>
+</nav>
+
+<!-- Bottom sheet (mobile) -->
+<aside class="archive-sheet"
+       role="dialog"
+       aria-modal="true"
+       aria-hidden="true"
+       aria-labelledby="archive-sheet-title"
+       tabindex="-1">
+  <div class="archive-sheet__handle" aria-hidden="true"></div>
+  <button class="archive-sheet__close" type="button" aria-label="Chiudi">X</button>
+  <h3 id="archive-sheet-title" class="archive-sheet__title"></h3>
+  <div class="archive-sheet__content"></div>
+  <div class="archive-sheet__ctas" role="group" aria-label="Collegamenti"></div>
+</aside>
+
 {{ end }}
