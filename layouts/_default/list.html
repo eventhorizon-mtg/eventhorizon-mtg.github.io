@@ -1,6 +1,6 @@
 {{ define "main" }}
-<section id="archive-page" class="archive-page" aria-labelledby="archive-title" data-endpoint="{{ "/archive/list.json" | relURL }}">
-  <!-- Mini hero (padding gestito via CSS, niente inline) -->
+<section class="archive" aria-labelledby="archive-title">
+  <!-- Mini hero -->
   <header class="mini-hero">
     <h1 id="archive-title" class="page-title">{{ .Title }}</h1>
     {{ with .Params.description }}
@@ -8,19 +8,109 @@
     {{ end }}
   </header>
 
-  <!-- Controlli / Ricerca: verranno popolati negli step successivi -->
+  <!-- Controlli / Ricerca -->
   <section class="archive-controls" aria-label="Filtri e ricerca">
-    <div id="archive-search-root"></div>
+    <details class="archive-search">
+      <summary class="archive-search__filter-toggle" role="button" aria-label="Mostra o nascondi i filtri">
+        Filtri
+      </summary>
+
+      <form class="archive-search__form" role="search" novalidate autocomplete="off">
+        <div class="field">
+          <label for="q">Cerca</label>
+          <input type="search" name="q" id="q" placeholder="Cerca per titolo, descrizione o tag">
+        </div>
+
+        <div class="field">
+          <label for="kind">Tipo</label>
+          <select name="kind" id="kind">
+            <option value="">Tutti</option>
+            <option value="video">Video</option>
+            <option value="content">Contenuti</option>
+            <option value="portal">Portali</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button type="reset" class="archive-search__reset">Reset</button>
+        </div>
+      </form>
+    </details>
   </section>
 
   <!-- Risultati -->
   <section class="archive-results" aria-live="polite">
-    <div id="archive-list" class="archive-list"></div>
-    <div id="archive-empty" class="archive-empty" hidden>Nessun elemento trovato.</div>
-    <nav id="archive-pager" class="archive-pager" aria-label="Paginazione"></nav>
+    <ul class="archive-list" id="archive-list">
+      {{/* Costruisci raccolta dagli YAML, esclusi draft, ordinati per data desc */}}
+      {{ $items := slice }}
+      {{ range $k, $it := .Site.Data.archive.items }}
+        {{ if not $it.draft }}
+          {{ $items = $items | append $it }}
+        {{ end }}
+      {{ end }}
+      {{ $items = sort $items "date" "desc" }}
+
+      {{ range $i, $it := $items }}
+        {{ $tagsStr := cond (isset $it "tags") (delimit $it.tags ",") "" }}
+        {{ $links  := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) }}
+        {{ $primary := (where $links "primary" true) | first }}
+        {{ $thumb := or $it.thumb "/img/placeholders/fblthp_placeholder.webp" }}
+
+        <li class="item is-{{ $it.kind }}"
+            data-id="{{ $it.id }}"
+            data-kind="{{ $it.kind }}"
+            data-title="{{ $it.title }}"
+            data-overline="{{ $it.overline }}"
+            data-desc="{{ $it.desc }}"
+            data-tags="{{ $tagsStr }}">
+          <div class="item-thumb">
+            {{ if $primary }}
+              <a href="{{ $primary.href }}" class="thumb-link" aria-label="Apri: {{ $it.title }}">
+                <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
+              </a>
+            {{ else }}
+              <div class="thumb">
+                <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" />
+              </div>
+            {{ end }}
+          </div>
+
+          <div class="item-content">
+            {{ with $it.overline }}<div class="item-overline">{{ . }}</div>{{ end }}
+            <h3 class="item-title">{{ $it.title }}</h3>
+            {{ with $it.desc }}<p class="item-desc">{{ . }}</p>{{ end }}
+
+            <div class="item-actions">
+              <div class="item-pills">
+                {{ range $l := $links }}
+                  {{ if not $l.primary }}
+                    <a href="{{ $l.href }}" class="btn {{ $l.btn_class }}">{{ $l.label }}</a>
+                  {{ end }}
+                {{ end }}
+              </div>
+
+              <!-- Chevron/button per aprire il bottom-sheet; testo vuoto (solo icona via CSS), con ARIA -->
+              <button type="button"
+                      class="item-actions-summary"
+                      aria-label="Dettagli e link"
+                      data-item-id="{{ $it.id }}"></button>
+            </div>
+          </div>
+        </li>
+      {{ end }}
+    </ul>
+
+    <div class="archive-empty" id="archive-empty" hidden>Nessun elemento trovato.</div>
   </section>
 
-  <!-- Contenuto opzionale della pagina (markdown dello _index.md) -->
+  <!-- Bottom sheet (overlay dettagli) -->
+  <div class="archive-sheet-backdrop" hidden></div>
+  <aside class="archive-sheet" role="dialog" aria-modal="true" aria-hidden="true">
+    <button type="button" class="archive-sheet__close" aria-label="Chiudi">×</button>
+    <div class="item-details"><!-- popolato da JS --></div>
+  </aside>
+
+  <!-- Contenuto opzionale dalla pagina -->
   {{ with .Content }}
     <div class="page-content">
       {{ . }}
