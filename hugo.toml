@@ -26,3 +26,10 @@ enableRobotsTXT = true
 
   # Preload hero LCP (opzionale: lascia o cambia path)
   preloadHero = "/assets/bg_image.webp"
+
+[outputFormats.ArchiveList]
+mediaType    = "application/json"
+baseName     = "list"
+isPlainText  = true
+notAlternative = true
+permalinkable  = true

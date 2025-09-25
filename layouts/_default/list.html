@@ -1,0 +1,30 @@
+{{ define "main" }}
+<section id="archive-page" class="archive-page" aria-labelledby="archive-title" data-endpoint="{{ "/archive/list.json" | relURL }}">
+  <!-- Mini hero (padding gestito via CSS, niente inline) -->
+  <header class="mini-hero">
+    <h1 id="archive-title" class="page-title">{{ .Title }}</h1>
+    {{ with .Params.description }}
+      <p class="page-desc">{{ . }}</p>
+    {{ end }}
+  </header>
+
+  <!-- Controlli / Ricerca: verranno popolati negli step successivi -->
+  <section class="archive-controls" aria-label="Filtri e ricerca">
+    <div id="archive-search-root"></div>
+  </section>
+
+  <!-- Risultati -->
+  <section class="archive-results" aria-live="polite">
+    <div id="archive-list" class="archive-list"></div>
+    <div id="archive-empty" class="archive-empty" hidden>Nessun elemento trovato.</div>
+    <nav id="archive-pager" class="archive-pager" aria-label="Paginazione"></nav>
+  </section>
+
+  <!-- Contenuto opzionale della pagina (markdown dello _index.md) -->
+  {{ with .Content }}
+    <div class="page-content">
+      {{ . }}
+    </div>
+  {{ end }}
+</section>
+{{ end }}
