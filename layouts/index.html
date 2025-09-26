@@ -8,14 +8,14 @@
     aria-label="Hero EventHorizon.mtg"
   >
     <div class="hero__content">
-      <!-- >>>START HERO LOGO -->
+      <!-- >>> START HERO LOGO -->
       <img class="hero__logo"
            src="/assets/logo.webp?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
            alt="Logo {{ .Site.Title }}"
            width="115" height="115"
            decoding="async"
            fetchpriority="high" />
-      <!-- >>>END HERO LOGO -->
+      <!-- <<< END HERO LOGO -->
 
       <!-- Text hero -->
       <h1 class="hero__title">BEYOND THE HORIZON</h1>
@@ -24,14 +24,14 @@
         <br>Tutto su un'unica rotta!
       </p>
       <!-- CTA: 3 chevron a "V" animate -->
-      <a class="hero-cta hero-cta--chevrons" href="#cards-title" aria-label="Scorri alla sezione successiva">
+      <a class="hero-cta hero-cta--chevrons" href="#portal" aria-label="Scorri alla sezione successiva">
         <svg class="v" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         <svg class="v" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         <svg class="v" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </a>
     </div>
   </section>
-  <!-- >>> END HERO -->
+  <!-- <<< END HERO -->
 
   <!-- >>> START SUB-HERO (Pager) -->
   <section id="subhero" class="sub-hero" aria-roledescription="carousel" aria-label="Contenuti in evidenza">
@@ -106,7 +106,7 @@
       <button class="pager__arrow next" type="button" aria-label="Slide successiva">&rsaquo;</button>
     </div>
   </section>
-  <!-- >>> END SUB-HERO -->
+  <!-- <<< END SUB-HERO -->
 
   <!-- >>> START CARDS SECTION -->
   <section id="cards" class="cards" aria-labelledby="cards-title">
@@ -202,7 +202,7 @@
       </div>
     </div>
   </section>
-  <!-- >>> END CARDS -->
+  <!-- <<< END CARDS -->
 
 <!-- >>> START LINKS -->
 <section class="links" aria-labelledby="links-title">
@@ -262,8 +262,19 @@
     </div>
   </div>
 </section>
-<!-- >>> END LINKS -->
+<!-- <<< END LINKS -->
 
+<!-- >>> START PORTAL -->
+<section id="portal" class="portal" aria-labelledby="portal-title">
+  <div class="portal__inner">
+    <h2 id="portal-title" class="portal__title">Esplora l'archivio</h2>
+    <p class="portal__intro">
+      Naviga tra i nostri contenuti passati: video, decklist e molto altro.
+    </p>
+    <p class="portal__sub">Viaggia tra le storie che plasmano Magic.</p>
+  </div>
+</section>
+<!-- <<< END PORTAL -->
 
 <!-- >>> START CONTACTS -->
 <section id="contacts" class="contacts" aria-labelledby="contacts-title">
@@ -308,7 +319,7 @@
     </ul>
   </div>
 </section>
-<!-- >>> END CONTACTS -->
+<!-- <<< END CONTACTS -->
 
 
 </main>
