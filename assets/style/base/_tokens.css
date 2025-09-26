@@ -1,13 +1,13 @@
-/* ============================================================
-   Design Tokens
-   ============================================================ */
-
+/* =======================
+   DESIGN TOKENS
+   ======================= */
 :root{
   /* Indigo */
   --indigo-900: #2F2760;
   --indigo-700: #5B4E9D;
   --indigo-500: #9F7BB8;
-  --indigo-600: #4A3F81; /* hover alphab codice del colore da riconsiderare */
+  /* add (per hover alphab) */
+  --indigo-600: #4A3F81;
 
   /* Neutral */
   --neutral-00:  #FFFFFF;
@@ -21,6 +21,7 @@
 
   /* Gold (focus) */
   --gold-600: #E0A402;
+  /* add scala Gold per hover/focus coerenti */
   --gold-500: #E0A402;
   --gold-700: #A37500;
 
@@ -32,7 +33,7 @@
   --orange-600: #DB6A1A;
   --orange-500: #FE771D;
 
-  /* Acid */
+  /* Acid (verde acceso) + hover speciale */
   --acid-600: #5CC800;
   --acid-hover: #EC3DE6;
 
@@ -50,7 +51,6 @@
   --lh-tight: 1.15;
   --lh-normal: 1.45;
   --fw-medium: 500;
-  --fw-semibold: 600;
   --fw-bold: 700;
   --fw-black: 800;
 
@@ -84,24 +84,8 @@
   --hero-bg-url: none;
 
   /* Tracking (letter-spacing) */
-  --trk-tight: -0.4px;
-  --trk-tight-lg: -0.6px;
-  --trk-slight: -0.2px;
-  --trk-wide:  0.04em;
-
-  /* Breakpoints */
-  --bp-tablet: 768;
-  --bp-desktop: 1024;
+  --trk-tight: -0.4px;    /* titoli compatti (mobile/tablet) */
+  --trk-tight-lg: -0.6px; /* titoli compatti (desktop) */
+  --trk-slight: -0.2px;   /* titoli medi, testi evidenziati */
+  --trk-wide:  0.04em;    /* overline/label */
 }
-
-/* Responsive container max width */
-@media (min-width: 1280px){
-  :root{ --container-max: 1200px; }
-}
-@media (min-width: 1536px){
-  :root{ --container-max: 1320px; }
-}
-
-/* ============================================================
-   Fine Design Tokens
-   ============================================================ */

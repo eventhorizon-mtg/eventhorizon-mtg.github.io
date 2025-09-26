@@ -1,5 +1,5 @@
 /* ============================================================
-   /pages/archive.base.css — base (senza media query)
+   /style/archive.base.css — base (senza media query)
    ============================================================ */
 
 /* -----------------------
@@ -124,8 +124,6 @@
 /* voce del menu a discesa: testo nero su sfondo bianco */
 .archive-search__select option{ color:#000; background:#fff; }
 .archive-search__input::placeholder{
-  /* fallback per browser senza color-mix */
-  color: rgba(255,255,255,0.80);
   color: color-mix(in oklab, #FFFFFF 80%, #000 20%);
   opacity: .85;
 }
@@ -141,8 +139,6 @@
   min-height: 44px;
   padding: 10px 14px;
   border-radius: 10px;
-  /* fallback bordo */
-  border: 1px solid rgba(0,0,0,0.18);
   border: 1px solid color-mix(in oklab, #000 18%, transparent);
   background: var(--gold-600, #E0A402);
   color: #111;
@@ -218,8 +214,6 @@
   margin: 0;
   width: 128px; height: 72px;
   border-radius: 8px; overflow: hidden;
-  /* fallback prima del color-mix */
-  background: rgba(243,242,247,0.08);
   background: color-mix(in oklab, var(--neutral-50, #F3F2F7) 8%, transparent);
   box-shadow: 0 1px 3px rgba(0,0,0,.18);
   display: block; text-decoration: none;
@@ -236,8 +230,6 @@
   font-size: clamp(.78rem, .3vw + .72rem, .85rem);
   letter-spacing: var(--trk-wide, 0.04em);
   opacity: .85;
-  /* fallback prima del color-mix */
-  color: #DCD9E6;
   color: color-mix(in oklab, var(--neutral-50) 88%, #000 12%);
 }
 .item-title{
@@ -265,8 +257,6 @@
   gap: 8px; min-height: 30px; padding: 5px 9px;
   border-radius: var(--pill-radius);
   text-decoration: none; color: #fff;
-  /* fallback prima del color-mix */
-  border: 1px solid rgba(255,255,255,0.16);
   border: 1px solid color-mix(in oklab, #FFFFFF 16%, transparent);
   box-shadow: 0 2px 6px rgba(0,0,0,.15);
   transition: background-color 120ms ease, transform 120ms ease;
@@ -285,8 +275,6 @@
 .pill.btn--scry:hover{ background:var(--indigo-900,#2F2760); }
 .pill.btn--edh{ background:var(--teal-600,#007A7C); }
 .pill.btn--edh:hover{ background:var(--teal-700,#006668); }
-.pill.btn--teal{ background:var(--teal-600,#007A7C); }
-.pill.btn--teal:hover{ background:var(--teal-700,#006668); }
 .pill.btn--mox{ background:var(--orange-600,#DB6A1A); }
 .pill.btn--mox:hover{ background:var(--orange-500,#FE771D); }
 .pill.btn--archi{ background:#1E6F78; }
@@ -326,8 +314,6 @@
 /* Details wrapper (+ contenuti) */
 .item-details{ display: contents; }
 .item-details .item-desc{
-  /* fallback prima del color-mix */
-  color: #EAE8F1;
   color: color-mix(in oklab, var(--neutral-50) 95%, #000 5%);
 }
 .item-details .item-desc p{ margin: 0; }
@@ -342,12 +328,16 @@
   font-weight: 600;
 }
 .archive-item.is-video .item-thumb{ position: relative; }
+.archive-item.is-video .item-thumb::after{
+  content: "▶";
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
 
-/* (RIMOSSA) versione char "▶" duplicata dello pseudo-elemento ::after */
-
-/* Versione valida mantenuta in coda: SVG + glass circle */
-
-/* Stile 'content' */
 .archive-item.is-content .item-overline{
   color: var(--teal-300, #00ADB1);
   font-weight: 500;
@@ -386,8 +376,6 @@
    ----------------------- */
 .archive .empty{
   margin: 18px 0 0;
-  /* fallback prima del color-mix */
-  color: #E3E1EC;
   color: color-mix(in oklab, var(--neutral-50) 90%, #000 10%);
 }
 .visually-hidden, .sr-only{
@@ -451,7 +439,3 @@
     background: rgba(211,47,47,0.40); /* YouTube red, semi-trasparente */
   }
 }
-
-/* ============================================================
-   Fine regole base (senza media query)
-   ============================================================ */

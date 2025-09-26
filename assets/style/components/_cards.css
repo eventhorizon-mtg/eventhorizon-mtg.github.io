@@ -1,5 +1,5 @@
 /* ============================================================
-   Card components
+   Cards.css
    ============================================================ */
 /* Sezione + variabili (dimensioni card e gap) */
 .cards{
@@ -121,7 +121,7 @@
     rgba(25, 26, 35, 0.00) 100%);
 }
 
-/* Pulsante Play — base */
+/* Pulsante Play â€” base */
 .card__play{ display: grid; place-items: center; }
 .card__play .sr-only{
   position: absolute !important;
@@ -149,7 +149,7 @@
   border-radius: 9999px;
 }
 
-/* Corpo testo — griglia 3 righe con titolo = 2 righe minime */
+/* Corpo testo â€” griglia 3 righe con titolo = 2 righe minime */
 .card__body{
   padding: 16px;
   display: grid;
@@ -193,7 +193,7 @@
   overflow: hidden;
 }
 
-/* Azioni “pinnate” in basso (default) */
+/* Azioni â€œpinnateâ€ in basso (default) */
 .card__actions{
   margin-top: auto;
   padding: 0 16px 16px;
@@ -218,7 +218,7 @@
 }
 .cards .card.is-video .card__media::before{ content: none; }
 
-/* Overline Indigo + testo più vicino */
+/* Overline Indigo + testo piÃ¹ vicino */
 .card.is-video .card__overline{
   color: var(--indigo-700);
   font-weight: 600;
@@ -312,7 +312,7 @@
   background: var(--card-bg, #C8C6D8) center / cover no-repeat;
 }
 
-/* Overlay radiale: leggermente più soft rispetto a .is-video */
+/* Overlay radiale: leggermente piÃ¹ soft rispetto a .is-video */
 .card.is-content .card__media-overlay{
   background: radial-gradient(53.91% 66.35% at 50% 50%,
     rgba(25, 26, 35, 0.28) 0%,
@@ -373,7 +373,7 @@
   justify-content: center;
 }
 
-/* Nessun Play nella variante content (l'elemento non è presente in HTML) */
+/* Nessun Play nella variante content (l'elemento non Ã¨ presente in HTML) */
 .card.is-content .card__play { display: none; }
 /* Mantieni l'overlay visibile (rimosso il vecchio display:none) */
 
@@ -574,7 +574,3 @@
 .cards .card__overline{ letter-spacing: var(--trk-wide); }
 .cards .card__title{    letter-spacing: var(--trk-slight); }
 .cards .card__desc{     letter-spacing: 0; }
-
-/* ============================================================
-   Fine Cards
-   ============================================================ */

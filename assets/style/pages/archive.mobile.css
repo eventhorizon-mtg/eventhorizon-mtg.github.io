@@ -1,5 +1,5 @@
 /* ============================================================
-   archive.mobile.css — regole mobile (≤1023.98px)
+   /style/archive.mobile.css — regole mobile (≤1023.98px)
    ============================================================ */
 
 /* -------- Bottom Sheet: stato base (ovunque) -------- */
@@ -104,13 +104,9 @@
     transition: opacity 160ms ease;
     z-index: 9998;
   }
-  @media (max-width: 1023.98px){
   .archive-sheet{
     position: fixed; left:0; right:0; bottom:0;
     transform: translateY(100%);
-    /* fallback solido per browser senza color-mix */
-    background: #0F1120;
-    /* mix moderno per browser compatibili */
     background: color-mix(in oklab, #0F1120 92%, #FFFFFF 8%);
     border-top-left-radius: 16px; border-top-right-radius: 16px;
     box-shadow: 0 -12px 30px rgba(0,0,0,.35);
@@ -121,7 +117,6 @@
     transition: transform 200ms ease, height 160ms ease;
     will-change: transform, height;
   }
-   }
   .archive-sheet.is-dragging{ transition: none !important; }
   .archive-sheet.is-dragging .archive-sheet__handle{ cursor: grabbing; }
   .archive-sheet__handle{
@@ -158,6 +153,3 @@
   .archive-sheet.is-open{ transform: translateY(0%); }
   .archive-sheet-backdrop.is-open{ opacity: 1; pointer-events: auto; }
 }
-/* ============================================================
-   Fine regole mobile
-   ============================================================ */

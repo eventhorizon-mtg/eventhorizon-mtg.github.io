@@ -1,13 +1,11 @@
-/* ============================================================
-   Hero
-   ============================================================ */
-
-/* Sfondo generale sotto la hero (ripristino legacy) */
+/* =======================
+   HERO SECTION
+   ======================= */
 .hero ~ *,
 .archive-hero ~ *{
+  /* Sfondo generale sotto la hero */
   background-color: #1B1C2D;
 }
-
 .hero{
   position: relative;
   isolation: isolate;
@@ -30,54 +28,49 @@
   content: "";
   position: absolute;
   inset: 0;
-  z-index: var(--z-hero-img, 1);
-  background-image: var(--hero-bg-url, none);
+  z-index: var(--z-hero-img);
+  background-image: var(--hero-bg-url);
   background-size: cover;
   background-position: center;
-  opacity: var(--hero-bg-opacity, 0.5);
+  opacity: var(--hero-bg-opacity);
   mix-blend-mode: multiply;
 }
-
 .hero__content{
   position: relative;
-  z-index: var(--z-hero-content, 2);
+  z-index: var(--z-hero-content);
   width: min(100%, var(--container-max));
   display: grid;
   justify-items: center;
-  gap: var(--space-5, 20px);
+  gap: var(--space-5);
   text-align: center;
-  padding-left: var(--container-pad-x, 16px);
-  padding-right: var(--container-pad-x, 16px);
+  padding-left: var(--container-pad-x);
+  padding-right: var(--container-pad-x);
 }
-
 .hero__logo{
-  width: 115px; height: 115px; object-fit: cover;
+  width: 115px;
+  height: 115px;
+  object-fit: cover;
   border: 3px solid var(--indigo-900);
   border-radius: 160px;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.25));
 }
-
 .hero__title{
   margin: 0;
   position: relative;
   z-index: 4;
   font-family: var(--font-display);
-  font-weight: var(--fw-black, 800);
+  font-weight: var(--fw-black);
   font-size: var(--fs-h1);
-  line-height: var(--lh-tight, 1.15);
-  letter-spacing: var(--trk-tight, -0.4px);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--trk-tight);
 }
-@media (min-width: 1024px){
-  .hero__title{ letter-spacing: var(--trk-tight-lg, -0.6px); }
-}
-
 .hero__subtitle{
   margin: 0;
   max-width: 62ch;
   color: var(--neutral-50);
-  font-weight: var(--fw-medium, 500);
-  line-height: var(--lh-normal, 1.45);
-  letter-spacing: 0;
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-normal);
+  letter-spacing: 0; /* neutro per leggibilità */
 }
 
 /* CTA Hero — 3 chevron a V animate */
@@ -101,59 +94,20 @@
 }
 .hero-cta--chevrons:hover{ transform: translateY(2px); }
 .hero-cta--chevrons .v{
-  width: 24px; height: 24px;
-  stroke: #fff; fill: none;
-  stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round;
+  width: 24px;
+  height: 24px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   opacity: .85;
   animation: heroV 1.6s ease-in-out infinite;
 }
 .hero-cta--chevrons .v:nth-child(1){ animation-delay: 0s; }
 .hero-cta--chevrons .v:nth-child(2){ animation-delay: .12s; }
 .hero-cta--chevrons .v:nth-child(3){ animation-delay: .24s; }
-
 @keyframes heroV{
   0%, 100% { transform: translateY(0);    opacity: .45; }
   50%      { transform: translateY(6px);  opacity: 1; }
 }
-
-/* Responsive tweaks */
-@media (max-width: 480px){
-  .hero{
-    padding: 64px 16px;
-    min-height: clamp(420px, 68vh, 640px);
-  }
-  .hero__logo{ width: 96px; height: 96px; }
-  .hero__content{ gap: 18px; }
-  .hero__subtitle{
-    max-width: 58ch;
-    font-size: clamp(0.98rem, 0.4vw + 0.92rem, 1.05rem);
-  }
-  .hero-cta--chevrons{ gap: 0; margin-top: 4px; }
-  .hero-cta--chevrons .v{ width: 22px; height: 22px; }
-}
-
-@media (min-width: 481px) and (max-width: 768px){
-  .hero{
-    padding: 72px 20px;
-    min-height: clamp(480px, 72vh, 820px);
-  }
-  .hero__logo{ width: 110px; height: 110px; }
-  .hero__content{ gap: 22px; }
-  .hero__subtitle{ max-width: 60ch; }
-  .hero-cta--chevrons{ margin-top: 6px; }
-}
-
-@media (min-width: 1024px){
-  .hero__content{ gap: var(--space-6, 24px); }
-  .hero-cta--chevrons{ margin-top: 8px; }
-}
-
-/* PRM: riduci animazioni se richiesto */
-@media (prefers-reduced-motion: reduce){
-  .hero-cta--chevrons:hover{ transform: none; }
-  .hero-cta--chevrons .v{ animation: none !important; }
-}
-
-/* ============================================================
-   Fine Hero
-   ============================================================ */

@@ -1,66 +1,99 @@
-/* ============================================================
-   Buttons
-   ============================================================ */
-
+/* =======================
+   CTA Variants (Buttons)
+   ======================= */
 .btn{
-  --btn-radius: var(--radius-s, 8px);
+  --btn-radius: var(--radius-s);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
   padding: 10px 16px;
   min-height: 45px;
   min-width: 149px;
-
-  border: 0;
   border-radius: var(--btn-radius);
   text-decoration: none;
   color: #fff;
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition:
-    transform var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1)),
-    background-color var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1)),
-    box-shadow var(--dur-1, 140ms) var(--ease-standard, cubic-bezier(.2,.8,.2,1));
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.25);
+  transition: transform var(--dur-1) var(--ease-standard),
+              background-color var(--dur-1) var(--ease-standard),
+              box-shadow var(--dur-1) var(--ease-standard);
 }
 
 /* Teal (default) */
 .btn--teal{ background: var(--teal-600); }
 .btn--teal:hover{ background: var(--teal-700); transform: scale(0.99); }
-.btn--teal:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--teal:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
 /* Gold */
-.btn--gold{ background: var(--gold-500); color: #0E0F1A; }
+.btn--gold{
+  background: var(--gold-500);
+  color: #0E0F1A;
+}
 .btn--gold:hover{ background: var(--gold-700); transform: scale(0.99); }
-.btn--gold:focus-visible{ outline: 2px solid var(--gold-500); outline-offset: 2px; }
+.btn--gold:focus-visible{
+  outline: 2px solid var(--gold-500);
+  outline-offset: 2px;
+}
 
-/* Base Indigo */
-.btn--base{ background: var(--indigo-900); color: #FFF; }
+/* Base (Indigo) */
+.btn--base{
+  background: var(--indigo-900);
+  color:#FFFFFF;
+}
 .btn--base:hover{ background: var(--indigo-700); transform: scale(0.99); }
-.btn--base:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--base:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
-/* AlphaB Indigo */
-.btn--alphab{ background: var(--indigo-700); color: #FFF; }
+/* AlphaB (Indigo) */
+.btn--alphab{
+  background: var(--indigo-700);
+  color:#FFFFFF;
+}
 .btn--alphab:hover{ background: var(--indigo-600); transform: scale(0.99); }
-.btn--alphab:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--alphab:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
 /* Acid */
-.btn--acid{ background: var(--acid-600); color: #202020; }
-.btn--acid:hover{ background: var(--acid-hover); color: #FFF; transform: scale(0.99); }
-.btn--acid:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--acid{
+  background: var(--acid-600);
+  color:#202020;
+}
+.btn--acid:hover{ background: var(--acid-hover); color:#FFFFFF; transform: scale(0.99); }
+.btn--acid:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
 /* Pink */
-.btn--pink{ background: var(--pink-600); color: #FFF; }
+.btn--pink{
+  background: var(--pink-600);
+  color:#FFFFFF;
+}
 .btn--pink:hover{ background: var(--pink-700); transform: scale(0.99); }
-.btn--pink:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--pink:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
 /* Orange */
-.btn--orange{ background: var(--orange-600); color: #FFF; }
+.btn--orange{
+  background: var(--orange-600);
+  color:#FFFFFF;
+}
 .btn--orange:hover{ background: var(--orange-500); transform: scale(0.99); }
-.btn--orange:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--orange:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
-/* Indigo Stroke (bianco con bordo/testo indigo) */
+/* Indigo Stroke (bianco con bordo e testo indigo) */
 .btn--indigostroke{
   background: #FFFFFF;
   color: var(--indigo-700);
@@ -72,28 +105,42 @@
   border-color: var(--indigo-900);
   transform: scale(0.99);
 }
-.btn--indigostroke:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--indigostroke:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
 
-/* Teal Stroke (se presente nel progetto) */
+/* Teal Stroke (bianco con bordo e testo teal) */
 .btn--tealstroke{
   background: #FFFFFF;
   color: var(--teal-600);
   border: 2px solid var(--teal-600);
 }
 .btn--tealstroke:hover{
-  background: var(--teal-600);
+  background: #007A7C;
   color: var(--neutral-00);
   border-color: var(--teal-700);
   transform: scale(0.99);
 }
-.btn--tealstroke:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+.btn--indigostroke:focus-visible{
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+
+/* Disabled1 */
+.btn--disabled1{ background: #af6e43; color:#ffecd4; }
+.btn--disabled1{
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
 
 /* Variante “liquid glass” */
 .btn.btn--liquid{
   --liquid-blur: 12px;
-  --liquid-alpha: 0.18;   /* opacità del velo */
-  --liquid-border: 0.38;  /* intensità bordo esterno */
-  --liquid-shadow: 0.28;  /* intensità ombra esterna */
+  --liquid-alpha: 0.18;
+  --liquid-border: 0.38;
+  --liquid-shadow: 0.28;
 
   color: #fff;
   text-shadow: 0 1px 2px rgba(0,0,0,0.45);
@@ -117,7 +164,11 @@
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.28),
     0 6px 18px rgba(0,0,0, calc(var(--liquid-shadow) + 0.10));
-  transform: translateY(0);
+  transform: translateY(0px);
+  transition:
+    transform var(--dur-1) var(--ease-standard),
+    background-color var(--dur-1) var(--ease-standard),
+    box-shadow var(--dur-1) var(--ease-standard);
 }
 .btn.btn--liquid:active{
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.02));
@@ -131,7 +182,7 @@
   outline-offset: 3px;
 }
 
-/* Variante liquid “dark” per sfondi chiari */
+/* Variante scura (dark) */
 .btn.btn--liquid.btn--dark{
   --liquid-blur: 12px;
   --liquid-alpha: 0.22;
@@ -145,7 +196,7 @@
   border: 1px solid rgba(255,255,255,var(--liquid-border));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.18),
-    0 4px 12px rgba(0,0,0,0.22);
+    0 4px 12px rgba(0,0,0,var(--liquid-shadow));
 }
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)){
   .btn.btn--liquid.btn--dark{
@@ -157,39 +208,17 @@
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.08));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.24),
-    0 6px 16px rgba(0,0,0,0.30);
+    0 6px 16px rgba(0,0,0, calc(var(--liquid-shadow) + 0.08));
   transform: translateY(-1px);
 }
 .btn.btn--liquid.btn--dark:active{
   background: rgba(255,255,255, calc(var(--liquid-alpha) + 0.04));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.26),
-    0 3px 8px rgba(0,0,0,0.24);
+    0 3px 8px rgba(0,0,0, calc(var(--liquid-shadow) + 0.02));
   transform: translateY(0);
 }
 .btn.btn--liquid.btn--dark:focus-visible{
   outline: 2px solid var(--indigo-600, #5B4E9D);
   outline-offset: 3px;
 }
-
-/* =======================
-   Stato disabilitato
-   ======================= */
-.btn--disabled1{
-  background: #af6e43;
-  color: #ffecd4;
-  pointer-events: none;
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-/* Riduzione motion */
-@media (prefers-reduced-motion: reduce){
-  .btn{
-    transition: background-color 0.001s linear !important;
-  }
-}
-
-/* ============================================================
-   Fine Buttons
-   ============================================================ */
