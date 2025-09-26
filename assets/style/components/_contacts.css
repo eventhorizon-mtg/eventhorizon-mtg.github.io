@@ -100,8 +100,8 @@
           mask-image: url("/static/icons/telegram.svg");
 }
 .icon-discord{
-  -webkit-mask-image: url("/static/icons/discord.svg");
-          mask-image: url("/static/icons/discord.svg");
+  -webkit-mask-image: url("/icons/discord.svg");
+          mask-image: url("/icons/discord.svg");
 }
 .icon-tiktok{
   -webkit-mask-image: url("/static/icons/tiktok.svg");

@@ -193,7 +193,7 @@
   overflow: hidden;
 }
 
-/* Azioni â€œpinnateâ€ in basso (default) */
+/* Azioni pinnate in basso (default) */
 .card__actions{
   margin-top: auto;
   padding: 0 16px 16px;
@@ -218,7 +218,7 @@
 }
 .cards .card.is-video .card__media::before{ content: none; }
 
-/* Overline Indigo + testo piÃ¹ vicino */
+/* Overline Indigo + testo + vicino */
 .card.is-video .card__overline{
   color: var(--indigo-700);
   font-weight: 600;
