@@ -181,7 +181,7 @@
                        href="{{ $purl }}"
                        target="_blank" rel="noopener noreferrer">Apri</a>
                   {{ else }}
-                    <a class="btn btn--indigostroke" href="{{ "/archive/" | relURL }}">Altro</a>
+                    <a class="btn btn--tealstroke" href="{{ "/archive/" | relURL }}">Altro</a>
                   {{ end }}
                 </div>
               {{ end }}
@@ -195,7 +195,7 @@
               <p class="card__desc">Contenuti in arrivo.</p>
             </div>
             <div class="card__actions">
-              <a class="btn btn--indigostroke" href="{{ "/archive/" | relURL }}">Altro</a>
+              <a class="btn btn--tealstroke" href="{{ "/archive/" | relURL }}">Altro</a>
             </div>
           </div>
         {{ end }}
@@ -265,40 +265,51 @@
 <!-- >>> END LINKS -->
 
 
-  <!-- >>> START CONTACTS -->
-  <section class="contacts" aria-labelledby="contacts-title">
-    <div class="contacts__inner">
-      <h2 id="contacts-title" class="contacts__title">Contatti</h2>
-      <ul class="contacts__list">
-        <li>
-          <a class="contact" href="https://www.instagram.com/eventhorizon.mtg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
-            <span class="contact__icon icon-instagram" aria-hidden="true"></span>
-          </a>
-        </li>
-        <li>
-          <a class="contact" href="https://www.youtube.com/@EventHorizonMtG/" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
-            <span class="contact__icon icon-youtube" aria-hidden="true"></span>
-          </a>
-        </li>
-        <li>
-          <a class="contact" href="https://t.me/eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
-            <span class="contact__icon icon-telegram" aria-hidden="true"></span>
-          </a>
-        </li>
-        <li>
-          <a class="contact" href="https://discord.com/invite/tQrbqNt6gd" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
-            <span class="contact__icon icon-discord" aria-hidden="true"></span>
-          </a>
-        </li>
-        <li>
-          <a class="contact" href="mailto:eventhorizon@growupnetwork.it" aria-label="Email" title="Email">
-            <span class="contact__icon icon-mail" aria-hidden="true"></span>
-          </a>
-        </li>
-      </ul>
-    </div>
-  </section>
-  <!-- >>> END CONTACTS -->
+<!-- >>> START CONTACTS -->
+<section id="contacts" class="contacts" aria-labelledby="contacts-title">
+  <div class="contacts__inner">
+    <h2 id="contacts-title" class="contacts__title">Chi siamo</h2>
+    <p class="contacts__intro">
+      Siamo Vincenzo e Francesco, amici appassionati di Magic: The Gathering, Dungeons & Dragons, giochi da tavolo e videogiochi.
+    </p>
+    <p class="contacts__sub">Restiamo in contatto</p>
+
+    <ul class="contacts__list" role="list">
+      <li>
+        <a class="contact" href="https://www.tiktok.com/@eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
+          <span class="contact__icon icon-tiktok" aria-hidden="true"></span>
+        </a>
+      </li>
+      <li>
+        <a class="contact" href="https://www.instagram.com/eventhorizon.mtg" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+          <span class="contact__icon icon-instagram" aria-hidden="true"></span>
+        </a>
+      </li>
+      <li>
+        <a class="contact" href="https://www.youtube.com/@EventHorizonMtG" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+          <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+        </a>
+      </li>
+      <li>
+        <a class="contact" href="https://t.me/eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
+          <span class="contact__icon icon-telegram" aria-hidden="true"></span>
+        </a>
+      </li>
+      <li>
+        <a class="contact" href="https://discord.com/invite/tQrbzhUa4k" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
+          <span class="contact__icon icon-discord" aria-hidden="true"></span>
+        </a>
+      </li>
+      <li>
+        <a class="contact" href="mailto:eventhorizon@growupnetwork.it" aria-label="Email" title="Email">
+          <span class="contact__icon icon-mail" aria-hidden="true"></span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+<!-- >>> END CONTACTS -->
+
 
 </main>
 {{ end }}
