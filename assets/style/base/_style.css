@@ -585,18 +585,18 @@ main{ display: block; }
 }
 
 /* Teal Stroke (bianco con bordo e testo teal) */
-.btn--indigostroke{
+.btn--tealstroke{
   background: #FFFFFF;
   color: var(--teal-600);
   border: 2px solid var(--teal-600);
 }
-.btn--indigostroke:hover{
+.btn--tealstroke:hover{
   background: #007A7C;
   color: var(--neutral-00);
   border-color: var(--teal-700);
   transform: scale(0.99);
 }
-.btn--indigostroke:focus-visible{
+.btn--tealstroke:focus-visible{
   outline: 2px solid var(--gold-300);
   outline-offset: 2px;
 }
