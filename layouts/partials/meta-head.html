@@ -31,22 +31,22 @@
 <link rel="canonical" href="{{ $canonical }}">
 
 <!-- Manifest PWA -->
-<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
+<link rel="manifest" href="{{ "site.webmanifest" | absURL }}">
 
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
 <!-- Favicons (assicurati che i file esistano sotto /static/icons/favicon/ ...) -->
-<link rel="icon" href='{{ "icons/favicon/favicon.ico" | relURL }}' sizes="any">
-<link rel="icon" href='{{ "icons/favicon/favicon.svg" | relURL }}' type="image/svg+xml">
-<link rel="icon" type="image/png" sizes="16x16" href='{{ "icons/favicon/favicon-16.png" | relURL }}'>
-<link rel="icon" type="image/png" sizes="32x32" href='{{ "icons/favicon/favicon-32.png" | relURL }}'>
-<link rel="icon" type="image/png" sizes="48x48" href='{{ "icons/favicon/favicon-48.png" | relURL }}'>
-<link rel="icon" type="image/png" sizes="96x96" href='{{ "icons/favicon/favicon-96.png" | relURL }}'>
-<link rel="apple-touch-icon" href='{{ "icons/favicon/apple-touch-icon.png" | relURL }}' sizes="180x180">
-<link rel="icon" type="image/png" sizes="192x192" href='{{ "icons/favicon/favicon-192.png" | relURL }}'>
-<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512.png" | relURL }}'>
-<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512-maskable.png" | relURL }}' purpose="any maskable">
+<link rel="icon" href='{{ "icons/favicon/favicon.ico" | absURL }}' sizes="any">
+<link rel="icon" href='{{ "icons/favicon/favicon.svg" | absURL }}' type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="16x16" href='{{ "icons/favicon/favicon-16.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="32x32" href='{{ "icons/favicon/favicon-32.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="48x48" href='{{ "icons/favicon/favicon-48.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="96x96" href='{{ "icons/favicon/favicon-96.png" | absURL }}'>
+<link rel="apple-touch-icon" href='{{ "icons/favicon/apple-touch-icon.png" | absURL }}' sizes="180x180">
+<link rel="icon" type="image/png" sizes="192x192" href='{{ "icons/favicon/favicon-192.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512-maskable.png" | absURL }}' purpose="any maskable">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -73,7 +73,7 @@
 
 <!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
-<link rel="preload" as="image" href="{{ . }}">
+<link rel="preload" as="image" href="{{ . | absURL }}">
 {{ end }}
 
 {{/* ---------------------------------------

@@ -28,7 +28,7 @@ enableRobotsTXT = true
   themeColor = "#0E0F1A"
 
   # Preload hero LCP (opzionale: lascia o cambia path)
-  preloadHero = "/images/bg_image.webp"
+  preloadHero = "images/bg_image.webp"
 
 [outputFormats.ArchiveList]
 mediaType    = "application/json"
@@ -39,6 +39,7 @@ permalinkable  = true
 
 
 relativeURLs = true
+
 
 
 
