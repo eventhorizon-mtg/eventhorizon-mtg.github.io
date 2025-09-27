@@ -8,6 +8,8 @@
 
 (() => {
   'use strict';
+  // GATE: esegui solo nella pagina Archivio
+  if (!document.querySelector('section.archive')) return;
 
   /* ==========================
    * Config & helpers (UI)
@@ -105,7 +107,7 @@
     on(handle, 'touchmove',  onMove,  { passive: true });
     on(handle, 'touchend',   onEnd);
 
-    // Apertura dallo stesso pulsante usato su desktop
+    // Apertura (mobile) dallo stesso pulsante usato su desktop
     document.addEventListener('click', (ev) => {
       const btn = ev.target && ev.target.closest('.item-actions-summary');
       if (!btn || !mqSheet.matches) return;
@@ -142,9 +144,9 @@
    * 2) Pannello desktop (in-row)
    * ========================== */
   (() => {
-    const mqSheet = window.matchMedia ? window.matchMedia('(max-width: 1023.98px)') : { matches: true };
+    const mqSheet2 = window.matchMedia ? window.matchMedia('(max-width: 1023.98px)') : { matches: true };
     const onDesktopToggle = (ev) => {
-      if (mqSheet.matches) return; // solo desktop
+      if (mqSheet2.matches) return; // solo desktop
       const item = ev.target && ev.target.closest('.item'); if (!item) return;
       const li = item.closest('.archive-item'); if (!li) return;
       const panel = qs('.item-panel', li);
@@ -159,7 +161,7 @@
     document.addEventListener('click', (ev) => {
       const btn = ev.target && ev.target.closest('.item-actions-summary');
       if (!btn) return;
-      if (!mqSheet.matches) onDesktopToggle(ev);
+      if (!mqSheet2.matches) onDesktopToggle(ev);
     });
   })();
 
@@ -238,7 +240,7 @@
 
       document.body.appendChild(popoverEl);
 
-      // Posizionamento
+      // Posizionamento vicino al bottone
       const rect = btn.getBoundingClientRect();
       const gap = 8;
       const width = Math.max(rect.width, 180);
@@ -260,7 +262,7 @@
       document.addEventListener('click', onDocClick, true);
       document.addEventListener('keydown', onKeyDown, true);
 
-      // Scelta
+      // Scelta (NON applica subito; si applica alla submit del form)
       popoverEl.addEventListener('click', (e) => {
         const b = e.target && e.target.closest('.filter-popover__item');
         if (!b) return;
@@ -273,7 +275,7 @@
             btn.classList.toggle('is-active', isActive);
           }
         }
-        closePopover();            // NON applichiamo subito
+        closePopover();
         btn && btn.focus();
       });
 
@@ -288,7 +290,7 @@
       else { const sel = document.getElementById('kind'); if (sel) sel.focus(); }
     });
 
-    // Submit: rimuove 'p' per ripartire da 1
+    // Submit: riparti da pagina 1
     if (form) on(form, 'submit', () => {
       try { const u = new URL(form.action || window.location.href); u.searchParams.delete('p'); form.action = u.toString(); } catch {}
     });
@@ -323,6 +325,8 @@
  * ============================================================ */
 (() => {
   'use strict';
+  // GATE: esegui solo nella pagina Archivio
+  if (!document.querySelector('section.archive')) return;
 
   // Helpers (Data)
   const qs  = (sel, root = document) => root.querySelector(sel);
@@ -448,43 +452,41 @@
            ${otherPills.map(P => `<a class="${P.cls}" href="${P.url}" target="_blank" rel="noopener" title="${P.lab}">${P.lab}</a>`).join('')}
          </div>` : '';
 
-    return (() => {
-      const li = document.createElement('li');
-      li.className = `archive-item is-${kindClass}`;
-      li.innerHTML = `
-        <article class="item" data-item-id="${idStr}" data-kind="${kindClass}">
-          <header class="item-head">
-            ${over ? `<p class="item-overline">${over}</p>` : ''}
-            <h2 class="item-title">${tit}</h2>
-          </header>
-          ${
-            primaryUrl
-            ? `<a class="item-thumb${primaryUrl && /\bprimary\b/.test(lower(links[primaryIndex]?.btn_class || '')) ? ' primary' : ''}"
-                  href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
-                 <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
-               </a>`
-            : `<figure class="item-thumb">
-                 <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
-               </figure>`
-          }
-          ${ hasDropdown
-              ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
-                   <span class="sr-only">${summaryLabel}</span>
-                 </button>`
-              : ''
-          }
-        </article>
+    const li = document.createElement('li');
+    li.className = `archive-item is-${kindClass}`;
+    li.innerHTML = `
+      <article class="item" data-item-id="${idStr}" data-kind="${kindClass}">
+        <header class="item-head">
+          ${over ? `<p class="item-overline">${over}</p>` : ''}
+          <h2 class="item-title">${tit}</h2>
+        </header>
         ${
-          hasDropdown
-          ? `<div class="item-panel" id="${linksId}" hidden>
-               ${desc ? `<div class="item-descbar"><p class="item-summary">${desc}</p></div>` : ''}
-               ${pillCtas}
-             </div>`
-          : ''
+          primaryUrl
+          ? `<a class="item-thumb${primaryUrl && /\bprimary\b/.test(lower(links[primaryIndex]?.btn_class || '')) ? ' primary' : ''}"
+                href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
+               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+             </a>`
+          : `<figure class="item-thumb">
+               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+             </figure>`
         }
-      `;
-      return li;
-    })();
+        ${ hasDropdown
+            ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
+                 <span class="sr-only">${summaryLabel}</span>
+               </button>`
+            : ''
+        }
+      </article>
+      ${
+        hasDropdown
+        ? `<div class="item-panel" id="${linksId}" hidden>
+             ${desc ? `<div class="item-descbar"><p class="item-summary">${desc}</p></div>` : ''}
+             ${pillCtas}
+           </div>`
+        : ''
+      }
+    `;
+    return li;
   };
 
   // Filtro / sort / paginazione
@@ -556,18 +558,24 @@
     if (strong) strong.textContent = new Intl.NumberFormat('it-IT').format(n);
   };
 
-  // Render lista
+  // Render lista (confinato nel container Archivio)
   const renderList = (arr) => {
-    const sectionArchive = qs('section.archive');
-    let listOl = sectionArchive && sectionArchive.querySelector('ol.archive-timeline');
+    const sectionArchive = document.querySelector('section.archive');
+    if (!sectionArchive) return; // safety
+    const container = sectionArchive.querySelector('.container') || sectionArchive;
+
+    // assicurati che esista l'OL
+    let listOl = container.querySelector('ol.archive-timeline');
     if (!listOl) {
       listOl = document.createElement('ol');
       listOl.className = 'archive-timeline';
-      const container = sectionArchive?.querySelector('.container') || sectionArchive || document.body;
       container.appendChild(listOl);
     }
+
+    // svuota e renderizza
     listOl.innerHTML = '';
     if (!arr.length) {
+      // mostra messaggio e rimuovi l'OL
       const p = document.createElement('p');
       p.className = 'empty';
       p.setAttribute('role', 'status');
@@ -576,7 +584,17 @@
       p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
       listOl.replaceWith(p);
       return;
+    } else {
+      // se c'è un vecchio <p.empty>, rimpiazzalo con un nuovo OL
+      const oldEmpty = container.querySelector('p.empty');
+      if (oldEmpty) {
+        oldEmpty.remove();
+        listOl = document.createElement('ol');
+        listOl.className = 'archive-timeline';
+        container.appendChild(listOl);
+      }
     }
+
     const frag = document.createDocumentFragment();
     for (const it of arr) frag.appendChild(renderItem(it));
     listOl.appendChild(frag);
