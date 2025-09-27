@@ -32,6 +32,60 @@ jobs:
       - name: Build site (publishDir=docs)
         run: hugo --minify
 
+      - name: Validate SRI references in generated HTML
+        run: |
+          python - << 'PY'
+          import os, re, sys, base64, hashlib
+          from urllib.parse import urlparse
+
+          root = 'docs'
+          problems = []
+          # Scan all HTML under docs/
+          for dirpath, _, filenames in os.walk(root):
+              for fn in filenames:
+                  if not fn.endswith('.html'): continue
+                  fp = os.path.join(dirpath, fn)
+                  html = open(fp, 'rb').read().decode('utf-8', errors='ignore')
+                  # Find stylesheet links with integrity
+                  for m in re.finditer(r'<link[^>]+rel=["\"]stylesheet["\"][^>]+href=["\"]([^"\"]+)["\"][^>]+integrity=["\"](sha256-[^"\"]+)["\"]', html, re.I):
+                      url, integrity = m.group(1), m.group(2)
+                      path = urlparse(url).path or url
+                      if path.startswith('/'):
+                          path = path[1:]
+                      if path.startswith('eventhorizon/'):
+                          path = path[len('eventhorizon/'):]
+                      local = os.path.join(root, path)
+                      if not os.path.exists(local):
+                          problems.append(f"Missing CSS asset: {url} -> {local}")
+                          continue
+                      data = open(local, 'rb').read()
+                      digest = base64.b64encode(hashlib.sha256(data).digest()).decode('ascii')
+                      if integrity != f'sha256-{digest}':
+                          problems.append(f"SRI mismatch CSS: {url}\n expected {integrity}\n   actual sha256-{digest}")
+                  # Find scripts with integrity
+                  for m in re.finditer(r'<script[^>]+src=["\"]([^"\"]+)["\"][^>]+integrity=["\"](sha256-[^"\"]+)["\"]', html, re.I):
+                      url, integrity = m.group(1), m.group(2)
+                      path = urlparse(url).path or url
+                      if path.startswith('/'):
+                          path = path[1:]
+                      if path.startswith('eventhorizon/'):
+                          path = path[len('eventhorizon/'):]
+                      local = os.path.join(root, path)
+                      if not os.path.exists(local):
+                          problems.append(f"Missing JS asset: {url} -> {local}")
+                          continue
+                      data = open(local, 'rb').read()
+                      digest = base64.b64encode(hashlib.sha256(data).digest()).decode('ascii')
+                      if integrity != f'sha256-{digest}':
+                          problems.append(f"SRI mismatch JS: {url}\n expected {integrity}\n   actual sha256-{digest}")
+
+          if problems:
+              print('\n'.join(problems))
+              sys.exit(1)
+          else:
+              print('SRI validation passed for CSS/JS references')
+          PY
+
       - name: Commit generated docs
         run: |
           if [ -n "$(git status --porcelain docs)" ]; then
