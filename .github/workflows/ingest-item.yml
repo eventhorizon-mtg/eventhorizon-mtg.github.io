@@ -1,0 +1,130 @@
+name: Ingest Archive Item from Issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  ingest:
+    if: contains(github.event.issue.labels.*.name, 'ingest:item')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse issue and create data file
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            // Parse sections created by Issue Forms: headings start with '### '
+            const lines = body.split(/\r?\n/);
+            const fields = {};
+            let current = null;
+            for (const ln of lines) {
+              const h = ln.match(/^###\s+(.+?)\s*$/);
+              if (h) { current = h[1].trim().toLowerCase().replace(/[^a-z0-9_]+/g,'_'); fields[current] = ''; continue; }
+              if (current) {
+                if (ln.trim() === '') continue;
+                fields[current] = (fields[current] ? fields[current] + '\n' : '') + ln;
+              }
+            }
+            function get(name){ return (fields[name]||'').trim(); }
+            function getOpt(name){ const v=get(name); return v? v : null; }
+            function asTags(txt){ return txt? txt.split(',').map(s=>s.trim()).filter(Boolean) : []; }
+            function link(label, url, btn, sort){ if(!url) return null; return { label:label||'Apri', href:url, btn_class:btn||'', sort_order:sort }; }
+
+            const id = get('id_univoco_(es._eh-0003)') || get('id');
+            if (!id) { core.setFailed('ID non trovato nel form'); return; }
+            const date = get('data_(yyyy-mm-dd)') || get('data');
+            const kind = (get('tipo')||'content').toLowerCase();
+            const title = get('titolo');
+            const overline = get('overline_(riga_sopra_il_titolo)') || get('overline');
+            const desc = get('descrizione_breve') || get('descrizione');
+            let thumb = get('thumbnail_(url_assoluto_o_path_sotto_images/...)') || get('thumbnail');
+            if (thumb && !/^https?:/i.test(thumb)) thumb = thumb.replace(/^\/+/, 'images/');
+            const tags = asTags(get('tag_(separati_da_virgola)') || '');
+            const slug = getOpt('slug_pagina_interna_(opzionale,_per_articoli_interni)') || getOpt('slug');
+
+            const l1 = link(get('link_1_-_label'), get('link_1_-_url'), get('link_1_-_classe_bottone_(es._btn--yt,_btn--mox,_btn--archi,_primary)'), 10);
+            const l2 = link(get('link_2_-_label'), get('link_2_-_url'), get('link_2_-_classe_bottone'), 20);
+            const l3 = link(get('link_3_-_label'), get('link_3_-_url'), get('link_3_-_classe_bottone'), 30);
+            const links = [l1,l2,l3].filter(Boolean);
+
+            const yamlLines = [];
+            function y(key,val){ if(val===null||val===undefined||val==='') return; yamlLines.push(`${key}: ${JSON.stringify(val)}`); }
+            yamlLines.push(`id: ${JSON.stringify(id)}`);
+            y('slug', slug);
+            y('kind', kind);
+            y('date', date);
+            y('title', title);
+            y('overline', overline);
+            y('desc', desc);
+            y('thumb', thumb);
+            if (tags.length) {
+              yamlLines.push('tags: [' + tags.map(t=>JSON.stringify(t)).join(', ') + ']');
+            }
+            if (links.length) {
+              yamlLines.push('links:');
+              for (const L of links) {
+                yamlLines.push('  - label: ' + JSON.stringify(L.label));
+                yamlLines.push('    href: ' + JSON.stringify(L.href));
+                if (L.btn_class) yamlLines.push('    btn_class: ' + JSON.stringify(L.btn_class));
+                if (L.sort_order!=null) yamlLines.push('    sort_order: ' + L.sort_order);
+              }
+            }
+            const content = yamlLines.join('\n') + '\n';
+            const filePath = `data/archive/items/${id}.yml`;
+
+            // Create or update the file
+            const { data: existing } = await github.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: filePath,
+            }).catch(()=>({data:null}));
+
+            const message = existing ? `Update archive item ${id} via issue #${context.payload.issue.number}` : `Add archive item ${id} via issue #${context.payload.issue.number}`;
+            await github.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: filePath,
+              message,
+              content: Buffer.from(content).toString('base64'),
+              sha: existing && existing.sha ? existing.sha : undefined,
+              committer: {
+                name: 'github-actions[bot]',
+                email: '41898282+github-actions[bot]@users.noreply.github.com'
+              },
+              author: {
+                name: 'github-actions[bot]',
+                email: '41898282+github-actions[bot]@users.noreply.github.com'
+              }
+            });
+
+            core.setOutput('file', filePath);
+
+      - name: Comment & close issue
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const file = core.getInput('file', { required: false }) || 'data/archive/items/...';
+            await github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: `✅ Item creato: \`${file}\`\n\nVerrà incluso automaticamente nell'Archivio alla prossima build.`
+            });
+            await github.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed'
+            });
