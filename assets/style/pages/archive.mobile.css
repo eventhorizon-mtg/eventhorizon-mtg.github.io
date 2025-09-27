@@ -153,3 +153,46 @@
   .archive-sheet.is-open{ transform: translateY(0%); }
   .archive-sheet-backdrop.is-open{ opacity: 1; pointer-events: auto; }
 }
+/* Popover filtro (mobile) */
+@media (max-width: 1023.98px) {
+  .filter-popover {
+    position: fixed;
+    background: #fff;
+    color: #0e0f1a;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 4px;
+    z-index: 10000;
+  }
+  .filter-popover__list {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+  }
+  .filter-popover__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    padding: 10px 12px;
+    font: inherit;
+    line-height: 1.2;
+    border-radius: 8px;
+  }
+  .filter-popover__item[aria-checked="true"] {
+    font-weight: 600;
+    background: rgba(0,0,0,0.06);
+  }
+  .filter-popover__item:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  /* Stato attivo del bottone filtro */
+  .archive-search__filter-toggle.is-active {
+    background: #E3B74E; /* gold */
+    color: #0E0F1A;
+  }
+}

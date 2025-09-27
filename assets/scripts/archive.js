@@ -3,16 +3,16 @@
  * - Bottom-sheet mobile (overlay, focus-trap, drag handle)
  * - Chevron: sheet su mobile, pannello full-width su desktop
  * - Search: reset e placeholder responsive
- * - Filter mobile: mostra il select (non applica subito); bottone attivo se kind ≠ ""
+ * - Filter mobile: popover "Tutti/Video/Contenuti" (non applica subito); bottone attivo se kind ≠ ""
  */
 
 (() => {
   'use strict';
 
   /* ==========================
-   * Config & helpers
+   * Config & helpers (UI)
    * ========================== */
-  const MQ_SHEET = '(max-width: 1023.98px)'; // mobile/tablet per sheet + pannello desktop
+  const MQ_SHEET = '(max-width: 1023.98px)'; // mobile/tablet: sheet e popover
   const MQ_PHONE = '(max-width: 768px)';     // placeholder breve "Cerca"
 
   const TRUE = 'true';
@@ -25,8 +25,6 @@
 
   const mqSheet = window.matchMedia ? window.matchMedia(MQ_SHEET) : { matches: true, addEventListener(){} };
   const mqPhone = window.matchMedia ? window.matchMedia(MQ_PHONE) : { matches: false, addEventListener(){} };
-
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
   const getURL = () => new URL(window.location.href);
   const getParam = (name) => getURL().searchParams.get(name);
@@ -51,32 +49,27 @@
       if (ev.key !== 'Tab') return;
       const focusables = qsa('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])', sheet)
         .filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
-      if (focusables.length === 0) return;
+      if (!focusables.length) return;
       const first = focusables[0];
       const last  = focusables[focusables.length - 1];
-
-      if (ev.shiftKey && document.activeElement === first) {
-        last.focus(); ev.preventDefault();
-      } else if (!ev.shiftKey && document.activeElement === last) {
-        first.focus(); ev.preventDefault();
-      }
+      if (ev.shiftKey && document.activeElement === first) { last.focus(); ev.preventDefault(); }
+      else if (!ev.shiftKey && document.activeElement === last) { first.focus(); ev.preventDefault(); }
     };
 
     const openSheet = (payload) => {
       if (!mqSheet.matches) return; // solo mobile/tablet
       lastFocus = document.activeElement;
 
-      // contenuti
       titleEl.textContent = payload.title || '';
       content.innerHTML   = payload.descHtml || '';
       ctas.innerHTML      = '';
       (payload.links || []).forEach(link => {
         const a = document.createElement('a');
-        a.className = link.cls || 'pill btn--base';
-        a.href      = link.url;
-        a.target    = '_blank';
-        a.rel       = 'noopener';
-        a.title     = link.lab || 'Apri';
+        a.className   = link.cls || 'pill btn--base';
+        a.href        = link.url;
+        a.target      = '_blank';
+        a.rel         = 'noopener';
+        a.title       = link.lab || 'Apri';
         a.textContent = link.lab || 'Apri';
         ctas.appendChild(a);
       });
@@ -100,14 +93,11 @@
     on(btnClose, 'click', closeSheet);
     on(backdrop, 'click', closeSheet);
 
-    // Drag to close
+    // Drag handle to close
     let startY = null, lastY = null;
     const onStart = (e) => { startY = (e.touches ? e.touches[0].clientY : e.clientY); lastY = startY; };
     const onMove  = (e) => { if (startY == null) return; lastY = (e.touches ? e.touches[0].clientY : e.clientY); };
-    const onEnd   = () => {
-      if (startY != null && lastY != null && (lastY - startY) > 60) closeSheet();
-      startY = lastY = null;
-    };
+    const onEnd   = () => { if (startY != null && lastY != null && (lastY - startY) > 60) closeSheet(); startY = lastY = null; };
     on(handle, 'mousedown', onStart);
     on(handle, 'mousemove', onMove);
     on(handle, 'mouseup',   onEnd);
@@ -115,7 +105,7 @@
     on(handle, 'touchmove',  onMove,  { passive: true });
     on(handle, 'touchend',   onEnd);
 
-    // Delego apertura: click su summary dell'item -> apri sheet (mobile)
+    // Apertura dallo stesso pulsante usato su desktop
     document.addEventListener('click', (ev) => {
       const btn = ev.target && ev.target.closest('.item-actions-summary');
       if (!btn || !mqSheet.matches) return;
@@ -152,12 +142,11 @@
    * 2) Pannello desktop (in-row)
    * ========================== */
   (() => {
+    const mqSheet = window.matchMedia ? window.matchMedia('(max-width: 1023.98px)') : { matches: true };
     const onDesktopToggle = (ev) => {
       if (mqSheet.matches) return; // solo desktop
-      const item = ev.target && ev.target.closest('.item');
-      if (!item) return;
-      const li = item.closest('.archive-item');
-      if (!li) return;
+      const item = ev.target && ev.target.closest('.item'); if (!item) return;
+      const li = item.closest('.archive-item'); if (!li) return;
       const panel = qs('.item-panel', li);
       const trigger = qs('.item-actions-summary', item);
       if (!panel || !trigger) return;
@@ -178,21 +167,18 @@
    * 3) Search UI (placeholder responsive)
    * ========================== */
   (() => {
-    const form = qs('#archive-search-form');
-    if (!form) return;
+    const form = qs('#archive-search-form'); if (!form) return;
     const q = qs('#q', form);
     const onMQ = () => {
       if (!q) return;
-      q.placeholder = mqPhone.matches
-        ? 'Cerca'
-        : 'Cerca per titolo, descrizione o tag…';
+      q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione o tag…';
     };
     onMQ();
     mqPhone.addEventListener && mqPhone.addEventListener('change', onMQ);
   })();
 
   /* ==========================
-   * 4) Search Reset + Filter Toggle (mobile)
+   * 4) Search Reset + Filter (popover mobile)
    * ========================== */
   (() => {
     const form   = qs('#archive-search-form');
@@ -200,136 +186,146 @@
     const sel    = qs('#kind', form || document);
     const btn    = qs('.archive-search__filter-toggle', form || document);
 
-    // Stato iniziale del bottone filtro (in base alla URL)
-    const initFilterButtonState = () => {
-      if (!btn || !sel) return;
-      const urlKind = (getParam('kind') || '').toLowerCase();
-      // sincronizza select con URL
-      if (urlKind === 'video' || urlKind === 'content') sel.value = urlKind;
-      else sel.value = '';
-      const active = sel.value !== '';
+    // Stato iniziale bottone filtro in base alla URL
+    const urlKind = (getParam('kind') || '').toLowerCase();
+    if (sel) sel.value = (urlKind === 'video' || urlKind === 'content') ? urlKind : '';
+    const active = !!(sel && sel.value !== '');
+    if (btn) {
       btn.setAttribute('aria-pressed', active ? TRUE : FALSE);
       btn.classList.toggle('is-active', active);
-      // sincronizza q visivamente
-      if (qInput) qInput.value = getParam('q') || '';
-    };
-    initFilterButtonState();
+      btn.setAttribute('aria-expanded', FALSE);
+    }
+    if (qInput) qInput.value = getParam('q') || '';
 
-    // Filter toggle (mobile-first): mostra il select (non applica subito)
+    // Popover
+    let popoverEl = null;
+    const closePopover = () => {
+      if (popoverEl && popoverEl.parentNode) popoverEl.parentNode.removeChild(popoverEl);
+      popoverEl = null;
+      if (btn) btn.setAttribute('aria-expanded', FALSE);
+      document.removeEventListener('click', onDocClick, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+    const onDocClick = (e) => {
+      if (!popoverEl) return;
+      const inside = e.target && (popoverEl.contains(e.target) || (btn && btn.contains(e.target)));
+      if (!inside) closePopover();
+    };
+    const onKeyDown = (e) => { if (e.key === 'Escape') closePopover(); };
+
+    const openPopover = () => {
+      if (popoverEl) closePopover();
+
+      popoverEl = document.createElement('div');
+      popoverEl.className = 'filter-popover';
+      popoverEl.setAttribute('role', 'menu');
+      popoverEl.setAttribute('aria-label', 'Filtro contenuti');
+
+      const current = sel ? sel.value : '';
+      popoverEl.innerHTML = `
+        <ul class="filter-popover__list" role="none">
+          <li role="none">
+            <button type="button" class="filter-popover__item" role="menuitemradio" aria-checked="${current===''?'true':'false'}" data-value="">Tutti</button>
+          </li>
+          <li role="none">
+            <button type="button" class="filter-popover__item" role="menuitemradio" aria-checked="${current==='video'?'true':'false'}" data-value="video">Video</button>
+          </li>
+          <li role="none">
+            <button type="button" class="filter-popover__item" role="menuitemradio" aria-checked="${current==='content'?'true':'false'}" data-value="content">Contenuti</button>
+          </li>
+        </ul>
+      `;
+
+      document.body.appendChild(popoverEl);
+
+      // Posizionamento
+      const rect = btn.getBoundingClientRect();
+      const gap = 8;
+      const width = Math.max(rect.width, 180);
+      const maxLeft = Math.max(8, Math.min(window.innerWidth - width - 8, rect.left));
+      Object.assign(popoverEl.style, {
+        position: 'fixed',
+        top: `${Math.min(window.innerHeight - 8, rect.bottom + gap)}px`,
+        left: `${maxLeft}px`,
+        minWidth: `${width}px`,
+        zIndex: '10000'
+      });
+
+      // Focus al corrente
+      const currentBtn = popoverEl.querySelector('.filter-popover__item[aria-checked="true"]')
+                          || popoverEl.querySelector('.filter-popover__item');
+      currentBtn && currentBtn.focus({ preventScroll: true });
+
+      // Eventi globali per chiusura
+      document.addEventListener('click', onDocClick, true);
+      document.addEventListener('keydown', onKeyDown, true);
+
+      // Scelta
+      popoverEl.addEventListener('click', (e) => {
+        const b = e.target && e.target.closest('.filter-popover__item');
+        if (!b) return;
+        const val = (b.getAttribute('data-value') || '').toLowerCase();
+        if (sel) {
+          sel.value = (val === 'video' || val === 'content') ? val : '';
+          const isActive = sel.value !== '';
+          if (btn) {
+            btn.setAttribute('aria-pressed', isActive ? TRUE : FALSE);
+            btn.classList.toggle('is-active', isActive);
+          }
+        }
+        closePopover();            // NON applichiamo subito
+        btn && btn.focus();
+      });
+
+      btn && btn.setAttribute('aria-expanded', TRUE);
+    };
+
+    // Click bottone filtro
     document.addEventListener('click', (e) => {
       const t = e.target && e.target.closest('.archive-search__filter-toggle');
       if (!t) return;
-      e.preventDefault();
-
-      if (!sel) return;
-      const isMobile = mqSheet.matches;
-
-      if (isMobile) {
-        // Apri/chiudi come menù: mostra il select e focus
-        const willOpen = t.getAttribute('aria-expanded') !== TRUE;
-        t.setAttribute('aria-expanded', willOpen ? TRUE : FALSE);
-        if (willOpen) {
-          sel.removeAttribute('hidden');
-          sel.style.display = 'block';      // robusto rispetto a display:none nel CSS
-          sel.focus({ preventScroll: true });
-        } else {
-          sel.setAttribute('hidden', '');
-          sel.style.display = '';
-        }
-      } else {
-        // Su desktop puoi semplicemente lasciare il select visibile (no-op)
-        // oppure togglarlo come in mobile se desideri lo stesso comportamento.
-        const willOpen = t.getAttribute('aria-expanded') !== TRUE;
-        t.setAttribute('aria-expanded', willOpen ? TRUE : FALSE);
-        if (willOpen) {
-          sel.removeAttribute('hidden');
-          sel.style.display = '';
-          sel.focus({ preventScroll: true });
-        } else {
-          sel.setAttribute('hidden', '');
-          sel.style.display = '';
-        }
-      }
+      if (mqSheet.matches) { e.preventDefault(); popoverEl ? closePopover() : openPopover(); }
+      else { const sel = document.getElementById('kind'); if (sel) sel.focus(); }
     });
 
-    // Alla selezione di un valore, NON applica subito:
-    // - chiude il menù su mobile/tablet
-    // - aggiorna lo stato del bottone (attivo se kind ≠ "")
-    document.addEventListener('change', (e) => {
-      if (!sel) return;
-      const isKind = e.target && e.target === sel;
-      if (!isKind) return;
-
-      const isMobile = mqSheet.matches;
-      if (isMobile) {
-        const t = btn;
-        if (t) {
-          t.setAttribute('aria-expanded', FALSE);
-        }
-        sel.setAttribute('hidden', '');
-        sel.style.display = '';
-      }
-
-      const active = sel.value !== '';
-      if (btn) {
-        btn.setAttribute('aria-pressed', active ? TRUE : FALSE);
-        btn.classList.toggle('is-active', active);
-      }
-      // Non navighiamo: l'applicazione avviene alla submit del form
+    // Submit: rimuove 'p' per ripartire da 1
+    if (form) on(form, 'submit', () => {
+      try { const u = new URL(form.action || window.location.href); u.searchParams.delete('p'); form.action = u.toString(); } catch {}
     });
 
-    // Submit del form: rimuovi sempre 'p' per ripartire dalla pagina 1
-    if (form) {
-      on(form, 'submit', (e) => {
-        // Lasciamo che il browser costruisca l'URL con i soli campi del form.
-        // (Non includerà 'p' se non c'è un input 'p' nel form)
-        // Qui possiamo comunque ripulire la URL corrente per sicurezza:
-        try {
-          const u = new URL(form.action || window.location.href);
-          // NB: non forziamo 'kind', 'q': li invia il form
-          u.searchParams.delete('p');
-          form.action = u.toString();
-        } catch {}
-      });
-    }
-
-    // Reset: unica sorgente di verità (delegato, robusto)
+    // Reset (delegato)
     document.addEventListener('click', (e) => {
       const resetBtn = e.target && e.target.closest('.archive-search__reset');
       if (!resetBtn) return;
       e.preventDefault();
+      closePopover();
 
       const u = new URL(window.location.href);
       u.searchParams.delete('q');
       u.searchParams.delete('p');
       u.searchParams.delete('kind');
 
-      // Pulisce i campi del form se presenti
       if (qInput) qInput.value = '';
       if (sel)    sel.value = '';
 
-      // Aggiorna stato bottone filtro
       if (btn) {
         btn.setAttribute('aria-pressed', FALSE);
         btn.classList.remove('is-active');
         btn.setAttribute('aria-expanded', FALSE);
       }
-      // Naviga alla versione "pulita" della pagina
       window.location.href = u.toString();
     });
   })();
 })();
 
 /* ============================================================
- * /script/archive.js — Data & Render layer (append non invasivo)
- * Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy (PHP+DB)
+ * Data & Render layer — Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy
  * ============================================================ */
 (() => {
   'use strict';
 
-  // Helpers locali
+  // Helpers (Data)
   const qs  = (sel, root = document) => root.querySelector(sel);
-  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const text = (v) => (v == null ? '' : String(v));
   const lower = (v) => text(v).toLowerCase();
   const trim = (v) => text(v).trim();
@@ -350,28 +346,25 @@
     const qLower  = lower(q).trim();
     if (!qLower) return false;
     const tokens = qLower.split(/\s+/).filter(Boolean);
-    for (let i = 0; i < tokens.length; i++) {
-      if (wrapped.includes(tokens[i])) return true;
-    }
+    for (let i = 0; i < tokens.length; i++) if (wrapped.includes(tokens[i])) return true;
     if (wrapped.includes(qLower)) return true;
     return false;
   };
 
-  // Pill mapping (come legacy)
+  // Pill mapping
   const normalizeBtnVariant = (raw) => {
     const t = lower(trim(raw));
     if (!t) return 'btn--base';
-    const m = t.match(/\bbtn--[a-z0-9\-]+\b/);
-    if (m) return m[0];
+    const m = t.match(/\bbtn--[a-z0-9\-]+\b/); if (m) return m[0];
     const map = {
-      'youtube': 'btn--yt', 'yt': 'btn--yt',
-      'scryfall': 'btn--scry', 'scry': 'btn--scry',
-      'edhrec': 'btn--edh', 'edh': 'btn--edh',
-      'moxfield': 'btn--mox', 'mox': 'btn--mox',
-      'archidekt': 'btn--archi', 'archi': 'btn--archi',
-      'teal': 'btn--teal', 'gold': 'btn--gold',
-      'primary': 'primary',
-      'indigo': 'btn--base', 'base': 'btn--base', 'default': 'btn--base',
+      'youtube':'btn--yt','yt':'btn--yt',
+      'scryfall':'btn--scry','scry':'btn--scry',
+      'edhrec':'btn--edh','edh':'btn--edh',
+      'moxfield':'btn--mox','mox':'btn--mox',
+      'archidekt':'btn--archi','archi':'btn--archi',
+      'teal':'btn--teal','gold':'btn--gold',
+      'primary':'primary',
+      'indigo':'btn--base','base':'btn--base','default':'btn--base',
     };
     const parts = t.split(/\s+/);
     for (const p of parts) if (map[p]) return map[p];
@@ -391,19 +384,14 @@
   };
   const pillClassFrom = (btnRaw, url) => {
     let v = normalizeBtnVariant(btnRaw);
-    if (v === 'btn--base') {
-      const fromUrl = variantFromUrl(url);
-      if (fromUrl) v = fromUrl;
-    }
+    if (v === 'btn--base') { const u = variantFromUrl(url); if (u) v = u; }
     return `pill ${v}`;
   };
   const pillLabel = (label, url) => {
     const L = trim(label);
     if (L) return L;
-    try {
-      const host = new URL(url, window.location.origin).host;
-      return host || 'Apri';
-    } catch { return 'Apri'; }
+    try { const host = new URL(url, window.location.origin).host; return host || 'Apri'; }
+    catch { return 'Apri'; }
   };
 
   // Stato/pager
@@ -411,58 +399,17 @@
     const n = parseInt(getParam('p') || '1', 10);
     return isNaN(n) || n < 1 ? 1 : n;
   };
-  const PAGE_SIZE_DEFAULT = 12;
   const getPageSize = () => {
-    const rootAttr = document.documentElement.getAttribute('data-archive-page-size');
-    if (rootAttr) {
-      const n = parseInt(rootAttr, 10);
-      if (!isNaN(n) && n > 0 && n <= 24) return n;
-    }
-    if (window.__ARCHIVE_PAGE_SIZE__ && Number.isInteger(window.__ARCHIVE_PAGE_SIZE__)) {
-      return Math.max(5, Math.min(24, window.__ARCHIVE_PAGE_SIZE__));
-    }
-    return PAGE_SIZE_DEFAULT;
+    const attr = document.documentElement.getAttribute('data-archive-page-size');
+    const n = parseInt(attr || '12', 10);
+    return (isNaN(n) ? 12 : Math.max(5, Math.min(24, n)));
   };
 
-  // Elementi DOM essenziali
-  const sectionArchive = qs('section.archive');
-  const ensureList = () => {
-    let ol = qs('ol.archive-timeline', sectionArchive);
-    if (!ol) {
-      ol = document.createElement('ol');
-      ol.className = 'archive-timeline';
-      const container = qs('.container', sectionArchive) || sectionArchive;
-      container.appendChild(ol);
-    }
-    return ol;
-  };
+  // Parametri URL correnti
+  const q  = trim(getParam('q') || '');
+  const k  = (getParam('kind') || '').toLowerCase().trim();
 
-  // Parametri URL
-  const qRaw  = getParam('q') || '';
-  const q     = trim(qRaw);
-  const kind  = lower(trim(getParam('kind') || ''));
-
-  // Sincronizza form UI (q/kind) e bottone filtro
-  const syncFormUI = () => {
-    const form   = qs('#archive-search-form');
-    const qInput = qs('#q', form || document);
-    const sel    = qs('#kind', form || document);
-    const btn    = qs('.archive-search__filter-toggle', form || document);
-
-    if (qInput) qInput.value = q;
-    if (sel) {
-      if (kind === 'video' || kind === 'content') sel.value = kind;
-      else sel.value = '';
-    }
-    if (btn && sel) {
-      const active = sel.value !== '';
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-      btn.classList.toggle('is-active', active);
-      btn.setAttribute('aria-expanded', 'false');
-    }
-  };
-
-  // Render di un singolo item (markup identico al template)
+  // Render item (markup identico)
   const renderItem = (it) => {
     const idStr = text(it.id);
     const kindClass = lower(text(it.kind) || 'content');
@@ -470,16 +417,13 @@
     const tit   = trim(it.title || '');
     const desc  = trim(it.desc || '');
 
-    // Thumb
     let thumbWeb = trim(it.thumb || '');
     if (thumbWeb && !isAbsolute(thumbWeb)) thumbWeb = '/' + thumbWeb.replace(/^\/+/, '');
     const appVer = document.documentElement.getAttribute('data-app-ver') || '';
     const thumbSrc = bustIfLocal(thumbWeb || '/assets/cards/fblthp_placeholder.webp', appVer);
 
-    // Links
     const links = Array.isArray(it.links) ? it.links.slice().sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) : [];
 
-    // primary via token dentro btn_class
     let primaryIndex = null;
     for (let i = 0; i < links.length; i++) {
       const raw = lower(links[i]?.btn_class || '');
@@ -487,75 +431,63 @@
     }
     const primaryUrl = (primaryIndex != null) ? trim(links[primaryIndex].href || '') : '';
 
-    // pills extra
     const otherPills = [];
     for (let i = 0; i < links.length; i++) {
       if (i === primaryIndex) continue;
-      const L = links[i];
-      const url = trim(L?.href || '');
-      if (!url) continue;
-      otherPills.push({
-        url,
-        lab: pillLabel(L?.label || '', url),
-        cls: pillClassFrom(L?.btn_class || '', url),
-      });
+      const L = links[i]; const url = trim(L?.href || ''); if (!url) continue;
+      otherPills.push({ url, lab: pillLabel(L?.label || '', url), cls: pillClassFrom(L?.btn_class || '', url) });
     }
 
     const linksId = `links-${idStr.replace(/[^a-zA-Z0-9_\-]+/g, '-')}`;
-    let otherCount = otherPills.length;
-    let hasDropdown = (!!desc) || (otherCount > 0);
-    let summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
+    const otherCount = otherPills.length;
+    const hasDropdown = (!!desc) || (otherCount > 0);
+    const summaryLabel = otherCount > 0 ? `Dettagli e link (${otherCount})` : 'Dettagli';
 
-    if (primaryUrl) {
-      hasDropdown = (!!desc) || (otherCount > 0);
-      summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
-    }
+    const pillCtas = otherCount
+      ? `<div class="item-ctas" role="group" aria-label="Collegamenti">
+           ${otherPills.map(P => `<a class="${P.cls}" href="${P.url}" target="_blank" rel="noopener" title="${P.lab}">${P.lab}</a>`).join('')}
+         </div>` : '';
 
-    const li = document.createElement('li');
-    li.className = `archive-item is-${kindClass}`;
-    li.innerHTML = `
-      <article class="item" data-item-id="${idStr}" data-kind="${kindClass}">
-        <header class="item-head">
-          ${over ? `<p class="item-overline">${over}</p>` : ''}
-          <h2 class="item-title">${tit}</h2>
-        </header>
+    return (() => {
+      const li = document.createElement('li');
+      li.className = `archive-item is-${kindClass}`;
+      li.innerHTML = `
+        <article class="item" data-item-id="${idStr}" data-kind="${kindClass}">
+          <header class="item-head">
+            ${over ? `<p class="item-overline">${over}</p>` : ''}
+            <h2 class="item-title">${tit}</h2>
+          </header>
+          ${
+            primaryUrl
+            ? `<a class="item-thumb${primaryUrl && /\bprimary\b/.test(lower(links[primaryIndex]?.btn_class || '')) ? ' primary' : ''}"
+                  href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
+                 <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+               </a>`
+            : `<figure class="item-thumb">
+                 <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+               </figure>`
+          }
+          ${ hasDropdown
+              ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
+                   <span class="sr-only">${summaryLabel}</span>
+                 </button>`
+              : ''
+          }
+        </article>
         ${
-          primaryUrl
-          ? `<a class="item-thumb${primaryUrl && /\bprimary\b/.test(lower(links[primaryIndex]?.btn_class || '')) ? ' primary' : ''}"
-                href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
-               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
-             </a>`
-          : `<figure class="item-thumb">
-               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
-             </figure>`
+          hasDropdown
+          ? `<div class="item-panel" id="${linksId}" hidden>
+               ${desc ? `<div class="item-descbar"><p class="item-summary">${desc}</p></div>` : ''}
+               ${pillCtas}
+             </div>`
+          : ''
         }
-        ${ hasDropdown
-            ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
-                 <span class="sr-only">${summaryLabel}</span>
-               </button>`
-            : ''
-        }
-      </article>
-      ${
-        hasDropdown
-        ? `<div class="item-panel" id="${linksId}" hidden>
-             ${desc ? `<div class="item-descbar"><p class="item-summary">${desc}</p></div>` : ''}
-             ${otherCount > 0
-                ? `<div class="item-ctas" role="group" aria-label="Collegamenti">
-                     ${otherPills.map(P => (
-                       `<a class="${P.cls}" href="${P.url}" target="_blank" rel="noopener" title="${P.lab}">${P.lab}</a>`
-                    )).join('')}
-                   </div>`
-                : ''
-             }
-           </div>`
-        : ''
-      }
-    `;
-    return li;
+      `;
+      return li;
+    })();
   };
 
-  // Filtro come nel legacy
+  // Filtro / sort / paginazione
   const filterItems = (arr, q, kind) => {
     const Q = lower(q).trim();
     const K = lower(kind);
@@ -567,8 +499,6 @@
       return inText || inTags;
     });
   };
-
-  // Ordinamento legacy: date DESC, id DESC
   const parseDate = (d) => { const t = Date.parse(d); return isNaN(t) ? 0 : t; };
   const sortItems = (arr) => arr.slice().sort((a, b) => {
     const ad = parseDate(a.date), bd = parseDate(b.date);
@@ -576,28 +506,24 @@
     const aid = text(a.id), bid = text(b.id);
     return (aid < bid) ? 1 : (aid > bid ? -1 : 0);
   });
+  const paginate = (arr, page, pageSize) => {
+    const total = arr.length;
+    const pages = Math.max(1, Math.ceil(total / pageSize));
+    const p = Math.min(Math.max(1, page), pages);
+    const start = (p - 1) * pageSize;
+    const end = start + pageSize;
+    return { total, pages, page: p, slice: arr.slice(start, end) };
+  };
 
-  // Paginazione
-const paginate = (arr, page, pageSize) => {
-  const total = arr.length;
-  const pages = Math.max(1, Math.ceil(total / pageSize));
-  const p = Math.min(Math.max(1, page), pages);
-  const start = (p - 1) * pageSize;
-  const end = start + pageSize;
-  return { total, pages, page: p, slice: arr.slice(start, end) };
-};
-
-  // Pager UI
+  // Pager & count UI
   const updatePager = (state) => {
     const pager = qs('.archive-pager');
     if (!pager) return;
-
     const url = getURL();
     const { page, pages } = state;
-
-    const prevA = qs('a[rel="prev"]', pager);
-    const nextA = qs('a[rel="next"]', pager);
-    const currSpan = qs('.curr', pager);
+    const prevA = pager.querySelector('a[rel="prev"]');
+    const nextA = pager.querySelector('a[rel="next"]');
+    const curr  = pager.querySelector('.curr');
 
     const setHref = (a, target) => {
       if (!a) return;
@@ -616,7 +542,7 @@ const paginate = (arr, page, pageSize) => {
       setHref(prevA, prevDisabled ? 1 : (page - 1));
       prevA.rel = 'prev';
     }
-    if (currSpan) currSpan.textContent = `Pag. ${page} / ${pages}`;
+    if (curr) curr.textContent = `Pag. ${page} / ${pages}`;
     const nextDisabled = page >= pages;
     if (nextA) {
       nextA.classList.toggle('disabled', nextDisabled);
@@ -625,16 +551,21 @@ const paginate = (arr, page, pageSize) => {
       nextA.rel = 'next';
     }
   };
-
   const updateHeroCount = (n) => {
-    const heroCount = qs('.archive-hero .filter-note strong');
-    if (heroCount) heroCount.textContent = new Intl.NumberFormat('it-IT').format(n);
+    const strong = qs('.archive-hero .filter-note strong');
+    if (strong) strong.textContent = new Intl.NumberFormat('it-IT').format(n);
   };
 
   // Render lista
   const renderList = (arr) => {
-    let listOl = ensureList();
-    // Svuota OL
+    const sectionArchive = qs('section.archive');
+    let listOl = sectionArchive && sectionArchive.querySelector('ol.archive-timeline');
+    if (!listOl) {
+      listOl = document.createElement('ol');
+      listOl.className = 'archive-timeline';
+      const container = sectionArchive?.querySelector('.container') || sectionArchive || document.body;
+      container.appendChild(listOl);
+    }
     listOl.innerHTML = '';
     if (!arr.length) {
       const p = document.createElement('p');
@@ -645,15 +576,7 @@ const paginate = (arr, page, pageSize) => {
       p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
       listOl.replaceWith(p);
       return;
-    } else {
-      const sectionArchive = qs('section.archive');
-      const existingEmpty = qs('p.empty', sectionArchive);
-      if (existingEmpty) {
-        existingEmpty.remove();
-        listOl = ensureList();
-      }
     }
-    // Append items
     const frag = document.createDocumentFragment();
     for (const it of arr) frag.appendChild(renderItem(it));
     listOl.appendChild(frag);
@@ -662,22 +585,16 @@ const paginate = (arr, page, pageSize) => {
   // Bootstrap
   const bootstrap = async () => {
     try {
-      // Sync UI form con query attuale
-      syncFormUI();
-
       const appVer = document.documentElement.getAttribute('data-app-ver') || '';
       const ver = appVer ? `?v=${appVer}` : '';
       const res = await fetch(`/archive/list.json${ver}`, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json(); // [{id, kind, date, title, overline, desc, thumb, tags, links}]
-      const pageSize = (() => {
-        const attr = document.documentElement.getAttribute('data-archive-page-size');
-        const n = parseInt(attr || '12', 10);
-        return (isNaN(n) ? 12 : Math.max(5, Math.min(24, n)));
-      })();
+
+      const pageSize = getPageSize();
       const curPage  = getPage();
 
-      const filtered = filterItems(data, q, kind);
+      const filtered = filterItems(data, q, k);
       const sorted   = sortItems(filtered);
       const paged    = paginate(sorted, curPage, pageSize);
 
