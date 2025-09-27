@@ -337,7 +337,23 @@
   const getParam = (name) => getURL().searchParams.get(name);
   const LIKE = (haystack, needle) => lower(haystack).includes(lower(needle));
   const isAbsolute = (u) => /^(data:|https?:|\/\/)/i.test(u);
-  const bustIfLocal = (u, ver) => (isAbsolute(u) ? u : (u + (ver ? `?v=${ver}` : '')));
+  const getBaseURL = () => {
+    const b = (document.documentElement.getAttribute('data-base-url') || '').trim();
+    return b.replace(/\/$/, '');
+  };
+  const toSiteURL = (u) => {
+    if (!u) return '';
+    if (isAbsolute(u)) return u;
+    const base = getBaseURL();
+    const clean = String(u).replace(/^\/+/, '');
+    return base ? `${base}/${clean}` : `/${clean}`;
+  };
+  const bustIfLocal = (u, ver) => {
+    const src = toSiteURL(u);
+    if (!ver) return src;
+    const sep = src.includes('?') ? '&' : '?';
+    return `${src}${sep}v=${ver}`;
+  };
   const buildArchiveEndpoint = (base, version) => {
     const cleanBase = trim(base || '');
     const finalBase = cleanBase || '/archive/list.json';
@@ -436,9 +452,8 @@
     const desc  = trim(it.desc || '');
 
     let thumbWeb = trim(it.thumb || '');
-    if (thumbWeb && !isAbsolute(thumbWeb)) thumbWeb = '/' + thumbWeb.replace(/^\/+/, '');
     const appVer = document.documentElement.getAttribute('data-app-ver') || '';
-    const thumbSrc = bustIfLocal(thumbWeb || '/images/cards/fblthp_placeholder.webp', appVer);
+    const thumbSrc = bustIfLocal(thumbWeb || 'images/cards/fblthp_placeholder.webp', appVer);
 
     const links = Array.isArray(it.links) ? it.links.slice().sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) : [];
 
