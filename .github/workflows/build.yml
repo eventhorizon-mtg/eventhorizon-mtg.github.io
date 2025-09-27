@@ -1,0 +1,45 @@
+name: Build and Publish (docs)
+
+on:
+  push:
+    branches:
+      - main
+    # Avoid infinite loops when committing only docs/
+    paths-ignore:
+      - 'docs/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.150.0'
+          extended: true
+
+      - name: Set cache-busting version (appVer)
+        run: echo "HUGO_PARAMS_APPVER=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Build site (publishDir=docs)
+        run: hugo --minify
+
+      - name: Commit generated docs
+        run: |
+          if [ -n "$(git status --porcelain docs)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs
+            git commit -m "Build docs with appVer=${HUGO_PARAMS_APPVER}"
+            git push
+          else
+            echo "No changes in docs"
+          fi
