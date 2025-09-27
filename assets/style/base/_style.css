@@ -824,28 +824,28 @@ main{ display: block; }
 
 /* Mapping file SVG → mask-image (aggiorna i path se cambi cartella) */
 .icon-mail{
-  -webkit-mask-image: url("/assets/icons/mail.svg");
-          mask-image: url("/assets/icons/mail.svg");
+  -webkit-mask-image: url("icons/mail.svg");
+          mask-image: url("icons/mail.svg");
 }
 .icon-instagram{
-  -webkit-mask-image: url("/assets/icons/instagram.svg");
-          mask-image: url("/assets/icons/instagram.svg");
+  -webkit-mask-image: url("icons/instagram.svg");
+          mask-image: url("icons/instagram.svg");
 }
 .icon-youtube{
-  -webkit-mask-image: url("/assets/icons/youtube.svg");
-          mask-image: url("/assets/icons/youtube.svg");
+  -webkit-mask-image: url("icons/youtube.svg");
+          mask-image: url("icons/youtube.svg");
 }
 .icon-telegram{
-  -webkit-mask-image: url("/assets/icons/telegram.svg");
-          mask-image: url("/assets/icons/telegram.svg");
+  -webkit-mask-image: url("icons/telegram.svg");
+          mask-image: url("icons/telegram.svg");
 }
 .icon-discord{
-  -webkit-mask-image: url("/assets/icons/discord.svg");
-          mask-image: url("/assets/icons/discord.svg");
+  -webkit-mask-image: url("icons/discord.svg");
+          mask-image: url("icons/discord.svg");
 }
 .icon-tiktok{
-  -webkit-mask-image: url("/assets/icons/tiktok.svg");
-          mask-image: url("/assets/icons/tiktok.svg");
+  -webkit-mask-image: url("icons/tiktok.svg");
+          mask-image: url("icons/tiktok.svg");
 }
 
 /* ===== Fallback automatico se mask-image non è supportato ===== */
@@ -872,12 +872,12 @@ main{ display: block; }
     /* il colore viene da currentColor */
     filter: brightness(0) saturate(100%); /* uniforma gli SVG multicolore */
   }
-  .icon-mail::before     { background-image: url("/assets/icons/mail.svg"); }
-  .icon-instagram::before{ background-image: url("/assets/icons/instagram.svg"); }
-  .icon-youtube::before  { background-image: url("/assets/icons/youtube.svg"); }
-  .icon-telegram::before { background-image: url("/assets/icons/telegram.svg"); }
-  .icon-discord::before  { background-image: url("/assets/icons/discord.svg"); }
-  .icon-tiktok::before   { background-image: url("/assets/icons/tiktok.svg"); }
+  .icon-mail::before     { background-image: url("icons/mail.svg"); }
+  .icon-instagram::before{ background-image: url("icons/instagram.svg"); }
+  .icon-youtube::before  { background-image: url("icons/youtube.svg"); }
+  .icon-telegram::before { background-image: url("icons/telegram.svg"); }
+  .icon-discord::before  { background-image: url("icons/discord.svg"); }
+  .icon-tiktok::before   { background-image: url("icons/tiktok.svg"); }
 }
 
 /* =======================
