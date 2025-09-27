@@ -338,6 +338,20 @@
   const LIKE = (haystack, needle) => lower(haystack).includes(lower(needle));
   const isAbsolute = (u) => /^(data:|https?:|\/\/)/i.test(u);
   const bustIfLocal = (u, ver) => (isAbsolute(u) ? u : (u + (ver ? `?v=${ver}` : '')));
+  const buildArchiveEndpoint = (base, version) => {
+    const cleanBase = trim(base || '');
+    const finalBase = cleanBase || '/archive/list.json';
+    const ver = trim(version || '');
+    if (!ver) return finalBase;
+    try {
+      const url = new URL(finalBase, window.location.origin);
+      url.searchParams.set('v', ver);
+      return url.toString();
+    } catch {
+      const sep = finalBase.includes('?') ? '&' : '?';
+      return `${finalBase}${sep}v=${ver}`;
+    }
+  };
 
   // Tag matching flessibile (token + frase)
   const makeTagsCSV = (tagsArr) => {
@@ -603,9 +617,12 @@
   // Bootstrap
   const bootstrap = async () => {
     try {
-      const appVer = document.documentElement.getAttribute('data-app-ver') || '';
-      const ver = appVer ? `?v=${appVer}` : '';
-      const res = await fetch(`/archive/list.json${ver}`, { credentials: 'same-origin' });
+      const appVer = trim(document.documentElement.getAttribute('data-app-ver') || '');
+      const rawEndpoint = (typeof window !== 'undefined' && window.__ARCHIVE_ENDPOINT__ != null)
+        ? window.__ARCHIVE_ENDPOINT__
+        : '';
+      const endpoint = buildArchiveEndpoint(rawEndpoint, appVer);
+      const res = await fetch(endpoint, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json(); // [{id, kind, date, title, overline, desc, thumb, tags, links}]
 
@@ -630,3 +647,4 @@
     bootstrap();
   }
 })();
+

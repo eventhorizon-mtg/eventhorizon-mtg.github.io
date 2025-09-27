@@ -275,6 +275,8 @@
 .pill.btn--scry:hover{ background:var(--indigo-900,#2F2760); }
 .pill.btn--edh{ background:var(--teal-600,#007A7C); }
 .pill.btn--edh:hover{ background:var(--teal-700,#006668); }
+.pill.btn--teal{ background:var(--teal-600,#007A7C); }
+.pill.btn--teal:hover{ background:var(--teal-700,#006668); }
 .pill.btn--mox{ background:var(--orange-600,#DB6A1A); }
 .pill.btn--mox:hover{ background:var(--orange-500,#FE771D); }
 .pill.btn--archi{ background:#1E6F78; }
@@ -439,3 +441,4 @@
     background: rgba(211,47,47,0.40); /* YouTube red, semi-trasparente */
   }
 }
+

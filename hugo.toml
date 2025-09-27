@@ -15,6 +15,7 @@ enableRobotsTXT = true
 
 [params]
   siteName = "EventHorizon.mtg"
+  appVer = "2025.09.27"
 
   # Open Graph (fallback globali; sovrascrivibili per pagina con front matter)
   [params.og]
@@ -27,7 +28,7 @@ enableRobotsTXT = true
   themeColor = "#0E0F1A"
 
   # Preload hero LCP (opzionale: lascia o cambia path)
-  preloadHero = "/assets/bg_image.webp"
+  preloadHero = "/images/bg_image.webp"
 
 [outputFormats.ArchiveList]
 mediaType    = "application/json"

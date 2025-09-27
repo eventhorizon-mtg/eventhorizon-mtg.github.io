@@ -10,11 +10,12 @@ tags: ["risorse", "tool", "database"]
 links:
   - label: "Scryfall"
     href: "#"
-    btn_class: "btn--neutral"
+    btn_class: "btn--base"
     sort_order: 1
     primary: false
   - label: "EDHREC"
     href: "#"
-    btn_class: "btn--neutral"
+    btn_class: "btn--base"
     sort_order: 2
     primary: false
+

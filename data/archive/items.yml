@@ -11,7 +11,7 @@
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=abcd1234"
-      btn_class: "btn--primary btn--yt"
+      btn_class: "btn--yt"
       sort_order: 10
     - label: "Scryfall"
       href: "https://scryfall.com/card/bro"
@@ -29,7 +29,7 @@
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=efgh5678"
-      btn_class: "btn--primary btn--yt"
+      btn_class: "btn--yt"
       sort_order: 10
 
 - id: "Content003"
@@ -47,7 +47,7 @@
       sort_order: 10
     - label: "Archidekt"
       href: "https://archidekt.com/decks/xyz"
-      btn_class: "btn--arch"
+      btn_class: "btn--archi"
       sort_order: 20
 
 - id: "Video004"
@@ -61,11 +61,11 @@
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=ijkl9012"
-      btn_class: "btn--primary btn--yt"
+      btn_class: "btn--yt"
       sort_order: 10
     - label: "EDHREC"
       href: "https://edhrec.com/commanders/nicol-bolas"
-      btn_class: "btn--edhrec"
+      btn_class: "btn--edh"
       sort_order: 20
 
 - id: "Content005"
@@ -79,7 +79,7 @@
   links:
     - label: "Archidekt"
       href: "https://archidekt.com/decks/abc"
-      btn_class: "btn--primary btn--arch"
+      btn_class: "btn--archi"
       sort_order: 10
 
 - id: "Video006"
@@ -93,7 +93,7 @@
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=mnop3456"
-      btn_class: "btn--primary btn--yt"
+      btn_class: "btn--yt"
       sort_order: 10
 
 - id: "Content007"
@@ -121,5 +121,6 @@
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=qrst7890"
-      btn_class: "btn--primary btn--yt"
+      btn_class: "btn--yt"
       sort_order: 10
+

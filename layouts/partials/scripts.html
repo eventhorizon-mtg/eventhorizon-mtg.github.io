@@ -34,11 +34,6 @@
   <script>
     window.__ARCHIVE_ENDPOINT__ = "{{ "/archive/list.json" | relURL }}";
   </script>
-  {{ with resources.Get "js/archive.js" }}
-    {{ $js := . | resources.Fingerprint "sha512" }}
-    <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
-  {{ else }}
-    <script defer src="{{ "js/archive.js" | relURL }}"></script>
-  {{ end }}
 {{ end }}
 <!-- <<< END: load archive.js solo su /archive/ -->
+
