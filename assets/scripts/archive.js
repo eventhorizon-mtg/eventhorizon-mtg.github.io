@@ -1,9 +1,9 @@
-/**
- * /script/archive.js — EventHorizon.mtg (Archivio)
+﻿/**
+ * /script/archive.js â€” EventHorizon.mtg (Archivio)
  * - Bottom-sheet mobile (overlay, focus-trap, drag handle)
  * - Chevron: sheet su mobile, pannello full-width su desktop
  * - Search: reset e placeholder responsive
- * - Filter mobile: popover "Tutti/Video/Contenuti" (non applica subito); bottone attivo se kind ≠ ""
+ * - Filter mobile: popover "Tutti/Video/Contenuti" (non applica subito); bottone attivo se kind â‰  ""
  */
 
 (() => {
@@ -46,6 +46,7 @@
     const ctas     = qs('.archive-sheet__ctas', sheet);
 
     let lastFocus = null;
+    let currentItem = null;
 
     const trapFocus = (ev) => {
       if (ev.key !== 'Tab') return;
@@ -58,9 +59,10 @@
       else if (!ev.shiftKey && document.activeElement === last) { first.focus(); ev.preventDefault(); }
     };
 
-    const openSheet = (payload) => {
+    const openSheet = (payload, fromItem) => {
       if (!mqSheet.matches) return; // solo mobile/tablet
       lastFocus = document.activeElement;
+      currentItem = fromItem || null;
 
       titleEl.textContent = payload.title || '';
       content.innerHTML   = payload.descHtml || '';
@@ -78,7 +80,10 @@
 
       sheet.setAttribute('aria-hidden', 'false');
       backdrop.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('no-scroll');
+      sheet.classList.add('is-open');
+      backdrop.classList.add('is-open');
+      document.body.classList.add('is-sheet-open');
+      if (currentItem) { try { currentItem.classList.add('is-sheet-open'); } catch(_) {} }
 
       sheet.addEventListener('keydown', trapFocus);
       (btnClose || sheet).focus();
@@ -87,7 +92,10 @@
     const closeSheet = () => {
       sheet.setAttribute('aria-hidden', 'true');
       backdrop.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('no-scroll');
+      sheet.classList.remove('is-open');
+      backdrop.classList.remove('is-open');
+      document.body.classList.remove('is-sheet-open');
+      if (currentItem) { try { currentItem.classList.remove('is-sheet-open'); } catch(_) {} currentItem = null; }
       sheet.removeEventListener('keydown', trapFocus);
       if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
     };
@@ -131,7 +139,7 @@
         title,
         descHtml: desc ? `<p class="item-summary">${desc.textContent}</p>` : '',
         links
-      });
+      }, article);
       ev.preventDefault();
     });
 
@@ -173,7 +181,7 @@
     const q = qs('#q', form);
     const onMQ = () => {
       if (!q) return;
-      q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione o tag…';
+      q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione o tagâ€¦';
     };
     onMQ();
     mqPhone.addEventListener && mqPhone.addEventListener('change', onMQ);
@@ -321,7 +329,7 @@
 })();
 
 /* ============================================================
- * Data & Render layer — Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy
+ * Data & Render layer â€” Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy
  * ============================================================ */
 (() => {
   'use strict';
@@ -614,7 +622,7 @@
       listOl.replaceWith(p);
       return;
     } else {
-      // se c'è un vecchio <p.empty>, rimpiazzalo con un nuovo OL
+      // se c'Ã¨ un vecchio <p.empty>, rimpiazzalo con un nuovo OL
       const oldEmpty = container.querySelector('p.empty');
       if (oldEmpty) {
         oldEmpty.remove();
