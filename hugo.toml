@@ -2,6 +2,8 @@ baseURL = "https://cetriolomtg-eng.github.io/eventhorizon/"
 languageCode = "it-it"
 title = "EventHorizon.mtg"
 
+publishDir = "docs"
+canonifyURLs = true
 enableRobotsTXT = true
 
 [pagination]
