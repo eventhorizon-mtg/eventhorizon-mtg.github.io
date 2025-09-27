@@ -125,7 +125,7 @@
         {{ if gt (len $items) 0 }}
           {{ range $i, $it := $items }}
             {{ $isVideo := eq (lower $it.kind) "video" }}
-            {{ $thumb := or $it.thumb "/assets/cards/fblthp_placeholder.webp" }}
+            {{ $thumb := or $it.thumb "/images/cards/fblthp_placeholder.webp" }}
             {{ $over  := $it.overline }}
             {{ $tit   := $it.title }}
             {{ $desc  := $it.desc }}
@@ -324,3 +324,4 @@
 
 </main>
 {{ end }}
+

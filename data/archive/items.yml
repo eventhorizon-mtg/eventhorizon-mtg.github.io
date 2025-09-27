@@ -5,8 +5,8 @@
   title: "La Guerra dei Fratelli"
   overline: "LA STORIA DI MAGIC - EPISODIO #06"
   desc: "Approfondimento sulla leggendaria guerra tra Urza e Mishra."
-  thumb: "/assets/thumbs/video001.webp"
-  card: "/assets/cards/card001.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
+  card: "/images/cards/fblthp_placeholder.webp"
   tags: ["urza", "mishra", "brothers war"]
   links:
     - label: "YouTube"
@@ -24,7 +24,7 @@
   title: "Phyrexia Compleated"
   overline: "STORIE DI MTG"
   desc: "Come i Phyrexiani hanno tentato di conquistare il Multiverso."
-  thumb: "/assets/thumbs/video002.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["phyrexia", "yawg", "urabrask"]
   links:
     - label: "YouTube"
@@ -38,7 +38,7 @@
   title: "Guida al Commander"
   overline: "FORMATI"
   desc: "Una guida completa al formato Commander / EDH."
-  thumb: "/assets/thumbs/content003.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["commander", "edh", "guide"]
   links:
     - label: "Moxfield"
@@ -56,7 +56,7 @@
   title: "Il Ritorno di Nicol Bolas"
   overline: "PLANESWALKER"
   desc: "Analisi narrativa e carte chiave legate a Nicol Bolas."
-  thumb: "/assets/thumbs/video004.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["nicol", "bolas", "nicol bolas"]
   links:
     - label: "YouTube"
@@ -74,7 +74,7 @@
   title: "Five Color Decks"
   overline: "DECKBUILDING"
   desc: "Strategie per costruire mazzi a cinque colori in Commander."
-  thumb: "/assets/thumbs/content005.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["five colors", "wubrg"]
   links:
     - label: "Archidekt"
@@ -88,7 +88,7 @@
   title: "Urza vs Mishra"
   overline: "SAGHE DI DOMINARIA"
   desc: "Conflitto epico tra i fratelli Urza e Mishra raccontato nel dettaglio."
-  thumb: "/assets/thumbs/video006.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["urza", "mishra", "dominaria"]
   links:
     - label: "YouTube"
@@ -102,7 +102,7 @@
   title: "Carte Iconiche"
   overline: "TOP LIST"
   desc: "Una selezione delle carte più iconiche della storia di Magic."
-  thumb: "/assets/thumbs/content007.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["iconic", "classic cards"]
   links:
     - label: "Scryfall"
@@ -116,11 +116,12 @@
   title: "Yawmoth e la Nuova Phyrexia"
   overline: "LEGGENDE"
   desc: "Dalla nascita di Yawgmoth fino alla Nuova Phyrexia."
-  thumb: "/assets/thumbs/video008.webp"
+  thumb: "/images/cards/fblthp_placeholder.webp"
   tags: ["yawmoth", "phyrexia", "legends"]
   links:
     - label: "YouTube"
       href: "https://www.youtube.com/watch?v=qrst7890"
       btn_class: "btn--yt"
       sort_order: 10
+
 

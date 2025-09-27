@@ -21,7 +21,7 @@ enableRobotsTXT = true
   [params.og]
     title = "EventHorizon.mtg"
     description = "Magic: The Gathering • Guide, video e risorse selezionate."
-    image = "/assets/social/og-image.jpg"
+    image = "/images/bg_image.webp"
     locale = "it_IT"
 
   # UI
@@ -39,5 +39,6 @@ permalinkable  = true
 
 
 relativeURLs = true
+
 
 

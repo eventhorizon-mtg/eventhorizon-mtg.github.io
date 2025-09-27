@@ -5,7 +5,7 @@ date: "2025-09-10"
 title: "Introduzione a Commander (EDH)"
 overline: "YouTube • Guide"
 desc: "Concetti base del formato Commander: regole, mazzi e consigli per iniziare."
-thumb: "/img/archive/eh-0001.webp"  # fallback possibile: /img/placeholders/fblthp_placeholder.webp
+thumb: "/images/cards/fblthp_placeholder.webp"  # fallback possibile: /img/placeholders/fblthp_placeholder.webp
 tags: ["commander", "tutorial", "intro"]
 links:
   - label: "Guarda su YouTube"
@@ -18,3 +18,4 @@ links:
     btn_class: "btn--teal"
     sort_order: 2
     primary: false
+

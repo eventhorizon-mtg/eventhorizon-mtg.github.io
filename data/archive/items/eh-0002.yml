@@ -5,7 +5,7 @@ date: "2025-08-28"
 title: "Portale Risorse MTG"
 overline: "Link utili"
 desc: "Raccolta di risorse: regole, database carte, strumenti per deckbuilding."
-thumb: "/img/archive/eh-0002.webp"  # se non vuoi il thumbnail cliccabile, nessun link primario
+thumb: "/images/cards/fblthp_placeholder.webp"  # se non vuoi il thumbnail cliccabile, nessun link primario
 tags: ["risorse", "tool", "database"]
 links:
   - label: "Scryfall"
@@ -18,4 +18,5 @@ links:
     btn_class: "btn--base"
     sort_order: 2
     primary: false
+
 

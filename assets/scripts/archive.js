@@ -438,7 +438,7 @@
     let thumbWeb = trim(it.thumb || '');
     if (thumbWeb && !isAbsolute(thumbWeb)) thumbWeb = '/' + thumbWeb.replace(/^\/+/, '');
     const appVer = document.documentElement.getAttribute('data-app-ver') || '';
-    const thumbSrc = bustIfLocal(thumbWeb || '/assets/cards/fblthp_placeholder.webp', appVer);
+    const thumbSrc = bustIfLocal(thumbWeb || '/images/cards/fblthp_placeholder.webp', appVer);
 
     const links = Array.isArray(it.links) ? it.links.slice().sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) : [];
 
@@ -647,4 +647,5 @@
     bootstrap();
   }
 })();
+
 
