@@ -1,3 +1,250 @@
+/**
+ * /script/archive.js — EventHorizon.mtg (Archivio)
+ * - Bottom-sheet mobile (overlay, focus-trap, drag handle)
+ * - Chevron: sheet su mobile, pannello full-width su desktop
+ * - Search: reset e placeholder responsive
+ * - Filter mobile: toggle di #kind via aria-controls + hidden (binding globale + multi-toggle)
+ */
+
+(() => {
+  'use strict';
+
+  /* ==========================
+   * Config & helpers
+   * ========================== */
+  const MQ_SHEET = '(max-width: 1023.98px)'; // mobile/tablet per sheet + pannello desktop
+  const MQ_PHONE = '(max-width: 768px)';     // placeholder breve "Cerca"
+
+  const TRUE = 'true';
+  const FALSE = 'false';
+
+  const qs  = (sel, root = document) => root.querySelector(sel);
+  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const on  = (el, ev, cb, opts) => el && el.addEventListener(ev, cb, opts);
+  const set = (el, name, val) => el && el.setAttribute(name, String(val));
+
+  const mqSheet = window.matchMedia ? window.matchMedia(MQ_SHEET) : { matches: true, addEventListener(){} };
+  const mqPhone = window.matchMedia ? window.matchMedia(MQ_PHONE) : { matches: false, addEventListener(){} };
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  const getURL = () => new URL(window.location.href);
+  const getParam = (name) => getURL().searchParams.get(name);
+
+  /* ==========================
+   * 1) Bottom-sheet (mobile) + Focus Trap
+   * ========================== */
+  (() => {
+    const sheet    = qs('.archive-sheet');
+    const backdrop = qs('.archive-sheet-backdrop');
+    const openers  = qsa('.item .item-actions-summary'); // delega anche dopo render dinamico
+    if (!sheet || !backdrop) return; // fail-safe: se manca il backdrop, il modulo non parte
+
+    const btnClose = qs('.archive-sheet__close', sheet);
+    const handle   = qs('.archive-sheet__handle', sheet);
+    const titleEl  = qs('#archive-sheet-title', sheet);
+    const content  = qs('.archive-sheet__content', sheet);
+    const ctas     = qs('.archive-sheet__ctas', sheet);
+
+    let lastFocus = null;
+
+    const trapFocus = (ev) => {
+      if (ev.key !== 'Tab') return;
+      const focusables = qsa('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])', sheet)
+        .filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last  = focusables[focusables.length - 1];
+
+      if (ev.shiftKey && document.activeElement === first) {
+        last.focus();
+        ev.preventDefault();
+      } else if (!ev.shiftKey && document.activeElement === last) {
+        first.focus();
+        ev.preventDefault();
+      }
+    };
+
+    const openSheet = (payload) => {
+      if (!mqSheet.matches) return; // solo mobile/tablet
+      lastFocus = document.activeElement;
+
+      // popola contenuti
+      titleEl.textContent = payload.title || '';
+      content.innerHTML   = payload.descHtml || '';
+      ctas.innerHTML      = '';
+      (payload.links || []).forEach(link => {
+        const a = document.createElement('a');
+        a.className = link.cls || 'pill btn--base';
+        a.href      = link.url;
+        a.target    = '_blank';
+        a.rel       = 'noopener';
+        a.title     = link.lab || 'Apri';
+        a.textContent = link.lab || 'Apri';
+        ctas.appendChild(a);
+      });
+
+      sheet.setAttribute('aria-hidden', 'false');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('no-scroll');
+
+      // focus management
+      sheet.addEventListener('keydown', trapFocus);
+      (btnClose || sheet).focus();
+    };
+
+    const closeSheet = () => {
+      sheet.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('no-scroll');
+      sheet.removeEventListener('keydown', trapFocus);
+      if (lastFocus && typeof lastFocus.focus === 'function') {
+        lastFocus.focus();
+      }
+    };
+
+    // Click chiusura
+    on(btnClose, 'click', closeSheet);
+    on(backdrop, 'click', closeSheet);
+
+    // Drag to close (semplice)
+    let startY = null, lastY = null;
+    const onStart = (e) => { startY = (e.touches ? e.touches[0].clientY : e.clientY); lastY = startY; };
+    const onMove  = (e) => { if (startY == null) return; lastY = (e.touches ? e.touches[0].clientY : e.clientY); };
+    const onEnd   = () => {
+      if (startY != null && lastY != null && (lastY - startY) > 60) closeSheet();
+      startY = lastY = null;
+    };
+    on(handle, 'mousedown', onStart);
+    on(handle, 'mousemove', onMove);
+    on(handle, 'mouseup',   onEnd);
+    on(handle, 'touchstart', onStart, { passive: true });
+    on(handle, 'touchmove',  onMove,  { passive: true });
+    on(handle, 'touchend',   onEnd);
+
+    // Delego apertura: click su summary dell'item -> apre sheet con contenuto dal pannello
+    document.addEventListener('click', (ev) => {
+      const btn = ev.target && ev.target.closest('.item-actions-summary');
+      if (!btn || !mqSheet.matches) return;
+
+      const article = btn.closest('.item');
+      const li = article && article.closest('.archive-item');
+      if (!li) return;
+
+      const panel = li.querySelector('.item-panel');
+      const desc  = panel ? panel.querySelector('.item-summary') : null;
+      const ctaEls = panel ? qsa('.item-ctas a', panel) : [];
+      const title = article.querySelector('.item-title')?.textContent || '';
+
+      const links = ctaEls.map(a => ({
+        url: a.getAttribute('href'),
+        lab: a.textContent.trim(),
+        cls: a.className
+      }));
+
+      openSheet({
+        title,
+        descHtml: desc ? `<p class="item-summary">${desc.textContent}</p>` : '',
+        links
+      });
+      ev.preventDefault();
+    });
+
+    // Chiudi con ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sheet.getAttribute('aria-hidden') === 'false') {
+        closeSheet();
+      }
+    });
+  })();
+
+  /* ==========================
+   * 2) Pannello desktop (in-row)
+   * ========================== */
+  (() => {
+    const onDesktopToggle = (ev) => {
+      if (mqSheet.matches) return; // solo desktop
+      const item = ev.target && ev.target.closest('.item');
+      if (!item) return;
+      const li = item.closest('.archive-item');
+      if (!li) return;
+      const panel = qs('.item-panel', li);
+      const trigger = qs('.item-actions-summary', item);
+      if (!panel || !trigger) return;
+      const willOpen = !item.classList.contains('is-open');
+      item.classList.toggle('is-open', willOpen);
+      set(trigger, 'aria-expanded', willOpen ? TRUE : FALSE);
+      try { panel.hidden = !willOpen; } catch {}
+    };
+
+    document.addEventListener('click', (ev) => {
+      const btn = ev.target && ev.target.closest('.item-actions-summary');
+      if (!btn) return;
+      if (!mqSheet.matches) { // desktop
+        onDesktopToggle(ev);
+      }
+    });
+  })();
+
+  /* ==========================
+   * 3) Search UI (placeholder responsive)
+   * ========================== */
+  (() => {
+    const form = qs('#archive-search-form');
+    if (!form) return;
+    const q = qs('#q', form);
+    const onMQ = () => {
+      if (!q) return;
+      q.placeholder = mqPhone.matches
+        ? 'Cerca'
+        : 'Cerca per titolo, descrizione o tag…';
+    };
+    onMQ();
+    mqPhone.addEventListener && mqPhone.addEventListener('change', onMQ);
+  })();
+
+  /* ==========================
+   * 4) Search Reset + Filter Toggle
+   * ========================== */
+  (() => {
+    // Filter toggle (apre/chiude il select su mobile)
+    document.addEventListener('click', (e) => {
+      const t = e.target && e.target.closest('.archive-search__filter-toggle');
+      if (!t) return;
+      e.preventDefault();
+      const sel = qs('#kind');
+      if (!sel) return;
+      const expanded = t.getAttribute('aria-expanded') === TRUE;
+      set(t, 'aria-expanded', expanded ? FALSE : TRUE);
+      // toggle hidden con attribute
+      if (expanded) sel.setAttribute('hidden', '');
+      else sel.removeAttribute('hidden');
+    });
+
+    // Reset: unica sorgente di verità (delegato, robusto)
+    document.addEventListener('click', (e) => {
+      const btn = e.target && e.target.closest('.archive-search__reset');
+      if (!btn) return;
+      e.preventDefault();
+
+      const u = new URL(window.location.href);
+      u.searchParams.delete('q');
+      u.searchParams.delete('p');
+      u.searchParams.delete('kind');
+
+      // Pulisce i campi del form se presenti
+      const form  = qs('.archive-search__form');
+      const q     = qs('#q', form || document);
+      const kind  = qs('#kind', form || document);
+      if (q)    q.value = '';
+      if (kind) kind.value = '';
+
+      // Naviga alla versione "pulita" della pagina
+      window.location.href = u.toString();
+    });
+  })();
+})();
+
 /* ============================================================
  * /script/archive.js — Data & Render layer (append non invasivo)
  * Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy (PHP+DB)
@@ -192,7 +439,7 @@
 
     // Regola: se c'è primary -> niente pill sul thumb; sheet solo per la descrizione/pills extra
     if (primaryUrl) {
-      // manteniamo comunque pills extra nel dropdown (come nella tua ultimo versione Hugo)
+      // manteniamo comunque pills extra nel dropdown
       hasDropdown = (!!desc) || (otherCount > 0);
       summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
     }
@@ -258,7 +505,6 @@
 
   // Ordinamento legacy: date DESC, id DESC
   const parseDate = (d) => {
-    // accetta ISO o yyyy-mm-dd
     const t = Date.parse(d);
     return isNaN(t) ? 0 : t;
   };
@@ -283,9 +529,15 @@
 
   // Pager UI
   const updatePager = (state) => {
+    const pager = qs('.archive-pager');
     if (!pager) return;
+
     const url = getURL();
     const { page, pages } = state;
+
+    const prevA = qs('a[rel="prev"]', pager);
+    const nextA = qs('a[rel="next"]', pager);
+    const currSpan = qs('.curr', pager);
 
     const setHref = (a, target) => {
       if (!a) return;
@@ -318,11 +570,21 @@
   };
 
   const updateHeroCount = (n) => {
+    const heroCount = qs('.archive-hero .filter-note strong');
     if (heroCount) heroCount.textContent = new Intl.NumberFormat('it-IT').format(n);
   };
 
   // Render lista
   const renderList = (arr) => {
+    const sectionArchive = qs('section.archive');
+    let listOl = qs('ol.archive-timeline', sectionArchive);
+    if (!listOl) {
+      listOl = document.createElement('ol');
+      listOl.className = 'archive-timeline';
+      const container = qs('.container', sectionArchive) || sectionArchive;
+      container.appendChild(listOl);
+    }
+
     // Svuota OL
     listOl.innerHTML = '';
     if (!arr.length) {
@@ -332,15 +594,19 @@
       p.setAttribute('aria-live', 'polite');
       const qVal = trim(getParam('q') || '');
       p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
+      // Sostituisci l'OL con il messaggio
       listOl.replaceWith(p);
       return;
     } else {
-      // Se era stato sostituito da <p.empty>, ripristina OL
-      if (listOl.tagName !== 'OL') {
+      // Se era stato sostituito da <p.empty>, ripristina OL (no-op se già presente)
+      const existingEmpty = qs('p.empty', sectionArchive);
+      if (existingEmpty) {
+        existingEmpty.remove();
         const newOl = document.createElement('ol');
         newOl.className = 'archive-timeline';
         const container = qs('.container', sectionArchive) || sectionArchive;
         container.appendChild(newOl);
+        listOl = newOl;
       }
     }
     // Append items
@@ -352,6 +618,7 @@
   // Bootstrap: fetch dati, filtra, pagina, render
   const bootstrap = async () => {
     try {
+      const appVer = document.documentElement.getAttribute('data-app-ver') || '';
       const ver = appVer ? `?v=${appVer}` : '';
       const res = await fetch(`/archive/list.json${ver}`, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -367,7 +634,6 @@
       renderList(paged.slice);
       updatePager(paged);
     } catch (err) {
-      // Fallback: non interrompere UI
       console.error('[archive] dataset error:', err);
     }
   };
