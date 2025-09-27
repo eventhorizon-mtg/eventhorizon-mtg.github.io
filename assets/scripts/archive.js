@@ -1,415 +1,381 @@
-/**
- * /script/archive.js — EventHorizon.mtg (Archivio)
- * - Bottom-sheet mobile (overlay, focus-trap, drag handle)
- * - Chevron: sheet su mobile, pannello full-width su desktop
- * - Search: reset e placeholder responsive
- * - Filter mobile: toggle di #kind via aria-controls + hidden (binding globale + multi-toggle)
- */
-
+/* ============================================================
+ * /script/archive.js — Data & Render layer (append non invasivo)
+ * Replica WHERE/ORDER BY/LIMIT/OFFSET del legacy (PHP+DB)
+ * ============================================================ */
 (() => {
   'use strict';
 
-  /* ==========================
-   * Config & helpers
-   * ========================== */
-  const MQ_SHEET = '(max-width: 1023.98px)'; // mobile/tablet per sheet + pannello desktop
-  const MQ_PHONE = '(max-width: 768px)';     // placeholder breve "Cerca"
-
-  const TRUE = 'true';
-  const FALSE = 'false';
-
+  // Helpers locali (non interferiscono col blocco esistente)
   const qs  = (sel, root = document) => root.querySelector(sel);
   const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const on  = (el, ev, cb, opts) => el && el.addEventListener(ev, cb, opts);
-  const set = (el, name, val) => el && el.setAttribute(name, String(val));
 
-  const mqSheet = window.matchMedia ? window.matchMedia(MQ_SHEET) : null;
-  const mqPhone = window.matchMedia ? window.matchMedia(MQ_PHONE) : null;
+  const text = (v) => (v == null ? '' : String(v));
+  const lower = (v) => text(v).toLowerCase();
+  const trim = (v) => text(v).trim();
 
-  const isMobileForSheet = () => (mqSheet ? mqSheet.matches : (window.innerWidth <= 1024));
-  const isPhone = () => (mqPhone ? mqPhone.matches : (window.innerWidth <= 768));
+  const getURL = () => new URL(window.location.href);
+  const getParam = (name) => getURL().searchParams.get(name);
 
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const LIKE = (haystack, needle) => lower(haystack).includes(lower(needle));
 
-  /* ==========================
-   * 1) Bottom-sheet (mobile)
-   * ========================== */
-  (function initBottomSheet() {
-    const sheet    = qs('.archive-sheet');
-    const backdrop = qs('.archive-sheet-backdrop');
-    if (!sheet || !backdrop) return;
+  // Emula il matching tag “flessibile” del legacy (token + frase intera)
+  // list.archivelist.json esporta "tags": [] => normalizzo in CSV per emulare CONCAT(',', lower(tags_csv), ',')
+  const makeTagsCSV = (tagsArr) => {
+    const arr = Array.isArray(tagsArr) ? tagsArr : [];
+    const csv = arr.map((t) => lower(t)).join(',');
+    return `,${csv},`; // wrapped
+  };
+  const matchTagsFlexible = (tagsArr, q) => {
+    const wrapped = makeTagsCSV(tagsArr);     // ",foo,bar baz,"
+    const qLower  = lower(q).trim();
+    if (!qLower) return false;
 
-    const btnClose     = qs('.archive-sheet__close', sheet);
-    const sheetTitle   = qs('#archive-sheet-title', sheet);
-    const sheetContent = qs('.archive-sheet__content', sheet);
-    const sheetCtas    = qs('.archive-sheet__ctas', sheet);
-    const sheetHandle  = qs('.archive-sheet__handle', sheet);
+    // tokenizzazione (spazio) + frase intera
+    const tokens = qLower.split(/\s+/).filter(Boolean);
 
-    let lastTrigger = null; // bottone chevron che ha aperto lo sheet
-    let lastItem    = null; // .item relativo
-
-    const getPanelFromItem = (item) => {
-      const li = item.closest('.archive-item');
-      return li ? qs('.item-panel', li) : null;
-    };
-
-    const fillSheetFromItem = (item) => {
-      // Titolo
-      const t = qs('.item-title', item);
-      sheetTitle.textContent = t ? String(t.textContent || '').trim() : 'Dettagli';
-
-      // Contenuto (descrizione)
-      sheetContent.innerHTML = '';
-      const panel = getPanelFromItem(item);
-      const desc = panel ? qs('.item-summary', panel) : null;
-      if (desc) {
-        const p = document.createElement('p');
-        p.className = 'sheet-summary';
-        p.textContent = String(desc.textContent || '').trim();
-        sheetContent.appendChild(p);
-      }
-
-      // CTAs (pills)
-      sheetCtas.innerHTML = '';
-      const ctas = panel ? qs('.item-ctas', panel) : null;
-      if (ctas) {
-        qsa('a', ctas).forEach(a => sheetCtas.appendChild(a.cloneNode(true)));
-      }
-    };
-
-    const openSheet = (item, trigger) => {
-      fillSheetFromItem(item);
-      lastTrigger = trigger || null;
-      lastItem    = item || null;
-
-      // Altezza iniziale (60vh) come px per drag più fluido
-      try {
-        const initH = Math.round(window.innerHeight * 0.60);
-        sheet.style.setProperty('--sheet-height', initH + 'px');
-      } catch {}
-
-      document.body.classList.add('is-sheet-open');
-      sheet.classList.add('is-open');
-      backdrop.classList.add('is-open');
-      set(sheet, 'aria-hidden', 'false');
-      set(backdrop, 'aria-hidden', 'false');
-      if (lastItem) lastItem.classList.add('is-sheet-open');
-
-      // Focus iniziale sul close
-      btnClose && btnClose.focus();
-
-      document.addEventListener('keydown', onKeyDown);
-      backdrop.addEventListener('click', closeSheet, { once: true });
-    };
-
-    const closeSheet = () => {
-      sheet.classList.remove('is-open');
-      backdrop.classList.remove('is-open');
-      document.body.classList.remove('is-sheet-open');
-      set(sheet, 'aria-hidden', 'true');
-      set(backdrop, 'aria-hidden', 'true');
-
-      if (lastItem) lastItem.classList.remove('is-sheet-open');
-      document.removeEventListener('keydown', onKeyDown);
-
-      if (lastTrigger && typeof lastTrigger.focus === 'function') {
-        lastTrigger.focus();
-      }
-      lastTrigger = null;
-      lastItem    = null;
-    };
-
-    const trapFocus = (e) => {
-      if (e.key !== 'Tab') return;
-      const focusables = qsa('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])', sheet)
-        .filter(el => !(el.offsetParent === null && el !== document.activeElement));
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last  = focusables[focusables.length - 1];
-      if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault(); first.focus();
-      } else if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault(); last.focus();
-      }
-    };
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closeSheet();
-      } else {
-        trapFocus(e);
-      }
-    };
-
-    // Drag to close/expand (handle)
-    let dragStartY = 0;
-    let dragStartH = 0;
-    let dragging = false;
-    let framePending = false;
-    let nextHeight = null;
-
-    const getHeightPx = () => {
-      const v = getComputedStyle(sheet).getPropertyValue('--sheet-height').trim();
-      if (!v) return Math.round(window.innerHeight * 0.60);
-      const n = parseInt(v, 10);
-      return isNaN(n) ? Math.round(window.innerHeight * 0.60) : n;
-    };
-
-    const onDragStart = (e) => {
-      if (!isMobileForSheet()) return;
-      dragging = true;
-      dragStartY = ('touches' in e) ? (e.touches[0]?.clientY ?? 0) : (e.clientY ?? 0);
-      dragStartH = getHeightPx();
-      sheet.classList.add('is-dragging');
-      document.addEventListener('touchmove', onDragMove, { passive: false });
-      document.addEventListener('touchend', onDragEnd, { passive: true });
-      document.addEventListener('pointermove', onDragMove, { passive: false });
-      document.addEventListener('pointerup', onDragEnd, { passive: true });
-    };
-
-    const onDragMove = (e) => {
-      if (!dragging) return;
-      try { e.preventDefault(); } catch {}
-      const y = ('touches' in e) ? (e.touches[0]?.clientY ?? dragStartY) : (e.clientY ?? dragStartY);
-      const dy = dragStartY - y; // verso l'alto => positivo
-      const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      const MIN = Math.round(Math.max(180, vh * 0.30));
-      const MAX = Math.round(vh * 0.92);
-      const h   = clamp(dragStartH + dy, MIN, MAX);
-      nextHeight = h;
-      if (!framePending) {
-        framePending = true;
-        requestAnimationFrame(() => {
-          if (nextHeight != null) sheet.style.setProperty('--sheet-height', nextHeight + 'px');
-          framePending = false;
-        });
-      }
-    };
-
-    const onDragEnd = () => {
-      if (!dragging) return;
-      dragging = false;
-      const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      const h  = getHeightPx();
-      const T1 = Math.round(vh * 0.33);
-      const T2 = Math.round(vh * 0.80);
-      if (h < T1) { closeSheet(); return; }
-      const target = (h > T2) ? Math.round(vh * 0.90) : Math.round(vh * 0.60);
-      sheet.style.setProperty('--sheet-height', target + 'px');
-      sheet.classList.remove('is-dragging');
-      document.removeEventListener('touchmove', onDragMove, { passive: false });
-      document.removeEventListener('pointermove', onDragMove, { passive: false });
-    };
-
-    if (sheetHandle) {
-      sheetHandle.addEventListener('touchstart', onDragStart, { passive: true });
-      sheetHandle.addEventListener('pointerdown', onDragStart, { passive: true });
+    // Per ogni token: match entro singolo tag (LIKE) + fallback plain (qui è equivalente)
+    for (let i = 0; i < tokens.length; i++) {
+      const tok = tokens[i];
+      // entro “singolo tag”: basta LIKE su wrapped (emulazione)
+      if (wrapped.includes(tok)) return true;
     }
 
-    // Deleghe chevron: sheet su mobile
-    const onSummaryClick = (ev) => {
-      const summary = ev.target && ev.target.closest('.item-actions-summary');
-      if (!summary) return;
-      if (!isMobileForSheet()) return; // desktop gestito altrove
-      ev.preventDefault();
-      const item = summary.closest('.item');
-      if (!item) return;
-      openSheet(item, summary);
-    };
-    const onSummaryKeydown = (ev) => {
-      const summary = ev.target && ev.target.closest('.item-actions-summary');
-      if (!summary) return;
-      if (!isMobileForSheet()) return;
-      if (ev.key === 'Enter' || ev.key === ' ') {
-        ev.preventDefault();
-        const item = summary.closest('.item');
-        if (!item) return;
-        openSheet(item, summary);
-      }
-    };
+    // Fallback: frase intera
+    if (wrapped.includes(qLower)) return true;
 
-    document.addEventListener('click', onSummaryClick);
-    document.addEventListener('keydown', onSummaryKeydown);
-    btnClose && btnClose.addEventListener('click', closeSheet);
+    return false;
+  };
 
-    // Se passa a desktop mentre è aperto → chiudi
-    const onMQSheet = (e) => { if (!e.matches && sheet.classList.contains('is-open')) closeSheet(); };
-    if (mqSheet && typeof mqSheet.addEventListener === 'function') {
-      mqSheet.addEventListener('change', onMQSheet);
-    } else if (mqSheet && typeof mqSheet.addListener === 'function') {
-      mqSheet.addListener(onMQSheet);
+  // Mappatura classi pill come nel legacy
+  const normalizeBtnVariant = (raw) => {
+    const t = lower(trim(raw));
+    if (!t) return 'btn--base';
+    // già valorizzato? es. "btn--yt"
+    const m = t.match(/\bbtn--[a-z0-9\-]+\b/);
+    if (m) return m[0];
+
+    const map = {
+      'youtube': 'btn--yt', 'yt': 'btn--yt',
+      'scryfall': 'btn--scry', 'scry': 'btn--scry',
+      'edhrec': 'btn--edh', 'edh': 'btn--edh',
+      'moxfield': 'btn--mox', 'mox': 'btn--mox',
+      'archidekt': 'btn--archi', 'archi': 'btn--archi',
+      'teal': 'btn--teal', 'gold': 'btn--gold',
+      'primary': 'primary',
+      'indigo': 'btn--base', 'base': 'btn--base', 'default': 'btn--base',
+    };
+    const parts = t.split(/\s+/);
+    for (const p of parts) if (map[p]) return map[p];
+    for (const k in map) if (t.includes(k)) return map[k];
+    return 'btn--base';
+  };
+  const variantFromUrl = (url) => {
+    try {
+      const host = new URL(url, window.location.origin).host.toLowerCase();
+      if (host.includes('youtube.com') || host.includes('youtu.be')) return 'btn--yt';
+      if (host.includes('scryfall.com')) return 'btn--scry';
+      if (host.includes('edhrec.com'))   return 'btn--edh';
+      if (host.includes('moxfield.com')) return 'btn--mox';
+      if (host.includes('archidekt.com'))return 'btn--archi';
+    } catch {}
+    return null;
+  };
+  const pillClassFrom = (btnRaw, url) => {
+    let v = normalizeBtnVariant(btnRaw);
+    if (v === 'btn--base') {
+      const fromUrl = variantFromUrl(url);
+      if (fromUrl) v = fromUrl;
     }
+    return `pill ${v}`;
+  };
+  const pillLabel = (label, url) => {
+    const L = trim(label);
+    if (L) return L;
+    try {
+      const host = new URL(url, window.location.origin).host;
+      return host || 'Apri';
+    } catch { return 'Apri'; }
+  };
+
+  const isAbsolute = (u) => /^(data:|https?:|\/\/)/i.test(u);
+  const bustIfLocal = (u, ver) => (isAbsolute(u) ? u : (u + (ver ? `?v=${ver}` : '')));
+
+  // Stato/pager
+  const getPage = () => {
+    const n = parseInt(getParam('p') || '1', 10);
+    return isNaN(n) || n < 1 ? 1 : n;
+  };
+  const PAGE_SIZE_DEFAULT = 12;
+
+  // Se c’è un data attr o una var globale, usiamola, altrimenti fallback 12
+  const getPageSize = () => {
+    const rootAttr = document.documentElement.getAttribute('data-archive-page-size');
+    if (rootAttr) {
+      const n = parseInt(rootAttr, 10);
+      if (!isNaN(n) && n > 0 && n <= 24) return n;
+    }
+    if (window.__ARCHIVE_PAGE_SIZE__ && Number.isInteger(window.__ARCHIVE_PAGE_SIZE__)) {
+      return Math.max(5, Math.min(24, window.__ARCHIVE_PAGE_SIZE__));
+    }
+    return PAGE_SIZE_DEFAULT;
+  };
+
+  // Elementi DOM essenziali
+  const sectionArchive = qs('section.archive');
+  const listOl         = qs('ol.archive-timeline', sectionArchive) || (() => {
+    const ol = document.createElement('ol');
+    ol.className = 'archive-timeline';
+    const container = qs('.container', sectionArchive) || sectionArchive;
+    container.appendChild(ol);
+    return ol;
   })();
 
-  /* =========================================
-   * 2) Desktop: pannello full-width in-row
-   * ========================================= */
-  (function initDesktopPanelToggle() {
-    const togglePanelFromItem = (item) => {
-      const li = item.closest('.archive-item');
-      if (!li) return;
-      const panel = qs('.item-panel', li);
-      const trigger = qs('.item-actions-summary', item);
-      if (!panel || !trigger) return;
-      const willOpen = !item.classList.contains('is-open');
-      item.classList.toggle('is-open', willOpen);
-      set(trigger, 'aria-expanded', willOpen ? TRUE : FALSE);
-      try { panel.hidden = !willOpen; } catch {}
-    };
+  const heroCount = qs('.archive-hero .filter-note strong');
+  const pager     = qs('.archive-pager');
+  const prevA     = pager ? qs('a[rel="prev"]', pager) : null;
+  const nextA     = pager ? qs('a[rel="next"]', pager) : null;
+  const currSpan  = pager ? qs('.curr', pager) : null;
 
-    const onDesktopToggle = (ev) => {
-      const item = ev.target && ev.target.closest('.item');
-      if (!item) return;
-      if (isMobileForSheet()) return; // mobile gestito dallo sheet
+  // Parametri URL
+  const qRaw  = getParam('q') || '';
+  const q     = trim(qRaw);
+  const kind  = lower(trim(getParam('kind') || ''));
 
-      const isChevron = !!ev.target.closest('.item-actions-summary');
-      const interactive = ev.target.closest('a, button, input, select, textarea');
+  // Leggi appVer (se presente) per cache-busting
+  const appVer = document.documentElement.getAttribute('data-app-ver') || '';
 
-      if (!isChevron && interactive) return; // non interferire con CTA interne
-      if (!item.contains(ev.target)) return;
+  // Render di un singolo item (markup identico al template)
+  const renderItem = (it) => {
+    const idStr = text(it.id);
+    const kindClass = lower(text(it.kind) || 'content');
+    const over  = trim(it.overline || '');
+    const tit   = trim(it.title || '');
+    const desc  = trim(it.desc || '');
 
-      if (isChevron) ev.preventDefault();
-      togglePanelFromItem(item);
-    };
+    // Thumb
+    let thumbWeb = trim(it.thumb || '');
+    if (thumbWeb && !isAbsolute(thumbWeb)) thumbWeb = '/' + thumbWeb.replace(/^\/+/, '');
+    const thumbSrc = bustIfLocal(thumbWeb || '/assets/cards/fblthp_placeholder.webp', appVer);
 
-    document.addEventListener('click', onDesktopToggle);
-  })();
+    // Links
+    const links = Array.isArray(it.links) ? it.links.slice().sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) : [];
 
-  /* =========================================
-   * 3) Mobile Filter Toggle — binding globale + multi-toggle
-   *      (allineato al CSS: form.has-filter-open)
-   * ========================================= */
-  (function initMobileFilterToggle() {
-    const form = qs('.archive-search__form');
+    // primary via token dentro btn_class (come legacy)
+    let primaryIndex = null;
+    for (let i = 0; i < links.length; i++) {
+      const raw = lower(links[i]?.btn_class || '');
+      if (raw && /\bprimary\b/.test(raw)) { primaryIndex = i; break; }
+    }
+    const primaryUrl = (primaryIndex != null) ? trim(links[primaryIndex].href || '') : '';
 
-    // Raccoglie tutti i possibili toggle "Filtro" nel documento (icona filter.svg inclusa)
-    const TOGGLE_SEL = '.archive-search__filter-toggle, [data-filter-toggle], [aria-controls="kind"]';
-
-    const getAllToggles = () => qsa(TOGGLE_SEL, document);
-
-    // Dato un toggle, risolve il vero <select> da mostrare/nascondere
-    const resolveTarget = (toggleEl) => {
-      const id = toggleEl?.getAttribute('aria-controls') || 'kind';
-      let el = document.getElementById(id);
-      if (el && el.tagName !== 'SELECT') {
-        // aria-controls punta a un wrapper → cerca il select al suo interno
-        el = el.querySelector('select#kind, select[name="kind"]');
-      }
-      // fallback: cerca dentro il form, poi nel documento
-      return el || (form ? (qs('#kind', form) || qs('select[name="kind"]', form)) : null) || qs('#kind') || qs('select[name="kind"]');
-    };
-
-    // Sincronizza aria-expanded su TUTTI i toggle che controllano lo stesso select
-    const syncTogglesExpanded = (select, expanded) => {
-      const toggles = getAllToggles();
-      toggles.forEach(tg => {
-        const target = resolveTarget(tg);
-        if (target === select) set(tg, 'aria-expanded', expanded ? TRUE : FALSE);
+    // pills (tutte le altre)
+    const otherPills = [];
+    for (let i = 0; i < links.length; i++) {
+      if (i === primaryIndex) continue;
+      const L = links[i];
+      const url = trim(L?.href || '');
+      if (!url) continue;
+      otherPills.push({
+        url,
+        lab: pillLabel(L?.label || '', url),
+        cls: pillClassFrom(L?.btn_class || '', url),
       });
-    };
-
-    // ⬇️ DIFFERENZA CHIAVE: gestiamo anche .has-filter-open sul form
-    const setFilterState = (select, expanded) => {
-      syncTogglesExpanded(select, expanded);
-
-      if (isMobileForSheet()) {
-        // Stato visuale CSS
-        if (form) form.classList.toggle('has-filter-open', !!expanded);
-        // Stato semantico/A11y
-        select.hidden = !expanded;
-        if (expanded) { try { select.focus(); } catch {} }
-      } else {
-        // Desktop: selettore sempre visibile, e rimuoviamo la classe dal form
-        select.hidden = false;
-        if (form) form.classList.remove('has-filter-open');
-      }
-    };
-
-    // Inizializzazione stato (al load)
-    const select = resolveTarget(getAllToggles()[0] || null);
-    if (!select) return;
-
-    const hasValue = !!String(select.value || '').trim();
-    setFilterState(select, isMobileForSheet() ? hasValue : false);
-
-    // Toggle via click/tastiera (binding globale, funziona anche se il bottone è fuori dal form)
-    const onGlobalClick = (ev) => {
-      const toggle = ev.target && ev.target.closest(TOGGLE_SEL);
-      if (!toggle) return;
-      try { ev.preventDefault(); ev.stopPropagation(); } catch {}
-      const target = resolveTarget(toggle);
-      if (!target) return;
-      const curr = toggle.getAttribute('aria-expanded') === TRUE;
-      setFilterState(target, !curr);
-    };
-    const onGlobalKey = (ev) => {
-      const toggle = ev.target && ev.target.closest(TOGGLE_SEL);
-      if (!toggle) return;
-      if (ev.key === 'Enter' || ev.key === ' ') {
-        try { ev.preventDefault(); ev.stopPropagation(); } catch {}
-        const target = resolveTarget(toggle);
-        if (!target) return;
-        const curr = toggle.getAttribute('aria-expanded') === TRUE;
-        setFilterState(target, !curr);
-      }
-    };
-
-    document.addEventListener('click', onGlobalClick, { passive: false });
-    document.addEventListener('keydown', onGlobalKey);
-
-    // Cambio breakpoint: su desktop il select è sempre visibile e la classe viene rimossa
-    const onMQChange = () => {
-      if (!select) return;
-      if (!isMobileForSheet()) {
-        setFilterState(select, false); // concettualmente chiuso, ma select visibile + classe rimossa
-      } else {
-        // su mobile: se aveva valore o un toggle è marcato expanded, mantieni aperto
-        const toggles = getAllToggles();
-        const expanded = toggles.some(tg => tg.getAttribute('aria-expanded') === TRUE);
-        setFilterState(select, expanded || !!String(select.value || '').trim());
-      }
-    };
-    if (mqSheet && typeof mqSheet.addEventListener === 'function') {
-      mqSheet.addEventListener('change', onMQChange);
-    } else if (mqSheet && typeof mqSheet.addListener === 'function') {
-      mqSheet.addListener(onMQChange);
     }
-  })();
 
-  /* =========================================
-   * 4) Search Reset + Placeholder
-   * ========================================= */
-  (function initSearchUX() {
-    const form  = qs('.archive-search__form');
-    const q     = qs('#q', form || document);
-    const kind  = qs('#kind', form || document);
-    const btnR  = qs('.archive-search__reset', form || document);
+    // aria-controls id
+    const linksId = `links-${idStr.replace(/[^a-zA-Z0-9_\-]+/g, '-')}`;
 
-    // Placeholder: "Cerca" su phone
-    const fullPH  = q ? (q.getAttribute('placeholder') || 'Cerca per titolo, descrizione o tag…') : 'Cerca per titolo, descrizione o tag…';
-    const shortPH = 'Cerca';
-    const applyPH = () => { if (q) q.setAttribute('placeholder', isPhone() ? shortPH : fullPH); };
-    applyPH();
-    if (mqPhone && typeof mqPhone.addEventListener === 'function') {
-      mqPhone.addEventListener('change', applyPH);
+    // hasDropdown
+    let otherCount = otherPills.length;
+    let hasDropdown = (!!desc) || (otherCount > 0);
+    let summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
+
+    // Regola: se c'è primary -> niente pill sul thumb; sheet solo per la descrizione/pills extra
+    if (primaryUrl) {
+      // manteniamo comunque pills extra nel dropdown (come nella tua ultimo versione Hugo)
+      hasDropdown = (!!desc) || (otherCount > 0);
+      summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
+    }
+
+    // Costruzione DOM
+    const li = document.createElement('li');
+    li.className = `archive-item is-${kindClass}`;
+    li.innerHTML = `
+      <article class="item" data-item-id="${idStr}" data-kind="${kindClass}">
+        <header class="item-head">
+          ${over ? `<p class="item-overline">${over}</p>` : ''}
+          <h2 class="item-title">${tit}</h2>
+        </header>
+        ${
+          primaryUrl
+          ? `<a class="item-thumb${primaryUrl && /\bprimary\b/.test(lower(links[primaryIndex]?.btn_class || '')) ? ' primary' : ''}"
+                href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
+               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+             </a>`
+          : `<figure class="item-thumb">
+               <img src="${thumbSrc}" alt="Anteprima: ${tit}" loading="lazy" decoding="async">
+             </figure>`
+        }
+        ${ hasDropdown
+            ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
+                 <span class="sr-only">${summaryLabel}</span>
+               </button>`
+            : ''
+        }
+      </article>
+      ${
+        hasDropdown
+        ? `<div class="item-panel" id="${linksId}" hidden>
+             ${desc ? `<div class="item-descbar"><p class="item-summary">${desc}</p></div>` : ''}
+             ${otherCount > 0
+                ? `<div class="item-ctas" role="group" aria-label="Collegamenti">
+                     ${otherPills.map(P => (
+                       `<a class="${P.cls}" href="${P.url}" target="_blank" rel="noopener" title="${P.lab}">${P.lab}</a>`
+                    )).join('')}
+                   </div>`
+                : ''
+             }
+           </div>`
+        : ''
+      }
+    `;
+    return li;
+  };
+
+  // Filtro come nel legacy
+  const filterItems = (arr, q, kind) => {
+    const Q = lower(q).trim();
+    const K = lower(kind);
+    return arr.filter((it) => {
+      if (K && K !== lower(it.kind || '')) return false;
+      if (!Q) return true;
+
+      const inText = LIKE(it.title || '', Q) || LIKE(it.overline || '', Q) || LIKE(it.desc || '', Q);
+      const inTags = matchTagsFlexible(it.tags || [], Q);
+      return inText || inTags;
+    });
+  };
+
+  // Ordinamento legacy: date DESC, id DESC
+  const parseDate = (d) => {
+    // accetta ISO o yyyy-mm-dd
+    const t = Date.parse(d);
+    return isNaN(t) ? 0 : t;
+  };
+  const sortItems = (arr) => {
+    return arr.slice().sort((a, b) => {
+      const ad = parseDate(a.date), bd = parseDate(b.date);
+      if (ad !== bd) return bd - ad; // desc
+      const aid = text(a.id), bid = text(b.id);
+      return (aid < bid) ? 1 : (aid > bid ? -1 : 0); // id DESC
+    });
+  };
+
+  // Paginazione
+  const paginate = (arr, page, pageSize) => {
+    const total = arr.length;
+    const pages = Math.max(1, Math.ceil(total / pageSize));
+    const p = Math.min(Math.max(1, page), pages);
+    const start = (p - 1) * pageSize;
+    const end = start + pageSize;
+    return { total, pages, page: p, slice: arr.slice(start, end) };
+  };
+
+  // Pager UI
+  const updatePager = (state) => {
+    if (!pager) return;
+    const url = getURL();
+    const { page, pages } = state;
+
+    const setHref = (a, target) => {
+      if (!a) return;
+      const u = new URL(url);
+      u.searchParams.set('p', target);
+      const qVal = getParam('q'); const kVal = getParam('kind');
+      if (qVal) u.searchParams.set('q', qVal); else u.searchParams.delete('q');
+      if (kVal) u.searchParams.set('kind', kVal); else u.searchParams.delete('kind');
+      a.href = u.toString();
+    };
+
+    // prev
+    const prevDisabled = page <= 1;
+    if (prevA) {
+      prevA.classList.toggle('disabled', prevDisabled);
+      prevA.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
+      setHref(prevA, prevDisabled ? 1 : (page - 1));
+      prevA.rel = 'prev';
+    }
+    // curr
+    if (currSpan) currSpan.textContent = `Pag. ${page} / ${pages}`;
+    // next
+    const nextDisabled = page >= pages;
+    if (nextA) {
+      nextA.classList.toggle('disabled', nextDisabled);
+      nextA.setAttribute('aria-disabled', nextDisabled ? 'true' : 'false');
+      setHref(nextA, nextDisabled ? pages : (page + 1));
+      nextA.rel = 'next';
+    }
+  };
+
+  const updateHeroCount = (n) => {
+    if (heroCount) heroCount.textContent = new Intl.NumberFormat('it-IT').format(n);
+  };
+
+  // Render lista
+  const renderList = (arr) => {
+    // Svuota OL
+    listOl.innerHTML = '';
+    if (!arr.length) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.setAttribute('role', 'status');
+      p.setAttribute('aria-live', 'polite');
+      const qVal = trim(getParam('q') || '');
+      p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
+      listOl.replaceWith(p);
+      return;
     } else {
-      on(window, 'resize', applyPH, { passive: true });
+      // Se era stato sostituito da <p.empty>, ripristina OL
+      if (listOl.tagName !== 'OL') {
+        const newOl = document.createElement('ol');
+        newOl.className = 'archive-timeline';
+        const container = qs('.container', sectionArchive) || sectionArchive;
+        container.appendChild(newOl);
+      }
     }
+    // Append items
+    const frag = document.createDocumentFragment();
+    for (const it of arr) frag.appendChild(renderItem(it));
+    listOl.appendChild(frag);
+  };
 
-    // Reset: unica sorgente di verità
-    if (form && btnR) {
-      btnR.addEventListener('click', (e) => {
-        e.preventDefault();
-        const u = new URL(window.location.href);
-        u.searchParams.delete('q');
-        u.searchParams.delete('p');
-        u.searchParams.delete('kind');
-        if (q)    q.value = '';
-        if (kind) kind.value = '';
-        // ricarica pulito
-        window.location.href = u.toString();
-      });
+  // Bootstrap: fetch dati, filtra, pagina, render
+  const bootstrap = async () => {
+    try {
+      const ver = appVer ? `?v=${appVer}` : '';
+      const res = await fetch(`/archive/list.json${ver}`, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json(); // [{id, kind, date, title, overline, desc, thumb, tags, links}]
+      const pageSize = getPageSize();
+      const curPage  = getPage();
+
+      const filtered = filterItems(data, q, kind);
+      const sorted   = sortItems(filtered);
+      const paged    = paginate(sorted, curPage, pageSize);
+
+      updateHeroCount(paged.total);
+      renderList(paged.slice);
+      updatePager(paged);
+    } catch (err) {
+      // Fallback: non interrompere UI
+      console.error('[archive] dataset error:', err);
     }
-  })();
+  };
+
+  // Avvio appena possibile
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
 })();
