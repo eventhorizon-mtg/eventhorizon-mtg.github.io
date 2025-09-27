@@ -3,7 +3,7 @@
  * - Bottom-sheet mobile (overlay, focus-trap, drag handle)
  * - Chevron: sheet su mobile, pannello full-width su desktop
  * - Search: reset e placeholder responsive
- * - Filter mobile: toggle di #kind via aria-controls + hidden (binding globale + multi-toggle)
+ * - Filter mobile: mostra il select (non applica subito); bottone attivo se kind ≠ ""
  */
 
 (() => {
@@ -37,8 +37,7 @@
   (() => {
     const sheet    = qs('.archive-sheet');
     const backdrop = qs('.archive-sheet-backdrop');
-    const openers  = qsa('.item .item-actions-summary'); // delega anche dopo render dinamico
-    if (!sheet || !backdrop) return; // fail-safe: se manca il backdrop, il modulo non parte
+    if (!sheet || !backdrop) return; // fail-safe
 
     const btnClose = qs('.archive-sheet__close', sheet);
     const handle   = qs('.archive-sheet__handle', sheet);
@@ -57,11 +56,9 @@
       const last  = focusables[focusables.length - 1];
 
       if (ev.shiftKey && document.activeElement === first) {
-        last.focus();
-        ev.preventDefault();
+        last.focus(); ev.preventDefault();
       } else if (!ev.shiftKey && document.activeElement === last) {
-        first.focus();
-        ev.preventDefault();
+        first.focus(); ev.preventDefault();
       }
     };
 
@@ -69,7 +66,7 @@
       if (!mqSheet.matches) return; // solo mobile/tablet
       lastFocus = document.activeElement;
 
-      // popola contenuti
+      // contenuti
       titleEl.textContent = payload.title || '';
       content.innerHTML   = payload.descHtml || '';
       ctas.innerHTML      = '';
@@ -88,7 +85,6 @@
       backdrop.setAttribute('aria-hidden', 'false');
       document.body.classList.add('no-scroll');
 
-      // focus management
       sheet.addEventListener('keydown', trapFocus);
       (btnClose || sheet).focus();
     };
@@ -98,16 +94,13 @@
       backdrop.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('no-scroll');
       sheet.removeEventListener('keydown', trapFocus);
-      if (lastFocus && typeof lastFocus.focus === 'function') {
-        lastFocus.focus();
-      }
+      if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
     };
 
-    // Click chiusura
     on(btnClose, 'click', closeSheet);
     on(backdrop, 'click', closeSheet);
 
-    // Drag to close (semplice)
+    // Drag to close
     let startY = null, lastY = null;
     const onStart = (e) => { startY = (e.touches ? e.touches[0].clientY : e.clientY); lastY = startY; };
     const onMove  = (e) => { if (startY == null) return; lastY = (e.touches ? e.touches[0].clientY : e.clientY); };
@@ -122,7 +115,7 @@
     on(handle, 'touchmove',  onMove,  { passive: true });
     on(handle, 'touchend',   onEnd);
 
-    // Delego apertura: click su summary dell'item -> apre sheet con contenuto dal pannello
+    // Delego apertura: click su summary dell'item -> apri sheet (mobile)
     document.addEventListener('click', (ev) => {
       const btn = ev.target && ev.target.closest('.item-actions-summary');
       if (!btn || !mqSheet.matches) return;
@@ -150,11 +143,8 @@
       ev.preventDefault();
     });
 
-    // Chiudi con ESC
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && sheet.getAttribute('aria-hidden') === 'false') {
-        closeSheet();
-      }
+      if (e.key === 'Escape' && sheet.getAttribute('aria-hidden') === 'false') closeSheet();
     });
   })();
 
@@ -180,9 +170,7 @@
     document.addEventListener('click', (ev) => {
       const btn = ev.target && ev.target.closest('.item-actions-summary');
       if (!btn) return;
-      if (!mqSheet.matches) { // desktop
-        onDesktopToggle(ev);
-      }
+      if (!mqSheet.matches) onDesktopToggle(ev);
     });
   })();
 
@@ -204,27 +192,111 @@
   })();
 
   /* ==========================
-   * 4) Search Reset + Filter Toggle
+   * 4) Search Reset + Filter Toggle (mobile)
    * ========================== */
   (() => {
-    // Filter toggle (apre/chiude il select su mobile)
+    const form   = qs('#archive-search-form');
+    const qInput = qs('#q', form || document);
+    const sel    = qs('#kind', form || document);
+    const btn    = qs('.archive-search__filter-toggle', form || document);
+
+    // Stato iniziale del bottone filtro (in base alla URL)
+    const initFilterButtonState = () => {
+      if (!btn || !sel) return;
+      const urlKind = (getParam('kind') || '').toLowerCase();
+      // sincronizza select con URL
+      if (urlKind === 'video' || urlKind === 'content') sel.value = urlKind;
+      else sel.value = '';
+      const active = sel.value !== '';
+      btn.setAttribute('aria-pressed', active ? TRUE : FALSE);
+      btn.classList.toggle('is-active', active);
+      // sincronizza q visivamente
+      if (qInput) qInput.value = getParam('q') || '';
+    };
+    initFilterButtonState();
+
+    // Filter toggle (mobile-first): mostra il select (non applica subito)
     document.addEventListener('click', (e) => {
       const t = e.target && e.target.closest('.archive-search__filter-toggle');
       if (!t) return;
       e.preventDefault();
-      const sel = qs('#kind');
+
       if (!sel) return;
-      const expanded = t.getAttribute('aria-expanded') === TRUE;
-      set(t, 'aria-expanded', expanded ? FALSE : TRUE);
-      // toggle hidden con attribute
-      if (expanded) sel.setAttribute('hidden', '');
-      else sel.removeAttribute('hidden');
+      const isMobile = mqSheet.matches;
+
+      if (isMobile) {
+        // Apri/chiudi come menù: mostra il select e focus
+        const willOpen = t.getAttribute('aria-expanded') !== TRUE;
+        t.setAttribute('aria-expanded', willOpen ? TRUE : FALSE);
+        if (willOpen) {
+          sel.removeAttribute('hidden');
+          sel.style.display = 'block';      // robusto rispetto a display:none nel CSS
+          sel.focus({ preventScroll: true });
+        } else {
+          sel.setAttribute('hidden', '');
+          sel.style.display = '';
+        }
+      } else {
+        // Su desktop puoi semplicemente lasciare il select visibile (no-op)
+        // oppure togglarlo come in mobile se desideri lo stesso comportamento.
+        const willOpen = t.getAttribute('aria-expanded') !== TRUE;
+        t.setAttribute('aria-expanded', willOpen ? TRUE : FALSE);
+        if (willOpen) {
+          sel.removeAttribute('hidden');
+          sel.style.display = '';
+          sel.focus({ preventScroll: true });
+        } else {
+          sel.setAttribute('hidden', '');
+          sel.style.display = '';
+        }
+      }
     });
+
+    // Alla selezione di un valore, NON applica subito:
+    // - chiude il menù su mobile/tablet
+    // - aggiorna lo stato del bottone (attivo se kind ≠ "")
+    document.addEventListener('change', (e) => {
+      if (!sel) return;
+      const isKind = e.target && e.target === sel;
+      if (!isKind) return;
+
+      const isMobile = mqSheet.matches;
+      if (isMobile) {
+        const t = btn;
+        if (t) {
+          t.setAttribute('aria-expanded', FALSE);
+        }
+        sel.setAttribute('hidden', '');
+        sel.style.display = '';
+      }
+
+      const active = sel.value !== '';
+      if (btn) {
+        btn.setAttribute('aria-pressed', active ? TRUE : FALSE);
+        btn.classList.toggle('is-active', active);
+      }
+      // Non navighiamo: l'applicazione avviene alla submit del form
+    });
+
+    // Submit del form: rimuovi sempre 'p' per ripartire dalla pagina 1
+    if (form) {
+      on(form, 'submit', (e) => {
+        // Lasciamo che il browser costruisca l'URL con i soli campi del form.
+        // (Non includerà 'p' se non c'è un input 'p' nel form)
+        // Qui possiamo comunque ripulire la URL corrente per sicurezza:
+        try {
+          const u = new URL(form.action || window.location.href);
+          // NB: non forziamo 'kind', 'q': li invia il form
+          u.searchParams.delete('p');
+          form.action = u.toString();
+        } catch {}
+      });
+    }
 
     // Reset: unica sorgente di verità (delegato, robusto)
     document.addEventListener('click', (e) => {
-      const btn = e.target && e.target.closest('.archive-search__reset');
-      if (!btn) return;
+      const resetBtn = e.target && e.target.closest('.archive-search__reset');
+      if (!resetBtn) return;
       e.preventDefault();
 
       const u = new URL(window.location.href);
@@ -233,12 +305,15 @@
       u.searchParams.delete('kind');
 
       // Pulisce i campi del form se presenti
-      const form  = qs('.archive-search__form');
-      const q     = qs('#q', form || document);
-      const kind  = qs('#kind', form || document);
-      if (q)    q.value = '';
-      if (kind) kind.value = '';
+      if (qInput) qInput.value = '';
+      if (sel)    sel.value = '';
 
+      // Aggiorna stato bottone filtro
+      if (btn) {
+        btn.setAttribute('aria-pressed', FALSE);
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-expanded', FALSE);
+      }
       // Naviga alla versione "pulita" della pagina
       window.location.href = u.toString();
     });
@@ -252,55 +327,42 @@
 (() => {
   'use strict';
 
-  // Helpers locali (non interferiscono col blocco esistente)
+  // Helpers locali
   const qs  = (sel, root = document) => root.querySelector(sel);
   const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
   const text = (v) => (v == null ? '' : String(v));
   const lower = (v) => text(v).toLowerCase();
   const trim = (v) => text(v).trim();
-
   const getURL = () => new URL(window.location.href);
   const getParam = (name) => getURL().searchParams.get(name);
-
   const LIKE = (haystack, needle) => lower(haystack).includes(lower(needle));
+  const isAbsolute = (u) => /^(data:|https?:|\/\/)/i.test(u);
+  const bustIfLocal = (u, ver) => (isAbsolute(u) ? u : (u + (ver ? `?v=${ver}` : '')));
 
-  // Emula il matching tag “flessibile” del legacy (token + frase intera)
-  // list.archivelist.json esporta "tags": [] => normalizzo in CSV per emulare CONCAT(',', lower(tags_csv), ',')
+  // Tag matching flessibile (token + frase)
   const makeTagsCSV = (tagsArr) => {
     const arr = Array.isArray(tagsArr) ? tagsArr : [];
     const csv = arr.map((t) => lower(t)).join(',');
-    return `,${csv},`; // wrapped
+    return `,${csv},`;
   };
   const matchTagsFlexible = (tagsArr, q) => {
-    const wrapped = makeTagsCSV(tagsArr);     // ",foo,bar baz,"
+    const wrapped = makeTagsCSV(tagsArr);
     const qLower  = lower(q).trim();
     if (!qLower) return false;
-
-    // tokenizzazione (spazio) + frase intera
     const tokens = qLower.split(/\s+/).filter(Boolean);
-
-    // Per ogni token: match entro singolo tag (LIKE) + fallback plain (qui è equivalente)
     for (let i = 0; i < tokens.length; i++) {
-      const tok = tokens[i];
-      // entro “singolo tag”: basta LIKE su wrapped (emulazione)
-      if (wrapped.includes(tok)) return true;
+      if (wrapped.includes(tokens[i])) return true;
     }
-
-    // Fallback: frase intera
     if (wrapped.includes(qLower)) return true;
-
     return false;
   };
 
-  // Mappatura classi pill come nel legacy
+  // Pill mapping (come legacy)
   const normalizeBtnVariant = (raw) => {
     const t = lower(trim(raw));
     if (!t) return 'btn--base';
-    // già valorizzato? es. "btn--yt"
     const m = t.match(/\bbtn--[a-z0-9\-]+\b/);
     if (m) return m[0];
-
     const map = {
       'youtube': 'btn--yt', 'yt': 'btn--yt',
       'scryfall': 'btn--scry', 'scry': 'btn--scry',
@@ -344,17 +406,12 @@
     } catch { return 'Apri'; }
   };
 
-  const isAbsolute = (u) => /^(data:|https?:|\/\/)/i.test(u);
-  const bustIfLocal = (u, ver) => (isAbsolute(u) ? u : (u + (ver ? `?v=${ver}` : '')));
-
   // Stato/pager
   const getPage = () => {
     const n = parseInt(getParam('p') || '1', 10);
     return isNaN(n) || n < 1 ? 1 : n;
   };
   const PAGE_SIZE_DEFAULT = 12;
-
-  // Se c’è un data attr o una var globale, usiamola, altrimenti fallback 12
   const getPageSize = () => {
     const rootAttr = document.documentElement.getAttribute('data-archive-page-size');
     if (rootAttr) {
@@ -369,27 +426,41 @@
 
   // Elementi DOM essenziali
   const sectionArchive = qs('section.archive');
-  const listOl         = qs('ol.archive-timeline', sectionArchive) || (() => {
-    const ol = document.createElement('ol');
-    ol.className = 'archive-timeline';
-    const container = qs('.container', sectionArchive) || sectionArchive;
-    container.appendChild(ol);
+  const ensureList = () => {
+    let ol = qs('ol.archive-timeline', sectionArchive);
+    if (!ol) {
+      ol = document.createElement('ol');
+      ol.className = 'archive-timeline';
+      const container = qs('.container', sectionArchive) || sectionArchive;
+      container.appendChild(ol);
+    }
     return ol;
-  })();
-
-  const heroCount = qs('.archive-hero .filter-note strong');
-  const pager     = qs('.archive-pager');
-  const prevA     = pager ? qs('a[rel="prev"]', pager) : null;
-  const nextA     = pager ? qs('a[rel="next"]', pager) : null;
-  const currSpan  = pager ? qs('.curr', pager) : null;
+  };
 
   // Parametri URL
   const qRaw  = getParam('q') || '';
   const q     = trim(qRaw);
   const kind  = lower(trim(getParam('kind') || ''));
 
-  // Leggi appVer (se presente) per cache-busting
-  const appVer = document.documentElement.getAttribute('data-app-ver') || '';
+  // Sincronizza form UI (q/kind) e bottone filtro
+  const syncFormUI = () => {
+    const form   = qs('#archive-search-form');
+    const qInput = qs('#q', form || document);
+    const sel    = qs('#kind', form || document);
+    const btn    = qs('.archive-search__filter-toggle', form || document);
+
+    if (qInput) qInput.value = q;
+    if (sel) {
+      if (kind === 'video' || kind === 'content') sel.value = kind;
+      else sel.value = '';
+    }
+    if (btn && sel) {
+      const active = sel.value !== '';
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  };
 
   // Render di un singolo item (markup identico al template)
   const renderItem = (it) => {
@@ -402,12 +473,13 @@
     // Thumb
     let thumbWeb = trim(it.thumb || '');
     if (thumbWeb && !isAbsolute(thumbWeb)) thumbWeb = '/' + thumbWeb.replace(/^\/+/, '');
+    const appVer = document.documentElement.getAttribute('data-app-ver') || '';
     const thumbSrc = bustIfLocal(thumbWeb || '/assets/cards/fblthp_placeholder.webp', appVer);
 
     // Links
     const links = Array.isArray(it.links) ? it.links.slice().sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) : [];
 
-    // primary via token dentro btn_class (come legacy)
+    // primary via token dentro btn_class
     let primaryIndex = null;
     for (let i = 0; i < links.length; i++) {
       const raw = lower(links[i]?.btn_class || '');
@@ -415,7 +487,7 @@
     }
     const primaryUrl = (primaryIndex != null) ? trim(links[primaryIndex].href || '') : '';
 
-    // pills (tutte le altre)
+    // pills extra
     const otherPills = [];
     for (let i = 0; i < links.length; i++) {
       if (i === primaryIndex) continue;
@@ -429,22 +501,16 @@
       });
     }
 
-    // aria-controls id
     const linksId = `links-${idStr.replace(/[^a-zA-Z0-9_\-]+/g, '-')}`;
-
-    // hasDropdown
     let otherCount = otherPills.length;
     let hasDropdown = (!!desc) || (otherCount > 0);
     let summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
 
-    // Regola: se c'è primary -> niente pill sul thumb; sheet solo per la descrizione/pills extra
     if (primaryUrl) {
-      // manteniamo comunque pills extra nel dropdown
       hasDropdown = (!!desc) || (otherCount > 0);
       summaryLabel = (otherCount > 0) ? `Dettagli e link (${otherCount})` : 'Dettagli';
     }
 
-    // Costruzione DOM
     const li = document.createElement('li');
     li.className = `archive-item is-${kindClass}`;
     li.innerHTML = `
@@ -496,7 +562,6 @@
     return arr.filter((it) => {
       if (K && K !== lower(it.kind || '')) return false;
       if (!Q) return true;
-
       const inText = LIKE(it.title || '', Q) || LIKE(it.overline || '', Q) || LIKE(it.desc || '', Q);
       const inTags = matchTagsFlexible(it.tags || [], Q);
       return inText || inTags;
@@ -504,28 +569,23 @@
   };
 
   // Ordinamento legacy: date DESC, id DESC
-  const parseDate = (d) => {
-    const t = Date.parse(d);
-    return isNaN(t) ? 0 : t;
-  };
-  const sortItems = (arr) => {
-    return arr.slice().sort((a, b) => {
-      const ad = parseDate(a.date), bd = parseDate(b.date);
-      if (ad !== bd) return bd - ad; // desc
-      const aid = text(a.id), bid = text(b.id);
-      return (aid < bid) ? 1 : (aid > bid ? -1 : 0); // id DESC
-    });
-  };
+  const parseDate = (d) => { const t = Date.parse(d); return isNaN(t) ? 0 : t; };
+  const sortItems = (arr) => arr.slice().sort((a, b) => {
+    const ad = parseDate(a.date), bd = parseDate(b.date);
+    if (ad !== bd) return bd - ad;
+    const aid = text(a.id), bid = text(b.id);
+    return (aid < bid) ? 1 : (aid > bid ? -1 : 0);
+  });
 
   // Paginazione
-  const paginate = (arr, page, pageSize) => {
-    const total = arr.length;
-    const pages = Math.max(1, Math.ceil(total / pageSize));
-    const p = Math.min(Math.max(1, page), pages);
-    const start = (p - 1) * pageSize;
-    const end = start + pageSize;
-    return { total, pages, page: p, slice: arr.slice(start, end) };
-  };
+const paginate = (arr, page, pageSize) => {
+  const total = arr.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const p = Math.min(Math.max(1, page), pages);
+  const start = (p - 1) * pageSize;
+  const end = start + pageSize;
+  return { total, pages, page: p, slice: arr.slice(start, end) };
+};
 
   // Pager UI
   const updatePager = (state) => {
@@ -549,7 +609,6 @@
       a.href = u.toString();
     };
 
-    // prev
     const prevDisabled = page <= 1;
     if (prevA) {
       prevA.classList.toggle('disabled', prevDisabled);
@@ -557,9 +616,7 @@
       setHref(prevA, prevDisabled ? 1 : (page - 1));
       prevA.rel = 'prev';
     }
-    // curr
     if (currSpan) currSpan.textContent = `Pag. ${page} / ${pages}`;
-    // next
     const nextDisabled = page >= pages;
     if (nextA) {
       nextA.classList.toggle('disabled', nextDisabled);
@@ -576,15 +633,7 @@
 
   // Render lista
   const renderList = (arr) => {
-    const sectionArchive = qs('section.archive');
-    let listOl = qs('ol.archive-timeline', sectionArchive);
-    if (!listOl) {
-      listOl = document.createElement('ol');
-      listOl.className = 'archive-timeline';
-      const container = qs('.container', sectionArchive) || sectionArchive;
-      container.appendChild(listOl);
-    }
-
+    let listOl = ensureList();
     // Svuota OL
     listOl.innerHTML = '';
     if (!arr.length) {
@@ -594,19 +643,14 @@
       p.setAttribute('aria-live', 'polite');
       const qVal = trim(getParam('q') || '');
       p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
-      // Sostituisci l'OL con il messaggio
       listOl.replaceWith(p);
       return;
     } else {
-      // Se era stato sostituito da <p.empty>, ripristina OL (no-op se già presente)
+      const sectionArchive = qs('section.archive');
       const existingEmpty = qs('p.empty', sectionArchive);
       if (existingEmpty) {
         existingEmpty.remove();
-        const newOl = document.createElement('ol');
-        newOl.className = 'archive-timeline';
-        const container = qs('.container', sectionArchive) || sectionArchive;
-        container.appendChild(newOl);
-        listOl = newOl;
+        listOl = ensureList();
       }
     }
     // Append items
@@ -615,15 +659,22 @@
     listOl.appendChild(frag);
   };
 
-  // Bootstrap: fetch dati, filtra, pagina, render
+  // Bootstrap
   const bootstrap = async () => {
     try {
+      // Sync UI form con query attuale
+      syncFormUI();
+
       const appVer = document.documentElement.getAttribute('data-app-ver') || '';
       const ver = appVer ? `?v=${appVer}` : '';
       const res = await fetch(`/archive/list.json${ver}`, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json(); // [{id, kind, date, title, overline, desc, thumb, tags, links}]
-      const pageSize = getPageSize();
+      const pageSize = (() => {
+        const attr = document.documentElement.getAttribute('data-archive-page-size');
+        const n = parseInt(attr || '12', 10);
+        return (isNaN(n) ? 12 : Math.max(5, Math.min(24, n)));
+      })();
       const curPage  = getPage();
 
       const filtered = filterItems(data, q, kind);
@@ -638,7 +689,6 @@
     }
   };
 
-  // Avvio appena possibile
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bootstrap);
   } else {
