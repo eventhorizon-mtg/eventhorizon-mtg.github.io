@@ -1,0 +1,13 @@
+id: "Video006"
+kind: "video"
+date: "2025-06-28"
+title: "Urza vs Mishra"
+overline: "SAGHE DI DOMINARIA"
+desc: "Conflitto epico tra i fratelli Urza e Mishra raccontato nel dettaglio."
+thumb: "/images/cards/fblthp_placeholder.webp"
+tags: ["urza", "mishra", "dominaria"]
+links:
+  - label: "YouTube"
+    href: "https://www.youtube.com/watch?v=mnop3456"
+    btn_class: "btn--yt primary"
+    sort_order: 10

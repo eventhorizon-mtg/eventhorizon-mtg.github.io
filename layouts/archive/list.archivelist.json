@@ -1,30 +1,6 @@
 {{- $list := slice -}}
-
-{{- /* Raccogli da directory data/archive/items/*.yml (mappa) */ -}}
 {{- with .Site.Data.archive.items -}}
   {{- range $k, $it := . -}}
-    {{- if not $it.draft -}}
-      {{- $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) -}}
-      {{- $tags  := cond (isset $it "tags")  $it.tags (slice) -}}
-      {{- $list = $list | append (dict
-        "id"        $it.id
-        "slug"      $it.slug
-        "kind"      $it.kind
-        "date"      $it.date
-        "title"     $it.title
-        "overline"  $it.overline
-        "desc"      $it.desc
-        "thumb"     $it.thumb
-        "tags"      $tags
-        "links"     $links
-      ) -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-
-{{- /* Raccogli anche da data/archive/items_list.yml (slice) */ -}}
-{{- with .Site.Data.archive.items_list -}}
-  {{- range $i, $it := . -}}
     {{- if not $it.draft -}}
       {{- $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) -}}
       {{- $tags  := cond (isset $it "tags")  $it.tags (slice) -}}

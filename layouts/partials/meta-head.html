@@ -102,7 +102,7 @@
 
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
-  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}">
+  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
 {{- end -}}
 
 {{/* ---------------------------------------
@@ -124,7 +124,7 @@
   {{- $archiveParts := $.Scratch.Get "archiveParts" -}}
   {{- if gt (len $archiveParts) 0 -}}
     {{- $archiveBundle := ($archiveParts | resources.Concat "style/archive-bundle.css") | resources.Minify | resources.Fingerprint -}}
-    <link rel="stylesheet" href="{{ $archiveBundle.RelPermalink }}">
+    <link rel="stylesheet" href="{{ $archiveBundle.RelPermalink }}" integrity="{{ $archiveBundle.Data.Integrity }}">
   {{- end -}}
 {{- end -}}
 
