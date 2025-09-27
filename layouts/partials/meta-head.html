@@ -31,7 +31,7 @@
 <link rel="canonical" href="{{ $canonical }}">
 
 <!-- Manifest PWA -->
-<link rel="manifest" href="/site.webmanifest">
+<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
 
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">

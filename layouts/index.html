@@ -4,13 +4,13 @@
   <!-- >>> START HERO SECTION -->
   <section
     class="hero has-hero-bg"
-    data-bg="/images/bg_image.webp?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
+    data-bg="{{ ("images/bg_image.webp" | relURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
     aria-label="Hero EventHorizon.mtg"
   >
     <div class="hero__content">
       <!-- >>> START HERO LOGO -->
       <img class="hero__logo"
-           src="/images/logo.webp?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
+           src="{{ ("images/logo.webp" | relURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
            alt="Logo {{ .Site.Title }}"
            width="115" height="115"
            decoding="async"
