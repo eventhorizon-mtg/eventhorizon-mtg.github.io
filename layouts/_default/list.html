@@ -23,7 +23,7 @@
 <!-- Barra ricerca -->
 <section class="archive-search" aria-label="Ricerca Archivio">
   <div class="container">
-    <form id="archive-search-form" class="archive-search__form" method="get" action="/archive/">
+    <form id="archive-search-form" class="archive-search__form" method="get" action="{{ .RelPermalink }}">
       <input
         id="q"
         name="q"
@@ -31,14 +31,14 @@
         type="search"
         placeholder="Cerca per titolo, descrizione o tag&hellip;"
         aria-label="Cerca"
-        value="{{ with .Site }}{{ index .Data.Terms "q" }}{{ end }}"
+        value=""
         inputmode="search"
       >
       <label for="kind" class="sr-only">Tipo</label>
       <select id="kind" name="kind" class="archive-search__select" aria-label="Tipo contenuto">
         <option value="">Tutti</option>
-        <option value="content" {{ if eq (index .Site.Params "kind") "content" }}selected{{ end }}>Contenuti</option>
-        <option value="video"   {{ if eq (index .Site.Params "kind") "video" }}selected{{ end }}>Video</option>
+        <option value="content">Contenuti</option>
+        <option value="video">Video</option>
       </select>
       <button class="archive-search__btn btn btn--gold" type="submit" aria-label="Cerca">
         <img src="/assets/icons/search.svg" class="icon icon--search" alt="" aria-hidden="true">
@@ -57,12 +57,10 @@
 <section class="archive" aria-label="Risultati">
   <div class="container">
 
-    <!-- Placeholder “nessun risultato”: il JS sostituisce/aggiorna -->
-    <ol class="archive-timeline">
-      <!-- Popolato da assets/script/archive.js (Data & Render) -->
-    </ol>
+    <!-- La lista è popolata da assets/script/archive.js -->
+    <ol class="archive-timeline"></ol>
 
-    <!-- Pager: il JS aggiorna href, disabilitazioni e testo corrente -->
+    <!-- Pager (pilotato dal JS) -->
     <nav class="archive-pager" aria-label="Paginazione risultati">
       <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina precedente" rel="prev">« Prec</a>
       <span class="curr" aria-current="page">Pag. 1 / 1</span>
@@ -72,7 +70,7 @@
   </div>
 </section>
 
-<!-- Backdrop (richiesto dal JS per il bottom-sheet mobile) -->
+<!-- Backdrop (necessario al bottom-sheet mobile) -->
 <div class="archive-sheet-backdrop" aria-hidden="true"></div>
 
 <!-- Bottom-sheet globale (mobile) — Opzione B -->
