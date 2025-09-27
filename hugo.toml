@@ -38,5 +38,6 @@ notAlternative = true
 permalinkable  = true
 
 
-relativeURLs = false
+relativeURLs = true
+
 
