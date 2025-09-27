@@ -1,6 +1,7 @@
 {{/* layouts/partials/scripts.html
      Bundle JS via Hugo Pipes (robusto ai file mancanti)
-     Ordine preservato: script.js → subhero.js → links.js → archive.js
+     Ordine preservato: script.js → subhero.js → links.js
+     (archive.js caricato solo su pagine archivio)
      Sorgenti attesi in: /assets/scripts/
 */}}
 
@@ -8,16 +9,14 @@
     "scripts/script.js"
     "scripts/subhero.js"
     "scripts/links.js"
-    "scripts/archive.js"
 -}}
 
-{{- /* Costruzione lista parts con Scratch per evitare problemi di scope */ -}}
+{{/* Costruzione lista parts con Scratch per evitare problemi di scope */}}
 {{- $.Scratch.Set "jsParts" (slice) -}}
 {{- range $p := $jsPaths -}}
   {{- with resources.Get $p -}}
     {{- $.Scratch.Add "jsParts" (slice .) -}}
   {{- else -}}
-    {{- /* File mancante: non interrompere la build */ -}}
     {{- warnf "scripts.html: risorsa JS non trovata: %s" $p -}}
   {{- end -}}
 {{- end -}}
@@ -25,20 +24,43 @@
 
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "script/bundle.js") | resources.Minify | resources.Fingerprint -}}
-  <script defer src="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous"></script>
+  <script defer src="{{ $bundle.RelPermalink }}"></script>
 {{- else -}}
-  {{- /* Nessun JS disponibile: niente output */ -}}
+  {{/* Fallback: usa il bundle precompilato in /static/script/ se presente */}}
+  {{- if (fileExists "static/script/bundle.min.js") -}}
+    <script defer src="{{ "script/bundle.min.js" | relURL }}"></script>
+  {{- else if (fileExists "static/script/bundle.js") -}}
+    <script defer src="{{ "script/bundle.js" | relURL }}"></script>
+  {{- else -}}
+    {{- warnf "scripts.html: nessun bundle JS trovato in assets/ o static/" -}}
+  {{- end -}}
 {{- end -}}
+
 <!-- >>> START: load archive.js solo su /archive/ -->
-{{ if eq .Section "archive" }}
+{{ if or (eq .Section "archive") (eq .Type "archive") (eq .Type "archivio") }}
   <script>
     window.__ARCHIVE_ENDPOINT__ = "{{ "/archive/list.json" | relURL }}";
   </script>
-  {{ with resources.Get "js/archive.js" }}
-    {{ $js := . | resources.Fingerprint "sha512" }}
-    <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
-  {{ else }}
-    <script defer src="{{ "js/archive.js" | relURL }}"></script>
-  {{ end }}
+
+  {{/* Prova dalle sorgenti in /assets/scripts/ */}}
+  {{- $archiveAsset := resources.Get "scripts/archive.js" -}}
+  {{- if $archiveAsset -}}
+    {{- $archive := ($archiveAsset | resources.Minify | resources.Fingerprint) -}}
+    <script defer src="{{ $archive.RelPermalink }}"></script>
+  {{- else -}}
+    {{- warnf "scripts.html: scripts/archive.js non trovato in assets/, provo static/" -}}
+    {{/* Fallback statici più comuni */}}
+    {{- if (fileExists "static/script/archive.min.js") -}}
+      <script defer src="{{ "script/archive.min.js" | relURL }}"></script>
+    {{- else if (fileExists "static/script/archive.js") -}}
+      <script defer src="{{ "script/archive.js" | relURL }}"></script>
+    {{- else if (fileExists "static/scripts/archive.js") -}}
+      <script defer src="{{ "scripts/archive.js" | relURL }}"></script>
+    {{- else if (fileExists "static/js/archive.js") -}}
+      <script defer src="{{ "js/archive.js" | relURL }}"></script>
+    {{- else -}}
+      {{- warnf "scripts.html: nessun archive.js trovato in static/" -}}
+    {{- end -}}
+  {{- end -}}
 {{ end }}
 <!-- <<< END: load archive.js solo su /archive/ -->
