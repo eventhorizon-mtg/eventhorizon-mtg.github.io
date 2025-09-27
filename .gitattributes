@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ensure generated assets keep consistent line endings (preserve SRI/hash)
+docs/style/*.css text eol=lf
+docs/script/*.js  text eol=lf
