@@ -18,7 +18,7 @@ Questa è una pagina **Articolo** di esempio generata nella sezione `article`.
 
 - Ha un header con data, tag, titolo, descrizione e un'immagine di copertina (parametro `cover`).
 - Il contenuto è Markdown normale: titoli, liste, link, immagini, ecc.
-- L'URL è configurato come `/articoli/benvenuto/` tramite i `permalinks` in `hugo.toml`.
+- L'URL è configurato come `/articles/benvenuto-su-eventhorizon.mtg/` tramite i `permalinks` in `hugo.toml`.
 
 ### Come creare un nuovo articolo
 

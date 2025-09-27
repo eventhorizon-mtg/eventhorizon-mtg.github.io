@@ -128,4 +128,14 @@
   {{- end -}}
 {{- end -}}
 
+{{/* ---------------------------------------
+     CSS specifico Articolo (sezione "article")
+---------------------------------------- */}}
+{{- if or (eq .Section "article") (eq .Type "article") -}}
+  {{- with resources.Get "style/pages/article.css" -}}
+    {{- $articleCss := . | resources.Minify | resources.Fingerprint -}}
+    <link rel="stylesheet" href="{{ $articleCss.RelPermalink }}">
+  {{- end -}}
+{{- end -}}
+
 

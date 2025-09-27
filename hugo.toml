@@ -14,7 +14,7 @@ enableRobotsTXT = true
   category = "categories"
 
 [permalinks]
-  article = "/articoli/:slug/"
+  article = "/articles/:slug/"
 
 [params]
   siteName = "EventHorizon.mtg"

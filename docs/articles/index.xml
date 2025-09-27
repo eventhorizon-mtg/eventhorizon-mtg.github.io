@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>EventHorizon.mtg</title>
-    <link>https://cetriolomtg-eng.github.io/eventhorizon/</link>
-    <description>Recent content on EventHorizon.mtg</description>
+    <title>Articoli on EventHorizon.mtg</title>
+    <link>https://cetriolomtg-eng.github.io/eventhorizon/articles/</link>
+    <description>Recent content in Articoli on EventHorizon.mtg</description>
     <generator>Hugo</generator>
     <language>it-it</language>
     <lastBuildDate>Sat, 27 Sep 2025 12:00:00 +0000</lastBuildDate>
-    <atom:link href="https://cetriolomtg-eng.github.io/eventhorizon/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://cetriolomtg-eng.github.io/eventhorizon/articles/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Benvenuto su EventHorizon.mtg</title>
       <link>https://cetriolomtg-eng.github.io/eventhorizon/articles/benvenuto-su-eventhorizon.mtg/</link>
