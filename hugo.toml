@@ -3,7 +3,7 @@ languageCode = "it-it"
 title = "EventHorizon.mtg"
 
 publishDir = "docs"
-canonifyURLs = true
+canonifyURLs = false
 enableRobotsTXT = true
 
 [pagination]
@@ -36,3 +36,7 @@ baseName     = "list"
 isPlainText  = true
 notAlternative = true
 permalinkable  = true
+
+
+relativeURLs = false
+

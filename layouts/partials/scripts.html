@@ -25,14 +25,21 @@
 
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "script/bundle.js") | resources.Minify | resources.Fingerprint -}}
-  <script defer src="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous"></script>
+  <script defer src="{{ $bundle.Permalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous"></script>
 {{- else -}}
   {{- /* Nessun JS disponibile: niente output */ -}}
 {{- end -}}
 <!-- >>> START: load archive.js solo su /archive/ -->
 {{ if eq .Section "archive" }}
   <script>
-    window.__ARCHIVE_ENDPOINT__ = "{{ "/archive/list.json" | relURL }}";
+    (function () {
+      var base = document.documentElement.getAttribute('data-base-url') || '';
+      if (!base) {
+        base = window.location.origin;
+      }
+      var normalized = base.replace(/\/$/, '');
+      window.__ARCHIVE_ENDPOINT__ = normalized + '/archive/list.json';
+    })();
   </script>
 {{ end }}
 <!-- <<< END: load archive.js solo su /archive/ -->

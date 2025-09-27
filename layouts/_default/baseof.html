@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" data-archive-page-size="12" data-app-ver="{{ with site.Params.appVer }}{{ . }}{{ end }}">
+<html lang="it" data-archive-page-size="12" data-app-ver="{{ with site.Params.appVer }}{{ . }}{{ end }}" data-base-url="{{ strings.TrimSuffix "/" .Site.BaseURL }}">
 <head>
   {{ partial "meta-head.html" . }}
   {{ block "head_extra" . }}{{ end }}
@@ -18,3 +18,4 @@
   {{ end }}
 </body>
 </html>
+
