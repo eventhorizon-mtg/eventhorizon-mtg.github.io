@@ -1,6 +1,6 @@
 ﻿+++
 title = "Privacy Policy"
-description = "Informativa sulla privacy e gestione dei consensi (Klaro)."
+description = "Informativa sulla privacy e sui cookie."
 date = 2025-09-28T00:00:00Z
 draft = false
 slug = "privacy-policy"
@@ -33,11 +33,10 @@ Questi cookie non profilano l’utente e non richiedono consenso preventivo.
 
 ## 4. Servizi di terze parti
 - **Hosting**: il sito è ospitato tramite **GitHub Pages** (servizio offerto da GitHub, Inc.).  
-  Per maggiori informazioni: [GitHub Privacy Statement](https://docs.github.com/it/site-policy/privacy-policies/github-privacy-statement).  
 
-- **Font**: i caratteri tipografici utilizzati (Lexend, Merriweather, Roboto) sono **conservati localmente** e non comportano alcun trasferimento di dati a terzi.  
+- **Font**: i caratteri tipografici utilizzati (Lexend, Merriweather, Roboto) sono **conservati localmente** e non comportano alcun trasferimento di dati a terzi.
 
-Non vengono utilizzati embed di terze parti.
+- Non vengono utilizzati embed di terze parti.
 
 ---
 
