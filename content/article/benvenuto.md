@@ -7,31 +7,81 @@ draft = false
 description = "Che cos'è la sezione Articoli e come verrà usata sul sito."
 tags = []
 
-# Media (puoi sostituire in futuro con un file sotto images/articles/benvenuto/cover.webp)
-cover = "images/bg_image.webp"
-
 +++
 
 ## Benvenuto!
 
 Questa è una pagina **Articolo** di esempio generata nella sezione `article`.
 
-- Ha un header con data, tag, titolo, descrizione e un'immagine di copertina (parametro `cover`).
-- Il contenuto è Markdown normale: titoli, liste, link, immagini, ecc.
-- L'URL è configurato come `/articles/benvenuto-su-eventhorizon.mtg/` tramite i `permalinks` in `hugo.toml`.
+- Header: data, tag, titolo e descrizione (niente più cover a tutta larghezza).
+- Contenuto: Markdown normale (titoli, liste, link, immagini, tabelle, codice...).
+- URL: configurato come `/articles/benvenuto-su-eventhorizon.mtg/` dai `permalinks` in `hugo.toml`.
+
+> Nota: le immagini inline funzionano se il percorso parte dalla radice del sito. L'immagine `images/bg_image.webp` non si vedeva perché era relativa alla pagina; usa invece `/images/bg_image.webp`.
+
+---
+
+### Esempi di asset del sito
+
+#### Immagini (inline)
+
+Hero globale (da `static/images/bg_image.webp`):
+
+![Hero](/images/bg_image.webp)
+
+Icona 192×192 (da `static/icons/...`):
+
+![Icona](/icons/favicon/favicon-192.png)
+
+Consiglio: per ogni articolo organizza le immagini in `static/images/articles/<slug>/` e referenziale così:
+
+`/images/articles/<slug>/file.webp`
+
+#### Link interni
+
+- Vai all'Archivio: [/archive/](/archive/)
+- Privacy Policy: [/privacy-policy/](/privacy-policy/)
+
+#### Liste
+
+- Punto elenco uno
+- Punto elenco due
+  - Sotto-elenco
+
+1. Primo
+2. Secondo
+
+#### Citazione
+
+> “La magia è credere in se stessi.”
+
+#### Tabella
+
+| Nome | Tipo     | Link                        |
+|------|----------|-----------------------------|
+| Mox  | Esterno  | https://moxfield.com/       |
+| Arch | Interno  | [/archive/](/archive/)      |
+
+#### Codice
+
+Esempio inline `fetch('/archive/list.json')`.
+
+```js
+// Esempio generico
+async function loadArchive() {
+  const res = await fetch('/archive/list.json');
+  const data = await res.json();
+  console.log('items:', data.length);
+}
+```
+
+---
 
 ### Come creare un nuovo articolo
 
 1. `hugo new article/<slug>.md`
-2. Compila i campi nel front matter (titolo, descrizione, tag, cover)
-3. Imposta `draft = false` quando vuoi pubblicarlo
-
-### Esempio di immagine inline
-
-Puoi inserire immagini dal tuo `static/images/...`:
-
-![Hero](images/bg_image.webp)
-
-Oppure, meglio, organizza le immagini per ogni articolo in `static/images/articles/<slug>/` e referenziale come `images/articles/<slug>/file.webp`.
+2. Compila il front matter (titolo, descrizione, tag)
+3. Inserisci immagini inline usando percorsi assoluti (es. `/images/articles/<slug>/cover.webp`)
+4. Imposta `draft = false` quando vuoi pubblicarlo
 
 Buona scrittura!
