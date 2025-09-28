@@ -287,6 +287,13 @@
   outline-offset:2px;
 }
 
+/* Forza la selezionabilità del testo nel corpo articoli */
+.article-body, .article-body *{
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
 /* ---------- Utilities: alignment / floats / widths ---------- */
 .article-body .align-center{ text-align:center; }
 .article-body .align-right{ text-align:right; }
