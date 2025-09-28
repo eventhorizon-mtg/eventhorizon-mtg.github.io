@@ -1,0 +1,13 @@
+id: "Content007"
+kind: "content"
+date: "2025-06-12"
+title: "Carte Iconiche"
+overline: "TOP LIST"
+desc: "Una selezione delle carte più iconiche della storia di Magic."
+thumb: "/images/cards/fblthp_placeholder.webp"
+tags: ["iconic", "classic cards"]
+links:
+  - label: "Scryfall"
+    href: "https://scryfall.com/card/iconic"
+    btn_class: "btn--scry primary"
+    sort_order: 10

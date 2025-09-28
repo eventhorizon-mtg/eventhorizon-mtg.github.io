@@ -1,5 +1,5 @@
 /* ============================================================
-   Links
+   Links.css
    ============================================================ */
 .links {
   /* Tema sezione (scuro) */
@@ -20,8 +20,8 @@
   );
 
   /* Parametri autoplay letti da links.js */
-  --links-auto-speed: 36;   /* px/s (cambia qui per più lento/veloce) */
-  --links-auto-ignore-rmw: 0; /* 0 = rispetta “Riduci animazioni” */
+  --links-auto-speed: 36;   /* px/s (cambia qui per piÃ¹ lento/veloce) */
+  --links-auto-ignore-rmw: 0; /* 0 = rispetta â€œRiduci animazioniâ€ */
 }
 @media (min-width: 480px){
   .links{
@@ -84,7 +84,7 @@
 .links__track > li::marker{ content: ''; }
 
 /* =========================
-   Card compatte (chiare) — altezza uniforme
+   Card compatte (chiare) â€” altezza uniforme
    ========================= */
 .link-card{
   --link-w: 240px;                 /* aumenta a 260px per meno colonne */
@@ -94,7 +94,7 @@
 }
 
 .link-card__link{
-  --link-h: 96px;                  /* 92–100px suggerito */
+  --link-h: 96px;                  /* 92â€“100px suggerito */
   height: var(--link-h);
 
   display: flex;
@@ -109,7 +109,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,.06);
 
   text-decoration: none;
-  /* niente transform nell'hover (zero “saltelli”) */
+  /* niente transform nell'hover (zero â€œsaltelliâ€) */
   transition: box-shadow 160ms ease, background-color 160ms ease;
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;                /* sicurezza anti overflow */
@@ -166,7 +166,7 @@
 }
 
 /* =========================
-   Desktop (≥1024px): riga scrollabile con snap + edge-fade
+   Desktop (â‰¥1024px): riga scrollabile con snap + edge-fade
    ========================= */
 @media (min-width: 1024px){
   .links__carousel{
@@ -184,7 +184,7 @@
     gap: var(--grid-gap);
     padding-bottom: 8px;           /* evita ritaglio delle ombre */
 
-    overscroll-behavior-x: contain;       /* evita lo “scroll chaining” verso la pagina */
+    overscroll-behavior-x: contain;       /* evita lo â€œscroll chainingâ€ verso la pagina */
     scrollbar-gutter: stable both-edges;  /* stabilizza il layout quando appare la scrollbar */
   }
   .links__track::-webkit-scrollbar{ display: none; } /* WebKit: nasconde scrollbar */
@@ -200,7 +200,7 @@
     content: "";
     position: absolute;
     top: 0; bottom: 0;
-    width: 36px;                   /* intensità dissolvenza */
+    width: 36px;                   /* intensitÃ  dissolvenza */
     pointer-events: none;          /* non blocca i click/scroll */
     z-index: 1;
   }
@@ -243,7 +243,7 @@
   .links__track.is-ready { transition: none; }
 }
 
-/* Mobile: card più piccole (baseline) */
+/* Mobile: card piÃ¹ piccole (baseline) */
 @media (max-width: 479.98px){
   .link-card { --link-w: 200px; }
   .link-card__link { --link-h: 88px; padding: 12px 14px; }
@@ -252,7 +252,7 @@
 
 @media (min-width: 1024px){
   .links{
-    --links-auto-speed: 32; /* più fluido, non eccessivo */
+    --links-auto-speed: 32; /* piÃ¹ fluido, non eccessivo */
   }
 }
 
@@ -267,7 +267,7 @@
     flex: 0 0 var(--link-w);
   }
 
-  /* Contenuto più ridotto */
+  /* Contenuto piÃ¹ ridotto */
   .links .link-card__link {
     --link-h: 70px;
     height: var(--link-h);
@@ -275,7 +275,7 @@
     gap: 6px;
   }
 
-  /* Logo più piccolo */
+  /* Logo piÃ¹ piccolo */
   .links .link-card__logo {
     width: 24px;
     height: 24px;
@@ -348,14 +348,10 @@
       -webkit-mask-repeat: no-repeat;
               mask-repeat: no-repeat;
     }
-    /* Evita doppio effetto quando la mask è disponibile */
+    /* Evita doppio effetto quando la mask Ã¨ disponibile */
     .links__carousel::before,
     .links__carousel::after{
       display: none !important;
     }
   }
 }
-
-/* ============================================================
-   Fine Links
-   ============================================================ */

@@ -1,5 +1,5 @@
 /* ============================================================
-   Card components
+   Cards.css
    ============================================================ */
 /* Sezione + variabili (dimensioni card e gap) */
 .cards{
@@ -121,7 +121,7 @@
     rgba(25, 26, 35, 0.00) 100%);
 }
 
-/* Pulsante Play — base */
+/* Pulsante Play â€” base */
 .card__play{ display: grid; place-items: center; }
 .card__play .sr-only{
   position: absolute !important;
@@ -149,7 +149,7 @@
   border-radius: 9999px;
 }
 
-/* Corpo testo — griglia 3 righe con titolo = 2 righe minime */
+/* Corpo testo â€” griglia 3 righe con titolo = 2 righe minime */
 .card__body{
   padding: 16px;
   display: grid;
@@ -193,7 +193,7 @@
   overflow: hidden;
 }
 
-/* Azioni “pinnate” in basso (default) */
+/* Azioni pinnate in basso (default) */
 .card__actions{
   margin-top: auto;
   padding: 0 16px 16px;
@@ -218,7 +218,7 @@
 }
 .cards .card.is-video .card__media::before{ content: none; }
 
-/* Overline Indigo + testo più vicino */
+/* Overline Indigo + testo + vicino */
 .card.is-video .card__overline{
   color: var(--indigo-700);
   font-weight: 600;
@@ -312,7 +312,7 @@
   background: var(--card-bg, #C8C6D8) center / cover no-repeat;
 }
 
-/* Overlay radiale: leggermente più soft rispetto a .is-video */
+/* Overlay radiale: leggermente piÃ¹ soft rispetto a .is-video */
 .card.is-content .card__media-overlay{
   background: radial-gradient(53.91% 66.35% at 50% 50%,
     rgba(25, 26, 35, 0.28) 0%,
@@ -373,208 +373,6 @@
   justify-content: center;
 }
 
-/* Nessun Play nella variante content (l'elemento non è presente in HTML) */
+/* Nessun Play nella variante content (l'elemento non Ã¨ presente in HTML) */
 .card.is-content .card__play { display: none; }
 /* Mantieni l'overlay visibile (rimosso il vecchio display:none) */
-
-/* ============================================================
-   Variante: .card.is-portal
-   ============================================================ */
-
-/* >>> LIQUID GLASS (no border) >>> */
-.card.is-portal {
-  position: relative;
-  background: transparent;
-  overflow: hidden;
-
-  /* Liquid Glass controls (override inline per-card) */
-  --glass-top: 10%;
-  --glass-bot: 52%;
-  --glass-feather: 22%;
-  --glass-blur: 2px;
-  --glass-alpha: 0.12;
-  --glass-sheen: 0.08;
-  --glass-tilt: 28deg;
-
-  /* Frost */
-  --frost-alpha: 0.10;
-  --frost-tint: rgba(30,25,35,var(--frost-alpha));
-
-  box-shadow:
-    0 0.5px 1px rgba(30,25,35,0.03),
-    0 6px 16px rgba(30,25,35,0.06);
-}
-
-.card.is-portal:hover {
-  box-shadow:
-    0 1px 2px rgba(30,25,35,0.05),
-    0 10px 24px rgba(30,25,35,0.10);
-  transform: none;
-}
-
-/* Media full cover */
-.card.is-portal .card__media {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  z-index: 0;
-}
-
-/* LIQUID GLASS */
-.card.is-portal .card__media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 1;
-
-  background:
-    linear-gradient(
-      var(--glass-tilt),
-      rgba(255,255,255,calc(var(--glass-sheen))) 0%,
-      rgba(255,255,255,0) 55%
-    ),
-    rgba(255,255,255,var(--glass-alpha));
-
-  -webkit-mask:
-    linear-gradient(
-      to bottom,
-      #000 0,
-      #000 calc(var(--glass-top) - var(--glass-feather)),
-      transparent calc(var(--glass-top) + var(--glass-feather))
-    ),
-    linear-gradient(
-      to top,
-      #000 0,
-      #000 calc(var(--glass-bot) - var(--glass-feather)),
-      transparent calc(var(--glass-bot) + var(--glass-feather))
-    );
-  mask:
-    linear-gradient(
-      to bottom,
-      #000 0,
-      #000 calc(var(--glass-top) - var(--glass-feather)),
-      transparent calc(var(--glass-top) + var(--glass-feather))
-    ),
-    linear-gradient(
-      to top,
-      #000 0,
-      #000 calc(var(--glass-bot) - var(--glass-feather)),
-      transparent calc(var(--glass-bot) + var(--glass-feather))
-    );
-}
-
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .card.is-portal .card__media::before {
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.06) contrast(1.02);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.06) contrast(1.02);
-  }
-}
-
-/* Frost overlay minimal (no blur) */
-.card.is-portal .card__media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 2;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    inset 0 -8px 24px rgba(0,0,0,0.18);
-}
-
-/* Body testo */
-.card.is-portal .card__body {
-  position: relative;
-  z-index: 1;
-  padding: 16px;
-  display: grid;
-  grid-template-rows: auto minmax(calc(1.3em * 2), auto) auto;
-  row-gap: 10px;
-  text-align: left;
-  color: var(--neutral-900);
-}
-
-.card.is-portal .card__overline {
-  color: var(--teal-700);
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
-.card.is-portal .card__title {
-  margin: 0;
-  font-weight: 700;
-  font-size: clamp(1.1rem, 1vw + 1rem, 1.4rem);
-  line-height: 1.3;
-  min-height: calc(1.3em * 2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Desc */
-.card.is-portal .card__desc {
-  position: absolute;
-  bottom: 22%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 96%;
-  z-index: 3;
-  margin: 0;
-  text-align: center;
-  font-size: clamp(0.9rem, 0.5vw + 0.8rem, 1rem);
-  font-weight: 600;
-  line-height: 1.55;
-  color: var(--neutral-900);
-
-  padding-inline: 8px;
-  padding-block: 2px;
-
-  -webkit-text-stroke: 2px #fff;
-  paint-order: stroke fill;
-  text-shadow:
-    0 1px 2px rgba(0,0,0,0.18),
-    0 2px 6px rgba(0,0,0,0.12);
-}
-
-@media (max-width: 480px) {
-  .card.is-portal .card__desc {
-    -webkit-text-stroke: 3px #fff;
-  }
-}
-
-/* CTA in basso (allineata a is-video) */
-.card.is-portal .card__actions {
-  position: absolute;
-  bottom: var(--cta-bottom, clamp(12px, 2.5vw, 20px));
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  padding: 0;
-  z-index: 5;
-  display: flex;
-  justify-content: center;
-}
-
-/* Nessun Play */
-.card.is-portal .card__play,
-.card.is-portal .card__media-overlay {
-  display: none !important;
-}
-
-/* Tracking coerente */
-.cards .card__overline{ letter-spacing: var(--trk-wide); }
-.cards .card__title{    letter-spacing: var(--trk-slight); }
-.cards .card__desc{     letter-spacing: 0; }
-
-/* ============================================================
-   Fine Cards
-   ============================================================ */

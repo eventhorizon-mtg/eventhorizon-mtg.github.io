@@ -1,7 +1,9 @@
-baseURL = "https://eventhorizonmtg.netlify.app/"
+baseURL = "https://eventhorizon-mtg.github.io/"
 languageCode = "it-it"
 title = "EventHorizon.mtg"
 
+publishDir = "public"
+canonifyURLs = false
 enableRobotsTXT = true
 
 [pagination]
@@ -11,18 +13,46 @@ enableRobotsTXT = true
   tag = "tags"
   category = "categories"
 
+[permalinks]
+  article = "/articles/:slug/"
+
 [params]
   siteName = "EventHorizon.mtg"
+  appVer = "2025.09.27"
 
   # Open Graph (fallback globali; sovrascrivibili per pagina con front matter)
   [params.og]
     title = "EventHorizon.mtg"
     description = "Magic: The Gathering • Guide, video e risorse selezionate."
-    image = "/assets/social/og-image.jpg"
+    image = "images/bg_image.webp"
     locale = "it_IT"
 
   # UI
   themeColor = "#0E0F1A"
 
   # Preload hero LCP (opzionale: lascia o cambia path)
-  preloadHero = "/assets/bg_image.webp"
+  preloadHero = "images/bg_image.webp"
+
+  # Fonts (self-hosted) preload list (WOFF2)
+  [params.fonts]
+    preload = [
+      "fonts/LexendDeca-Regular.woff2",
+      "fonts/LexendGiga-Regular.woff2",
+      "fonts/Merriweather-Light.woff2",
+      "fonts/Roboto-Regular.woff2",
+      "fonts/Roboto-Italic.woff2"
+    ]
+
+[outputFormats.ArchiveList]
+mediaType    = "application/json"
+baseName     = "list"
+isPlainText  = true
+notAlternative = true
+permalinkable  = true
+
+
+relativeURLs = true
+
+
+
+

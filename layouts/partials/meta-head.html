@@ -31,22 +31,22 @@
 <link rel="canonical" href="{{ $canonical }}">
 
 <!-- Manifest PWA -->
-<link rel="manifest" href="/site.webmanifest">
+<link rel="manifest" href="{{ "site.webmanifest" | absURL }}">
 
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
-<!-- Favicons (assicurati che i file esistano sotto /static/assets/favicon/ ...) -->
-<link rel="icon" href="/assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" href="/assets/favicon/favicon.svg" type="image/svg+xml">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon/favicon-48.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96.png">
-<link rel="apple-touch-icon" href="/assets/favicon/apple-touch-icon.png" sizes="180x180">
-<link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon/favicon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/favicon-512.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/favicon-512-maskable.png" purpose="any maskable">
+<!-- Favicons (assicurati che i file esistano sotto /static/icons/favicon/ ...) -->
+<link rel="icon" href='{{ "icons/favicon/favicon.ico" | absURL }}' sizes="any">
+<link rel="icon" href='{{ "icons/favicon/favicon.svg" | absURL }}' type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="16x16" href='{{ "icons/favicon/favicon-16.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="32x32" href='{{ "icons/favicon/favicon-32.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="48x48" href='{{ "icons/favicon/favicon-48.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="96x96" href='{{ "icons/favicon/favicon-96.png" | absURL }}'>
+<link rel="apple-touch-icon" href='{{ "icons/favicon/apple-touch-icon.png" | absURL }}' sizes="180x180">
+<link rel="icon" type="image/png" sizes="192x192" href='{{ "icons/favicon/favicon-192.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512.png" | absURL }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ "icons/favicon/favicon-512-maskable.png" | absURL }}' purpose="any maskable">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -65,15 +65,19 @@
 {{- if $ogDesc }}<meta name="twitter:description" content="{{ $ogDesc }}">{{ end -}}
 {{- if $ogImageAbs }}<meta name="twitter:image" content="{{ $ogImageAbs }}">{{ end -}}
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<!-- Fonts (self-hosted) -->
+{{/* NOTE: font-face rules are loaded via assets/style/base/_fonts.css included in the main bundle below. */}}
 
 <!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
-<link rel="preload" as="image" href="{{ . }}">
+  {{- $pre := . | absURL -}}
+  {{- $ver := or site.Params.appVer "" -}}
+  {{- if $ver -}}
+    {{- $sep := cond (in $pre "?") "&" "?" -}}
+    <link rel="preload" as="image" href="{{ printf "%s%sv=%s" $pre $sep $ver }}">
+  {{- else -}}
+    <link rel="preload" as="image" href="{{ $pre }}">
+  {{- end -}}
 {{ end }}
 
 {{/* ---------------------------------------
@@ -81,20 +85,16 @@
      Costruzione lista con Scratch (evita problemi di scope/append)
 ---------------------------------------- */}}
 {{- $cssPaths := slice
-    "style/base/_tokens.css"
-    "style/base/_base.css"
+    "style/base/_fonts.css"
+    "style/base/_style.css"
 
-    "style/layout/_navbar.css"
-    "style/layout/_hero.css"
     "style/layout/_subhero.css"
-    "style/layout/_footer.css"
 
-    "style/components/_buttons.css"
     "style/components/_cards.css"
+    "style/components/_portal.css"
     "style/components/_links.css"
     "style/components/_contacts.css"
 
-    "style/utilities/_a11y.css"
 -}}
 
 {{- $.Scratch.Set "parts" (slice) -}}
@@ -107,14 +107,21 @@
 
 {{- if gt (len $parts) 0 -}}
   {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
-  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}">
+  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous">
 {{- end -}}
 
+<!-- Optional: Preload core WOFF2 fonts (configure in params.fonts.preload) -->
+{{ with site.Params.fonts.preload }}
+  {{ range . }}
+    <link rel="preload" as="font" href="{{ . | absURL }}" type="font/woff2" crossorigin>
+  {{ end }}
+{{ end }}
+
 {{/* ---------------------------------------
-     CSS specifico Archivio (solo per pagine di tipo "archivio")
-     Percorsi: style/pages/archive.base.css, archive.mobile.css, archive.desktop.css
+     CSS specifico Archivio (solo per pagine "archivio" / sezione "archive")
+     Percorsi: assets/style/pages/archive.base.css, archive.mobile.css, archive.desktop.css
 ---------------------------------------- */}}
-{{- if eq .Type "archivio" -}}
+{{- if or (eq .Section "archive") (eq .Type "archive") (eq .Type "archivio") -}}
   {{- $archivePaths := slice
       "style/pages/archive.base.css"
       "style/pages/archive.mobile.css"
@@ -129,6 +136,18 @@
   {{- $archiveParts := $.Scratch.Get "archiveParts" -}}
   {{- if gt (len $archiveParts) 0 -}}
     {{- $archiveBundle := ($archiveParts | resources.Concat "style/archive-bundle.css") | resources.Minify | resources.Fingerprint -}}
-    <link rel="stylesheet" href="{{ $archiveBundle.RelPermalink }}" integrity="{{ $archiveBundle.Data.Integrity }}">
+    <link rel="stylesheet" href="{{ $archiveBundle.RelPermalink }}" integrity="{{ $archiveBundle.Data.Integrity }}" crossorigin="anonymous">
   {{- end -}}
 {{- end -}}
+
+{{/* ---------------------------------------
+     CSS specifico Articolo (sezione "article")
+---------------------------------------- */}}
+{{- if or (eq .Section "article") (eq .Type "article") -}}
+  {{- with resources.Get "style/pages/article.css" -}}
+    {{- $articleCss := . | resources.Minify | resources.Fingerprint -}}
+    <link rel="stylesheet" href="{{ $articleCss.RelPermalink }}">
+  {{- end -}}
+{{- end -}}
+
+

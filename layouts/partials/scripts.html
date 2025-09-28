@@ -1,14 +1,14 @@
 {{/* layouts/partials/scripts.html
      Bundle JS via Hugo Pipes (robusto ai file mancanti)
      Ordine preservato: script.js → subhero.js → links.js → archive.js
-     Sorgenti attesi in: /assets/script/
+     Sorgenti attesi in: /assets/scripts/
 */}}
 
 {{- $jsPaths := slice
-    "script/script.js"
-    "script/subhero.js"
-    "script/links.js"
-    "script/archive.js"
+    "scripts/script.js"
+    "scripts/subhero.js"
+    "scripts/links.js"
+    "scripts/archive.js"
 -}}
 
 {{- /* Costruzione lista parts con Scratch per evitare problemi di scope */ -}}
@@ -29,3 +29,36 @@
 {{- else -}}
   {{- /* Nessun JS disponibile: niente output */ -}}
 {{- end -}}
+<!-- >>> START: load archive.js solo su /archive/ -->
+{{ if eq .Section "archive" }}
+  <script>
+    (function () {
+      var base = document.documentElement.getAttribute('data-base-url') || '';
+      if (!base) {
+        base = window.location.origin;
+      }
+      var normalized = base.replace(/\/$/, '');
+      window.__ARCHIVE_ENDPOINT__ = normalized + '/archive/list.json';
+    })();
+  </script>
+  <script>
+    // Normalize placeholder text on archive search (fix legacy artifacts)
+    window.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('archive-search-form');
+      if (!form) return;
+      var q = form.querySelector('#q');
+      if (!q) return;
+      var mqPhone = window.matchMedia ? window.matchMedia('(max-width: 768px)') : { matches: false };
+      var setPH = function () {
+        q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione, tag';
+      };
+      setPH();
+      if (mqPhone.addEventListener) mqPhone.addEventListener('change', setPH);
+      else if (mqPhone.addListener) mqPhone.addListener(setPH);
+    });
+  </script>
+{{ end }}
+<!-- <<< END: load archive.js solo su /archive/ -->
+
+
+

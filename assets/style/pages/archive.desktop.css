@@ -1,5 +1,5 @@
 /* ============================================================
-   /pages/archive.desktop.css — regole desktop (≥1024px)
+   /style/archive.desktop.css â€” regole desktop (â‰¥1024px)
    ============================================================ */
 
 @media (min-width: 1024px){
@@ -12,9 +12,8 @@
     grid-template-columns: 1fr auto auto auto; /* q | kind | submit | reset */
     gap: 8px;
   }
-  /* Su desktop il filtro (select) è sempre visibile */
-  .archive-search__select{ display: block; }
-  /* Nascondi il bottone filtro su desktop (il select è visibile) */
+  /* Reset usa lo stile base (inline-grid; place-items:center) */
+  /* Nascondi il bottone filtro su desktop (il select Ã¨ visibile) */
   .archive-search__filter-toggle{ display: none; }
 
   /* ----- Item layout: niente colonna 'pill', dropdown full-width ----- */
@@ -23,7 +22,7 @@
     grid-template-columns: 128px minmax(0,1fr) auto;      /* thumb | testo | chevron */
     grid-template-areas:
       "thumb text chevron"
-      "details details details";                          /* dropdown sotto a tutta larghezza */
+      "details details details";                 /* dropdown sotto a tutta larghezza */
     column-gap: 18px;
     row-gap: 12px;
     padding: 10px 12px;
@@ -44,10 +43,10 @@
     letter-spacing: var(--trk-tight-lg, -0.5px);
   }
 
-  /* Thumb allineato al centro: non condiziona l'altezza del dropdown */
+  /* Thumb allineato in alto: non condiziona l'altezza del dropdown */
   .item-thumb{ align-self: center; }
 
-  /* Chevron a destra: stile coerente con i controlli */
+    /* Chevron a destra: stile coerente con i controlli */
   .item-actions-summary{
     grid-area: chevron;
     justify-self: end;
@@ -61,9 +60,9 @@
   .item-actions-summary::after{ font-size: 19px; }
   .item-actions-summary:hover{ background: transparent; }
 
-  /* Dropdown in flow e full-width sotto l’item */
+  /* Dropdown in flow e full-width sotto lâ€™item */
   /* .item-details display spostato in base */
-  /* Pannello: visibilità via [hidden] (senza animazioni) */
+    /* Pannello: visibilità via [hidden] (senza animazioni) */
   /* Allinea il contenuto del pannello sotto la colonna testo:
      128px (thumb) + 18px (gap) + 12px (padding orizzontale dell'item) = 158px */
   .item-panel{ margin-top: 0; padding: 0 12px 8px 158px; }
@@ -85,12 +84,9 @@
   }
   .archive-item.is-content .item::before{ content: none !important; }
 
-  /* Spazio inferiore condizionale (se vuoi enfatizzare l’apertura)
-     – applicabile se aggiungi una classe .is-open via JS al container
+  /* Spazio inferiore condizionale (se vuoi enfatizzare lâ€™apertura)
+     â€“ applicabile se aggiungi una classe .is-open via JS al container
   */
   .archive-item .item{ padding-bottom: 0; }
   .archive-item .item.is-open{ padding-bottom: 10px; }
 }
-/* ============================================================
-   Fine regole desktop
-   ============================================================ */

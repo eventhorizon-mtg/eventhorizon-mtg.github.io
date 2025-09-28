@@ -1,0 +1,32 @@
+/* =======================
+   Portal
+   ======================= */
+.portal{
+  background: var(--neutral-50);
+  color: var(--indigo-900);
+  padding: clamp(32px, 6vw, 72px) 0;
+  /* Evita che l'anchor #portal finisca sotto la navbar fissa */
+  scroll-margin-top: 80px;
+}
+.portal__inner{
+  width: min(100%, var(--container-max));
+  margin-inline: auto;
+  padding-inline: var(--container-pad-x);
+  text-align: center;
+}
+.portal__title{
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-tight);
+}
+.portal__intro{
+  margin: 0 auto;
+  max-width: 68ch;
+}
+.portal__sub{
+  margin: 12px 0 18px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+}

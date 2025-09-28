@@ -1,0 +1,17 @@
+id: "Video004"
+kind: "video"
+date: "2025-07-21"
+title: "Il Ritorno di Nicol Bolas"
+overline: "PLANESWALKER"
+desc: "Analisi narrativa e carte chiave legate a Nicol Bolas."
+thumb: "/images/cards/fblthp_placeholder.webp"
+tags: ["nicol", "bolas", "nicol bolas"]
+links:
+  - label: "YouTube"
+    href: "https://www.youtube.com/watch?v=ijkl9012"
+    btn_class: "btn--yt primary"
+    sort_order: 10
+  - label: "EDHREC"
+    href: "https://edhrec.com/commanders/nicol-bolas"
+    btn_class: "btn--edh"
+    sort_order: 20

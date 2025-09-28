@@ -1,6 +1,6 @@
-/* ============================================================
-   Contacts styles
-   ============================================================ */
+/* =======================
+   Contacts
+   ======================= */
 .contacts{
   background: var(--neutral-50);
   color: var(--indigo-900);
@@ -19,63 +19,123 @@
   font-size: var(--fs-h2);
   line-height: var(--lh-tight);
 }
-.contacts__intro{ margin: 0 auto; max-width: 68ch; }
+.contacts__intro{
+  margin: 0 auto;
+  max-width: 68ch;
+}
 .contacts__sub{
   margin: 12px 0 18px;
   font-weight: var(--fw-bold);
   letter-spacing: 0.02em;
 }
 
-/* icone in fila */
+/* icone in FILA, centrata; wrap solo se necessario su view strettissime */
 .contacts__list{
-  list-style: none; margin: 0; padding: 0;
-  display: flex; justify-content: center; align-items: center;
-  gap: 16px; flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;                 /* distanza tra icone */
+  flex-wrap: wrap;           /* sicurezza su schermi molto stretti */
 }
+
 .contact{
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 44px; height: 44px; border-radius: 10px;
-  text-decoration: none; -webkit-tap-highlight-color: transparent; outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;               /* touch target */
+  height: 44px;
+  border-radius: 10px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
-.contact:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 3px; }
+.contact:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 3px;
+}
 
-/* Icone via mask */
+/* Icone SVG via mask: colore = background-color */
+/* Icone: dimensione + colore di base */
 .contact__icon{
-  width: 24px; height: 24px; display: inline-block;
-  background-color: var(--indigo-900);
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-color: var(--indigo-900); /* colore icona */
   transition: background-color var(--dur-1) var(--ease-standard);
-
-  -webkit-mask-position: center; mask-position: center;
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mask-mode: alpha;
 }
+
+/* Hover: cambia SOLO il colore dell'icona */
 .contact:hover .contact__icon{ background-color: var(--teal-600); }
 
-.icon-mail{     -webkit-mask-image: url("/assets/icons/mail.svg");     mask-image: url("/assets/icons/mail.svg"); }
-.icon-instagram{-webkit-mask-image: url("/assets/icons/instagram.svg");mask-image: url("/assets/icons/instagram.svg"); }
-.icon-youtube{  -webkit-mask-image: url("/assets/icons/youtube.svg");  mask-image: url("/assets/icons/youtube.svg"); }
-.icon-telegram{ -webkit-mask-image: url("/assets/icons/telegram.svg"); mask-image: url("/assets/icons/telegram.svg"); }
-.icon-discord{  -webkit-mask-image: url("/assets/icons/discord.svg");  mask-image: url("/assets/icons/discord.svg"); }
-.icon-tiktok{   -webkit-mask-image: url("/assets/icons/tiktok.svg");   mask-image: url("/assets/icons/tiktok.svg"); }
-
-/* Fallback senza mask-image */
-@supports not (mask-image: url("")){
-  .contact{ color: var(--indigo-900); }
-  .contact:hover{ color: var(--teal-600); }
-  .contact__icon{ background-color: transparent !important; position: relative; }
-  .contact__icon::before{
-    content: ""; display: block; width: 24px; height: 24px;
-    background-repeat: no-repeat; background-position: center; background-size: contain;
-    filter: brightness(0) saturate(100%);
-  }
-  .icon-mail::before{      background-image: url("/assets/icons/mail.svg"); }
-  .icon-instagram::before{ background-image: url("/assets/icons/instagram.svg"); }
-  .icon-youtube::before{   background-image: url("/assets/icons/youtube.svg"); }
-  .icon-telegram::before{  background-image: url("/assets/icons/telegram.svg"); }
-  .icon-discord::before{   background-image: url("/assets/icons/discord.svg"); }
-  .icon-tiktok::before{    background-image: url("/assets/icons/tiktok.svg"); }
+/* ===== Mask esplicita (con prefissi) ===== */
+.contact__icon{
+  /* posizionamento e sizing coerenti */
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+          mask-mode: alpha;
 }
 
-/* ============================================================
-   Fine Contacts
-   ============================================================ */
+/* Mapping file SVG → mask-image (aggiorna i path se cambi cartella) */
+.icon-mail{
+  -webkit-mask-image: url("../icons/mail.svg");
+          mask-image: url("../icons/mail.svg");
+}
+.icon-instagram{
+  -webkit-mask-image: url("../icons/instagram.svg");
+          mask-image: url("../icons/instagram.svg");
+}
+.icon-youtube{
+  -webkit-mask-image: url("../icons/youtube.svg");
+          mask-image: url("../icons/youtube.svg");
+}
+.icon-telegram{
+  -webkit-mask-image: url("../icons/telegram.svg");
+          mask-image: url("../icons/telegram.svg");
+}
+.icon-discord{
+  -webkit-mask-image: url("../icons/discord.svg");
+          mask-image: url("../icons/discord.svg");
+}
+.icon-tiktok{
+  -webkit-mask-image: url("../icons/tiktok.svg");
+          mask-image: url("../icons/tiktok.svg");
+}
+
+/* ===== Fallback automatico se mask-image non è supportato ===== */
+@supports not (mask-image: url("")) {
+  /* coloriamo via currentColor e usiamo uno pseudo-elemento con background-image */
+  .contact{
+    color: var(--indigo-900);
+  }
+  .contact:hover{
+    color: var(--teal-600);
+  }
+  .contact__icon{
+    /* il vero disegno sta nel ::before */
+    background-color: transparent !important;
+    position: relative;
+  }
+  .contact__icon::before{
+    content: "";
+    display: block;
+    width: 24px; height: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* il colore viene da currentColor */
+    filter: brightness(0) saturate(100%); /* uniforma gli SVG multicolore */
+  }
+  .icon-mail::before     { background-image: url("../icons/mail.svg"); }
+  .icon-instagram::before{ background-image: url("../icons/instagram.svg"); }
+  .icon-youtube::before  { background-image: url("../icons/youtube.svg"); }
+  .icon-telegram::before { background-image: url("../icons/telegram.svg"); }
+  .icon-discord::before  { background-image: url("../icons/discord.svg"); }
+  .icon-tiktok::before   { background-image: url("../icons/tiktok.svg"); }
+}

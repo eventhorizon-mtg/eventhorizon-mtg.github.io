@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ensure generated assets keep exact bytes (preserve SRI/hash)
+docs/style/*.css -text
+docs/style/**/*.css -text
+docs/script/*.js  -text
