@@ -40,10 +40,10 @@
   border-bottom:0;
 }
 .article-hero .container{
-  max-width:var(--container-w);
-  margin-inline:auto;
-  padding:28px var(--container-pad-x) 18px;
-  text-align:center;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding: 10px var(--container-pad-x) 8px;
+  text-align: left;
 }
 
 .article-meta{
