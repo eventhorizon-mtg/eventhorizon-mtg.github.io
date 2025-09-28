@@ -94,7 +94,7 @@
     "style/components/_portal.css"
     "style/components/_links.css"
     "style/components/_contacts.css"
-    "style/components/_modal.css"
+    "style/pages/privacy.css"
     
 
 -}}
@@ -159,14 +159,6 @@
   {{- end -}}
 {{- end -}}
 
-{{/* ---------------------------------------
-     CSS specifico Privacy Policy (slug privacy-policy)
----------------------------------------- */}}
-{{- if eq .Slug "privacy-policy" -}}
-  {{- with resources.Get "style/pages/privacy.css" -}}
-    {{- $privacyCss := . | resources.Minify | resources.Fingerprint -}}
-    <link rel="stylesheet" href="{{ $privacyCss.RelPermalink }}" integrity="{{ $privacyCss.Data.Integrity }}" crossorigin="anonymous">
-  {{- end -}}
-{{- end -}}
+{{/* Nota: privacy.css è ora nel bundle globale; regole pagina sono scope su body[data-page="privacy-policy"] */}}
 
 

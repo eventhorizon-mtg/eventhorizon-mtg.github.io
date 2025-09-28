@@ -40,3 +40,62 @@ body[data-page="privacy-policy"] .page-body{
 body[data-page="privacy-policy"] .page-body a{ color: var(--indigo-700, #5B4E9D); }
 body[data-page="privacy-policy"] .page-body strong{ color:#000; }
 
+/* --- Modal styles (global) --- */
+.privacy-modal{
+  position: fixed; inset: 0; z-index: 1100;
+  display: grid; place-items: center;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 160ms ease, visibility 160ms step-end;
+}
+.privacy-modal.is-open{ opacity:1; visibility:visible; pointer-events:auto; }
+.privacy-modal__backdrop{
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.privacy-modal__window{
+  position: relative; z-index: 1;
+  width: min(92vw, 860px);
+  max-height: 85vh; overflow: auto;
+  background: #FFF;
+  color: #000;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  transform: translateY(8px) scale(.98);
+  transition: transform 220ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease;
+}
+.privacy-modal.is-open .privacy-modal__window{ transform: translateY(0) scale(1); }
+.privacy-modal__header{
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 16px;
+  background: #F7F7FB;
+  border-bottom: 1px solid #E6E6EB;
+  border-top-left-radius: 14px; border-top-right-radius: 14px;
+}
+.privacy-modal__title{
+  margin: 0; font: 700 clamp(1.1rem, 1.2vw + .9rem, 1.5rem) "Open Sans", var(--font-sans);
+  color: #000;
+}
+.privacy-modal__close{
+  appearance: none; border: 0; background: transparent;
+  color: #000; font-size: 22px; line-height: 1;
+  padding: 8px 10px; border-radius: 10px; cursor: pointer;
+}
+.privacy-modal__close:hover{ background: rgba(0,0,0,.06); }
+.privacy-modal__close:focus-visible{ outline: 2px solid var(--gold-600, #E0A402); outline-offset: 2px; }
+.privacy-modal__content{
+  padding: 16px; font: 400 .98rem/1.65 "Open Sans", var(--font-sans); color:#000;
+}
+.privacy-modal__content a{ color: var(--indigo-700, #5B4E9D); text-decoration: underline; }
+
+/* Disable body scroll when open */
+body.is-modal-open{ overflow: hidden; }
+
+@media (max-width: 420px){
+  .privacy-modal__window{ width: min(96vw, 860px); border-radius: 12px; }
+  .privacy-modal__header{ padding: 12px 12px }
+  .privacy-modal__content{ padding: 14px 12px }
+}
