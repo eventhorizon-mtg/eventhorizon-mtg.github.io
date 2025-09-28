@@ -13,7 +13,26 @@
       All logos and trademarks are © their respective owners. <br>
       EventHorizon.mtg is not produced by, endorsed by, or affiliated with these services.
       <br><br>
-      <a href="{{ "/privacy-policy/" | absURL }}">Privacy and Cookies Policy</a>
+      <a href="#privacy-policy" class="js-privacy-link">Privacy and Cookies Policy</a>
     </small>
   </div>
 </footer>
+
+<!-- Privacy Policy Modal (content sourced from content/privacy-policy.md) -->
+{{ $pp := or (site.GetPage "privacy-policy") (site.GetPage "/privacy-policy") }}
+<div class="privacy-modal" id="privacy-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="privacy-modal-title">
+  <div class="privacy-modal__backdrop" data-modal-close aria-hidden="true"></div>
+  <div class="privacy-modal__window" role="document">
+    <header class="privacy-modal__header">
+      <h2 id="privacy-modal-title" class="privacy-modal__title">Privacy Policy</h2>
+      <button type="button" class="privacy-modal__close" aria-label="Chiudi" data-modal-close>×</button>
+    </header>
+    <div class="privacy-modal__content">
+      {{ with $pp }}
+        {{ .Content }}
+      {{ else }}
+        <p>Informativa sulla privacy non disponibile.</p>
+      {{ end }}
+    </div>
+  </div>
+  </div>

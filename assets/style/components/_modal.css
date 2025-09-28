@@ -1,0 +1,13 @@
+/* Privacy Modal */
+.privacy-modal{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity 160ms ease,visibility 160ms step-end}
+.privacy-modal.is-open{opacity:1;visibility:visible;transition:opacity 160ms ease,visibility 0s step-start}
+.privacy-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.privacy-modal__window{position:relative;z-index:1;width:min(92vw, 860px);max-height:85vh;overflow:auto;background:color-mix(in oklab, var(--neutral-900,#0E0F1A) 96%, #FFFFFF 4%);border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 18px 46px rgba(0,0,0,.35)}
+.privacy-modal__header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.privacy-modal__title{margin:0;font-size:clamp(1.1rem, 1.4vw + .8rem, 1.4rem)}
+.privacy-modal__close{appearance:none;border:0;background:transparent;color:#fff;font-size:22px;line-height:1;padding:6px 8px;border-radius:8px;cursor:pointer}
+.privacy-modal__close:hover{background:rgba(255,255,255,.1)}
+.privacy-modal__content{padding:18px 16px}
+.privacy-modal__content p{margin:0 0 1em}
+.privacy-modal__content a{color:var(--teal-300,#00ADB1)}
+

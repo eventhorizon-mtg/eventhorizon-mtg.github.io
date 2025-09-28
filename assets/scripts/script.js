@@ -111,6 +111,36 @@
   });
 })();
 
+// Privacy Policy modal (open from footer link)
+(() => {
+  const link = document.querySelector('.js-privacy-link');
+  const modal = document.getElementById('privacy-modal');
+  if (!link || !modal) return;
+
+  const closeBtns = modal.querySelectorAll('[data-modal-close]');
+  const body = document.body;
+
+  const open = () => {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    body.classList.add('is-modal-open');
+  };
+  const close = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    body.classList.remove('is-modal-open');
+  };
+
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    open();
+  });
+  closeBtns.forEach(btn => btn.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+  });
+})();
+
 /* Hero chevrons: scroll to #portal (mobile only) >>> */
 (function () {
   const chevrons = document.querySelector('.hero-cta--chevrons');
