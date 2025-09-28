@@ -1,0 +1,9 @@
+{{- $src := .Get "src" -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $caption := .Get "caption" | default "" -}}
+<figure class="{{ $class }}">
+  <img src="{{ $src | absURL }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  {{- if $caption }}<figcaption>{{ $caption }}</figcaption>{{ end -}}
+</figure>
+

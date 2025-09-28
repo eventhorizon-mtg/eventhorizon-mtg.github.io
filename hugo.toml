@@ -39,8 +39,8 @@ enableRobotsTXT = true
       "fonts/LexendDeca-Regular.woff2",
       "fonts/LexendGiga-Regular.woff2",
       "fonts/Merriweather-Light.woff2",
-      "fonts/Roboto-Regular.woff2",
-      "fonts/Roboto-Italic.woff2"
+      "fonts/OpenSans-Regular.woff2",
+      "fonts/OpenSans-Italic.woff2"
     ]
 
 [outputFormats.ArchiveList]

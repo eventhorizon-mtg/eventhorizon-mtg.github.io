@@ -1,0 +1,5 @@
+{{- $pos := .Get "pos" | default "center" -}}
+<div class="align-{{ $pos }}">
+  {{ .Inner }}
+</div>
+

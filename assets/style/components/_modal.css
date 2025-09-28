@@ -20,12 +20,12 @@
 .privacy-modal{
   position:fixed; inset:0; z-index:1100;
   display:grid; place-items:center;
-  opacity:0; visibility:hidden;
+  opacity:0; visibility:hidden; pointer-events:none;
   transition:opacity 160ms ease, visibility 160ms step-end;
   overscroll-behavior:contain;
 }
 .privacy-modal.is-open{
-  opacity:1; visibility:visible;
+  opacity:1; visibility:visible; pointer-events:auto;
   transition:opacity 160ms ease, visibility 0s step-start;
 }
 

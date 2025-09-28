@@ -1,0 +1,5 @@
+{{- $align := .Get "align" | default "left" -}}
+<div class="btn-group {{ if eq $align "center" }}is-center{{ else if eq $align "right" }}is-right{{ end }}">
+  {{ .Inner }}
+  </div>
+
