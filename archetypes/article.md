@@ -1,4 +1,4 @@
-++
++++
 title = '{{ replace .File.ContentBaseName "-" " " | title }}'
 date = '{{ .Date }}'
 draft = true
@@ -11,7 +11,7 @@ tags = []
 # ogImage   = ''   # es: "images/articles/{{ .File.ContentBaseName }}/share.webp" (oppure URL assoluto)
 # canonical = ''
 
-++
++++
 
 ## Sommario
 
@@ -23,7 +23,7 @@ Testo articolo...
 
 ### Immagini inline
 
-Inserisci le immagini direttamente nel corpo dell'articolo (la cover hero è stata rimossa). 
+Inserisci le immagini direttamente nel corpo dell'articolo (la cover hero è stata rimossa).
 Percorsi consigliati:
 
 - Metti i file in `static/images/articles/{{ .File.ContentBaseName }}/...`

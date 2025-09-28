@@ -1,4 +1,4 @@
-++ 
++++
 title = "Benvenuto su EventHorizon.mtg"
 date = 2025-09-27T12:00:00Z
 draft = false
