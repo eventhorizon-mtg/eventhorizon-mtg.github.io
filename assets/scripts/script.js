@@ -111,7 +111,7 @@
   });
 })();
 
-/* Hero chevrons: scroll a card target via ID (mobile only) >>> */
+/* Hero chevrons: scroll to #portal (mobile only) >>> */
 (function () {
   const chevrons = document.querySelector('.hero-cta--chevrons');
   if (!chevrons) return;
@@ -122,17 +122,19 @@
   const mqMobile = window.matchMedia('(max-width: 767.98px)');
 
   const onChevronClick = (ev) => {
-    if (mqMobile.matches) {
-      ev.preventDefault();
+    if (!mqMobile.matches) return;
 
-      // Trova la card target per ID
-      const target = document.getElementById('hero-chevron-target');
-      if (!target) return;
+    // Trova la sezione PORTAL (nuova logica)
+    const target = document.getElementById('portal') || document.querySelector('#portal');
+    if (!target) return; // fallback: lascia il default dell'anchor
 
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+    ev.preventDefault();
+    try {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (_) {
+      // Fallback robusto
+      const y = target.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
