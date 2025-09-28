@@ -1,4 +1,4 @@
-﻿+++
++++
 title = "Privacy Policy"
 description = "Informativa sulla privacy e sui cookie."
 date = 2025-09-28T00:00:00Z
@@ -18,7 +18,7 @@ url = "/privacy-policy/"
 
 ## 2. Tipi di dati trattati
 **Questo sito non raccoglie dati personali degli utenti in maniera automatica.**  
-Gli unici dati eventualmente comunicati sono quelli forniti volontariamente dall’utente tramite contatti diretti (es. email).
+Gli unici dati eventualmente comunicati sono quelli forniti volontariamente dall'utente tramite contatti diretti (es. email).
 
 ---
 
@@ -27,7 +27,7 @@ Il sito **non utilizza cookie di profilazione** né strumenti di tracciamento di
 
 #### Cookie tecnici
 Il sito utilizza solo cookie **tecnici** essenziali al corretto funzionamento della piattaforma di hosting (**GitHub Pages**).  
-Questi cookie non profilano l’utente e non richiedono consenso preventivo.
+Questi cookie non profilano l'utente e non richiedono consenso preventivo.
 
 ---
 
@@ -41,26 +41,27 @@ Questi cookie non profilano l’utente e non richiedono consenso preventivo.
 ---
 
 ## 5. Finalità del trattamento
-I dati eventualmente forniti volontariamente dall’utente (es. tramite email di contatto) vengono trattati esclusivamente per rispondere alle richieste.
+I dati eventualmente forniti volontariamente dall'utente (es. tramite email di contatto) vengono trattati esclusivamente per rispondere alle richieste.
 
 ---
 
 ## 6. Base giuridica
-Il trattamento dei dati personali si fonda sull’art. 6 GDPR, in particolare:  
-- esecuzione di misure precontrattuali su richiesta dell’interessato (risposta a contatti volontari).
+Il trattamento dei dati personali si fonda sull'art. 6 GDPR, in particolare:  
+- esecuzione di misure precontrattuali su richiesta dell'interessato (risposta a contatti volontari).
 
 ---
 
 ## 7. Conservazione dei dati
-I dati personali forniti dall’utente (es. email inviate volontariamente) verranno conservati solo per il tempo necessario a fornire riscontro.
+I dati personali forniti dall'utente (es. email inviate volontariamente) verranno conservati solo per il tempo necessario a fornire riscontro.
 
 ---
 
 ## 8. Autorità di controllo
-L’interessato ha diritto di proporre reclamo al Garante per la protezione dei dati personali ([www.garanteprivacy.it](https://www.garanteprivacy.it)) se ritiene che il trattamento violi la normativa vigente.
+L'interessato ha diritto di proporre reclamo al Garante per la protezione dei dati personali ([www.garanteprivacy.it](https://www.garanteprivacy.it)) se ritiene che il trattamento violi la normativa vigente.
 
 ---
 
 ## 9. Aggiornamenti
 La presente informativa può essere aggiornata in ogni momento.  
 Ultima modifica: **28 settembre 2025**.
+

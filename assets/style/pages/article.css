@@ -15,9 +15,9 @@
   --quote-bg:       #ECEBF3;
   --pre-bg:         #EFEFF4;
 
-  /* Evita self-reference sui token colore, che li rende invalidi */
-  --teal-300:       #00ADB1;
-  --teal-700:       #007D82;
+  /* Accenti: usa indigo (coerente con il tema base) */
+  --indigo-500:     var(--indigo-500, #9F7BB8);
+  --indigo-700:     var(--indigo-700, #5B4E9D);
   --gold-600:       #E0A402;
 
   --container-w:    820px;
@@ -31,6 +31,7 @@
 .article{
   padding-top:72px;
   background:var(--page-bg);
+  overflow-x: clip; /* previene sottili overflow orizzontali su mobile */
 }
 @media (min-width:1024px){
   .article{ padding-top:80px; }
@@ -42,7 +43,7 @@
   border-bottom:0;
 }
 .article-hero .container{
-  max-width: var(--container-max);
+  max-width: var(--container-w); /* allineato alla larghezza del body */
   margin-inline: auto;
   padding: 10px var(--container-pad-x) 8px;
   text-align: left;
@@ -155,16 +156,18 @@
 }
 .article-body li{ margin:.28em 0; }
 .article-body li::marker{
-  color: color-mix(in oklab, var(--teal-300) 70%, #000 30%);
+  color: color-mix(in oklab, var(--indigo-500) 70%, #000 30%);
 }
 
 /* Link */
 .article-body a{
-  color: var(--teal-700);
+  color: var(--indigo-700);
   text-decoration: underline;
   text-decoration-thickness: from-font;
   text-underline-offset: 2px;
 }
+.article-body a.btn,
+.article-body .btn{ text-decoration: none; }
 .article-body a:hover{
   text-decoration-color: currentColor;
 }
@@ -193,7 +196,7 @@
 }
 
 .article-body figure.is-full-bleed{
-  width:100vw; margin-left:50%;
+  width:100svw; margin-left:50%;
   transform:translateX(-50%);
   max-width:none;
 }
@@ -265,7 +268,7 @@
   color:var(--text-strong);
 }
 .article-body .callout.is-info{
-  border-color: color-mix(in oklab, var(--teal-300) 35%, #000 65%);
+  border-color: color-mix(in oklab, var(--indigo-500) 35%, #000 65%);
 }
 .article-body .callout.is-warn{
   border-color: color-mix(in oklab, var(--gold-600) 45%, #000 55%);
@@ -280,11 +283,11 @@
 
 /* Accessibilità */
 .article-body ::selection{
-  background: color-mix(in oklab, var(--teal-300) 25%, #FFF 75%);
+  background: color-mix(in oklab, var(--indigo-500) 25%, #FFF 75%);
   color:var(--text-strong);
 }
 .article-body a:focus-visible{
-  outline:2px solid color-mix(in oklab, var(--teal-300) 85%, #000 15%);
+  outline:2px solid color-mix(in oklab, var(--indigo-500) 85%, #000 15%);
   outline-offset:2px;
 }
 

@@ -1,7 +1,6 @@
 {{- $href := .Get "href" | default "#" -}}
 {{- $label := .Get "label" | default (.Inner | default "Apri") -}}
-{{- $variant := .Get "variant" | default "btn--teal" -}}
+{{- $variant := .Get "variant" | default "btn--base" -}}
 {{- $target := .Get "target" | default "" -}}
 {{- $rel := cond (or (eq $target "_blank") (strings.HasPrefix $href "http")) "noopener noreferrer" "" -}}
 <a class="btn {{ $variant }}" href="{{ $href }}" {{ if $target }}target="{{ $target }}"{{ end }} {{ if $rel }}rel="{{ $rel }}"{{ end }}>{{ $label }}</a>
-

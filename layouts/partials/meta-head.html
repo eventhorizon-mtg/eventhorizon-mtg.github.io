@@ -95,6 +95,7 @@
     "style/components/_links.css"
     "style/components/_contacts.css"
     "style/components/_modal.css"
+    
 
 -}}
 
@@ -113,8 +114,15 @@
 
 <!-- Optional: Preload core WOFF2 fonts (configure in params.fonts.preload) -->
 {{ with site.Params.fonts.preload }}
+  {{ $ver := or site.Params.appVer "" }}
   {{ range . }}
-    <link rel="preload" as="font" href="{{ . | absURL }}" type="font/woff2" crossorigin>
+    {{- $href := . | absURL -}}
+    {{- if $ver -}}
+      {{- $sep := cond (in $href "?") "&" "?" -}}
+      <link rel="preload" as="font" href="{{ printf "%s%sv=%s" $href $sep $ver }}" type="font/woff2" crossorigin>
+    {{- else -}}
+      <link rel="preload" as="font" href="{{ $href }}" type="font/woff2" crossorigin>
+    {{- end -}}
   {{ end }}
 {{ end }}
 
@@ -147,7 +155,17 @@
 {{- if or (eq .Section "article") (eq .Type "article") -}}
   {{- with resources.Get "style/pages/article.css" -}}
     {{- $articleCss := . | resources.Minify | resources.Fingerprint -}}
-    <link rel="stylesheet" href="{{ $articleCss.RelPermalink }}">
+    <link rel="stylesheet" href="{{ $articleCss.RelPermalink }}" integrity="{{ $articleCss.Data.Integrity }}" crossorigin="anonymous">
+  {{- end -}}
+{{- end -}}
+
+{{/* ---------------------------------------
+     CSS specifico Privacy Policy (slug privacy-policy)
+---------------------------------------- */}}
+{{- if eq .Slug "privacy-policy" -}}
+  {{- with resources.Get "style/pages/privacy.css" -}}
+    {{- $privacyCss := . | resources.Minify | resources.Fingerprint -}}
+    <link rel="stylesheet" href="{{ $privacyCss.RelPermalink }}" integrity="{{ $privacyCss.Data.Integrity }}" crossorigin="anonymous">
   {{- end -}}
 {{- end -}}
 

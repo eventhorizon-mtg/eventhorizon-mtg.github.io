@@ -1,0 +1,42 @@
+/* Privacy Policy page: light theme, Open Sans, compact typography */
+body[data-page="privacy-policy"]{
+  color:#000;
+  background: var(--neutral-50, #F3F2F7);
+}
+
+body[data-page="privacy-policy"] main{
+  background: var(--neutral-50, #F3F2F7);
+}
+
+/* Container tuning */
+body[data-page="privacy-policy"] .page > .container{
+  max-width: var(--container-w, 820px);
+  margin-inline: auto;
+  padding: 16px var(--container-pad-x, 16px) 64px;
+}
+
+/* Typography */
+body[data-page="privacy-policy"] .page h1{
+  margin: 0 0 .4em;
+  font-family: "Open Sans", var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 1.2vw + 1.2rem, 2rem);
+  line-height: 1.2;
+  color: #000;
+}
+body[data-page="privacy-policy"] .page h2{
+  margin: 1.6em 0 .5em;
+  font-family: "Open Sans", var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(1.15rem, .9vw + 1rem, 1.4rem);
+  color: #000;
+}
+body[data-page="privacy-policy"] .page-body{
+  font-family: "Open Sans", var(--font-sans);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #000;
+}
+body[data-page="privacy-policy"] .page-body a{ color: var(--indigo-700, #5B4E9D); }
+body[data-page="privacy-policy"] .page-body strong{ color:#000; }
+

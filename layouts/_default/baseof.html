@@ -4,7 +4,7 @@
   {{ partial "meta-head.html" . }}
   {{ block "head_extra" . }}{{ end }}
 </head>
-<body>
+<body data-page="{{ .Slug }}" data-section="{{ .Section }}" data-type="{{ .Type }}">
   {{ partial "navbar.html" . }}
 
   <main id="main" role="main">

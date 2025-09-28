@@ -59,6 +59,15 @@ jobs:
             echo "ERROR: JS bundle fingerprint not found in index.html";
             exit 1;
           }
+          # 4) Article-specific CSS uses fingerprinted filename on any article page (if present)
+          for d in public/articles public/article; do
+            if [ -d "$d" ]; then
+              grep -R -Eo '/style/pages/article.min\.[a-f0-9]{64}\.css' "$d" >/dev/null || {
+                echo "ERROR: Article CSS fingerprint not found in article pages under $d";
+                exit 1;
+              }
+            fi
+          done
 
       - name: Validate SRI references in generated HTML
         run: |
