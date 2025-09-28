@@ -27,9 +27,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {{- if $ogDesc }}<meta name="description" content="{{ $ogDesc }}">{{ end }}
 
-<!-- Klaro (privacy manager) -->
-<script src="https://api.kiprotect.com/v1/privacy-managers/8b694f53e9f6acd89923a04df0626791/klaro.js"></script>
-
 <!-- Canonical -->
 <link rel="canonical" href="{{ $canonical }}">
 
@@ -68,11 +65,8 @@
 {{- if $ogDesc }}<meta name="twitter:description" content="{{ $ogDesc }}">{{ end -}}
 {{- if $ogImageAbs }}<meta name="twitter:image" content="{{ $ogImageAbs }}">{{ end -}}
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700;900&family=Lexend+Giga:wght@800&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<!-- Fonts (self-hosted) -->
+{{/* NOTE: font-face rules are loaded via assets/style/base/_fonts.css included in the main bundle below. */}}
 
 <!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
@@ -91,6 +85,7 @@
      Costruzione lista con Scratch (evita problemi di scope/append)
 ---------------------------------------- */}}
 {{- $cssPaths := slice
+    "style/base/_fonts.css"
     "style/base/_style.css"
 
     "style/layout/_subhero.css"
@@ -114,6 +109,13 @@
   {{- $bundle := ($parts | resources.Concat "style/bundle.css") | resources.Minify | resources.Fingerprint -}}
   <link rel="stylesheet" href="{{ $bundle.RelPermalink }}" integrity="{{ $bundle.Data.Integrity }}" crossorigin="anonymous">
 {{- end -}}
+
+<!-- Optional: Preload core WOFF2 fonts (configure in params.fonts.preload) -->
+{{ with site.Params.fonts.preload }}
+  {{ range . }}
+    <link rel="preload" as="font" href="{{ . | absURL }}" type="font/woff2" crossorigin>
+  {{ end }}
+{{ end }}
 
 {{/* ---------------------------------------
      CSS specifico Archivio (solo per pagine "archivio" / sezione "archive")
