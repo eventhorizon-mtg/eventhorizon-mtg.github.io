@@ -1,13 +1,178 @@
-/* Privacy Modal */
-.privacy-modal{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity 160ms ease,visibility 160ms step-end}
-.privacy-modal.is-open{opacity:1;visibility:visible;transition:opacity 160ms ease,visibility 0s step-start}
-.privacy-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}
-.privacy-modal__window{position:relative;z-index:1;width:min(92vw, 860px);max-height:85vh;overflow:auto;background:color-mix(in oklab, var(--neutral-900,#0E0F1A) 96%, #FFFFFF 4%);border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 18px 46px rgba(0,0,0,.35)}
-.privacy-modal__header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
-.privacy-modal__title{margin:0;font-size:clamp(1.1rem, 1.4vw + .8rem, 1.4rem)}
-.privacy-modal__close{appearance:none;border:0;background:transparent;color:#fff;font-size:22px;line-height:1;padding:6px 8px;border-radius:8px;cursor:pointer}
-.privacy-modal__close:hover{background:rgba(255,255,255,.1)}
-.privacy-modal__content{padding:18px 16px}
-.privacy-modal__content p{margin:0 0 1em}
-.privacy-modal__content a{color:var(--teal-300,#00ADB1)}
+/* =========================
+   Privacy Modal (polish)
+   – Nessun cambio all’HTML
+   – Palette: usa i tuoi token se presenti
+   ========================= */
 
+/* Base palette (fallback se i token non esistono) */
+:root{
+  --_bg-900: var(--neutral-900, #0E0F1A);
+  --_bg-800: var(--neutral-800, #151726);
+  --_text-100: var(--neutral-00, #FFFFFF);
+  --_border: rgba(255,255,255,.14);
+  --_divider: rgba(255,255,255,.10);
+  --_teal: var(--teal-300, #00ADB1);
+  --_indigo: var(--indigo-700, #5B4E9D);
+  --_shadow: 0 24px 60px rgba(0,0,0,.45);
+}
+
+/* Wrapper */
+.privacy-modal{
+  position:fixed; inset:0; z-index:1100;
+  display:grid; place-items:center;
+  opacity:0; visibility:hidden;
+  transition:opacity 160ms ease, visibility 160ms step-end;
+  overscroll-behavior:contain;
+}
+.privacy-modal.is-open{
+  opacity:1; visibility:visible;
+  transition:opacity 160ms ease, visibility 0s step-start;
+}
+
+/* Backdrop */
+.privacy-modal__backdrop{
+  position:absolute; inset:0;
+  background: color-mix(in oklab, #000 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* Window */
+.privacy-modal__window{
+  position:relative; z-index:1;
+  width:min(92vw, 860px);
+  max-height:85vh; overflow:auto;
+  background:
+    color-mix(in oklab, var(--_bg-900) 92%, #fff 8%);
+  border:1px solid var(--_border);
+  border-radius:16px;
+  box-shadow: var(--_shadow);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  /* micro-motion in ingresso */
+  transform: translateY(8px) scale(.98);
+  opacity:.98;
+  transition: transform 220ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease;
+}
+.privacy-modal.is-open .privacy-modal__window{
+  transform: translateY(0) scale(1);
+  opacity:1;
+}
+
+/* Header */
+.privacy-modal__header{
+  position:sticky; top:0; z-index:2;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:16px 18px;
+  background:
+    linear-gradient(to bottom,
+      color-mix(in oklab, var(--_bg-900) 94%, #fff 6%), 
+      color-mix(in oklab, var(--_bg-900) 90%, #fff 10%));
+  border-bottom:1px solid var(--_divider);
+  border-top-left-radius:16px; border-top-right-radius:16px;
+}
+
+/* Titolo */
+.privacy-modal__title{
+  margin:0;
+  font-size:clamp(1.1rem, 1.2vw + .9rem, 1.5rem);
+  font-weight:700;
+  letter-spacing:.2px;
+  color: var(--_text-100);
+}
+
+/* Close */
+.privacy-modal__close{
+  appearance:none; border:0; background:transparent;
+  color:var(--_text-100); font-size:22px; line-height:1;
+  padding:8px 10px; border-radius:10px; cursor:pointer;
+  transition: background 160ms ease, transform 120ms ease;
+}
+.privacy-modal__close:hover{ background:rgba(255,255,255,.10) }
+.privacy-modal__close:active{ transform: scale(.96) }
+.privacy-modal__close:focus-visible{
+  outline:2px solid color-mix(in oklab, var(--_teal) 85%, #fff 15%);
+  outline-offset:2px;
+}
+
+/* Content */
+.privacy-modal__content{
+  padding:20px 18px 18px;
+  color: var(--_text-100);
+}
+.privacy-modal__content > *+*{ margin-top:1em }
+.privacy-modal__content p{ margin:0 }
+.privacy-modal__content a{
+  color: var(--_teal);
+  text-decoration: none;
+  border-bottom: 1px dashed color-mix(in oklab, var(--_teal) 75%, #fff 25%);
+}
+.privacy-modal__content a:hover{
+  text-decoration: underline;
+}
+
+/* Divider opzionali */
+.privacy-modal__section + .privacy-modal__section{
+  border-top:1px solid var(--_divider);
+  padding-top:16px; margin-top:16px;
+}
+
+/* Footer/Actions (se presenti) */
+.privacy-modal__actions{
+  display:flex; gap:10px; justify-content:flex-end;
+  padding:16px 18px;
+  border-top:1px solid var(--_divider);
+  background: color-mix(in oklab, var(--_bg-900) 94%, #fff 6%);
+  border-bottom-left-radius:16px; border-bottom-right-radius:16px;
+}
+.privacy-modal__btn{
+  appearance:none; border:1px solid var(--_divider);
+  background: color-mix(in oklab, var(--_bg-800) 88%, #fff 12%);
+  color: var(--_text-100);
+  padding:10px 14px; border-radius:12px; cursor:pointer;
+  font-weight:600; letter-spacing:.2px;
+  transition: transform 120ms ease, background 160ms ease, border-color 160ms ease;
+}
+.privacy-modal__btn:hover{
+  background: color-mix(in oklab, var(--_bg-800) 80%, #fff 20%);
+  border-color: rgba(255,255,255,.22);
+}
+.privacy-modal__btn:active{ transform: translateY(1px) }
+
+/* CTA primaria */
+.privacy-modal__btn--primary{
+  border-color: transparent;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--_teal) 88%, #fff 12%),
+    color-mix(in oklab, var(--_indigo) 30%, #000 70%)
+  );
+}
+.privacy-modal__btn--primary:hover{
+  filter: brightness(1.05);
+}
+
+/* Scrollbar elegante (webkit) */
+.privacy-modal__window::-webkit-scrollbar{ width:12px }
+.privacy-modal__window::-webkit-scrollbar-track{
+  background: transparent; border-left:1px solid var(--_divider);
+}
+.privacy-modal__window::-webkit-scrollbar-thumb{
+  background: color-mix(in oklab, var(--_bg-800) 70%, #fff 30%);
+  border:3px solid transparent; background-clip:content-box; border-radius:999px;
+}
+
+/* Riduzione motion */
+@media (prefers-reduced-motion: reduce){
+  .privacy-modal,
+  .privacy-modal__window,
+  .privacy-modal__close,
+  .privacy-modal__btn{ transition:none }
+  .privacy-modal__window{ transform:none }
+}
+
+/* Piccoli schermi */
+@media (max-width: 420px){
+  .privacy-modal__window{ width:min(96vw, 860px); border-radius:14px }
+  .privacy-modal__header{ padding:14px 14px }
+  .privacy-modal__content{ padding:16px 14px }
+  .privacy-modal__actions{ padding:14px }
+}
