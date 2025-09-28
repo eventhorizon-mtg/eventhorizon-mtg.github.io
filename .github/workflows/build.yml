@@ -32,6 +32,26 @@ jobs:
       - name: Build site (publishDir=docs)
         run: hugo --minify
 
+      - name: Verify cache-busting markers
+        run: |
+          set -e
+          echo "Expected appVer: ${HUGO_PARAMS_APPVER}"
+          # 1) HTML root carries the appVer used for cache busting of images/JSON
+          grep -q "data-app-ver=${HUGO_PARAMS_APPVER}" docs/index.html || {
+            echo "ERROR: data-app-ver mismatch or missing in docs/index.html";
+            exit 1;
+          }
+          # 2) CSS bundle uses fingerprinted filename
+          grep -Eo '/style/bundle.min\.[a-f0-9]{64}\.css' docs/index.html >/dev/null || {
+            echo "ERROR: CSS bundle fingerprint not found in index.html";
+            exit 1;
+          }
+          # 3) JS bundle uses fingerprinted filename
+          grep -Eo '/script/bundle.min\.[a-f0-9]{64}\.js' docs/index.html >/dev/null || {
+            echo "ERROR: JS bundle fingerprint not found in index.html";
+            exit 1;
+          }
+
       - name: Validate SRI references in generated HTML
         run: |
           python - << 'PY'

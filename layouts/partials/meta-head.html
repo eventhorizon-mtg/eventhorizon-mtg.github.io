@@ -73,7 +73,14 @@
 
 <!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
 {{ with .Site.Params.preloadHero }}
-<link rel="preload" as="image" href="{{ . | absURL }}">
+  {{- $pre := . | absURL -}}
+  {{- $ver := or site.Params.appVer "" -}}
+  {{- if $ver -}}
+    {{- $sep := cond (in $pre "?") "&" "?" -}}
+    <link rel="preload" as="image" href="{{ printf "%s%sv=%s" $pre $sep $ver }}">
+  {{- else -}}
+    <link rel="preload" as="image" href="{{ $pre }}">
+  {{- end -}}
 {{ end }}
 
 {{/* ---------------------------------------
