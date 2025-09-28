@@ -15,12 +15,14 @@
   --quote-bg:       #ECEBF3;
   --pre-bg:         #EFEFF4;
 
-  --teal-300:       var(--teal-300, #00ADB1);
-  --teal-700:       var(--teal-700, #007D82);
-  --gold-600:       var(--gold-600, #E0A402);
+  /* Evita self-reference sui token colore, che li rende invalidi */
+  --teal-300:       #00ADB1;
+  --teal-700:       #007D82;
+  --gold-600:       #E0A402;
 
   --container-w:    820px;
-  --container-pad-x: var(--container-pad-x, 16px);
+  /* Usa un valore concreto per evitare cicli var() che annullano il padding navbar */
+  --container-pad-x: 16px;
   --radius-article: 14px;
   --radius-media:   12px;
 }
