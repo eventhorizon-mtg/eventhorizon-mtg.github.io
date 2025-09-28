@@ -40,6 +40,22 @@ jobs:
 
           root = 'docs'
           problems = []
+
+          def to_local(url: str) -> str:
+              # Map a URL to a local file under docs/.
+              # Handles GitHub Pages project paths by stripping the first segment if needed.
+              from urllib.parse import urlparse
+              path = urlparse(url).path or url
+              path = path.lstrip('/')
+              cand = os.path.join(root, path)
+              if os.path.exists(cand):
+                  return cand
+              if '/' in path:
+                  _, rest = path.split('/', 1)
+                  cand2 = os.path.join(root, rest)
+                  if os.path.exists(cand2):
+                      return cand2
+              return cand
           # Scan all HTML under docs/
           for dirpath, _, filenames in os.walk(root):
               for fn in filenames:
@@ -54,7 +70,7 @@ jobs:
                           path = path[1:]
                       if path.startswith('eventhorizon/'):
                           path = path[len('eventhorizon/'):]
-                      local = os.path.join(root, path)
+                      local = to_local(url)
                       if not os.path.exists(local):
                           problems.append(f"Missing CSS asset: {url} -> {local}")
                           continue
@@ -70,7 +86,7 @@ jobs:
                           path = path[1:]
                       if path.startswith('eventhorizon/'):
                           path = path[len('eventhorizon/'):]
-                      local = os.path.join(root, path)
+                      local = to_local(url)
                       if not os.path.exists(local):
                           problems.append(f"Missing JS asset: {url} -> {local}")
                           continue
