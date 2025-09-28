@@ -1,4 +1,4 @@
-baseURL = "https://eventhorizon-eng.github.io/eventhorizon/"
+baseURL = "https://eventhorizon-mtg.github.io/eventhorizon/"
 languageCode = "it-it"
 title = "EventHorizon.mtg"
 
@@ -24,7 +24,7 @@ enableRobotsTXT = true
   [params.og]
     title = "EventHorizon.mtg"
     description = "Magic: The Gathering • Guide, video e risorse selezionate."
-    image = "/images/bg_image.webp"
+    image = "images/bg_image.webp"
     locale = "it_IT"
 
   # UI
