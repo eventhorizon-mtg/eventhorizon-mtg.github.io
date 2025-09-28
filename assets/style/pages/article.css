@@ -1,60 +1,222 @@
 /* ============================================================
-   Article pages
+   Article pages — reading polish (no HTML changes)
    ============================================================ */
 
 /* Evita overlap con navbar fissa */
-.article{ padding-top: 72px; }
+.article{ padding-top:72px; }
 
-/* Hero/meta */
-.article-hero{ background: color-mix(in oklab, var(--neutral-900, #0E0F1A) 94%, #FFFFFF 6%); }
-.article-hero .container{ padding: 24px var(--container-pad-x, 16px) 16px; }
-.article-meta{ margin: 0 0 8px; opacity: .85; font-size: .95rem; letter-spacing: .02em; }
-.article-title{ margin: 0 0 6px; font-family: var(--font-display, var(--font-sans));
-  font-weight: var(--fw-black, 800);
-  font-size: clamp(1.75rem, 1.6vw + 1.2rem, 2.25rem);
-  line-height: var(--lh-tight, 1.15);
+@media (min-width:1024px){
+  .article{ padding-top:80px; }
 }
-.article-desc{ margin: 0 0 12px; opacity: .9; }
 
-.article-cover{ margin: 0; }
-.article-cover img{ display:block; width:100%; height:auto; object-fit:cover; }
+/* ---------- HERO / META ---------- */
+.article-hero{
+  background: color-mix(in oklab, var(--neutral-900,#0E0F1A) 94%, #fff 6%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.article-hero .container{
+  padding:28px var(--container-pad-x,16px) 18px;
+  max-width: 880px;
+  margin-inline:auto;
+}
+.article-meta{
+  margin:0 0 8px;
+  opacity:.85;
+  font-size:.95rem;
+  letter-spacing:.02em;
+}
+.article-title{
+  margin:0 0 10px;
+  font-family:var(--font-display, var(--font-sans));
+  font-weight:var(--fw-black,800);
+  font-size:clamp(1.9rem, 1.2vw + 1.4rem, 2.6rem);
+  line-height:var(--lh-tight,1.15);
+  letter-spacing:.2px;
+}
+.article-desc{
+  margin:0;
+  opacity:.92;
+  font-size:clamp(1.05rem, .5vw + 1rem, 1.15rem);
+  line-height:1.45;
+}
 
-/* Corpo editoriale (prose) */
+/* ---------- COVER ---------- */
+.article-cover{ margin:0; }
+.article-cover img{
+  display:block; width:100%; height:auto; object-fit:cover;
+  border-radius:12px;
+}
+
+/* ---------- BODY / PROSE ---------- */
 .article-body.container{
-  max-width: 860px;
-  padding: 16px var(--container-pad-x, 16px) 72px;
+  max-width: 72ch;                 /* ~ line-length ideale */
+  padding: 24px var(--container-pad-x,16px) 80px;
+  margin-inline:auto;
+  color: var(--neutral-00,#fff);
+  --lead-size: clamp(1.05rem, .4vw + 1rem, 1.2rem);
 }
-.article-body p{ margin: 0 0 1.1em; }
-.article-body h2{ margin: 1.6em 0 .4em; font-size: clamp(1.35rem, 1.2vw + 1rem, 1.8rem); line-height: 1.2; }
-.article-body h3{ margin: 1.4em 0 .4em; font-size: clamp(1.15rem, .9vw + .9rem, 1.4rem); line-height: 1.25; }
-.article-body ul, .article-body ol{ margin: .8em 0 1em; padding-left: 1.2em; }
-.article-body li{ margin: .25em 0; }
-.article-body a{ color: var(--teal-300, #00ADB1); text-decoration: none; }
-.article-body a:hover{ text-decoration: underline; }
+.article-body{
+  font-size:1rem;
+  line-height:1.65;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  hanging-punctuation:first last;
+  hyphens:auto;
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+.article-body p{ margin:0 0 1.1em; }
+.article-body p + p{ text-indent:0; }
 
-/* Citazioni e evidenze */
+/* paragrafo introduttivo (opzionale: aggiungi .is-lead al primo p) */
+.article-body .is-lead{
+  font-size:var(--lead-size);
+  line-height:1.6;
+  opacity:.95;
+}
+
+/* Headings: ritmo verticale coerente */
+.article-body h2{
+  margin: 2.0em 0 .6em;
+  font-size: clamp(1.5rem, 1.2vw + 1.1rem, 2.0rem);
+  line-height:1.25;
+  letter-spacing:.2px;
+}
+.article-body h3{
+  margin: 1.6em 0 .5em;
+  font-size: clamp(1.25rem, .9vw + 1rem, 1.55rem);
+  line-height:1.3;
+}
+.article-body h4{
+  margin: 1.4em 0 .4em;
+  font-size: clamp(1.05rem, .6vw + .95rem, 1.2rem);
+  letter-spacing:.2px;
+  opacity:.95;
+}
+
+/* Liste */
+.article-body ul,
+.article-body ol{
+  margin:.8em 0 1.1em;
+  padding-left:1.2em;
+}
+.article-body li{ margin:.28em 0; }
+.article-body li::marker{ color:color-mix(in oklab, var(--teal-300,#00ADB1) 70%, #fff 30%); }
+
+/* Link */
+.article-body a{
+  color:var(--teal-300,#00ADB1);
+  text-decoration:none;
+  border-bottom:1px dashed color-mix(in oklab, var(--teal-300,#00ADB1) 75%, #fff 25%);
+}
+.article-body a:hover{
+  text-decoration:underline;
+}
+
+/* Citazioni */
 .article-body blockquote{
-  margin: 1.2em 0; padding: .6em 1em; border-left: 3px solid var(--gold-600, #E0A402);
-  background: color-mix(in oklab, #FFFFFF 6%, var(--neutral-900, #0E0F1A) 94%);
-  font-style: italic; opacity: .95;
+  margin: 1.4em 0;
+  padding:.9em 1.1em;
+  border-left:4px solid var(--gold-600,#E0A402);
+  background: color-mix(in oklab, #fff 6%, var(--neutral-900,#0E0F1A) 94%);
+  font-style:italic;
+  opacity:.96;
+  border-radius:8px;
 }
-
-/* Code */
-.article-body pre{ padding: 12px 14px; overflow:auto; border-radius: 8px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
-}
-.article-body code{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.article-body blockquote > *:first-child{ margin-top:0 }
+.article-body blockquote > *:last-child{ margin-bottom:0 }
 
 /* Figure */
-.article-body figure{ margin: 1.2em 0; }
-.article-body figcaption{ opacity:.8; font-size:.95rem; margin-top:.4em; }
-
-/* Immagini responsive nel corpo */
-.article-body img{ display:block; max-width:100%; height:auto; border-radius: 6px; }
-
-@media (min-width: 1024px){
-  .article{ padding-top: 80px; }
-  .article-body.container{ padding-bottom: 96px; }
+.article-body figure{ margin:1.4em 0; }
+.article-body img{
+  display:block; max-width:100%; height:auto; border-radius:10px;
+}
+.article-body figcaption{
+  opacity:.8; font-size:.95rem; margin-top:.5em;
+  text-align:center;
 }
 
+/* Variante full-bleed opzionale: aggiungi .is-full-bleed al figure */
+.article-body figure.is-full-bleed{
+  width:100vw; margin-left:50%;
+  transform:translateX(-50%);
+  max-width:none;
+}
+.article-body figure.is-full-bleed img{ border-radius:0 }
+
+/* Tabelle */
+.article-body table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  margin:1.2em 0;
+  font-size:.98rem;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  overflow:hidden;
+}
+.article-body thead th{
+  text-align:left;
+  padding:.75em .8em;
+  background: color-mix(in oklab, var(--neutral-900,#0E0F1A) 90%, #fff 10%);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+.article-body td{
+  padding:.7em .8em;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.article-body tr:last-child td{ border-bottom:0; }
+
+/* Code */
+.article-body pre{
+  padding:14px 16px;
+  overflow:auto;
+  border-radius:10px;
+  background: color-mix(in oklab, #000 30%, #fff 0%);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  line-height:1.55;
+}
+.article-body code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.94em;
+}
+.article-body :not(pre) > code{
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  padding:.08em .35em;
+  border-radius:6px;
+}
+
+/* Note / callout (aggiungi .callout [.is-info/.is-warn]) */
+.article-body .callout{
+  margin:1.2em 0; padding:.9em 1em;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  background: color-mix(in oklab, var(--neutral-900,#0E0F1A) 92%, #fff 8%);
+}
+.article-body .callout.is-info{ border-color: color-mix(in oklab, var(--teal-300,#00ADB1) 40%, #fff 60%); }
+.article-body .callout.is-warn{ border-color: color-mix(in oklab, var(--gold-600,#E0A402) 40%, #fff 60%); }
+
+/* Separatore sezione */
+.article-body hr{
+  height:1px; border:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  margin:2.2em 0;
+}
+
+/* ---------- ACCESSIBILITÀ & READING FEEL ---------- */
+.article-body ::selection{
+  background: color-mix(in oklab, var(--teal-300,#00ADB1) 30%, #fff 70%);
+  color:#000;
+}
+.article-body a:focus-visible{
+  outline:2px solid color-mix(in oklab, var(--teal-300,#00ADB1) 85%, #fff 15%);
+  outline-offset:2px;
+}
+
+/* ---------- OPTIONAL: barra progresso lettura ---------- */
+.reading-progress{
+  position:sticky; top:0; left:0; right:0; height:3px; z-index:1000;
+  background:linear-gradient(90deg, var(--teal-300,#00ADB1) var(--_p,0%), transparent 0);
+}
