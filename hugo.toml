@@ -2,7 +2,7 @@ baseURL = "https://eventhorizon-mtg.github.io/"
 languageCode = "it-it"
 title = "EventHorizon.mtg"
 
-publishDir = "docs"
+publishDir = "public"
 canonifyURLs = false
 enableRobotsTXT = true
 
