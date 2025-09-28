@@ -41,6 +41,22 @@
       window.__ARCHIVE_ENDPOINT__ = normalized + '/archive/list.json';
     })();
   </script>
+  <script>
+    // Normalize placeholder text on archive search (fix legacy artifacts)
+    window.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('archive-search-form');
+      if (!form) return;
+      var q = form.querySelector('#q');
+      if (!q) return;
+      var mqPhone = window.matchMedia ? window.matchMedia('(max-width: 768px)') : { matches: false };
+      var setPH = function () {
+        q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione, tag';
+      };
+      setPH();
+      if (mqPhone.addEventListener) mqPhone.addEventListener('change', setPH);
+      else if (mqPhone.addListener) mqPhone.addListener(setPH);
+    });
+  </script>
 {{ end }}
 <!-- <<< END: load archive.js solo su /archive/ -->
 
