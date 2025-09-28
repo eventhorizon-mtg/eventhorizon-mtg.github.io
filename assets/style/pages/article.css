@@ -323,6 +323,15 @@
   .article-body table{ font-size:.95rem; }
 }
 
+/* Mobile/tablet: garantisci padding laterale e safe-area */
+@media (max-width: 768px){
+  .article-hero .container,
+  .article-body.container{
+    padding-left: calc(var(--container-pad-x) + env(safe-area-inset-left));
+    padding-right: calc(var(--container-pad-x) + env(safe-area-inset-right));
+  }
+}
+
 /* Print */
 @media print{
   .article{ padding-top:0; background:#FFF; }
