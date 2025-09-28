@@ -9,11 +9,6 @@
       <h1 class="article-title" itemprop="headline">{{ .Title }}</h1>
       {{ with .Params.description }}<p class="article-desc">{{ . }}</p>{{ end }}
     </div>
-    {{ with .Params.cover }}
-      <figure class="article-cover">
-        <img src="{{ . | absURL }}" alt="Cover: {{ $.Title }}" loading="eager" fetchpriority="high">
-      </figure>
-    {{ end }}
   </header>
 
   <div class="article-body container" itemprop="articleBody">

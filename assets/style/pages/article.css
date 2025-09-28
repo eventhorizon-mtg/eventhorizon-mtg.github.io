@@ -11,11 +11,11 @@
 
 /* ---------- HERO / META ---------- */
 .article-hero{
-  background: color-mix(in oklab, var(--neutral-900,#0E0F1A) 94%, #fff 6%);
-  border-bottom:1px solid rgba(255,255,255,.06);
+  background: transparent;
+  border-bottom:1px solid rgba(255,255,255,.12);
 }
 .article-hero .container{
-  padding:28px var(--container-pad-x,16px) 18px;
+  padding:16px var(--container-pad-x,16px) 8px;
   max-width: 880px;
   margin-inline:auto;
 }
@@ -130,6 +130,7 @@
 .article-body figure{ margin:1.4em 0; }
 .article-body img{
   display:block; max-width:100%; height:auto; border-radius:10px;
+  margin: 1em auto;
 }
 .article-body figcaption{
   opacity:.8; font-size:.95rem; margin-top:.5em;
