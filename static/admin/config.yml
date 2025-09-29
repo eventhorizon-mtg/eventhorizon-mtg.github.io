@@ -2,6 +2,7 @@ backend:
   name: github
   repo: eventhorizon-mtg/eventhorizon-mtg.github.io
   branch: test
+  site_domain: eventhorizon-mtg.github.io
   base_url: https://eventhorizon-oauth.cetriolo-mtg.workers.dev
   auth_endpoint: auth
 
