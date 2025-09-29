@@ -2,25 +2,32 @@
 <html lang="it">
   <head>
     <meta charset="utf-8" />
+    <title>Fallback Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EventHorizon.mtg — CMS</title>
-
-    <!-- Decap CMS (CDN) -->
-    <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    
-    <!-- FALLBACK: intercetta token nel hash o query e rilancia "authorization:github:success:..."
-         Supporta formati diversi (access_token/token/authorization) e forza route `#/` dopo il login.
-         Inoltre, se riceve il postMessage dal popup OAuth, assicura il routing su `#/`. -->
-    <script defer>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 16px; }
+      pre { background: #f5f5f5; padding: 12px; }
+    </style>
+    <script>
+      // Intercetta postMessage per tracciare la chiamata dal fallback
+      (function(){
+        var _pm = window.postMessage;
+        window.__lastPostMessage = null;
+        window.postMessage = function(msg, target) {
+          window.__lastPostMessage = { msg: String(msg), target: String(target) };
+          return _pm.apply(this, arguments);
+        };
+      })();
+    </script>
+    <script>
+      // Copia del fallback di static/admin/index.html
       (function () {
         function parseAuthFromHashOrQuery() {
           var h = window.location.hash || "";
           var q = window.location.search || "";
 
-          // 1) Legacy prefix nel hash
           if (h && h !== "#" && h !== "#/") {
             var hash = h.charAt(0) === "#" ? h.slice(1) : h;
-
             var legacyPrefix = "authorization:github:success:";
             if (hash.indexOf(legacyPrefix) === 0) {
               try {
@@ -30,8 +37,6 @@
                 return data;
               } catch (e) {}
             }
-
-            // access_token nel hash
             try {
               var paramsH = new URLSearchParams(hash);
               var tokenH = paramsH.get("access_token") || paramsH.get("token");
@@ -40,7 +45,6 @@
             } catch (_) {}
           }
 
-          // 2) access_token nella query string
           if (q && q.length > 1) {
             try {
               var paramsQ = new URLSearchParams(q.charAt(0) === "?" ? q.slice(1) : q);
@@ -57,16 +61,12 @@
           if (!data) return;
           try {
             var msg = "authorization:github:success:" + JSON.stringify(data);
-            // Esegui dopo il load per essere sicuri che i listener siano attivi
             setTimeout(function () {
               window.postMessage(msg, "*");
-              // Sposta l'URL sulla root del router della UI del CMS e pulisci query/hash originali
               var newUrl = window.location.pathname + window.location.search.replace(/^\?$/, "") + "#/";
               history.replaceState(null, "", newUrl);
             }, 0);
-          } catch (e) {
-            // silenzioso
-          }
+          } catch (e) {}
         }
 
         if (document.readyState === "complete") {
@@ -75,11 +75,9 @@
           window.addEventListener("load", relay);
         }
 
-        // Se il popup OAuth invia il messaggio, forziamo comunque il routing su `#/`
         window.addEventListener("message", function (ev) {
           if (typeof ev.data === "string" && ev.data.indexOf("authorization:github:success:") === 0) {
             try {
-              // Non interferire con Decap; ci limitiamo a garantire che la route sia la home
               var target = window.location.pathname + window.location.search.replace(/^\?$/, "") + "#/";
               if (window.location.hash !== "#/") {
                 history.replaceState(null, "", target);
@@ -91,6 +89,22 @@
     </script>
   </head>
   <body>
-    <div id="nc-root"></div>
+    <h1>Fallback Test</h1>
+    <p>Questo test verifica che il fallback reindirizzi a <code>#/</code> e invii il <code>postMessage</code>.</p>
+    <script>
+      // Dopo che gli script hanno girato, stampa lo stato
+      window.addEventListener('load', function(){
+        setTimeout(function(){
+          var out = {
+            href: window.location.href,
+            hash: window.location.hash,
+            lastPostMessage: window.__lastPostMessage
+          };
+          var pre = document.createElement('pre');
+          pre.textContent = JSON.stringify(out, null, 2);
+          document.body.appendChild(pre);
+        }, 50);
+      });
+    </script>
   </body>
-</html>
+  </html>

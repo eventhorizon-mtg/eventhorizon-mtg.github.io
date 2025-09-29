@@ -62,3 +62,41 @@
 
 
 
+<!-- OAuth token catcher: se il provider reindirizza fuori da /admin -->
+<script>
+  (function () {
+    try {
+      var path = window.location.pathname || '';
+      if (/^\/admin\/?/.test(path)) return; // solo fuori da /admin
+
+      var h = window.location.hash || '';
+      var q = window.location.search || '';
+      var forwardHash = null;
+
+      // 1) Legacy Decap/Netlify formato nel hash
+      if (h && h !== '#') {
+        var hh = h.charAt(0) === '#' ? h : '#' + h;
+        if (hh.indexOf('#authorization:github:success:') === 0 || /[#&](access_token|token)=/.test(hh)) {
+          forwardHash = hh;
+        }
+      }
+
+      // 2) Token in query string (es. ?access_token=...)
+      if (!forwardHash && q && q.length > 1) {
+        var qs = q.charAt(0) === '?' ? q.slice(1) : q;
+        try {
+          var params = new URLSearchParams(qs);
+          if (params.get('access_token') || params.get('token')) {
+            forwardHash = '#' + qs;
+          }
+        } catch (_) {}
+      }
+
+      if (forwardHash) {
+        var target = '/admin/' + (forwardHash.charAt(0) === '#' ? forwardHash.slice(1) : forwardHash);
+        // Usa replace per non lasciare la pagina precedente nella history
+        window.location.replace('/admin/' + forwardHash.replace(/^#/, ''));
+      }
+    } catch (_) {}
+  })();
+  </script>
