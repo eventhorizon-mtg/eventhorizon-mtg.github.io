@@ -4,11 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EventHorizon.mtg — CMS</title>
+
+    <!-- FALLBACK: intercetta token nel hash e rilancia "authorization:github:success:..." -->
+    <script>
+      (function () {
+        var h = window.location.hash || "";
+        var prefix = "#authorization:github:success:";
+        if (h.indexOf(prefix) === 0) {
+          try {
+            var raw = decodeURIComponent(h.slice(prefix.length));
+            var msg = "authorization:github:success:" + raw; // stringa legacy attesa da Decap
+            window.postMessage(msg, "*");
+          } catch (e) {}
+          // pulisci l'hash per evitare doppie inizializzazioni
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      })();
+    </script>
+
     <!-- Decap CMS (CDN) -->
     <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   </head>
   <body>
-    <!-- Mount point CMS -->
     <div id="nc-root"></div>
   </body>
 </html>
