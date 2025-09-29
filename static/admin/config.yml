@@ -1,0 +1,104 @@
+backend:
+  name: github
+  repo: eventhorizon-mtg/eventhorizon-mtg.github.io
+  branch: test
+  base_url: https://eventhorizon-oauth.cetriolo-mtg.workers.dev
+  auth_endpoint: auth
+
+media_folder: "static/uploads"
+public_folder: "/uploads"
+
+# Commit diretti (puoi valutare editorial_workflow in seguito)
+# publish_mode: editorial_workflow
+
+collections:
+  # Archivio: item YAML in data/archive/items/*.yml
+  - name: "archive_items"
+    label: "Archivio — Items"
+    folder: "data/archive/items"
+    create: true
+    format: "yaml"
+    extension: "yml"
+    # Nome file basato dal titolo (kebab-case)
+    slug: "{{slug}}"
+
+    # Solo questi due campi sono obbligatori
+    fields:
+      - label: "Data"
+        name: "date"
+        widget: "date"
+        format: "YYYY-MM-DD"
+        required: true
+
+      - label: "Titolo"
+        name: "title"
+        widget: "string"
+        required: true
+
+      # Tutto il resto è facoltativo
+      - label: "ID"
+        name: "id"
+        widget: "string"
+        required: false
+        hint: "Opzionale; se vuoto puoi usare lo slug come riferimento."
+
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        required: false
+        pattern:
+          - "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          - "Minuscole, numeri e trattini (kebab-case)."
+
+      - label: "Tipo"
+        name: "kind"
+        widget: "select"
+        options:
+          - { label: "Video", value: "video" }
+          - { label: "Contenuto", value: "content" }
+        required: false
+        default: "content"
+
+      - label: "Overline"
+        name: "overline"
+        widget: "string"
+        required: false
+
+      - label: "Descrizione"
+        name: "desc"
+        widget: "text"
+        required: false
+
+      - label: "Thumbnail"
+        name: "thumb"
+        widget: "image"
+        required: false
+        choose_url: true
+        hint: "Carica in /uploads o incolla un URL assoluto."
+
+      - label: "Tag"
+        name: "tags"
+        widget: "list"
+        required: false
+        field: { label: "Tag", name: "tag", widget: "string" }
+
+      - label: "Link"
+        name: "links"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Label", name: "label", widget: "string", required: false }
+          - label: "URL"
+            name: "href"
+            widget: "string"
+            required: false
+            pattern:
+              - "^https?://.*"
+              - "Inserisci un URL assoluto (http/https)."
+          - { label: "Classe bottone", name: "btn_class", widget: "string", required: false, hint: "Es. btn--yt, btn--teal..." }
+          - { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 }
+          - { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
+
+      - { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false }
+      - { label: "Autore", name: "author", widget: "string", required: false }
+      - { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
