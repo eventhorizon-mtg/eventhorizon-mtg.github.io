@@ -5,25 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EventHorizon.mtg — CMS</title>
 
-    <!-- FALLBACK: intercetta token nel hash e rilancia "authorization:github:success:..." -->
-    <script>
+    <!-- Decap CMS (CDN) -->
+    <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    
+    <!-- FALLBACK: intercetta token nel hash e rilancia "authorization:github:success:..."
+         Nota: posticipiamo il postMessage finché la libreria Decap ha registrato i listener. -->
+    <script defer>
       (function () {
         var h = window.location.hash || "";
         var prefix = "#authorization:github:success:";
-        if (h.indexOf(prefix) === 0) {
+        if (h.indexOf(prefix) !== 0) return;
+
+        function relay() {
           try {
             var raw = decodeURIComponent(h.slice(prefix.length));
-            var msg = "authorization:github:success:" + raw; // stringa legacy attesa da Decap
-            window.postMessage(msg, "*");
-          } catch (e) {}
-          // pulisci l'hash per evitare doppie inizializzazioni
-          history.replaceState(null, "", window.location.pathname + window.location.search);
+            var msg = "authorization:github:success:" + raw; // atteso da Decap
+            // Esegui dopo il load per essere sicuri che i listener siano attivi
+            setTimeout(function () {
+              window.postMessage(msg, "*");
+              // Pulisci l'hash per evitare doppie inizializzazioni
+              history.replaceState(null, "", window.location.pathname + window.location.search);
+            }, 0);
+          } catch (e) {
+            // In caso di errore di decodifica, non bloccare la pagina
+          }
+        }
+
+        if (document.readyState === "complete") {
+          relay();
+        } else {
+          window.addEventListener("load", relay);
         }
       })();
     </script>
-
-    <!-- Decap CMS (CDN) -->
-    <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   </head>
   <body>
     <div id="nc-root"></div>
