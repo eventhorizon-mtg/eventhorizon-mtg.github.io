@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>OAuth Self-Test — EventHorizon</title>
+  <style>
+    body { font: 14px system-ui, sans-serif; padding: 24px; max-width: 920px; margin: 0 auto; }
+    .ok { color: #0a7a0a; font-weight: 600; }
+    .fail { color: #b00020; font-weight: 600; }
+    code { background: #f4f4f8; padding: 2px 6px; border-radius: 4px; }
+    pre { background: #f4f4f8; padding: 12px; border-radius: 6px; overflow:auto; }
+    button { padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+    .row { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>OAuth Self-Test (GitHub OAuth via Worker)</h1>
+
+  <div class="row">
+    <button id="btnLogin">1) Avvia Login GitHub via Worker</button>
+    <span id="step1"></span>
+  </div>
+
+  <div class="row">
+    <div><strong>Token:</strong> <span id="tokmask">—</span></div>
+    <div><strong>Scope dichiarato dal Worker:</strong> <span id="scopes">—</span></div>
+  </div>
+
+  <div class="row">
+    <button id="btnUser" disabled>2) Prova <code>GET /user</code></button>
+    <span id="userRes"></span>
+    <pre id="userBody" hidden></pre>
+  </div>
+
+  <div class="row">
+    <label>Repo da testare (owner/repo): </label>
+    <input id="repo" value="eventhorizon-mtg/eventhorizon-mtg.github.io" style="width:320px"/>
+    <button id="btnRepo" disabled>3) Prova accesso al repo</button>
+    <span id="repoRes"></span>
+    <pre id="repoBody" hidden></pre>
+  </div>
+
+  <script>
+    (function () {
+      var WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev"; // deve combaciare
+      var ADMIN_ORIGIN = "https://eventhorizon-mtg.github.io";                  // deve combaciare
+      var token = null;
+
+      function mask(t) { if (!t) return "—"; return t.slice(0,6) + "…"; }
+
+      function setMsg(el, ok, text) {
+        el.className = ok ? "ok" : "fail";
+        el.textContent = text;
+      }
+
+      function parseLegacyHash() {
+        var h = location.hash || "";
+        var prefix = "authorization:github:success:";
+        if (h.startsWith("#" + prefix) || h.startsWith(prefix)) {
+          var raw = h.replace(/^#/, "").slice(prefix.length);
+          try {
+            var obj = JSON.parse(decodeURIComponent(raw));
+            return obj && obj.token ? obj : null;
+          } catch(e) {}
+        }
+        return null;
+      }
+
+      // 1) Avvio login
+      document.getElementById("btnLogin").onclick = function () {
+        var u = WORKER_BASE + "/auth?origin=" + encodeURIComponent(ADMIN_ORIGIN) + "&scope=public_repo,user";
+        var w = window.open(u, "oauth", "width=960,height=720");
+        document.getElementById("step1").textContent = "Popup aperto… completa GitHub";
+      };
+
+      // Ricevi token via postMessage dal callback
+      window.addEventListener("message", function (ev) {
+        if (typeof ev.data === "string" && ev.data.indexOf("authorization:github:success:") === 0) {
+          try {
+            var raw = ev.data.slice("authorization:github:success:".length);
+            var obj = JSON.parse(raw);
+            if (obj && obj.token) {
+              token = obj.token;
+              document.getElementById("tokmask").textContent = mask(token);
+              setMsg(document.getElementById("step1"), true, "Token ricevuto via postMessage da " + ev.origin);
+              document.getElementById("btnUser").disabled = false;
+              document.getElementById("btnRepo").disabled = false;
+            }
+          } catch (e) {
+            setMsg(document.getElementById("step1"), false, "Parsing token fallito");
+          }
+        }
+      });
+
+      // Fallback: se il Worker ha fatto redirect con hash legacy
+      window.addEventListener("load", function () {
+        var obj = parseLegacyHash();
+        if (obj && obj.token) {
+          token = obj.token;
+          document.getElementById("tokmask").textContent = mask(token);
+          setMsg(document.getElementById("step1"), true, "Token preso dall’hash (fallback)");
+          history.replaceState(null, "", location.pathname + location.search);
+          document.getElementById("btnUser").disabled = false;
+          document.getElementById("btnRepo").disabled = false;
+        }
+      });
+
+      // 2) /user
+      document.getElementById("btnUser").onclick = async function () {
+        var el = document.getElementById("userRes");
+        var bodyEl = document.getElementById("userBody");
+        bodyEl.hidden = true;
+        if (!token) { setMsg(el, false, "Nessun token"); return; }
+        try {
+          var r = await fetch("https://api.github.com/user", {
+            headers: { "Authorization": "token " + token, "Accept": "application/vnd.github+json" }
+          });
+          var j = await r.json();
+          document.getElementById("scopes").textContent = r.headers.get("x-oauth-scopes") || "—";
+          setMsg(el, r.ok, r.ok ? "OK (" + r.status + ")" : "FAIL (" + r.status + ")");
+          bodyEl.textContent = JSON.stringify(j, null, 2);
+          bodyEl.hidden = false;
+        } catch (e) {
+          setMsg(el, false, "Errore rete");
+        }
+      };
+
+      // 3) Repo access (list refs as a harmless probe)
+      document.getElementById("btnRepo").onclick = async function () {
+        var repo = document.getElementById("repo").value.trim();
+        var el = document.getElementById("repoRes");
+        var bodyEl = document.getElementById("repoBody");
+        bodyEl.hidden = true;
+        if (!token) { setMsg(el, false, "Nessun token"); return; }
+        try {
+          var r = await fetch("https://api.github.com/repos/" + repo, {
+            headers: { "Authorization": "token " + token, "Accept": "application/vnd.github+json" }
+          });
+          var j = await r.json();
+          setMsg(el, r.ok, r.ok ? "OK repo (" + r.status + ")" : "FAIL repo (" + r.status + ")");
+          bodyEl.textContent = JSON.stringify(j, null, 2);
+          bodyEl.hidden = false;
+        } catch (e) {
+          setMsg(el, false, "Errore rete");
+        }
+      };
+    })();
+  </script>
+</body>
+</html>
