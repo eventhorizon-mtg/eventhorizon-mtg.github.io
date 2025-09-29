@@ -9,25 +9,48 @@
     <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
     
     <!-- FALLBACK: intercetta token nel hash e rilancia "authorization:github:success:..."
-         Nota: posticipiamo il postMessage finché la libreria Decap ha registrato i listener. -->
+         Supporta formati diversi (access_token/token/authorization) e forza route `#/` dopo il login. -->
     <script defer>
       (function () {
-        var h = window.location.hash || "";
-        var prefix = "#authorization:github:success:";
-        if (h.indexOf(prefix) !== 0) return;
+        function parseAuthFromHash(h) {
+          if (!h || h === "#" || h === "#/") return null;
+          var hash = h.charAt(0) === "#" ? h.slice(1) : h;
+
+          var legacyPrefix = "authorization:github:success:";
+          if (hash.indexOf(legacyPrefix) === 0) {
+            try {
+              var raw = decodeURIComponent(hash.slice(legacyPrefix.length));
+              var data = JSON.parse(raw);
+              if (!data.provider) data.provider = "github";
+              return data;
+            } catch (e) {
+              return null;
+            }
+          }
+
+          try {
+            var params = new URLSearchParams(hash);
+            var token = params.get("access_token") || params.get("token");
+            var provider = params.get("provider") || params.get("authorization") || "github";
+            if (token) return { token: token, provider: provider };
+          } catch (_) {}
+          return null;
+        }
 
         function relay() {
+          var data = parseAuthFromHash(window.location.hash || "");
+          if (!data) return;
           try {
-            var raw = decodeURIComponent(h.slice(prefix.length));
-            var msg = "authorization:github:success:" + raw; // atteso da Decap
+            var msg = "authorization:github:success:" + JSON.stringify(data);
             // Esegui dopo il load per essere sicuri che i listener siano attivi
             setTimeout(function () {
               window.postMessage(msg, "*");
-              // Pulisci l'hash per evitare doppie inizializzazioni
-              history.replaceState(null, "", window.location.pathname + window.location.search);
+              // Sposta l'URL sulla root del router della UI del CMS
+              var newUrl = window.location.pathname + window.location.search + "#/";
+              history.replaceState(null, "", newUrl);
             }, 0);
           } catch (e) {
-            // In caso di errore di decodifica, non bloccare la pagina
+            // silenzioso
           }
         }
 
