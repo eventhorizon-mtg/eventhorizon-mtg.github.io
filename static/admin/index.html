@@ -5,26 +5,94 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>EventHorizon Admin</title>
 
-    <!-- Favicon minimale per evitare 404 (opzionale) -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3EEH%3C/text%3E%3C/svg%3E">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3EEH%3C/text%3E%3C/svg%3E"
+    />
 
-    <!-- Bridge "one-shot": legge l'hash e lo riposta UNA volta a Decap -->
     <script>
       (function () {
-        var raw = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
-        var isAuth = typeof raw === "string" && raw.startsWith("authorization:github:");
-        if (isAuth) {
-          // aspetta che Decap monti, poi riposta e pulisce l'hash
-          window.addEventListener("load", function () {
-            try { window.postMessage(raw, window.location.origin); } catch (_) {}
-            try { history.replaceState(null, "", location.pathname); } catch (_) {}
-          });
+        var QUEUE_KEY = "__oauthQueue";
+        var AUTH_PREFIX = "authorization:github:";
+        var MAX_DRAIN = 30;
+        var DRAIN_DELAY = 150;
+
+        function isAuthMessage(value) {
+          return typeof value === "string" && value.indexOf(AUTH_PREFIX) === 0;
         }
+
+        function push(value) {
+          try {
+            window[QUEUE_KEY].push(String(value));
+          } catch (_) {}
+        }
+
+        window[QUEUE_KEY] = [];
+
+        window.addEventListener(
+          "message",
+          function (event) {
+            if (!event || !isAuthMessage(event.data)) return;
+            push(event.data);
+          },
+          false
+        );
+
+        (function readFromUrl() {
+          var fromHash = location.hash ? location.hash.slice(1) : "";
+          if (fromHash) {
+            try { fromHash = decodeURIComponent(fromHash); } catch (_) {}
+          }
+
+          var fromQuery = "";
+          if (!fromHash && location.search) {
+            var params = new URLSearchParams(location.search);
+            fromQuery = params.get("authorization") || "";
+          }
+
+          var candidate = fromHash || fromQuery;
+          if (candidate && isAuthMessage(candidate)) {
+            push(candidate);
+          }
+        })();
+
+        (function drainQueue() {
+          var attempts = 0;
+          var timer = setInterval(function () {
+            var queue = window[QUEUE_KEY];
+            if (queue && queue.length) {
+              var toSend = queue.slice();
+              queue.length = 0;
+              toSend.forEach(function (message) {
+                window.postMessage(message, window.location.origin);
+              });
+            }
+
+            attempts += 1;
+            if (attempts >= MAX_DRAIN) {
+              clearInterval(timer);
+            }
+          }, DRAIN_DELAY);
+        })();
+
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            var currentHash = location.hash ? location.hash.slice(1) : "";
+            if (currentHash) {
+              try { currentHash = decodeURIComponent(currentHash); } catch (_) {}
+            }
+            if (currentHash && isAuthMessage(currentHash)) {
+              history.replaceState(null, "", location.pathname);
+            }
+          }, 2000);
+        });
       })();
     </script>
 
-    <!-- Carica una sola volta Decap; niente CMS.init() -->
-    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+    <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js" defer></script>
   </head>
-  <body></body>
+  <body>
+    <noscript>Abilita JavaScript per usare l'area amministrativa.</noscript>
+  </body>
 </html>
+
