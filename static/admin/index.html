@@ -4,58 +4,58 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
-    <!-- 1) Evita auto-init: -->
+    <!-- Evita auto-init e doppie inizializzazioni -->
     <script>window.CMS_MANUAL_INIT = true;</script>
-    <!-- 2) Carica una sola volta Decap (versione pin):
-         NON includere altre copie in altri script/HTML -->
+    <!-- UNA SOLA copia di Decap -->
     <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
     <style>
-      html,body { height:100%; margin:0; background:#0e0f1a; color:#eaeef8; }
-      .nc-appHeader-root { background: rgba(47,39,96,.9); backdrop-filter: blur(6px); }
+      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8}
+      .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
     </style>
   </head>
   <body>
     <noscript>Serve JavaScript per usare l’admin.</noscript>
     <script>
-      // 3) Inizializza SOLO quando il DOM è pronto
-      window.addEventListener('DOMContentLoaded', async () => {
-        try {
-          // Verifica che il body esista (difesa in più)
-          if (!document.body) {
-            console.error('[Decap] document.body assente al DOMContentLoaded');
-            return;
-          }
+      // Log errori JS e promise non gestite (per capire se qualcosa rompe il render)
+      window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
+      window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
 
-          // 4) Verifica che config.yml sia raggiungibile (debug chiaro se 404)
-          const cfgUrl = '/admin/config.yml';
-          const res = await fetch(cfgUrl, { cache: 'no-store' });
-          if (!res.ok) {
-            console.error(`[Decap] Impossibile caricare ${cfgUrl}: HTTP ${res.status}`);
-            alert(`Config non trovata (HTTP ${res.status}). Controlla il percorso /static/admin/config.yml.`);
-            return;
-          }
-
-          // 5) Init esplicito usando la URL (Decap esegue il fetch interno)
-          CMS.init({ config: cfgUrl });
-          console.log('Decap CMS inizializzato con config:', cfgUrl);
-        } catch (e) {
-          console.error('[Decap] Errore in init:', e);
-          alert('Errore durante l’inizializzazione di Decap. Vedi la console per i dettagli.');
-        }
-      });
-    </script>
-
-    <script>
-      // Debug Decap: logga TUTTI i messaggi dal popup
-      window.addEventListener('message', (e) => {
-        console.log('[ADMIN msg]', e.origin, e.data);
-        if (typeof e.data === 'string' && e.data.startsWith('authorization:github:')) {
-          console.log('[ADMIN] OAuth payload:', e.data.slice(0, 80) + '…');
-        }
-      });
-      // Attiva log verbosi interni di Decap
+      // Attiva log verbosi di Decap
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
-    </script>
 
+      window.addEventListener('DOMContentLoaded', async () => {
+        const cfgUrl = '/admin/config.yml';
+        const r = await fetch(cfgUrl, { cache: 'no-store' });
+        if (!r.ok) {
+          console.error('[ADMIN] Config non raggiungibile:', r.status, cfgUrl);
+          alert('Config non trovata: ' + cfgUrl + ' (HTTP ' + r.status + ')');
+          return;
+        }
+        // Init esplicito
+        CMS.init({ config: cfgUrl });
+        console.log('[ADMIN] Decap avviato con', cfgUrl);
+      });
+
+      // Debug: verifica che il postMessage arrivi e prova immediatamente il token (senza stamparlo)
+      (function(){
+        async function testToken(token) {
+          const h = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
+          const me   = await fetch('https://api.github.com/user', { headers: h });
+          const repo = await fetch('https://api.github.com/repos/eventhorizon-mtg/eventhorizon-mtg.github.io', { headers: h });
+          console.log('[testToken] /user', me.status, '| /repo', repo.status, '| scopes:', repo.headers.get('X-OAuth-Scopes'));
+        }
+        window.addEventListener('message', (e) => {
+          if (typeof e.data === 'string' && e.data.startsWith('authorization:github:')) {
+            const kind = e.data.split(':')[2];
+            console.log('[ADMIN] OAuth msg:', kind);
+            if (kind === 'success') {
+              const token = e.data.slice('authorization:github:success:'.length);
+              console.log('[ADMIN] Token length =', token.length);
+              if (token.length > 0) testToken(token);
+            }
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
