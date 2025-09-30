@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
+    <!-- 1) Evita auto-init: -->
+    <script>window.CMS_MANUAL_INIT = true;</script>
+    <!-- 2) Carica una sola volta Decap (versione pin):
+         NON includere altre copie in altri script/HTML -->
     <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
     <style>
       html,body { height:100%; margin:0; background:#0e0f1a; color:#eaeef8; }
@@ -11,6 +15,34 @@
     </style>
   </head>
   <body>
-    <!-- Decap CMS si inizializza automaticamente da config.yml -->
+    <noscript>Serve JavaScript per usare l’admin.</noscript>
+    <script>
+      // 3) Inizializza SOLO quando il DOM è pronto
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          // Verifica che il body esista (difesa in più)
+          if (!document.body) {
+            console.error('[Decap] document.body assente al DOMContentLoaded');
+            return;
+          }
+
+          // 4) Verifica che config.yml sia raggiungibile (debug chiaro se 404)
+          const cfgUrl = '/admin/config.yml';
+          const res = await fetch(cfgUrl, { cache: 'no-store' });
+          if (!res.ok) {
+            console.error(`[Decap] Impossibile caricare ${cfgUrl}: HTTP ${res.status}`);
+            alert(`Config non trovata (HTTP ${res.status}). Controlla il percorso /static/admin/config.yml.`);
+            return;
+          }
+
+          // 5) Init esplicito usando la URL (Decap esegue il fetch interno)
+          CMS.init({ config: cfgUrl });
+          console.log('Decap CMS inizializzato con config:', cfgUrl);
+        } catch (e) {
+          console.error('[Decap] Errore in init:', e);
+          alert('Errore durante l’inizializzazione di Decap. Vedi la console per i dettagli.');
+        }
+      });
+    </script>
   </body>
 </html>
