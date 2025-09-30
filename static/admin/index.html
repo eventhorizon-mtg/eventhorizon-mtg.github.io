@@ -8,10 +8,9 @@
     <!-- Favicon per silenziare 404 (opzionale) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🔒</text></svg>">
 
-    <!-- Listener PRECOCE: prima di caricare Decap, così non perdiamo il postMessage -->
+    <!-- Bridge PRECOCE per non perdere i messaggi OAuth -->
     <script>
       (function () {
-        // Accoda i payload ricevuti finché Decap non è pronto
         window.__oauthQueue = [];
 
         function isAuthMsg(s) {
@@ -25,46 +24,38 @@
           try { window.__oauthQueue.push(String(msg)); } catch(_) {}
         }
 
-        // 1) Ascolta postMessage dal popup (o da altre finestre)
+        // 1) ricevi da popup
         window.addEventListener("message", function (e) {
           if (!e || typeof e.data !== "string") return;
           if (!isAuthMsg(e.data)) return;
           enqueue(e.data);
         }, false);
 
-        // 2) Leggi fallback via HASH o QUERY (se presente)
-        function takeFromUrl() {
+        // 2) leggi fallback via hash/query
+        (function takeFromUrl() {
           var raw = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
           if (!raw && location.search) {
             var q = new URLSearchParams(location.search);
             raw = q.get("authorization") || "";
           }
           if (isAuthMsg(raw)) enqueue(raw);
-        }
-        takeFromUrl();
+        })();
 
-        // 3) Dispatcher che riprova finché Decap non “aggancia”
-        function flushQueue() {
-          if (!window.__oauthQueue || !window.__oauthQueue.length) return;
-          try {
+        // 3) ripubblica localmente (origin corretto) con qualche retry per coprire race
+        var tries = 0, maxTries = 20;
+        var iv = setInterval(function () {
+          if (window.__oauthQueue && window.__oauthQueue.length) {
             var copy = window.__oauthQueue.slice();
             window.__oauthQueue.length = 0;
             copy.forEach(function (m) {
-              // Re-post localmente (origin corretto)
               window.postMessage(m, window.location.origin);
             });
-          } catch(_) {}
-        }
-
-        // Ripeti flush alcune volte per coprire race (router mount, ecc.)
-        var tries = 0, maxTries = 20;
-        var iv = setInterval(function () {
-          flushQueue();
+          }
           tries++;
           if (tries >= maxTries) clearInterval(iv);
         }, 150);
 
-        // Pulisci URL dopo un po' (ma non subito, per consentire a Decap di leggerlo)
+        // pulizia hash dopo che Decap ha avuto tempo di leggerlo
         setTimeout(function () {
           var raw = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
           if (raw && isAuthMsg(raw)) {
@@ -74,48 +65,18 @@
       })();
     </script>
 
-    <!-- Decap CMS -->
+    <!-- Carica Decap una SOLA volta; niente CMS.init() -->
     <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js" defer></script>
 
-    <!-- (Opzionale) Log di debug sintetico -->
+    <!-- (Opzionale) debug sintetico -->
     <script defer>
       window.addEventListener("message", function (e) {
         var d = e && e.data;
         if (typeof d === "string" && d.startsWith("authorization:github:")) {
-          // console.log("[bridge] received:", d.slice(0, 80) + "…");
+          // console.log("[admin-bridge] msg:", d.slice(0, 80) + "…");
         }
       });
     </script>
   </head>
-  <body>
-    <script>
-      // Inizializzazione Decap: chiamarla ESATTAMENTE una volta
-      (function () {
-        var inited = false;
-
-        function initOnce() {
-          if (inited) return;
-          if (!(window.CMS && typeof window.CMS.init === "function")) return;
-          inited = true;
-          window.CMS.init();
-        }
-
-        // 1) Prova subito (se Decap è già caricato)
-        initOnce();
-
-        // 2) Poll leggero per quando lo script defer finisce dopo
-        var tries = 0, maxTries = 40;
-        var poll = setInterval(function () {
-          if (inited) { clearInterval(poll); return; }
-          initOnce();
-          tries++;
-          if (inited || tries >= maxTries) clearInterval(poll);
-        }, 100);
-
-        // 3) Ulteriore safety su DOMContentLoaded
-        document.addEventListener("DOMContentLoaded", initOnce);
-        window.addEventListener("load", initOnce);
-      })();
-    </script>
-  </body>
+  <body></body>
 </html>
