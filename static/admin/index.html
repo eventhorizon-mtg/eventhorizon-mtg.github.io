@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EventHorizon.mtg — CMS</title>
 
+    <!-- Favicon silenzia il 404 in console (opzionale) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🌀</text></svg>">
+
     <!-- Decap CMS (CDN) -->
     <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
@@ -12,7 +15,7 @@
       Auth bridge:
       - Intercetta token in hash/query (legacy "authorization:github:success:" o access_token/token)
       - Forza la route su "#/login" prima di dispatchare, così Decap monta i listener di auth
-      - Re-dispatch del messaggio legacy per massima compatibilità
+      - Re-dispatch del messaggio legacy SOLO con {token} e con piccoli retry
       - Pulisce l'URL mantenendo "#/login"
     -->
     <script defer>
@@ -29,6 +32,19 @@
           }
         }
 
+        // Invia SOLO {token} in formato legacy, con piccoli retry per evitare race
+        function dispatchLegacyTokenOnly(data) {
+          var safe = { token: data && data.token ? data.token : null };
+          if (!safe.token) return;
+          var msg = "authorization:github:success:" + JSON.stringify(safe);
+
+          var tries = 0, max = 3;
+          (function tick() {
+            window.postMessage(msg, "*");
+            if (++tries < max) setTimeout(tick, 150);
+          })();
+        }
+
         function parseAuthFromHashOrQuery() {
           var h = window.location.hash || "";
           var q = window.location.search || "";
@@ -40,11 +56,10 @@
             var legacyPrefix = "authorization:github:success:";
             if (hash.indexOf(legacyPrefix) === 0) {
               try {
-                // N.B.: alcuni worker non encodano, altri sì; decodeURIComponent è tollerante
+                // Alcuni worker non encodano, altri sì; decodeURIComponent è tollerante
                 var raw = decodeURIComponent(hash.slice(legacyPrefix.length));
                 var data = JSON.parse(raw);
-                if (!data.provider) data.provider = "github";
-                return data;
+                return { token: data && data.token ? data.token : null };
               } catch (e) {}
             }
 
@@ -52,8 +67,7 @@
             try {
               var paramsH = new URLSearchParams(hash);
               var tokenH = paramsH.get("access_token") || paramsH.get("token");
-              var providerH = paramsH.get("provider") || paramsH.get("authorization") || "github";
-              if (tokenH) return { token: tokenH, provider: providerH };
+              if (tokenH) return { token: tokenH };
             } catch (_) {}
           }
 
@@ -62,16 +76,10 @@
             try {
               var paramsQ = new URLSearchParams(q.charAt(0) === "?" ? q.slice(1) : q);
               var tokenQ = paramsQ.get("access_token") || paramsQ.get("token");
-              var providerQ = paramsQ.get("provider") || paramsQ.get("authorization") || "github";
-              if (tokenQ) return { token: tokenQ, provider: providerQ };
+              if (tokenQ) return { token: tokenQ };
             } catch (_) {}
           }
           return null;
-        }
-
-        function dispatchLegacy(data) {
-          var msg = "authorization:github:success:" + JSON.stringify(data);
-          window.postMessage(msg, "*");
         }
 
         function relayFromUrlIfPresent() {
@@ -79,7 +87,7 @@
           if (!data) return;
           ensureLoginRouteThen(function () {
             // 1) invia il messaggio legacy (Decap lo consuma su #/login)
-            dispatchLegacy(data);
+            dispatchLegacyTokenOnly(data);
             // 2) pulisci l’URL ma resta su #/login: Decap poi reindirizza dove serve
             var clean = window.location.pathname + window.location.search.replace(/^\?$/, "") + LOGIN_ROUTE;
             history.replaceState(null, "", clean);
@@ -93,15 +101,18 @@
           window.addEventListener("load", relayFromUrlIfPresent);
         }
 
-        // Se il popup OAuth invia il messaggio in diretta, porta su #/login e re-dispatch
+        // Se il popup OAuth invia il messaggio in diretta, porta su #/login e rilancia SOLO {token} con retry
         window.addEventListener("message", function (ev) {
           if (typeof ev.data === "string" && ev.data.indexOf("authorization:github:success:") === 0) {
-            ensureLoginRouteThen(function () {
-              // re-dispatch dopo un tick per essere sicuri che i listener Decap siano pronti
-              setTimeout(function () {
-                window.postMessage(ev.data, "*");
-              }, 30);
-            });
+            try {
+              var raw = ev.data.slice("authorization:github:success:".length);
+              var obj = JSON.parse(raw || "{}");
+              var data = { token: obj && obj.token ? obj.token : null };
+              if (!data.token) return;
+              ensureLoginRouteThen(function () {
+                setTimeout(function () { dispatchLegacyTokenOnly(data); }, 30);
+              });
+            } catch (_) {}
           }
         });
       })();
