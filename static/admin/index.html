@@ -5,27 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
 
-    <!-- Evita auto-init (lo facciamo noi, una volta sola) -->
+    <!-- Evita auto-init (lo facciamo noi) -->
     <script>window.CMS_MANUAL_INIT = true;</script>
-    <!-- UNA SOLA copia di Decap CMS -->
+    <!-- UNA SOLA copia di Decap -->
     <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
 
     <style>
       html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
       .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
-      .hint{position:fixed;bottom:10px;left:10px;opacity:.65;font-size:12px}
+      #status{
+        position:fixed;right:10px;bottom:10px;background:rgba(27,30,43,.92);
+        border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;
+        font-size:12px;line-height:1.4;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.3)
+      }
+      #status b{color:#00ADB1}
+      #status button{margin-left:8px;padding:4px 8px;border-radius:8px;border:0;cursor:pointer}
     </style>
   </head>
   <body>
     <noscript>Serve JavaScript per usare l’admin.</noscript>
+    <div id="status">Auth: <b id="s-auth">—</b> · Keys: <span id="s-keys">—</span> <button id="btn-reinit">Re-init</button></div>
 
     <script>
-      // Log errori utili
+      // Log utili
       window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
       window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
 
-      // --- INIT DECAP CON CONFIG INLINE (niente fetch YAML che può bloccare) ---
+      // Helpers storage
+      function getLS(k){ try{return localStorage.getItem(k);}catch{return null;} }
+      function setLS(k,v){ try{localStorage.setItem(k,v);}catch{} }
+      function rmLS(k){ try{localStorage.removeItem(k);}catch{} }
+
+      // Mostra stato rapido
+      function paintStatus(){
+        const a = !!getLS('decap-cms-user'), n = !!getLS('netlify-cms-user');
+        document.getElementById('s-auth').textContent = a||n ? 'ready' : 'missing';
+        document.getElementById('s-keys').textContent = (a?'decap':'—') + ' / ' + (n?'netlify':'—');
+      }
+      paintStatus();
+
+      // Re-init pulito
+      document.getElementById('btn-reinit').addEventListener('click', ()=>{
+        rmLS('decap-cms-user'); rmLS('netlify-cms-user'); sessionStorage.clear();
+        location.reload();
+      });
+
+      // INIT DECAP (config inline, niente fetch YAML)
       window.addEventListener('DOMContentLoaded', () => {
         const config = {
           load_config_file: false,
@@ -35,7 +61,7 @@
             branch: "test",
             base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
             auth_endpoint: "auth",
-            app_id: "GITHUB_CLIENT_ID_PLACEHOLDER" // puoi lasciarlo così o mettere il tuo Client ID
+            app_id: "GITHUB_CLIENT_ID_PLACEHOLDER"
           },
           media_folder: "static/uploads",
           public_folder: "/uploads",
@@ -60,8 +86,7 @@
                   ], required: false, default: "content" },
                 { label: "Overline", name: "overline", widget: "string", required: false },
                 { label: "Descrizione", name: "desc", widget: "text", required: false },
-                { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true,
-                  hint: "Carica in /uploads o incolla un URL assoluto." },
+                { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true },
                 { label: "Tag", name: "tags", widget: "list", required: false,
                   field: { label: "Tag", name: "tag", widget: "string" } },
                 { label: "Link", name: "links", widget: "list", required: false, fields: [
@@ -79,47 +104,47 @@
             }
           ]
         };
+
+        // Mirror chiavi se manca una delle due
+        const decap = getLS('decap-cms-user');
+        const netli = getLS('netlify-cms-user');
+        if (decap && !netli) setLS('netlify-cms-user', decap);
+        if (netli && !decap) setLS('decap-cms-user', netli);
+        paintStatus();
+
         CMS.init({ config });
         console.log('[ADMIN] Decap avviato (config inline)');
       });
 
-      // --- HOOK OAUTH: persiste il token con "user" popolato, poi ricarica ---
+      // HOOK OAUTH: persiste token (+user) e ricarica
       (function () {
-        const KEYS = ['decap-cms-user','netlify-cms-user'];
-
         async function buildUserPayload(token) {
-          // Recupero /user così salviamo l'oggetto completo: Decap lo riconosce sempre
           const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
           let userJson = null;
           try {
             const me = await fetch('https://api.github.com/user', { headers });
             if (me.ok) userJson = await me.json();
-          } catch (e) {
-            console.warn('[ADMIN] /user fetch fallita, salvo solo il token');
-          }
-          const payload = userJson ? { token: String(token), user: userJson } : { token: String(token) };
-          return JSON.stringify(payload);
+          } catch {}
+          return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
         }
-
-        async function saveToken(token) {
+        async function saveTokenToBoth(token) {
           if (!token) return;
           const payloadStr = await buildUserPayload(token);
-          for (const k of KEYS) localStorage.setItem(k, payloadStr);
-          console.log('[ADMIN] Token + user salvati in', KEYS, '→ ricarico…');
+          setLS('decap-cms-user', payloadStr);
+          setLS('netlify-cms-user', payloadStr);
+          paintStatus();
+          console.log('[ADMIN] Token+user salvati (decap / netlify) → reload…');
           setTimeout(() => location.reload(), 150);
         }
-
         window.addEventListener('message', (e) => {
           if (typeof e.data !== 'string') return;
           if (e.data.startsWith('authorization:github:success:')) {
             const token = e.data.slice('authorization:github:success:'.length);
             console.log('[ADMIN] OAuth → token length:', token.length);
-            if (token.length > 0) saveToken(token);
+            if (token.length > 0) saveTokenToBoth(token);
           }
         });
       })();
     </script>
-
-    <div class="hint">Se resta bloccato, svuota cache: <code>localStorage.removeItem('decap-cms-user'); localStorage.removeItem('netlify-cms-user'); sessionStorage.clear(); location.reload();</code></div>
   </body>
 </html>
