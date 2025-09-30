@@ -6,23 +6,34 @@
     <title>Admin · Decap CMS</title>
     <!-- Evita auto-init e doppie inizializzazioni -->
     <script>window.CMS_MANUAL_INIT = true;</script>
-    <!-- UNA SOLA copia di Decap -->
+    <!-- UNA SOLA copia di Decap CMS -->
     <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
     <style>
-      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8}
-      .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
+      html,body {
+        height:100%;
+        margin:0;
+        background:#0e0f1a;
+        color:#eaeef8;
+        font-family:system-ui, sans-serif;
+      }
+      .nc-appHeader-root {
+        background: rgba(47,39,96,.9);
+        backdrop-filter: blur(6px);
+      }
     </style>
   </head>
   <body>
     <noscript>Serve JavaScript per usare l’admin.</noscript>
+
     <script>
-      // Log errori JS e promise non gestite (per capire se qualcosa rompe il render)
+      // Log errori JS globali
       window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
       window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
 
       // Attiva log verbosi di Decap
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
 
+      // Init esplicito Decap CMS al DOM ready
       window.addEventListener('DOMContentLoaded', async () => {
         const cfgUrl = '/admin/config.yml';
         const r = await fetch(cfgUrl, { cache: 'no-store' });
@@ -31,28 +42,30 @@
           alert('Config non trovata: ' + cfgUrl + ' (HTTP ' + r.status + ')');
           return;
         }
-        // Init esplicito
         CMS.init({ config: cfgUrl });
         console.log('[ADMIN] Decap avviato con', cfgUrl);
       });
 
-      // Debug: verifica che il postMessage arrivi e prova immediatamente il token (senza stamparlo)
-      (function(){
-        async function testToken(token) {
-          const h = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
-          const me   = await fetch('https://api.github.com/user', { headers: h });
-          const repo = await fetch('https://api.github.com/repos/eventhorizon-mtg/eventhorizon-mtg.github.io', { headers: h });
-          console.log('[testToken] /user', me.status, '| /repo', repo.status, '| scopes:', repo.headers.get('X-OAuth-Scopes'));
+      // --- Patch permanente: salva token OAuth in localStorage ---
+      (function () {
+        const KEYS = [
+          'decap-cms-user',     // nuovo Decap CMS
+          'netlify-cms-user'    // compat col vecchio Netlify CMS
+        ];
+        function saveToken(token) {
+          if (!token) return;
+          const payload = JSON.stringify({ token: String(token) });
+          for (const k of KEYS) localStorage.setItem(k, payload);
+          console.log('[ADMIN] Token salvato in', KEYS, '→ ricarico…');
+          // Ricarico per far rileggere a Decap l’auth
+          setTimeout(() => location.reload(), 150);
         }
         window.addEventListener('message', (e) => {
-          if (typeof e.data === 'string' && e.data.startsWith('authorization:github:')) {
-            const kind = e.data.split(':')[2];
-            console.log('[ADMIN] OAuth msg:', kind);
-            if (kind === 'success') {
-              const token = e.data.slice('authorization:github:success:'.length);
-              console.log('[ADMIN] Token length =', token.length);
-              if (token.length > 0) testToken(token);
-            }
+          if (typeof e.data !== 'string') return;
+          if (e.data.startsWith('authorization:github:success:')) {
+            const token = e.data.slice('authorization:github:success:'.length);
+            console.log('[ADMIN] Hook OAuth → token length:', token.length);
+            saveToken(token);
           }
         });
       })();
