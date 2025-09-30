@@ -2,153 +2,109 @@
 <html lang="it">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EventHorizon.mtg — CMS</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>EventHorizon Admin</title>
 
     <!-- Favicon per silenziare 404 (opzionale) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🔒</text></svg>">
 
-    <!-- Decap CMS (CDN) -->
-    <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Listener PRECOCE: prima di caricare Decap, così non perdiamo il postMessage -->
+    <script>
+      (function () {
+        // Accoda i payload ricevuti finché Decap non è pronto
+        window.__oauthQueue = [];
 
-    <!--
-      Auth bridge robusto:
-      - Intercetta token in hash/query (legacy "authorization:github:success:" o access_token/token)
-      - Se la pagina gira in un POPUP ed è presente un opener, invia il messaggio all'opener e chiude il popup
-      - Altrimenti, forza la route su "#/login" e re-dispatch SOLO {token} (con piccoli retry) per farlo consumare da Decap
-      - Pulisce l’URL
-    -->
+        function isAuthMsg(s) {
+          return typeof s === "string" && (
+            s.startsWith("authorization:github:success:") ||
+            s.startsWith("authorization:github:error:")
+          );
+        }
+
+        function enqueue(msg) {
+          try { window.__oauthQueue.push(String(msg)); } catch(_) {}
+        }
+
+        // 1) Ascolta postMessage dal popup (o da altre finestre)
+        window.addEventListener("message", function (e) {
+          if (!e || typeof e.data !== "string") return;
+          if (!isAuthMsg(e.data)) return;
+          enqueue(e.data);
+        }, false);
+
+        // 2) Leggi fallback via HASH o QUERY (se presente)
+        function takeFromUrl() {
+          var raw = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+          if (!raw && location.search) {
+            var q = new URLSearchParams(location.search);
+            raw = q.get("authorization") || "";
+          }
+          if (isAuthMsg(raw)) enqueue(raw);
+        }
+        takeFromUrl();
+
+        // 3) Piccolo dispatcher che riprova finché Decap non “aggancia”
+        function flushQueue() {
+          if (!window.__oauthQueue || !window.__oauthQueue.length) return;
+          // Re-invia i messaggi nell'ambiente della pagina
+          try {
+            var copy = window.__oauthQueue.slice();
+            window.__oauthQueue.length = 0;
+            copy.forEach(function (m) {
+              // Re-post localmente (origin corretto)
+              window.postMessage(m, window.location.origin);
+            });
+          } catch(_) {}
+        }
+
+        // Ripeti flush alcune volte per coprire race (router mount, ecc.)
+        var tries = 0, maxTries = 20;
+        var iv = setInterval(function () {
+          flushQueue();
+          tries++;
+          if (tries >= maxTries) clearInterval(iv);
+        }, 150);
+
+        // Pulisci URL dopo un po' (ma non subito, per consentire a Decap di leggerlo)
+        setTimeout(function () {
+          if (location.hash && isAuthMsg(decodeURIComponent(location.hash.slice(1)))) {
+            history.replaceState(null, "", location.pathname);
+          }
+        }, 2000);
+      })();
+    </script>
+
+    <!-- Decap CMS -->
+    <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js" defer></script>
+
+    <!-- Opzionale: log di debug non verboso -->
     <script defer>
       (function () {
-        var LOGIN_ROUTE = "#/login";
-
-        function ensureLoginRouteThen(fn) {
-          var target = window.location.pathname + window.location.search.replace(/^\?$/, "") + LOGIN_ROUTE;
-          if (window.location.hash !== LOGIN_ROUTE) {
-            history.replaceState(null, "", target);
-            setTimeout(fn, 50); // lascia il tempo al router Decap di montarsi
-          } else {
-            fn();
-          }
-        }
-
-        // Invia SOLO {token} in formato legacy, con piccoli retry per evitare race
-        function dispatchLegacyTokenOnlyToSelf(data) {
-          var safe = { token: data && data.token ? data.token : null };
-          if (!safe.token) return;
-          var msg = "authorization:github:success:" + JSON.stringify(safe);
-          var tries = 0, max = 3;
-          (function tick() {
-            window.postMessage(msg, "*");
-            if (++tries < max) setTimeout(tick, 150);
-          })();
-        }
-
-        // Invia SOLO {token} all'opener (se esiste), con un minimo di tolleranza
-        function postToOpenerAndMaybeClose(data) {
-          var safe = { token: data && data.token ? data.token : null };
-          if (!safe.token) return false;
-          var msg = "authorization:github:success:" + JSON.stringify(safe);
-          try {
-            if (window.opener && !window.opener.closed) {
-              // invia 2 volte a distanza ravvicinata per massima compatibilità
-              window.opener.postMessage(msg, "*");
-              setTimeout(function(){ try { window.opener.postMessage(msg, "*"); } catch(_){} }, 60);
-              // prova a chiudere il popup (non blocca se il browser lo impedisce)
-              setTimeout(function(){ try { window.close(); } catch(_){} }, 120);
-              return true;
-            }
-          } catch(_) {}
-          return false;
-        }
-
-        function parseAuthFromHashOrQuery() {
-          var h = window.location.hash || "";
-          var q = window.location.search || "";
-
-          // 1) Legacy prefix nel hash (popup fallback del Worker)
-          if (h && h !== "#" && h !== "#/" && h !== LOGIN_ROUTE) {
-            var hash = h.charAt(0) === "#" ? h.slice(1) : h;
-
-            var legacyPrefix = "authorization:github:success:";
-            if (hash.indexOf(legacyPrefix) === 0) {
-              try {
-                // Alcuni worker non encodano, altri sì; decodeURIComponent è tollerante
-                var raw = decodeURIComponent(hash.slice(legacyPrefix.length));
-                var data = JSON.parse(raw);
-                return { token: data && data.token ? data.token : null };
-              } catch (e) {}
-            }
-
-            // 1b) Variante: access_token/token nel hash
-            try {
-              var paramsH = new URLSearchParams(hash);
-              var tokenH = paramsH.get("access_token") || paramsH.get("token");
-              if (tokenH) return { token: tokenH };
-            } catch (_) {}
-          }
-
-          // 2) Variante: access_token/token nella query string
-          if (q && q.length > 1) {
-            try {
-              var paramsQ = new URLSearchParams(q.charAt(0) === "?" ? q.slice(1) : q);
-              var tokenQ = paramsQ.get("access_token") || paramsQ.get("token");
-              if (tokenQ) return { token: tokenQ };
-            } catch (_) {}
-          }
-          return null;
-        }
-
-        function cleanupUrl(keepLogin) {
-          var hash = keepLogin ? LOGIN_ROUTE : "#/";
-          var clean = window.location.pathname + window.location.search.replace(/^\?$/, "") + hash;
-          history.replaceState(null, "", clean);
-        }
-
-        function relayFromUrlIfPresent() {
-          var data = parseAuthFromHashOrQuery();
-          if (!data) return;
-
-          // Caso 1: siamo nel POPUP (opener esistente) → invia all'opener e chiudi
-          if (window.opener && !window.opener.closed) {
-            var ok = postToOpenerAndMaybeClose(data);
-            // Pulizia URL del popup (comunque)
-            cleanupUrl(true);
-            if (ok) return; // missione compiuta, il main riceverà il token
-          }
-
-          // Caso 2: finestra principale (o nessun opener) → consumalo localmente
-          ensureLoginRouteThen(function () {
-            dispatchLegacyTokenOnlyToSelf(data);
-            cleanupUrl(true);
-          });
-        }
-
-        // Avvio relay al load (Decap già caricato grazie a defer)
-        if (document.readyState === "complete") {
-          relayFromUrlIfPresent();
-        } else {
-          window.addEventListener("load", relayFromUrlIfPresent);
-        }
-
-        // Se il popup OAuth invia il messaggio in diretta al MAIN, porta su #/login e rilancia SOLO {token} con retry
-        window.addEventListener("message", function (ev) {
-          if (typeof ev.data === "string" && ev.data.indexOf("authorization:github:success:") === 0) {
-            try {
-              var raw = ev.data.slice("authorization:github:success:".length);
-              var obj = JSON.parse(raw || "{}");
-              var data = { token: obj && obj.token ? obj.token : null };
-              if (!data.token) return;
-              ensureLoginRouteThen(function () {
-                setTimeout(function () { dispatchLegacyTokenOnlyToSelf(data); }, 30);
-              });
-            } catch (_) {}
+        // Piccolo monitor per capire se i messaggi arrivano davvero
+        window.addEventListener("message", function (e) {
+          var d = e && e.data;
+          if (typeof d === "string" && d.startsWith("authorization:github:")) {
+            // console.log("[bridge] received:", d.slice(0, 60) + "…");
           }
         });
       })();
     </script>
   </head>
   <body>
-    <div id="nc-root"></div>
+    <script>
+      // Avvia Decap (config.yml sarà caricato da /admin/config.yml o dal default in repo)
+      // Se usi un percorso non standard, assicurati che il file esista sotto /admin/config.yml
+      if (window.CMS && typeof window.CMS.init === "function") {
+        window.CMS.init();
+      } else {
+        // In alcuni casi Decap monta in ritardo
+        document.addEventListener("DOMContentLoaded", function () {
+          if (window.CMS && typeof window.CMS.init === "function") {
+            window.CMS.init();
+          }
+        });
+      }
+    </script>
   </body>
 </html>
+
