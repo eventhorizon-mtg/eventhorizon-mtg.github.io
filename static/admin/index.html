@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
 
-    <!-- NIENTE auto-init -->
+    <!-- Evita auto-init: inizializziamo noi -->
     <script>window.CMS_MANUAL_INIT = true;</script>
     <!-- UNA SOLA copia di Decap -->
-    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js?v=force1"></script>
+    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js?v=loopfix1"></script>
 
     <style>
       html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
@@ -25,13 +25,22 @@
     <div id="status">Auth: <b id="s-auth">—</b> · Keys: <span id="s-keys">—</span> <button id="btn-reinit">Re-init</button></div>
 
     <script>
-      // === Helpers base ===
+      // ========= Helpers base =========
       const LS_DECAP = 'decap-cms-user';
       const LS_NETLI = 'netlify-cms-user';
 
       function getLS(k){ try{return localStorage.getItem(k);}catch{return null;} }
       function setLS(k,v){ try{localStorage.setItem(k,v);}catch{} }
       function rmLS(k){ try{localStorage.removeItem(k);}catch{} }
+
+      function getStoredToken(){
+        try{
+          const raw = getLS(LS_DECAP) || getLS(LS_NETLI);
+          if (!raw) return null;
+          const obj = JSON.parse(raw);
+          return (obj && typeof obj.token === 'string') ? obj.token : null;
+        } catch { return null; }
+      }
       function paintStatus(){
         const a = !!getLS(LS_DECAP), n = !!getLS(LS_NETLI);
         document.getElementById('s-auth').textContent = a||n ? 'ready' : 'missing';
@@ -41,12 +50,20 @@
         rmLS(LS_DECAP); rmLS(LS_NETLI); sessionStorage.clear(); location.reload();
       });
 
+      // Log utili
       window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
       window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
 
-      // === Init Decap con config INLINE (niente fetch YAML) ===
+      // ========= Init Decap con CONFIG INLINE =========
       window.addEventListener('DOMContentLoaded', () => {
+        // specchia le chiavi se manca una delle due
+        const decap = getLS(LS_DECAP);
+        const netli = getLS(LS_NETLI);
+        if (decap && !netli) setLS(LS_NETLI, decap);
+        if (netli && !decap) setLS(LS_DECAP, netli);
+        paintStatus();
+
         const config = {
           load_config_file: false,
           backend: {
@@ -55,7 +72,7 @@
             branch: "test",
             base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
             auth_endpoint: "auth",
-            app_id: "Ov23liuGRKkJ7ujGpqXE"  // <-- deve essere REALE
+            app_id: "Ov23liuGRKkJ7ujGpqXE"  // <— METTI QUI IL CLIENT ID REALE
           },
           media_folder: "static/uploads",
           public_folder: "/uploads",
@@ -99,34 +116,26 @@
           ]
         };
 
-        // Mirror chiavi se manca una delle due
-        const decap = getLS(LS_DECAP);
-        const netli = getLS(LS_NETLI);
-        if (decap && !netli) setLS(LS_NETLI, decap);
-        if (netli && !decap) setLS(LS_DECAP, netli);
-        paintStatus();
-
         CMS.init({ config });
         console.log('[ADMIN] Decap avviato (config inline)');
 
-        // === FORZA l’handshake: se c'è un token nello storage, re-invia il messaggio che Decap si aspetta ===
+        // === FORZA l’handshake SOLO una volta e solo se non già autenticato ===
+        function looksAuthed(){
+          try { const s = CMS.getState().toJS(); return !!(s && s.auth && (s.auth.user || s.auth.token)); }
+          catch { return false; }
+        }
         setTimeout(() => {
-          try {
-            const raw = getLS(LS_DECAP) || getLS(LS_NETLI);
-            if (!raw) return;
-            const obj = JSON.parse(raw);
-            const token = obj && obj.token;
-            if (token && typeof token === 'string' && token.length > 0) {
-              console.log('[ADMIN] Reinoltro token a Decap via postMessage');
-              window.postMessage('authorization:github:success:' + token, '*');
-            }
-          } catch (e) {
-            console.warn('[ADMIN] Reinoltro token fallito:', e);
-          }
-        }, 500); // un piccolo delay per dare tempo a Decap di montare i listener
+          if (sessionStorage.getItem('oauth_reposted') === '1') return;
+          const token = getStoredToken();
+          if (!token) return;
+          if (looksAuthed()) return;
+          console.log('[ADMIN] Reinoltro token a Decap (una volta)');
+          sessionStorage.setItem('oauth_reposted','1');
+          try { window.postMessage('authorization:github:success:' + token, '*'); } catch {}
+        }, 700);
       });
 
-      // === Hook popup OAuth: salva token (+user) e ricarica ===
+      // ========= Hook popup OAuth: salva token (+user) e ricarica (no loop) =========
       (function () {
         async function buildUserPayload(token) {
           const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
@@ -137,15 +146,22 @@
           } catch {}
           return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
         }
+
         async function saveTokenToBoth(token) {
           if (!token) return;
+          const existing = getStoredToken();
+          if (existing && existing === token) {
+            console.log('[ADMIN] Token identico già presente: niente reload');
+            return;
+          }
           const payloadStr = await buildUserPayload(token);
           setLS(LS_DECAP, payloadStr);
           setLS(LS_NETLI, payloadStr);
-          paintStatus();
           console.log('[ADMIN] Token+user salvati (decap / netlify) → reload…');
+          sessionStorage.removeItem('oauth_reposted');
           setTimeout(() => location.reload(), 150);
         }
+
         window.addEventListener('message', (e) => {
           if (typeof e.data !== 'string') return;
           if (e.data.startsWith('authorization:github:success:')) {
@@ -155,6 +171,9 @@
           }
         });
       })();
+
+      // Aggiorna lo status ogni tanto
+      setInterval(paintStatus, 800);
     </script>
   </body>
 </html>
