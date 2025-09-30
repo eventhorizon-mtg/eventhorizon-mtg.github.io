@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EventHorizon.mtg — CMS</title>
 
-    <!-- Favicon silenzia il 404 in console (opzionale) -->
+    <!-- Favicon per silenziare 404 (opzionale) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🌀</text></svg>">
 
     <!-- Decap CMS (CDN) -->
     <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
     <!--
-      Auth bridge:
+      Auth bridge robusto:
       - Intercetta token in hash/query (legacy "authorization:github:success:" o access_token/token)
-      - Forza la route su "#/login" prima di dispatchare, così Decap monta i listener di auth
-      - Re-dispatch del messaggio legacy SOLO con {token} e con piccoli retry
-      - Pulisce l'URL mantenendo "#/login"
+      - Se la pagina gira in un POPUP ed è presente un opener, invia il messaggio all'opener e chiude il popup
+      - Altrimenti, forza la route su "#/login" e re-dispatch SOLO {token} (con piccoli retry) per farlo consumare da Decap
+      - Pulisce l’URL
     -->
     <script defer>
       (function () {
@@ -33,16 +33,33 @@
         }
 
         // Invia SOLO {token} in formato legacy, con piccoli retry per evitare race
-        function dispatchLegacyTokenOnly(data) {
+        function dispatchLegacyTokenOnlyToSelf(data) {
           var safe = { token: data && data.token ? data.token : null };
           if (!safe.token) return;
           var msg = "authorization:github:success:" + JSON.stringify(safe);
-
           var tries = 0, max = 3;
           (function tick() {
             window.postMessage(msg, "*");
             if (++tries < max) setTimeout(tick, 150);
           })();
+        }
+
+        // Invia SOLO {token} all'opener (se esiste), con un minimo di tolleranza
+        function postToOpenerAndMaybeClose(data) {
+          var safe = { token: data && data.token ? data.token : null };
+          if (!safe.token) return false;
+          var msg = "authorization:github:success:" + JSON.stringify(safe);
+          try {
+            if (window.opener && !window.opener.closed) {
+              // invia 2 volte a distanza ravvicinata per massima compatibilità
+              window.opener.postMessage(msg, "*");
+              setTimeout(function(){ try { window.opener.postMessage(msg, "*"); } catch(_){} }, 60);
+              // prova a chiudere il popup (non blocca se il browser lo impedisce)
+              setTimeout(function(){ try { window.close(); } catch(_){} }, 120);
+              return true;
+            }
+          } catch(_) {}
+          return false;
         }
 
         function parseAuthFromHashOrQuery() {
@@ -82,15 +99,28 @@
           return null;
         }
 
+        function cleanupUrl(keepLogin) {
+          var hash = keepLogin ? LOGIN_ROUTE : "#/";
+          var clean = window.location.pathname + window.location.search.replace(/^\?$/, "") + hash;
+          history.replaceState(null, "", clean);
+        }
+
         function relayFromUrlIfPresent() {
           var data = parseAuthFromHashOrQuery();
           if (!data) return;
+
+          // Caso 1: siamo nel POPUP (opener esistente) → invia all'opener e chiudi
+          if (window.opener && !window.opener.closed) {
+            var ok = postToOpenerAndMaybeClose(data);
+            // Pulizia URL del popup (comunque)
+            cleanupUrl(true);
+            if (ok) return; // missione compiuta, il main riceverà il token
+          }
+
+          // Caso 2: finestra principale (o nessun opener) → consumalo localmente
           ensureLoginRouteThen(function () {
-            // 1) invia il messaggio legacy (Decap lo consuma su #/login)
-            dispatchLegacyTokenOnly(data);
-            // 2) pulisci l’URL ma resta su #/login: Decap poi reindirizza dove serve
-            var clean = window.location.pathname + window.location.search.replace(/^\?$/, "") + LOGIN_ROUTE;
-            history.replaceState(null, "", clean);
+            dispatchLegacyTokenOnlyToSelf(data);
+            cleanupUrl(true);
           });
         }
 
@@ -101,7 +131,7 @@
           window.addEventListener("load", relayFromUrlIfPresent);
         }
 
-        // Se il popup OAuth invia il messaggio in diretta, porta su #/login e rilancia SOLO {token} con retry
+        // Se il popup OAuth invia il messaggio in diretta al MAIN, porta su #/login e rilancia SOLO {token} con retry
         window.addEventListener("message", function (ev) {
           if (typeof ev.data === "string" && ev.data.indexOf("authorization:github:success:") === 0) {
             try {
@@ -110,7 +140,7 @@
               var data = { token: obj && obj.token ? obj.token : null };
               if (!data.token) return;
               ensureLoginRouteThen(function () {
-                setTimeout(function () { dispatchLegacyTokenOnly(data); }, 30);
+                setTimeout(function () { dispatchLegacyTokenOnlyToSelf(data); }, 30);
               });
             } catch (_) {}
           }
