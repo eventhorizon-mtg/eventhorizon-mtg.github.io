@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
 
-    <!-- Evita auto-init (lo facciamo noi) -->
+    <!-- NIENTE auto-init -->
     <script>window.CMS_MANUAL_INIT = true;</script>
     <!-- UNA SOLA copia di Decap -->
-    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js?v=force1"></script>
 
     <style>
       html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
       .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
-      #status{
-        position:fixed;right:10px;bottom:10px;background:rgba(27,30,43,.92);
+      #status{position:fixed;right:10px;bottom:10px;background:rgba(27,30,43,.92);
         border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;
-        font-size:12px;line-height:1.4;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.3)
-      }
+        font-size:12px;line-height:1.4;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,.3)}
       #status b{color:#00ADB1}
       #status button{margin-left:8px;padding:4px 8px;border-radius:8px;border:0;cursor:pointer}
     </style>
@@ -27,31 +25,27 @@
     <div id="status">Auth: <b id="s-auth">—</b> · Keys: <span id="s-keys">—</span> <button id="btn-reinit">Re-init</button></div>
 
     <script>
-      // Log utili
+      // === Helpers base ===
+      const LS_DECAP = 'decap-cms-user';
+      const LS_NETLI = 'netlify-cms-user';
+
+      function getLS(k){ try{return localStorage.getItem(k);}catch{return null;} }
+      function setLS(k,v){ try{localStorage.setItem(k,v);}catch{} }
+      function rmLS(k){ try{localStorage.removeItem(k);}catch{} }
+      function paintStatus(){
+        const a = !!getLS(LS_DECAP), n = !!getLS(LS_NETLI);
+        document.getElementById('s-auth').textContent = a||n ? 'ready' : 'missing';
+        document.getElementById('s-keys').textContent = (a?'decap':'—') + ' / ' + (n?'netlify':'—');
+      }
+      document.getElementById('btn-reinit').addEventListener('click', ()=>{
+        rmLS(LS_DECAP); rmLS(LS_NETLI); sessionStorage.clear(); location.reload();
+      });
+
       window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
       window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
 
-      // Helpers storage
-      function getLS(k){ try{return localStorage.getItem(k);}catch{return null;} }
-      function setLS(k,v){ try{localStorage.setItem(k,v);}catch{} }
-      function rmLS(k){ try{localStorage.removeItem(k);}catch{} }
-
-      // Mostra stato rapido
-      function paintStatus(){
-        const a = !!getLS('decap-cms-user'), n = !!getLS('netlify-cms-user');
-        document.getElementById('s-auth').textContent = a||n ? 'ready' : 'missing';
-        document.getElementById('s-keys').textContent = (a?'decap':'—') + ' / ' + (n?'netlify':'—');
-      }
-      paintStatus();
-
-      // Re-init pulito
-      document.getElementById('btn-reinit').addEventListener('click', ()=>{
-        rmLS('decap-cms-user'); rmLS('netlify-cms-user'); sessionStorage.clear();
-        location.reload();
-      });
-
-      // INIT DECAP (config inline, niente fetch YAML)
+      // === Init Decap con config INLINE (niente fetch YAML) ===
       window.addEventListener('DOMContentLoaded', () => {
         const config = {
           load_config_file: false,
@@ -61,7 +55,7 @@
             branch: "test",
             base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
             auth_endpoint: "auth",
-            app_id: "Ov23liuGRKkJ7ujGpqXE"
+            app_id: "Ov23liuGRKkJ7ujGpqXE"  // <-- deve essere REALE
           },
           media_folder: "static/uploads",
           public_folder: "/uploads",
@@ -106,17 +100,33 @@
         };
 
         // Mirror chiavi se manca una delle due
-        const decap = getLS('decap-cms-user');
-        const netli = getLS('netlify-cms-user');
-        if (decap && !netli) setLS('netlify-cms-user', decap);
-        if (netli && !decap) setLS('decap-cms-user', netli);
+        const decap = getLS(LS_DECAP);
+        const netli = getLS(LS_NETLI);
+        if (decap && !netli) setLS(LS_NETLI, decap);
+        if (netli && !decap) setLS(LS_DECAP, netli);
         paintStatus();
 
         CMS.init({ config });
         console.log('[ADMIN] Decap avviato (config inline)');
+
+        // === FORZA l’handshake: se c'è un token nello storage, re-invia il messaggio che Decap si aspetta ===
+        setTimeout(() => {
+          try {
+            const raw = getLS(LS_DECAP) || getLS(LS_NETLI);
+            if (!raw) return;
+            const obj = JSON.parse(raw);
+            const token = obj && obj.token;
+            if (token && typeof token === 'string' && token.length > 0) {
+              console.log('[ADMIN] Reinoltro token a Decap via postMessage');
+              window.postMessage('authorization:github:success:' + token, '*');
+            }
+          } catch (e) {
+            console.warn('[ADMIN] Reinoltro token fallito:', e);
+          }
+        }, 500); // un piccolo delay per dare tempo a Decap di montare i listener
       });
 
-      // HOOK OAUTH: persiste token (+user) e ricarica
+      // === Hook popup OAuth: salva token (+user) e ricarica ===
       (function () {
         async function buildUserPayload(token) {
           const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
@@ -130,8 +140,8 @@
         async function saveTokenToBoth(token) {
           if (!token) return;
           const payloadStr = await buildUserPayload(token);
-          setLS('decap-cms-user', payloadStr);
-          setLS('netlify-cms-user', payloadStr);
+          setLS(LS_DECAP, payloadStr);
+          setLS(LS_NETLI, payloadStr);
           paintStatus();
           console.log('[ADMIN] Token+user salvati (decap / netlify) → reload…');
           setTimeout(() => location.reload(), 150);
