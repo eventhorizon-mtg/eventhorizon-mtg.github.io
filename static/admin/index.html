@@ -43,10 +43,9 @@
         }
         takeFromUrl();
 
-        // 3) Piccolo dispatcher che riprova finché Decap non “aggancia”
+        // 3) Dispatcher che riprova finché Decap non “aggancia”
         function flushQueue() {
           if (!window.__oauthQueue || !window.__oauthQueue.length) return;
-          // Re-invia i messaggi nell'ambiente della pagina
           try {
             var copy = window.__oauthQueue.slice();
             window.__oauthQueue.length = 0;
@@ -67,7 +66,8 @@
 
         // Pulisci URL dopo un po' (ma non subito, per consentire a Decap di leggerlo)
         setTimeout(function () {
-          if (location.hash && isAuthMsg(decodeURIComponent(location.hash.slice(1)))) {
+          var raw = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+          if (raw && isAuthMsg(raw)) {
             history.replaceState(null, "", location.pathname);
           }
         }, 2000);
@@ -77,34 +77,45 @@
     <!-- Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js" defer></script>
 
-    <!-- Opzionale: log di debug non verboso -->
+    <!-- (Opzionale) Log di debug sintetico -->
     <script defer>
-      (function () {
-        // Piccolo monitor per capire se i messaggi arrivano davvero
-        window.addEventListener("message", function (e) {
-          var d = e && e.data;
-          if (typeof d === "string" && d.startsWith("authorization:github:")) {
-            // console.log("[bridge] received:", d.slice(0, 60) + "…");
-          }
-        });
-      })();
+      window.addEventListener("message", function (e) {
+        var d = e && e.data;
+        if (typeof d === "string" && d.startsWith("authorization:github:")) {
+          // console.log("[bridge] received:", d.slice(0, 80) + "…");
+        }
+      });
     </script>
   </head>
   <body>
     <script>
-      // Avvia Decap (config.yml sarà caricato da /admin/config.yml o dal default in repo)
-      // Se usi un percorso non standard, assicurati che il file esista sotto /admin/config.yml
-      if (window.CMS && typeof window.CMS.init === "function") {
-        window.CMS.init();
-      } else {
-        // In alcuni casi Decap monta in ritardo
-        document.addEventListener("DOMContentLoaded", function () {
-          if (window.CMS && typeof window.CMS.init === "function") {
-            window.CMS.init();
-          }
-        });
-      }
+      // Inizializzazione Decap: chiamarla ESATTAMENTE una volta
+      (function () {
+        var inited = false;
+
+        function initOnce() {
+          if (inited) return;
+          if (!(window.CMS && typeof window.CMS.init === "function")) return;
+          inited = true;
+          window.CMS.init();
+        }
+
+        // 1) Prova subito (se Decap è già caricato)
+        initOnce();
+
+        // 2) Poll leggero per quando lo script defer finisce dopo
+        var tries = 0, maxTries = 40;
+        var poll = setInterval(function () {
+          if (inited) { clearInterval(poll); return; }
+          initOnce();
+          tries++;
+          if (inited || tries >= maxTries) clearInterval(poll);
+        }, 100);
+
+        // 3) Ulteriore safety su DOMContentLoaded
+        document.addEventListener("DOMContentLoaded", initOnce);
+        window.addEventListener("load", initOnce);
+      })();
     </script>
   </body>
 </html>
-
