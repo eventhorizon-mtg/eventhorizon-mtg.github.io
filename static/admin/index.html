@@ -4,25 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Decap CMS</title>
-    <!-- Evita auto-init e doppie inizializzazioni -->
+
+    <!-- Evita auto-init (lo facciamo noi, una volta sola) -->
     <script>window.CMS_MANUAL_INIT = true;</script>
     <!-- UNA SOLA copia di Decap CMS -->
     <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+
     <style>
-      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui, sans-serif}
+      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
       .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
+      .hint{position:fixed;bottom:10px;left:10px;opacity:.65;font-size:12px}
     </style>
   </head>
   <body>
     <noscript>Serve JavaScript per usare l’admin.</noscript>
 
     <script>
-      // Log errori JS globali per capire subito se qualcosa rompe il render
+      // Log errori utili
       window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
       window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
       try { localStorage.setItem('debug','decap-cms:*'); } catch {}
 
-      // --- Init Decap CMS con CONFIG INLINE (niente YAML da caricare) ---
+      // --- INIT DECAP CON CONFIG INLINE (niente fetch YAML che può bloccare) ---
       window.addEventListener('DOMContentLoaded', () => {
         const config = {
           load_config_file: false,
@@ -32,7 +35,7 @@
             branch: "test",
             base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
             auth_endpoint: "auth",
-            app_id: "GITHUB_CLIENT_ID_PLACEHOLDER" // <-- inserirai il Client ID qui (in chiaro)
+            app_id: "GITHUB_CLIENT_ID_PLACEHOLDER" // puoi lasciarlo così o mettere il tuo Client ID
           },
           media_folder: "static/uploads",
           public_folder: "/uploads",
@@ -50,60 +53,25 @@
                 { label: "Data", name: "date", widget: "date", format: "YYYY-MM-DD", required: true },
                 { label: "Titolo", name: "title", widget: "string", required: true },
                 { label: "ID", name: "id", widget: "string", required: false },
-                {
-                  label: "Slug",
-                  name: "slug",
-                  widget: "string",
-                  required: false,
-                  pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."]
-                },
-                {
-                  label: "Tipo",
-                  name: "kind",
-                  widget: "select",
-                  options: [
-                    { label: "Video", value: "video" },
-                    { label: "Contenuto", value: "content" }
-                  ],
-                  required: false,
-                  default: "content"
-                },
+                { label: "Slug", name: "slug", widget: "string", required: false,
+                  pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."] },
+                { label: "Tipo", name: "kind", widget: "select", options: [
+                    { label: "Video", value: "video" }, { label: "Contenuto", value: "content" }
+                  ], required: false, default: "content" },
                 { label: "Overline", name: "overline", widget: "string", required: false },
                 { label: "Descrizione", name: "desc", widget: "text", required: false },
-                {
-                  label: "Thumbnail",
-                  name: "thumb",
-                  widget: "image",
-                  required: false,
-                  choose_url: true,
-                  hint: "Carica in /uploads o incolla un URL assoluto."
-                },
-                {
-                  label: "Tag",
-                  name: "tags",
-                  widget: "list",
-                  required: false,
-                  field: { label: "Tag", name: "tag", widget: "string" }
-                },
-                {
-                  label: "Link",
-                  name: "links",
-                  widget: "list",
-                  required: false,
-                  fields: [
+                { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true,
+                  hint: "Carica in /uploads o incolla un URL assoluto." },
+                { label: "Tag", name: "tags", widget: "list", required: false,
+                  field: { label: "Tag", name: "tag", widget: "string" } },
+                { label: "Link", name: "links", widget: "list", required: false, fields: [
                     { label: "Label", name: "label", widget: "string", required: false },
-                    {
-                      label: "URL",
-                      name: "href",
-                      widget: "string",
-                      required: false,
-                      pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."]
-                    },
+                    { label: "URL", name: "href", widget: "string", required: false,
+                      pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."] },
                     { label: "Classe bottone", name: "btn_class", widget: "string", required: false },
                     { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 },
                     { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
-                  ]
-                },
+                  ]},
                 { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false },
                 { label: "Autore", name: "author", widget: "string", required: false },
                 { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
@@ -111,30 +79,47 @@
             }
           ]
         };
-
         CMS.init({ config });
         console.log('[ADMIN] Decap avviato (config inline)');
       });
 
-      // --- Patch permanente: salva token OAuth in localStorage e ricarica ---
+      // --- HOOK OAUTH: persiste il token con "user" popolato, poi ricarica ---
       (function () {
         const KEYS = ['decap-cms-user','netlify-cms-user'];
-        function saveToken(token) {
+
+        async function buildUserPayload(token) {
+          // Recupero /user così salviamo l'oggetto completo: Decap lo riconosce sempre
+          const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
+          let userJson = null;
+          try {
+            const me = await fetch('https://api.github.com/user', { headers });
+            if (me.ok) userJson = await me.json();
+          } catch (e) {
+            console.warn('[ADMIN] /user fetch fallita, salvo solo il token');
+          }
+          const payload = userJson ? { token: String(token), user: userJson } : { token: String(token) };
+          return JSON.stringify(payload);
+        }
+
+        async function saveToken(token) {
           if (!token) return;
-          const payload = JSON.stringify({ token: String(token) });
-          for (const k of KEYS) localStorage.setItem(k, payload);
-          console.log('[ADMIN] Token salvato in', KEYS, '→ ricarico…');
+          const payloadStr = await buildUserPayload(token);
+          for (const k of KEYS) localStorage.setItem(k, payloadStr);
+          console.log('[ADMIN] Token + user salvati in', KEYS, '→ ricarico…');
           setTimeout(() => location.reload(), 150);
         }
+
         window.addEventListener('message', (e) => {
           if (typeof e.data !== 'string') return;
           if (e.data.startsWith('authorization:github:success:')) {
             const token = e.data.slice('authorization:github:success:'.length);
-            console.log('[ADMIN] Hook OAuth → token length:', token.length);
-            saveToken(token);
+            console.log('[ADMIN] OAuth → token length:', token.length);
+            if (token.length > 0) saveToken(token);
           }
         });
       })();
     </script>
+
+    <div class="hint">Se resta bloccato, svuota cache: <code>localStorage.removeItem('decap-cms-user'); localStorage.removeItem('netlify-cms-user'); sessionStorage.clear(); location.reload();</code></div>
   </body>
 </html>
