@@ -2,97 +2,56 @@
 <html lang="it">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>EventHorizon Admin</title>
-
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3EEH%3C/text%3E%3C/svg%3E"
-    />
-
-    <script>
-      (function () {
-        var QUEUE_KEY = "__oauthQueue";
-        var AUTH_PREFIX = "authorization:github:";
-        var MAX_DRAIN = 30;
-        var DRAIN_DELAY = 150;
-
-        function isAuthMessage(value) {
-          return typeof value === "string" && value.indexOf(AUTH_PREFIX) === 0;
-        }
-
-        function push(value) {
-          try {
-            window[QUEUE_KEY].push(String(value));
-          } catch (_) {}
-        }
-
-        window[QUEUE_KEY] = [];
-
-        window.addEventListener(
-          "message",
-          function (event) {
-            if (!event || !isAuthMessage(event.data)) return;
-            push(event.data);
-          },
-          false
-        );
-
-        (function readFromUrl() {
-          var fromHash = location.hash ? location.hash.slice(1) : "";
-          if (fromHash) {
-            try { fromHash = decodeURIComponent(fromHash); } catch (_) {}
-          }
-
-          var fromQuery = "";
-          if (!fromHash && location.search) {
-            var params = new URLSearchParams(location.search);
-            fromQuery = params.get("authorization") || "";
-          }
-
-          var candidate = fromHash || fromQuery;
-          if (candidate && isAuthMessage(candidate)) {
-            push(candidate);
-          }
-        })();
-
-        (function drainQueue() {
-          var attempts = 0;
-          var timer = setInterval(function () {
-            var queue = window[QUEUE_KEY];
-            if (queue && queue.length) {
-              var toSend = queue.slice();
-              queue.length = 0;
-              toSend.forEach(function (message) {
-                window.postMessage(message, window.location.origin);
-              });
-            }
-
-            attempts += 1;
-            if (attempts >= MAX_DRAIN) {
-              clearInterval(timer);
-            }
-          }, DRAIN_DELAY);
-        })();
-
-        window.addEventListener("load", function () {
-          setTimeout(function () {
-            var currentHash = location.hash ? location.hash.slice(1) : "";
-            if (currentHash) {
-              try { currentHash = decodeURIComponent(currentHash); } catch (_) {}
-            }
-            if (currentHash && isAuthMessage(currentHash)) {
-              history.replaceState(null, "", location.pathname);
-            }
-          }, 2000);
-        });
-      })();
-    </script>
-
-    <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin · Decap CMS</title>
+    <!-- Versione fissata per stabilità -->
+    <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+    <style>
+      html,body { height:100%; background:#0e0f1a; color:#eaeef8; }
+      .nc-appHeader-root { background: rgba(47,39,96,.9); backdrop-filter: blur(6px); }
+      a, .nc-collectionCard-link { color:#00ADB1; }
+    </style>
   </head>
   <body>
-    <noscript>Abilita JavaScript per usare l'area amministrativa.</noscript>
+    <script>
+      // === CONFIG ===
+      const SITE_URL = "https://eventhorizon-mtg.github.io";
+      const WORKER_BASE_URL = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
+
+      CMS.init({
+        config: {
+          backend: {
+            name: "github",
+            repo: "eventhorizon-mtg/eventhorizon-mtg.github.io",
+            branch: "test",
+            base_url: WORKER_BASE_URL,
+            auth_endpoint: "auth",
+            // ⬇️ INSERISCI QUI IL TUO CLIENT ID (NON il secret)
+            app_id: "Ov23liuGRKkJ7ujGpqXE"
+          },
+          site_url: SITE_URL,
+          media_folder: "static/uploads",
+          public_folder: "/uploads",
+          locale: "it",
+          load_config_file: false, // teniamo tutto inline per il primo setup
+          collections: [
+            {
+              name: "pagine",
+              label: "Pagine",
+              folder: "content/pages",
+              create: true,
+              slug: "{{slug}}",
+              fields: [
+                { label: "Titolo", name: "title", widget: "string" },
+                { label: "Data", name: "date", widget: "datetime" },
+                { label: "Contenuto", name: "body", widget: "markdown" }
+              ]
+            }
+          ]
+        }
+      });
+
+      console.log("Decap CMS avviato (GitHub backend + Cloudflare Worker OAuth).");
+    </script>
   </body>
 </html>
-
