@@ -44,5 +44,18 @@
         }
       });
     </script>
+
+    <script>
+      // Debug Decap: logga TUTTI i messaggi dal popup
+      window.addEventListener('message', (e) => {
+        console.log('[ADMIN msg]', e.origin, e.data);
+        if (typeof e.data === 'string' && e.data.startsWith('authorization:github:')) {
+          console.log('[ADMIN] OAuth payload:', e.data.slice(0, 80) + '…');
+        }
+      });
+      // Attiva log verbosi interni di Decap
+      try { localStorage.setItem('debug','decap-cms:*'); } catch {}
+    </script>
+
   </body>
 </html>
