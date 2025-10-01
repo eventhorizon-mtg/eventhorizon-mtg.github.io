@@ -1,13 +1,159 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="it">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex" />
-    <title>Content Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin · Static CMS</title>
+
+    <!-- Niente auto-init: inizializziamo noi -->
+    <script>window.CMS_MANUAL_INIT = true;</script>
+    <!-- Static CMS (app) -->
+    <script src="https://unpkg.com/@staticcms/app@1.5.3/dist/static-cms-app.js"></script>
+    <!-- Backend GitHub (bundled in app, ma includo anche core per sicurezza) -->
+    <script src="https://unpkg.com/@staticcms/core@1.5.3/dist/static-cms-core.js"></script>
+
+    <style>
+      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
+      .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
+      #status{position:fixed;right:10px;bottom:10px;background:rgba(27,30,43,.92);
+        border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;
+        font-size:12px;line-height:1.4;z-index:9999}
+      #status b{color:#00ADB1}
+      #status button{margin-left:8px;padding:4px 8px;border-radius:8px;border:0;cursor:pointer}
+    </style>
   </head>
   <body>
-    <!-- Include the script that builds the page and powers Decap CMS -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <noscript>Serve JavaScript per usare l’admin.</noscript>
+    <div id="status">Auth: <b id="s-auth">—</b> · Keys: <span id="s-keys">—</span> <button id="btn-reinit">Re-init</button></div>
+
+    <script>
+      // ===== Helpers storage
+      const KEYS = ['staticcms-user','netlify-cms-user','decap-cms-user'];
+      const getLS = k => { try{return localStorage.getItem(k);}catch{return null;} };
+      const setLS = (k,v) => { try{localStorage.setItem(k,v);}catch{} };
+      const rmLS = k => { try{localStorage.removeItem(k);}catch{} };
+      const any = () => KEYS.map(getLS).find(Boolean);
+      function getStoredToken() {
+        try { const raw = any(); if (!raw) return null; const obj = JSON.parse(raw); return typeof obj.token==='string'?obj.token:null; } catch { return null; }
+      }
+      function mirrorKeys(payloadStr){
+        KEYS.forEach(k => setLS(k, payloadStr));
+      }
+      function paintStatus(){
+        const flags = KEYS.map(k => !!getLS(k));
+        document.getElementById('s-auth').textContent = flags.some(Boolean) ? 'ready' : 'missing';
+        document.getElementById('s-keys').textContent = KEYS.map((k,i)=>flags[i]?k:'—').join(' / ');
+      }
+      document.getElementById('btn-reinit').addEventListener('click', ()=>{
+        KEYS.forEach(rmLS); sessionStorage.clear(); location.reload();
+      });
+      paintStatus();
+
+      // ===== Config INLINE (Hugo + GitHub Pages + Cloudflare Worker)
+      const config = {
+        load_config_file: false,
+        backend: {
+          name: "github",
+          repo: "eventhorizon-mtg/eventhorizon-mtg.github.io",
+          branch: "test",
+          base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
+          auth_endpoint: "auth",
+          app_id: "INSERISCI_IL_TUO_CLIENT_ID_GITHUB" // <— INSERISCI QUI IL CLIENT ID REALE
+        },
+        media_folder: "static/uploads",
+        public_folder: "/uploads",
+        locale: "it",
+        collections: [
+          {
+            name: "archive_items",
+            label: "Archivio — Items",
+            folder: "data/archive/items",
+            create: true,
+            format: "yaml",
+            extension: "yml",
+            slug: "{{slug}}",
+            fields: [
+              { label: "Data", name: "date", widget: "date", format: "YYYY-MM-DD", required: true },
+              { label: "Titolo", name: "title", widget: "string", required: true },
+              { label: "ID", name: "id", widget: "string", required: false },
+              { label: "Slug", name: "slug", widget: "string", required: false,
+                pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."] },
+              { label: "Tipo", name: "kind", widget: "select", options: [
+                  { label: "Video", value: "video" }, { label: "Contenuto", value: "content" }
+                ], required: false, default: "content" },
+              { label: "Overline", name: "overline", widget: "string", required: false },
+              { label: "Descrizione", name: "desc", widget: "text", required: false },
+              { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true },
+              { label: "Tag", name: "tags", widget: "list", required: false,
+                field: { label: "Tag", name: "tag", widget: "string" } },
+              { label: "Link", name: "links", widget: "list", required: false, fields: [
+                  { label: "Label", name: "label", widget: "string", required: false },
+                  { label: "URL", name: "href", widget: "string", required: false,
+                    pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."] },
+                  { label: "Classe bottone", name: "btn_class", widget: "string", required: false },
+                  { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 },
+                  { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
+                ]},
+              { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false },
+              { label: "Autore", name: "author", widget: "string", required: false },
+              { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
+            ]
+          }
+        ]
+      };
+
+      // ===== Init Static CMS
+      window.addEventListener('DOMContentLoaded', () => {
+        // specchia eventuale chiave esistente su tutte
+        const raw = any(); if (raw) mirrorKeys(raw); paintStatus();
+
+        // Inizializza
+        CMS.init({ config });
+        console.log('[ADMIN] Static CMS avviato');
+
+        // Forza handshake solo una volta se non già autenticato
+        setTimeout(() => {
+          if (sessionStorage.getItem('oauth_reposted') === '1') return;
+          const token = getStoredToken();
+          if (!token) return;
+          // prova a leggere stato; se non c'è utente, reinvia postMessage
+          let authed = false;
+          try { const s = CMS.getState().toJS(); authed = !!(s && s.auth && (s.auth.user || s.auth.token)); } catch {}
+          if (!authed) {
+            console.log('[ADMIN] Reinoltro token a Static CMS');
+            sessionStorage.setItem('oauth_reposted','1');
+            window.postMessage('authorization:github:success:' + token, '*');
+          }
+        }, 700);
+      });
+
+      // ===== Hook popup OAuth: salva token (+user) in TUTTE le chiavi e ricarica (no loop se identico)
+      (function () {
+        async function buildUserPayload(token) {
+          const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
+          let userJson = null;
+          try { const me = await fetch('https://api.github.com/user', { headers }); if (me.ok) userJson = await me.json(); } catch {}
+          return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
+        }
+        window.addEventListener('message', async (e) => {
+          if (typeof e.data !== 'string') return;
+          if (!e.data.startsWith('authorization:github:success:')) return;
+          const token = e.data.slice('authorization:github:success:'.length);
+          if (!token) return;
+
+          const existing = getStoredToken();
+          if (existing && existing === token) {
+            console.log('[ADMIN] Token identico già presente: niente reload');
+            return;
+          }
+          const payloadStr = await buildUserPayload(token);
+          mirrorKeys(payloadStr);
+          paintStatus();
+          console.log('[ADMIN] Token+user salvati (staticcms / netlify / decap) → reload…');
+          sessionStorage.removeItem('oauth_reposted');
+          setTimeout(() => location.reload(), 150);
+        });
+      })();
+    </script>
   </body>
 </html>
