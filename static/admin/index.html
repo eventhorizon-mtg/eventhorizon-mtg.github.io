@@ -1,106 +1,149 @@
 <!doctype html>
 <html lang="it">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin · CMS (stabile)</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Login + CMS</title>
 
-    <!-- Evita auto-init -->
-    <script>window.CMS_MANUAL_INIT = true;</script>
-    <!-- Build stabile e collaudata -->
-    <script src="https://unpkg.com/netlify-cms-app@2.15.72/dist/netlify-cms.js"></script>
+  <!-- CMS stabile -->
+  <script>window.CMS_MANUAL_INIT = true;</script>
+  <script src="https://unpkg.com/netlify-cms-app@2.15.72/dist/netlify-cms.js"></script>
 
-    <style>
-      html,body{height:100%;margin:0;background:#0e0f1a;color:#eaeef8;font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
-      .nc-appHeader-root{background:rgba(47,39,96,.9);backdrop-filter:blur(6px)}
-    </style>
-  </head>
-  <body>
-    <noscript>Serve JavaScript per usare l’admin.</noscript>
+  <style>
+    :root{--bg:#0e0f1a;--fg:#eaeef8;--card:#1b1e2b}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
+    .wrap{display:flex;align-items:center;justify-content:center;height:100%}
+    .card{background:var(--card);padding:22px 20px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.35);max-width:560px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border:0;border-radius:10px;cursor:pointer}
+    .btn-primary{background:#6c5ce7;color:white}
+    .btn-ghost{background:transparent;color:#c8cfeb;border:1px solid rgba(255,255,255,.15)}
+    .hint{opacity:.8;font-size:12px;margin-top:10px}
+    .ok{color:#00c2b2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2 style="margin:0 0 10px">Area Admin</h2>
+      <p id="authState">Stato: <b>non autenticato</b></p>
+      <div class="row" style="margin-top:8px">
+        <button id="loginBtn" class="btn btn-primary">🔑 Login con GitHub</button>
+        <button id="resetBtn" class="btn btn-ghost">♻️ Reset autenticazione</button>
+      </div>
+      <p class="hint">Se il login va a buon fine, questa pagina salva il token in LocalStorage e carica l’interfaccia del CMS.</p>
+    </div>
+  </div>
 
-    <script>
-      // Log utili
-      window.addEventListener('error', e => console.error('[ADMIN error]', e.error || e.message));
-      window.addEventListener('unhandledrejection', e => console.error('[ADMIN unhandled]', e.reason));
-
-      // Config INLINE (identica alla tua)
-      const config = {
-        load_config_file: false,
-        backend: {
-          name: "github",
-          repo: "eventhorizon-mtg/eventhorizon-mtg.github.io",
-          branch: "test",
-          base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
-          auth_endpoint: "auth",
-          app_id: "Ov23liuGRKkJ7ujGpqXE"  // <— METTI QUI IL CLIENT ID REALE
-        },
-        media_folder: "static/uploads",
-        public_folder: "/uploads",
-        locale: "it",
-        collections: [
-          {
-            name: "archive_items",
-            label: "Archivio — Items",
-            folder: "data/archive/items",
-            create: true,
-            format: "yaml",
-            extension: "yml",
-            slug: "{{slug}}",
-            fields: [
-              { label: "Data", name: "date", widget: "date", format: "YYYY-MM-DD", required: true },
-              { label: "Titolo", name: "title", widget: "string", required: true },
-              { label: "ID", name: "id", widget: "string", required: false },
-              { label: "Slug", name: "slug", widget: "string", required: false,
-                pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."] },
-              { label: "Tipo", name: "kind", widget: "select", options: [
-                  { label: "Video", value: "video" }, { label: "Contenuto", value: "content" }
-                ], required: false, default: "content" },
-              { label: "Overline", name: "overline", widget: "string", required: false },
-              { label: "Descrizione", name: "desc", widget: "text", required: false },
-              { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true },
-              { label: "Tag", name: "tags", widget: "list", required: false,
-                field: { label: "Tag", name: "tag", widget: "string" } },
-              { label: "Link", name: "links", widget: "list", required: false, fields: [
-                  { label: "Label", name: "label", widget: "string", required: false },
-                  { label: "URL", name: "href", widget: "string", required: false,
-                    pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."] },
-                  { label: "Classe bottone", name: "btn_class", widget: "string", required: false },
-                  { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 },
-                  { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
-                ]},
-              { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false },
-              { label: "Autore", name: "author", widget: "string", required: false },
-              { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
-            ]
-          }
-        ]
-      };
-
-      // Inizializza
-      window.addEventListener('DOMContentLoaded', () => {
-        CMS.init({ config });
-        console.log('[ADMIN] CMS avviato (stabile 2.15.72)');
-      });
-
-      // Hook popup OAuth: salva token + user e ricarica
-      (function () {
-        async function buildUserPayload(token) {
-          const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
-          let userJson = null;
-          try { const me = await fetch('https://api.github.com/user', { headers }); if (me.ok) userJson = await me.json(); } catch {}
-          return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
+  <script>
+    // --- Config (metti il tuo Client ID) ---
+    const CMS_CONFIG = {
+      load_config_file: false,
+      backend: {
+        name: "github",
+        repo: "eventhorizon-mtg/eventhorizon-mtg.github.io",
+        branch: "test",
+        base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
+        auth_endpoint: "auth",
+        app_id: "Ov23liuGRKkJ7ujGpqXE" // <-- Client ID REALE
+      },
+      media_folder: "static/uploads",
+      public_folder: "/uploads",
+      locale: "it",
+      collections: [
+        {
+          name: "archive_items",
+          label: "Archivio — Items",
+          folder: "data/archive/items",
+          create: true,
+          format: "yaml",
+          extension: "yml",
+          slug: "{{slug}}",
+          fields: [
+            { label: "Data", name: "date", widget: "date", format: "YYYY-MM-DD", required: true },
+            { label: "Titolo", name: "title", widget: "string", required: true },
+            { label: "ID", name: "id", widget: "string", required: false },
+            { label: "Slug", name: "slug", widget: "string", required: false,
+              pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."] },
+            { label: "Tipo", name: "kind", widget: "select", options: [
+                { label: "Video", value: "video" }, { label: "Contenuto", value: "content" }
+              ], required: false, default: "content" },
+            { label: "Overline", name: "overline", widget: "string", required: false },
+            { label: "Descrizione", name: "desc", widget: "text", required: false },
+            { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true },
+            { label: "Tag", name: "tags", widget: "list", required: false,
+              field: { label: "Tag", name: "tag", widget: "string" } },
+            { label: "Link", name: "links", widget: "list", required: false, fields: [
+                { label: "Label", name: "label", widget: "string", required: false },
+                { label: "URL", name: "href", widget: "string", required: false,
+                  pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."] },
+                { label: "Classe bottone", name: "btn_class", widget: "string", required: false },
+                { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 },
+                { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
+              ]},
+            { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false },
+            { label: "Autore", name: "author", widget: "string", required: false },
+            { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
+          ]
         }
-        window.addEventListener('message', async (e) => {
-          if (typeof e.data !== 'string') return;
-          if (!e.data.startsWith('authorization:github:success:')) return;
-          const token = e.data.slice('authorization:github:success:'.length);
-          if (!token) return;
-          const payloadStr = await buildUserPayload(token);
-          localStorage.setItem('netlify-cms-user', payloadStr); // chiave che questa build legge
-          console.log('[ADMIN] Token salvato → reload');
-          setTimeout(()=>location.reload(), 120);
-        });
-      })();
-    </script>
-  </body>
+      ]
+    };
+
+    // --- Storage helpers ---
+    const STORAGE_KEYS = ['netlify-cms-user','decap-cms-user','staticcms-user'];
+    const getLS = k => { try{return localStorage.getItem(k);}catch{return null;} };
+    const setLS = (k,v) => { try{localStorage.setItem(k,v);}catch{} };
+    const rmLS = k => { try{localStorage.removeItem(k);}catch{} };
+    const any = () => STORAGE_KEYS.map(getLS).find(Boolean);
+    function setAuthStateUI(ok){
+      const el = document.getElementById('authState');
+      el.innerHTML = ok ? 'Stato: <b class="ok">autenticato</b>' : 'Stato: <b>non autenticato</b>';
+    }
+
+    // --- Init CMS UI se già autenticato ---
+    function initCMS() {
+      document.querySelector('.wrap').style.display = 'none'; // nascondi card login
+      CMS.init({ config: CMS_CONFIG });
+      console.log('[ADMIN] CMS avviato (2.15.72)');
+    }
+
+    // All'avvio: se ho già token, vado direttamente al CMS
+    (function boot(){
+      const raw = any();
+      if (raw) { setAuthStateUI(true); initCMS(); }
+      else { setAuthStateUI(false); }
+    })();
+
+    // --- Pulsante Login: apre il popup del Worker ---
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const origin = location.origin;
+      const url = CMS_CONFIG.backend.base_url + '/auth?origin=' + encodeURIComponent(origin);
+      window.open(url, 'oauth', 'width=980,height=720');
+    });
+
+    // --- Reset ---
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      STORAGE_KEYS.forEach(rmLS); sessionStorage.clear(); location.reload();
+    });
+
+    // --- Quando rientra il token dal popup: salva e avvia CMS ---
+    async function buildUserPayload(token) {
+      const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
+      let userJson = null;
+      try { const me = await fetch('https://api.github.com/user', { headers }); if (me.ok) userJson = await me.json(); } catch {}
+      return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
+    }
+
+    window.addEventListener('message', async (e) => {
+      if (typeof e.data !== 'string') return;
+      if (!e.data.startsWith('authorization:github:success:')) return;
+      const token = e.data.slice('authorization:github:success:'.length);
+      if (!token) return;
+      const payloadStr = await buildUserPayload(token);
+      STORAGE_KEYS.forEach(k => setLS(k, payloadStr));
+      setAuthStateUI(true);
+      initCMS();
+    });
+  </script>
+</body>
 </html>
