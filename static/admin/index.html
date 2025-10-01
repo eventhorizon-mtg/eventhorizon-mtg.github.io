@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span>Aggiornamento in corso…</span></div>
+  
   <header>
     <div class="row">
       <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
@@ -740,13 +740,11 @@ byId("saveBtn").onclick = async () => {
   await loadList();
   try { await resetSiteCaches(); } catch(_){ }
   // Attendi la pubblicazione effettiva (fino a 90s) poi ricarica admin
-  try {
-    const prev = await fetchSiteVersion();
-    await waitForNewBuild(prev, 90000, 2000);
-  } catch(_) {}
-  const url = new URL(window.location.href);
-  url.searchParams.set('t', String(Date.now()));
-  window.location.replace(url.toString());
+  setTimeout(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('t', String(Date.now()));
+    window.location.replace(url.toString());
+  }, 150);
 };
 
 /* ====== LINKS UI ====== */
@@ -853,3 +851,4 @@ function readTagsChips(){
 </script>
 </body>
 </html>
+

@@ -1,14 +1,5 @@
 <!DOCTYPE html>
-{{- $vapp := or site.Params.appVer "" -}}
-{{- $mod := 0 -}}
-{{- with (readDir "data/archive/items") -}}
-  {{- range . -}}
-    {{- if (not .IsDir) -}}
-      {{- if gt .ModTime.Unix $mod -}}{{- $mod = .ModTime.Unix -}}{{- end -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-<html lang="it" data-archive-page-size="12" data-app-ver="{{ with site.Params.appVer }}{{ . }}{{ end }}" data-base-url="{{ strings.TrimSuffix "/" .Site.BaseURL }}" data-archive-ver="{{ if $vapp }}{{ printf "%s-%d" $vapp $mod }}{{ else }}{{ printf "%d" $mod }}{{ end }}">
+<html lang="it" data-archive-page-size="12" data-app-ver="{{ with site.Params.appVer }}{{ . }}{{ end }}" data-base-url="{{ strings.TrimSuffix "/" .Site.BaseURL }}">
 <head>
   {{ partial "meta-head.html" . }}
   {{ block "head_extra" . }}{{ end }}
