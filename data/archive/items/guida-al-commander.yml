@@ -1,0 +1,21 @@
+id: Content003
+kind: content
+date: '2025-07-30'
+title: Guida al Commander
+overline: FORMATI
+desc: Una guida completa al formato Commander / EDH.
+thumb: /images/cards/fblthp_placeholder.webp
+tags:
+  - commander
+  - edh
+  - guide
+links:
+  - label: Moxfield
+    href: https://www.moxfield.com/decks/xyz
+    btn_class: btn--mox primary
+    sort_order: 10
+  - label: Archidekt
+    href: https://archidekt.com/decks/xyz
+    btn_class: btn--archi
+    sort_order: 20
+slug: guida-al-commander
