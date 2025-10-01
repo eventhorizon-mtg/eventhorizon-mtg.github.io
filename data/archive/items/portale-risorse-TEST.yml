@@ -1,6 +1,6 @@
 date: '2025-10-01'
 title: Nuovo item
-kind: content
+kind: video
 overline: FORMATI fffffffffffff
 author: gigo
 desc: grgfdghfdgfdgfdgfd
@@ -9,7 +9,7 @@ tags:
   - yawmoth
   - phyrexia
   - legends
-draft: true
+draft: false
 links:
   - label: bfff
     href: www.google.com
@@ -17,4 +17,5 @@ links:
     sort_order: 0
     primary: true
 slug: portale-risorse-TEST
-card: /uploads/20251001-235240-cetriolo-rick-banner.jpg
+card: /images/cards/20251002-001009-cetriolo-rick-banner.jpg
+thumb: /images/thumbs/20251002-001001-livello-1-copia.png
