@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin · Mini Editor (Hugo + GitHub)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="stylesheet" href="admin.css">
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="row">
+      <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
+      <button id="logoutBtn" class="btn">🚪 Logout</button>
+      <span id="who" class="status"></span>
+    </div>
+    <div class="row">
+      <button id="newBtn" class="btn">➕ Nuovo item</button>
+      <button id="saveBtn" class="btn primary">💾 Salva</button>
+      <span id="saveStatus" class="status"></span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Lista -->
+    <div class="card">
+      <div class="row justify-between mb-8">
+        <div>
+          <strong>Archivio — Items</strong>
+          <div class="muted">folder: <code>data/archive/items</code> · branch: <code>test</code></div>
+        </div>
+        <button id="reloadBtn" class="btn">↻ Reload</button>
+      </div>
+      <div id="list" class="list"></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="card">
+      <div class="two mt-8">
+        <div>
+          <label>Data</label>
+          <input id="f_date" type="date" />
+        </div>
+        <div>
+          <label>Titolo</label>
+          <input id="f_title" type="text" placeholder="Titolo…" />
+        </div>
+      </div>
+
+      <div class="two mt-8">
+        <div>
+          <label>Slug (kebab-case)</label>
+          <input id="f_slug" type="text" placeholder="es. nuova-carta-xyz" />
+        </div>
+        <div>
+          <label>Tipo</label>
+          <input id="f_kind" type="text" placeholder="video | content" />
+        </div>
+      </div>
+
+      <div class="two mt-8">
+        <div>
+          <label>Overline</label>
+          <input id="f_overline" type="text" />
+        </div>
+        <div>
+          <label>Autore</label>
+          <input id="f_author" type="text" />
+        </div>
+      </div>
+
+      <div class="two mt-8">
+        <div>
+          <label>ID</label>
+          <input id="f_id" type="text" placeholder="opzionale (fallback: slug)" />
+        </div>
+        <div>
+          <label>Thumbnail</label>
+          <div class="row align-center gap-8">
+            <input id="f_thumb" type="text" placeholder="/uploads/... oppure URL" />
+            <input id="uploadThumb" type="file" accept="image/*" hidden />
+            <button id="btnUploadThumb" class="btn">Carica</button>
+            <button id="btnBrowseThumb" class="btn">Sfoglia</button>
+          </div>
+          <div id="thumbBrowser" class="asset-browser hidden"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <label>Descrizione</label>
+        <textarea id="f_desc" class="textarea--sm" placeholder="Testo descrizione (opzionale)"></textarea>
+      </div>
+
+      <div class="two" style="margin-top:8px">
+        <div>
+          <label>Tag (separati da virgola)</label>
+          <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
+          <div id="tagsSaved" class="tags-saved mt-8"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
+          <label for="f_draft" style="margin:0">Bozza</label>
+          <input id="f_draft" type="checkbox" />
+          <label for="f_updated" style="margin-left:14px">Aggiornato</label>
+          <input id="f_updated" type="datetime-local" />
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <label>Immagine Card (home)</label>
+        <div class="row align-center gap-8">
+          <input id="f_card" type="text" placeholder="/uploads/... oppure URL" />
+          <input id="uploadCard" type="file" accept="image/*" hidden />
+          <button id="btnUploadCard" class="btn">Carica</button>
+          <button id="btnBrowseCard" class="btn">Sfoglia</button>
+        </div>
+        <div id="cardBrowser" class="asset-browser hidden"></div>
+      </div>
+
+      <div class="mt-8">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <label>Link</label>
+          <button id="addLinkBtn" class="btn">Aggiungi link</button>
+        </div>
+        <div id="linksList" class="links-list"></div>
+        <div class="muted">Campi: Label, URL, Classe, Ordine, Primario</div>
+      </div>
+
+      <div style="margin-top:8px">
+        <label>YAML grezzo (avanzato)</label>
+        <textarea id="f_raw" placeholder="# qui vedi/modifichi l'intero YAML"></textarea>
+        <div class="muted">Puoi editare i campi sopra o direttamente il YAML. Al salvataggio unifichiamo.</div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <span id="fileInfo" class="pill">—</span>
+        <button id="deleteBtn" class="btn danger">🗑️ Elimina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- YAML parser -->
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script>
+/* ====== CONFIGURAZIONE ====== */
+let OWNER = "eventhorizon-mtg";
+let REPO  = "eventhorizon-mtg.github.io";
+let BRANCH = "test";
+let FOLDER = "data/archive/items";
+let EXT    = "yml";
+let WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
+let AUTH_ENDPOINT = "auth";
+let APP_ID = ""; // Client ID (dal config)
+let WORKER_ORIGIN = new URL(WORKER_BASE).origin;
+let MEDIA_FOLDER = "static/uploads";
+let PUBLIC_FOLDER = "/uploads";
+
+async function loadConfig() {
+  try {
+    const res = await fetch("config.yml", { cache: "no-store" });
+    if (!res.ok) return; // fallback ai default hardcoded
+    const txt = await res.text();
+    const cfg = jsyaml.load(txt) || {};
+    if (cfg.backend) {
+      const repoStr = cfg.backend.repo || ""; // es. owner/name
+      if (repoStr.includes("/")) {
+        const [owner, repoName] = repoStr.split("/", 2);
+        if (owner) OWNER = owner;
+        if (repoName) REPO = repoName;
+      }
+      if (cfg.backend.branch) BRANCH = cfg.backend.branch;
+      if (cfg.backend.base_url) {
+        WORKER_BASE = cfg.backend.base_url.replace(/\/$/, "");
+        WORKER_ORIGIN = new URL(WORKER_BASE).origin;
+      }
+      if (cfg.backend.auth_endpoint) AUTH_ENDPOINT = cfg.backend.auth_endpoint;
+      if (cfg.backend.app_id) APP_ID = cfg.backend.app_id;
+    }
+    const coll = (cfg.collections || []).find(c => c.name === "archive_items");
+    if (coll) {
+      if (coll.folder) FOLDER = coll.folder.replace(/\/$/, "");
+      if (coll.extension) EXT = String(coll.extension).replace(/^\./, "");
+      if (cfg.media_folder) MEDIA_FOLDER = String(cfg.media_folder).replace(/\/$/, "");
+      if (cfg.public_folder) PUBLIC_FOLDER = String(cfg.public_folder).replace(/\/$/, "");
+      // Se il config definisce opzioni per kind, trasforma input in select
+      const kindFieldCfg = (coll.fields || []).find(f => f.name === "kind");
+      const kindOpts = kindFieldCfg && Array.isArray(kindFieldCfg.options) ? kindFieldCfg.options : null;
+      if (kindOpts && kindOpts.length) {
+        const old = byId("f_kind");
+        if (old) {
+          const sel = document.createElement("select");
+          sel.id = "f_kind";
+          sel.innerHTML = kindOpts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+          old.parentNode.replaceChild(sel, old);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Config non caricato:", e);
+  }
+}
+
+/* ====== STATO ====== */
+let TOKEN = localStorage.getItem("gh_token") || "";
+let CURRENT = null; // {path, sha, yaml}
+
+/* ====== UTILS ====== */
+const gh = (url, opts={}) => fetch(url, {
+  ...opts,
+  headers: {
+    "Accept":"application/vnd.github+json",
+    "X-GitHub-Api-Version":"2022-11-28",
+    "Authorization": TOKEN ? `token ${TOKEN}` : undefined,
+    "Content-Type": opts.body ? "application/json" : undefined
+  }
+});
+const b64 = {
+  enc: (s) => {
+    const bytes = new TextEncoder().encode(String(s));
+    let bin = ""; bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  },
+  dec: (b) => {
+    const bin = atob(b || "");
+    const bytes = new Uint8Array(bin.length);
+    for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+};
+
+function toPublicUrlFromPath(path){
+  try{
+    const mf = MEDIA_FOLDER.replace(/\\/g,'/');
+    if (path.startsWith(mf)){
+      const rel = path.slice(mf.length).replace(/^\//,'');
+      return `${PUBLIC_FOLDER}/${rel}`.replace(/\/+/g,'/');
+    }
+  }catch(_){ }
+  return `/${path.replace(/^static\//,'')}`;
+}
+
+async function listImages(rootPath, depth=2){
+  const out = [];
+  async function walk(p, d){
+    const u = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${p}?ref=${encodeURIComponent(BRANCH)}`;
+    const r = await gh(u);
+    if (!r.ok) return;
+    const arr = await r.json();
+    for (const it of arr){
+      if (it.type === 'file' && /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(it.name)){
+        out.push({ path: it.path, name: it.name, publicUrl: toPublicUrlFromPath(it.path) });
+      } else if (it.type === 'dir' && d > 0){
+        await walk(it.path, d-1);
+      }
+    }
+  }
+  await walk(rootPath, depth);
+  return out;
+}
+
+function renderAssetBrowser(container, items, targetInput){
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'asset-grid';
+  for (const it of items){
+    const a = document.createElement('div');
+    a.className = 'asset';
+    a.innerHTML = `<img src="${it.publicUrl}" alt="${it.name}"><small class="meta">${it.name}</small>`;
+    a.onclick = () => { targetInput.value = it.publicUrl; container.classList.add('hidden'); };
+    wrap.appendChild(a);
+  }
+  container.appendChild(wrap);
+  container.classList.remove('hidden');
+}
+const byId = id => document.getElementById(id);
+const kebab = s => String(s||"").toLowerCase().trim()
+  .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+
+/* ====== UI HOOKS ====== */
+  const listEl = byId("list");
+  const saveStatus = byId("saveStatus");
+  const fileInfo = byId("fileInfo");
+  const reloadBtn = byId("reloadBtn");
+  if (reloadBtn) reloadBtn.onclick = () => loadList();
+  const uploadThumbInput = byId("uploadThumb");
+  const btnUploadThumb = byId("btnUploadThumb");
+  const btnBrowseThumb = byId("btnBrowseThumb");
+  const thumbBrowser = byId("thumbBrowser");
+  const fThumb = byId("f_thumb");
+  const uploadCardInput = byId("uploadCard");
+  const btnUploadCard = byId("btnUploadCard");
+  const btnBrowseCard = byId("btnBrowseCard");
+  const cardBrowser = byId("cardBrowser");
+  const fCard = byId("f_card");
+
+function setWho(user){
+  const el = byId("who");
+  el.textContent = user ? `Autenticato come ${user.login}` : "Non autenticato";
+}
+async function fetchMe(){
+  if (!TOKEN) return null;
+  const r = await gh("https://api.github.com/user");
+  if (!r.ok) return null;
+  return r.json();
+}
+
+/* ====== LOGIN / LOGOUT ====== */
+byId("loginBtn").onclick = () => {
+  const origin = location.origin;
+  const url = `${WORKER_BASE}/${AUTH_ENDPOINT}?origin=${encodeURIComponent(origin)}&scope=repo${APP_ID?`&client_id=${encodeURIComponent(APP_ID)}`:""}`;
+  window.open(url, "oauth", "width=980,height=720");
+};
+byId("logoutBtn").onclick = () => {
+  localStorage.removeItem("gh_token");
+  TOKEN = "";
+  setWho(null);
+  alert("Logout eseguito.");
+};
+
+/* Ricezione token dal popup */
+window.addEventListener("message", async (e) => {
+  try { if (new URL(e.origin).origin !== WORKER_ORIGIN) return; } catch(_) { return; }
+  if (typeof e.data !== "string") return;
+  if (!e.data.startsWith("authorization:github:success:")) return;
+  const tok = e.data.slice("authorization:github:success:".length);
+  if (!tok) return;
+  TOKEN = tok;
+  localStorage.setItem("gh_token", TOKEN);
+  const me = await fetchMe();
+  setWho(me);
+  await loadList();
+});
+
+/* ====== UPLOAD ASSET (THUMB) ====== */
+function sanitizeFilename(name){
+  const dot = name.lastIndexOf('.');
+  const base = name.slice(0, dot >= 0 ? dot : undefined);
+  const ext = dot >= 0 ? name.slice(dot) : '';
+  return `${kebab(base)}${ext.toLowerCase()}`;
+}
+function uniqueMediaPath(file){
+  const now = new Date();
+  const pad = (n)=> String(n).padStart(2,'0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const clean = sanitizeFilename(file.name || 'asset');
+  return `${MEDIA_FOLDER}/${stamp}-${clean}`;
+}
+async function uploadAssetFile(file){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error('Lettura file fallita'));
+    fr.onload = async () => {
+      try {
+        const dataUrl = String(fr.result||'');
+        const base64 = dataUrl.split(',')[1] || '';
+        const path = uniqueMediaPath(file);
+        const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+        async function putBody(sha){
+          const body = { message: `chore(admin): upload ${path}`, content: base64, branch: BRANCH, ...(sha?{sha}: {}) };
+          return gh(url, { method: 'PUT', body: JSON.stringify(body) });
+        }
+        let r = await putBody(null);
+        if (r.status === 422) {
+          const g = await gh(url);
+          if (g.ok) {
+            const j = await g.json();
+            r = await putBody(j.sha);
+          }
+        }
+        if (!r.ok) { const t = await r.text().catch(()=>String(r.status)); throw new Error(`Upload fallito: ${r.status} ${t}`); }
+        resolve({ path, publicUrl: toPublicUrlFromPath(path) });
+      } catch (err) { reject(err); }
+    };
+    fr.readAsDataURL(file);
+  });
+}
+if (btnUploadThumb && uploadThumbInput) {
+  btnUploadThumb.onclick = () => uploadThumbInput.click();
+  uploadThumbInput.onchange = async () => {
+    if (!uploadThumbInput.files || !uploadThumbInput.files[0]) return;
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    try {
+      saveStatus.textContent = 'Caricamento in corso…';
+      const file = uploadThumbInput.files[0];
+      const { publicUrl } = await uploadAssetFile(file);
+      byId('f_thumb').value = publicUrl;
+      saveStatus.textContent = 'Immagine caricata';
+    } catch (e) {
+      alert(String(e && e.message || e));
+    } finally {
+      uploadThumbInput.value = '';
+    }
+  };
+}
+
+if (btnUploadCard && uploadCardInput) {
+  btnUploadCard.onclick = () => uploadCardInput.click();
+  uploadCardInput.onchange = async () => {
+    if (!uploadCardInput.files || !uploadCardInput.files[0]) return;
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    try {
+      saveStatus.textContent = 'Caricamento in corso…';
+      const file = uploadCardInput.files[0];
+      const { publicUrl } = await uploadAssetFile(file);
+      byId('f_card').value = publicUrl;
+      saveStatus.textContent = 'Immagine caricata';
+    } catch (e) {
+      alert(String(e && e.message || e));
+    } finally {
+      uploadCardInput.value = '';
+    }
+  };
+}
+
+if (btnBrowseThumb && thumbBrowser && fThumb) {
+  btnBrowseThumb.onclick = async () => {
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    const items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    renderAssetBrowser(thumbBrowser, items, fThumb);
+  };
+}
+if (btnBrowseCard && cardBrowser && fCard) {
+  btnBrowseCard.onclick = async () => {
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    const base = MEDIA_FOLDER.replace(/\/$/, '') + '/cards';
+    let items = await listImages(base, 1).catch(()=>[]);
+    if (!items.length) items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    renderAssetBrowser(cardBrowser, items, fCard);
+  };
+}
+
+/* ====== CARICAMENTO LISTA FILE ====== */
+let CURRENT_DIR = null;
+async function loadList(path){
+  if (path) CURRENT_DIR = path; else CURRENT_DIR = CURRENT_DIR || FOLDER;
+  listEl.innerHTML = "";
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT_DIR}?ref=${encodeURIComponent(BRANCH)}`;
+  const r = await gh(url);
+  if (!r.ok) {
+    listEl.innerHTML = `<div class="muted">Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.</div>`;
+    return;
+  }
+  const items = await r.json();
+  if (CURRENT_DIR !== FOLDER) {
+    const up = document.createElement('div');
+    up.className = 'item item--dir';
+    up.innerHTML = `<strong>..</strong><span class="meta">Torna su</span>`;
+    up.onclick = () => {
+      const p = CURRENT_DIR.replace(/\\/g,'/');
+      const i = p.lastIndexOf('/');
+      const parent = i>0 ? p.slice(0,i) : FOLDER;
+      loadList(parent);
+    };
+    listEl.appendChild(up);
+  }
+  const dirs = items.filter(x => x.type === 'dir');
+  const files = items.filter(x => x.type === 'file' && /\.ya?ml$/i.test(x.name));
+  dirs.forEach((d) => {
+    const div = document.createElement('div');
+    div.className = 'item item--dir';
+    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${d.name}</strong><span class="meta">${d.path}</span>`;
+    div.onclick = () => loadList(d.path);
+    listEl.appendChild(div);
+  });
+  if (files.length === 0 && dirs.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'muted';
+    empty.textContent = 'Cartella vuota.';
+    listEl.appendChild(empty);
+  }
+  for (const f of files) {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${f.name}</strong><span class="meta">${f.path}</span>`;
+    div.onclick = () => openFile(f.path);
+    listEl.appendChild(div);
+    (async () => {
+      try {
+        const ur = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`;
+        const rr = await gh(ur);
+        if (!rr.ok) return;
+        const j = await rr.json();
+        const raw = b64.dec(j.content);
+        const yml = jsyaml.load(raw) || {};
+        const isDraft = !!yml.draft;
+        if (isDraft) {
+          div.classList.add('is-draft');
+          const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft';
+          div.appendChild(s);
+        }
+      } catch(_) {}
+    })();
+  }
+}
+
+/* ====== APRI FILE ====== */
+async function openFile(path){
+  [...listEl.children].forEach(el => el.classList.toggle("active", el.querySelector(".meta").textContent===path));
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${encodeURIComponent(BRANCH)}`;
+  const r = await gh(url);
+  if (!r.ok) { alert("Errore apertura file: " + r.status); return; }
+  const j = await r.json();
+  const raw = b64.dec(j.content);
+  let yml;
+  try { yml = jsyaml.load(raw) || {}; } catch (e) { yml = {}; }
+  CURRENT = { path, sha: j.sha, yaml: yml };
+  fillForm(yml, raw, path);
+}
+
+function fillForm(y, raw, path){
+  byId("f_date").value = (y.date||"").slice(0,10);
+  byId("f_title").value = y.title||"";
+  byId("f_slug").value = y.slug||"";
+  byId("f_kind").value = y.kind||"";
+  byId("f_overline").value = y.overline||"";
+  byId("f_author").value = y.author||"";
+  byId("f_desc").value = y.desc||"";
+  byId("f_id").value = y.id || "";
+  byId("f_thumb").value = y.thumb || "";
+  byId("f_card").value = y.card || "";
+  byId("f_tags").value = "";
+  byId("f_draft").checked = !!y.draft;
+  // Draft badge near file info (create if missing)
+  (function(){
+    let badge = document.getElementById('draftBadge');
+    if (!badge) {
+      const ref = document.getElementById('fileInfo');
+      if (ref && ref.parentNode) {
+        badge = document.createElement('span');
+        badge.id = 'draftBadge';
+        badge.className = 'pill pill--warn';
+        ref.parentNode.insertBefore(badge, ref.nextSibling);
+      }
+    }
+    if (badge) { badge.textContent = 'Draft'; badge.hidden = !y.draft; }
+  })();
+  renderSavedTags(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
+  if (y.updated) {
+    try {
+      const d = new Date(y.updated);
+      const iso = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      byId("f_updated").value = iso;
+    } catch(_) { byId("f_updated").value = ""; }
+  } else {
+    byId("f_updated").value = "";
+  }
+  // Links UI
+  const list = byId("linksList");
+  list.innerHTML = "";
+  const links = Array.isArray(y.links) ? y.links : (y.links ? [y.links] : []);
+  for (const L of links) addLinkRow(L);
+  const fd = byId('f_draft');
+  if (fd) fd.onchange = () => {
+    const b = document.getElementById('draftBadge');
+    if (b) b.hidden = !fd.checked;
+  };
+  byId("f_raw").value = raw || jsyaml.dump(y);
+  fileInfo.textContent = path || "—";
+}
+
+/* ====== CREA NUOVO ====== */
+byId("newBtn").onclick = () => {
+  const today = new Date().toISOString().slice(0,10);
+  const y = { date: today, title: "Nuovo item", kind: "content" };
+  const slug = kebab(y.title);
+  const path = `${FOLDER}/${slug}.${EXT}`;
+  CURRENT = { path, sha: null, yaml: y };
+  fillForm(y, jsyaml.dump(y), path);
+};
+
+/* ====== ELIMINA ====== */
+byId("deleteBtn").onclick = async () => {
+  if (!CURRENT || !CURRENT.path) return alert("Nessun file aperto.");
+  if (!confirm(`Eliminare ${CURRENT.path}?`)) return;
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
+  const body = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
+  const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
+  if (!r.ok) { alert("Errore eliminazione: " + r.status); return; }
+  saveStatus.textContent = "File eliminato.";
+  CURRENT = null;
+  await loadList();
+  fillForm({}, "", "—");
+};
+
+/* ====== SALVA (PATCH) ====== */
+byId("saveBtn").onclick = async () => {
+  if (!TOKEN) { alert("Prima fai login."); return; }
+
+  // 1) Parti SEMPRE dal YAML attuale (così non perdi proprietà non mappate nel form)
+  let y = {};
+  try {
+    const raw = byId("f_raw").value.trim();
+    y = raw ? (jsyaml.load(raw) || {}) : {};
+  } catch (e) {
+    return alert("YAML non valido: " + e.message);
+  }
+
+  // 2) Unisci i campi del form (se valorizzati) senza azzerare chiavi esistenti
+  const f_date = byId("f_date").value;
+  const f_title = byId("f_title").value;
+  const f_slug  = byId("f_slug").value;
+  const f_kind  = byId("f_kind").value;
+  const f_over  = byId("f_overline").value;
+  const f_auth  = byId("f_author").value;
+  const f_desc  = byId("f_desc").value;
+  const f_id    = byId("f_id").value;
+  const f_thumb = byId("f_thumb").value;
+  const f_card  = byId("f_card").value;
+  const f_tags  = byId("f_tags").value;
+  const f_draft = byId("f_draft").checked;
+  const f_upd   = byId("f_updated").value;
+
+  if (f_date) y.date = f_date;
+  if (f_title) y.title = f_title;
+  if (f_kind) y.kind = f_kind;
+  if (f_over) y.overline = f_over;
+  if (f_auth) y.author = f_auth;
+  if (typeof f_desc === 'string') y.desc = f_desc; // consenti stringa vuota per cancellare la descrizione
+  if (f_id) y.id = f_id; else delete y.id;
+  if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
+  if (typeof f_card === 'string') y.card = f_card || undefined;
+  // Tags: unisci chip salvate + input corrente (poi pulisci input)
+  const chipTags = readTagsChips();
+  const inputTags = (typeof f_tags === 'string')
+    ? f_tags.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
+  const set = new Set([...(chipTags||[]), ...inputTags]);
+  y.tags = Array.from(set);
+  renderSavedTags(y.tags);
+  byId("f_tags").value = "";
+  y.draft = !!f_draft;
+  if (f_upd) {
+    try { y.updated = new Date(f_upd).toISOString(); } catch(_) {}
+  }
+
+  // Links from UI
+  y.links = readLinksFromUI();
+
+  // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
+  let slug = f_slug || y.slug || kebab(y.title || "");
+  if (!y.title) return alert("Titolo obbligatorio");
+  if (!slug) return alert("Slug obbligatorio");
+  y.slug = slug;
+
+  // 4) Serializza di nuovo (così f_raw riflette l’oggetto finale)
+  const content = jsyaml.dump(y);
+  byId("f_raw").value = content;
+
+  // 5) Path target: consenti rinomina file se cambi lo slug
+  const newPath = `${FOLDER}/${slug}.${EXT}`;
+  const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
+
+  // 6) Salva via GitHub API (create-or-update robusto)
+  async function putFileSmart(path, shaMaybe) {
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+    const mkBody = (sha) => JSON.stringify({
+      message: `chore(admin): ${sha ? 'update' : 'create'} ${path}`,
+      content: b64.enc(content),
+      branch: BRANCH,
+      ...(sha ? { sha } : {})
+    });
+
+    // Se abbiamo già la SHA la usiamo direttamente
+    if (shaMaybe) {
+      return gh(url, { method: 'PUT', body: mkBody(shaMaybe) });
+    }
+
+    // Tenta create, se esiste fallback a update ottenendo sha
+    let r = await gh(url, { method: 'PUT', body: mkBody(null) });
+    if (r.status === 422) {
+      const g = await gh(url);
+      if (g.ok) {
+        const j = await g.json();
+        r = await gh(url, { method: 'PUT', body: mkBody(j.sha) });
+      }
+    }
+    return r;
+  }
+
+  // Se è rinomina: crea nuovo file, poi (se vuoi) elimina il vecchio
+  if (isRename) {
+    // Crea nuovo o aggiorna se già esiste
+    let r = await putFileSmart(newPath, null);
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      return alert("Errore creazione nuovo file: " + r.status + " – " + t);
+    }
+    const newRes = await r.json();
+    // Elimina il vecchio file
+    if (CURRENT && CURRENT.sha) {
+      const delUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
+      const delBody = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
+      const del = await gh(delUrl, { method: "DELETE", body: JSON.stringify(delBody) });
+      if (!del.ok) {
+        const t = await del.text().catch(()=>String(del.status));
+        alert("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " — " + t);
+      }
+    }
+    saveStatus.textContent = "Salvato (rinominato) ✓";
+    CURRENT = { path: newPath, sha: newRes.content.sha, yaml: y };
+    fileInfo.textContent = newPath;
+  } else {
+    // Update o create sul path corrente
+    const sha = CURRENT ? CURRENT.sha : null;
+    let r = await putFileSmart(newPath, sha || null);
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      return alert("Errore salvataggio: " + r.status + " – " + t);
+    }
+    const j = await r.json();
+    saveStatus.textContent = "Salvato ✓";
+    CURRENT = { path: newPath, sha: j.content.sha, yaml: y };
+    fileInfo.textContent = newPath;
+  }
+
+  // 7) Ricarica lista
+  await loadList();
+};
+
+/* ====== LINKS UI ====== */
+function addLinkRow(L={}){
+  const row = document.createElement('div');
+  row.className = 'row card link-row';
+  const opts = [
+    {val:'', lab:'(Nessuna)'},
+    {val:'btn--yt', lab:'YouTube'},
+    {val:'btn--mox', lab:'Moxfield'},
+    {val:'btn--archi', lab:'Archidekt'},
+    {val:'btn--scry', lab:'Scryfall'},
+    {val:'btn--edh', lab:'EDHREC'},
+    {val:'btn--teal', lab:'Teal'},
+    {val:'btn--base', lab:'Base'},
+    {val:'__custom__', lab:'Custom…'}
+  ];
+  let btnClass = String(L.btn_class||'');
+  const effectivePrim = !!(L.primary || /\bprimary\b/.test(btnClass));
+  btnClass = btnClass.replace(/\bprimary\b/g,'').replace(/\s{2,}/g,' ').trim();
+  const isKnown = opts.some(o => o.val && o.val === btnClass) || btnClass === '';
+  const selHtml = '<select class="link-class-select">' + opts.map(o => '<option value="'+o.val+'" '+((!btnClass && o.val==='') || (btnClass===o.val)?'selected':'')+'>'+o.lab+'</option>').join('') + '</select>';
+  const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':btnClass)+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
+  row.innerHTML = `
+    <input type="text" placeholder="Label" class="link-label" value="${(L.label||'').replace(/"/g,'&quot;')}">
+    <input type="text" placeholder="URL" class="link-href" value="${(L.href||'').replace(/"/g,'&quot;')}">
+    ${selHtml}
+    ${inputHtml}
+    <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}">
+    <label class="muted link-primary-wrap">Primario <input type="checkbox" class="link-primary" ${effectivePrim? 'checked':''}></label>
+    <button type="button" class="btn danger link-del">Rimuovi</button>
+  `;
+  const sel = row.querySelector('.link-class-select');
+  const custom = row.querySelector('.link-class');
+  if (sel) sel.addEventListener('change', () => {
+    if (sel.value === '__custom__') { custom.style.display = ''; custom.focus(); }
+    else { if (custom) custom.style.display = 'none'; }
+  });
+  row.querySelector('.link-del').onclick = () => row.remove();
+  byId('linksList').appendChild(row);
+}
+function readLinksFromUI(){
+  const list = byId('linksList');
+  const rows = Array.from(list.querySelectorAll('.row.card'));
+  const out = [];
+  for (const r of rows) {
+    const label = r.querySelector('.link-label')?.value?.trim() || '';
+    const href  = r.querySelector('.link-href')?.value?.trim() || '';
+    let cls   = '';
+    const sel  = r.querySelector('.link-class-select');
+    const cus  = r.querySelector('.link-class');
+    if (sel) {
+      if (sel.value === '__custom__') cls = cus?.value?.trim() || '';
+      else cls = sel.value || '';
+    } else cls = r.querySelector('.link-class')?.value?.trim() || '';
+    const ord   = parseInt(r.querySelector('.link-order')?.value || '0', 10) || 0;
+    const prim  = !!r.querySelector('.link-primary')?.checked;
+    if (!label && !href) continue;
+    if (prim && cls && !/\bprimary\b/.test(cls)) cls = (cls + ' primary').trim();
+    if (!prim && /\bprimary\b/.test(cls)) cls = cls.replace(/\bprimary\b/g,'').replace(/\s{2,}/g,' ').trim();
+    const L = { label, href, btn_class: cls, sort_order: ord, primary: prim };
+    if (prim) L.primary = true;
+    out.push(L);
+  }
+  // Mantieni al massimo un "primary" vero
+  let sawPrimary = false;
+  for (const L of out) {
+    if (L.primary && !sawPrimary) { sawPrimary = true; }
+    else if (L.primary && sawPrimary) { delete L.primary; }
+  }
+  return out;
+}
+byId('addLinkBtn').onclick = () => addLinkRow({ sort_order: 0, primary: false });
+
+function renderSavedTags(arr){
+  const el = byId('tagsSaved');
+  if (!el) return;
+  el.innerHTML = '';
+  (arr||[]).forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'chip';
+    s.dataset.tag = t;
+    s.innerHTML = `${t} <button type="button" class="x" aria-label="Rimuovi">×</button>`;
+    const btn = s.querySelector('.x');
+    if (btn) btn.onclick = () => { s.remove(); };
+    el.appendChild(s);
+  });
+}
+
+function readTagsChips(){
+  const el = byId('tagsSaved'); if (!el) return [];
+  return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
+}
+
+/* ====== AVVIO ====== */
+(async function boot(){
+  await loadConfig();
+  if (TOKEN) {
+    const me = await fetchMe();
+    setWho(me);
+  }
+  await loadList();
+})();
+</script>
+</body>
+</html>
