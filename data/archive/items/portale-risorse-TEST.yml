@@ -12,7 +12,7 @@ tags:
 draft: false
 links:
   - label: bfff
-    href: www.google.com
+    href: https://www.google.com
     btn_class: btn--teal primary
     sort_order: 0
     primary: true
