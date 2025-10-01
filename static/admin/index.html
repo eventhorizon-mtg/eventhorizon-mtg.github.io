@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="wrap">
-  
+  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
   <header>
     <div class="row">
       <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
@@ -331,6 +331,56 @@ async function waitForNewBuild(prev, timeoutMs=60000, intervalMs=2000){
   return false;
 }
 
+async function getPagesLatest(){
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/pages/builds/latest`;
+  const r = await gh(url);
+  if (!r.ok) throw new Error('pages latest '+r.status);
+  return r.json();
+}
+async function monitorDeployAndReload(){
+  showNotice('Build/deploy avviato…');
+  const start = Date.now();
+  let baseLatest = null;
+  try { baseLatest = await getPagesLatest(); } catch(_) {}
+  const baseTime = baseLatest ? (Date.parse(baseLatest.updated_at||'') || 0) : 0;
+  const prevVersion = await fetchSiteVersion().catch(()=> '');
+
+  // Se l'endpoint Pages non è disponibile, fallback diretto su versione
+  if (!baseTime && !baseLatest) {
+    updateNotice('Attesa nuova versione del sito…');
+    const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
+    hideNotice();
+    return ok;
+  }
+
+  const deadline = Date.now() + 180000; // 3 minuti
+  while (Date.now() < deadline) {
+    let status = 'in attesa…';
+    try {
+      const latest = await getPagesLatest();
+      const t = Date.parse(latest.updated_at||'') || 0;
+      const changed = t > baseTime;
+      status = String(latest.status || 'processing');
+      if (changed && /built/i.test(status)) {
+        updateNotice('Build completata, finalizzo deploy…');
+        const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
+        hideNotice();
+        return ok;
+      }
+      if (changed && /error/i.test(status)) {
+        hideNotice();
+        alert('Build GitHub Pages fallita. Controlla i log di Pages/Actions.');
+        return false;
+      }
+    } catch(_) { /* ignora e riprova */ }
+    const secs = Math.floor((Date.now()-start)/1000);
+    updateNotice(`Stato build: ${status} — ${secs}s`);
+    await sleep(2000);
+  }
+  hideNotice();
+  return false;
+}
+
 function renderAssetBrowser(container, items, targetInput){
   container.innerHTML = '';
   const wrap = document.createElement('div');
@@ -365,6 +415,11 @@ const kebab = s => String(s||"").toLowerCase().trim()
   const btnBrowseCard = byId("btnBrowseCard");
   const cardBrowser = byId("cardBrowser");
   const fCard = byId("f_card");
+
+  // Build/deploy notice helpers
+  function showNotice(msg){ const n = byId('buildNotice'); if (!n) return; n.classList.remove('hidden'); const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
+  function updateNotice(msg){ const n = byId('buildNotice'); if (!n) return; const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
+  function hideNotice(){ const n = byId('buildNotice'); if (!n) return; n.classList.add('hidden'); }
 
 function setWho(user){
   const el = byId("who");
@@ -914,4 +969,5 @@ function readTagsChips(){
 </script>
 </body>
 </html>
+
 
