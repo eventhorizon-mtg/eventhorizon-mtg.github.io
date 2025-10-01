@@ -1,0 +1,19 @@
+date: '2025-10-01'
+title: Nuovo item
+kind: content
+overline: FORMATI fffffffffffff
+author: gigo
+desc: grgfdghfdgfdgfdgfd
+id: Content044
+tags:
+  - yawmoth
+  - phyrexia
+  - legends
+draft: false
+links:
+  - label: bfff
+    href: www.google.com
+    btn_class: btn--teal primary
+    sort_order: 0
+    primary: true
+slug: portale-risorse-TES
