@@ -79,23 +79,26 @@
         </div>
         <div>
           <label>Thumbnail</label>
-          <div class="row align-center" style="gap:8px">
-            <input id="f_thumb" type="text" placeholder="/images/... oppure URL" />
+          <div class="row align-center gap-8">
+            <input id="f_thumb" type="text" placeholder="/uploads/... oppure URL" />
             <input id="uploadThumb" type="file" accept="image/*" hidden />
             <button id="btnUploadThumb" class="btn">Carica</button>
+            <button id="btnBrowseThumb" class="btn">Sfoglia</button>
           </div>
+          <div id="thumbBrowser" class="asset-browser hidden"></div>
         </div>
       </div>
 
       <div style="margin-top:8px">
         <label>Descrizione</label>
-        <textarea id="f_desc" placeholder="Testo descrizione (opzionale)"></textarea>
+        <textarea id="f_desc" class="textarea--sm" placeholder="Testo descrizione (opzionale)"></textarea>
       </div>
 
       <div class="two" style="margin-top:8px">
         <div>
           <label>Tag (separati da virgola)</label>
           <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
+          <div id="tagsSaved" class="tags-saved mt-8"></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
           <label for="f_draft" style="margin:0">Bozza</label>
@@ -105,7 +108,18 @@
         </div>
       </div>
 
-      <div style="margin-top:8px">
+      <div class="mt-8">
+        <label>Immagine Card (home)</label>
+        <div class="row align-center gap-8">
+          <input id="f_card" type="text" placeholder="/uploads/... oppure URL" />
+          <input id="uploadCard" type="file" accept="image/*" hidden />
+          <button id="btnUploadCard" class="btn">Carica</button>
+          <button id="btnBrowseCard" class="btn">Sfoglia</button>
+        </div>
+        <div id="cardBrowser" class="asset-browser hidden"></div>
+      </div>
+
+      <div class="mt-8">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <label>Link</label>
           <button id="addLinkBtn" class="btn">Aggiungi link</button>
@@ -216,6 +230,51 @@ const b64 = {
     return new TextDecoder().decode(bytes);
   }
 };
+
+function toPublicUrlFromPath(path){
+  try{
+    const mf = MEDIA_FOLDER.replace(/\\/g,'/');
+    if (path.startsWith(mf)){
+      const rel = path.slice(mf.length).replace(/^\//,'');
+      return `${PUBLIC_FOLDER}/${rel}`.replace(/\/+/g,'/');
+    }
+  }catch(_){ }
+  return `/${path.replace(/^static\//,'')}`;
+}
+
+async function listImages(rootPath, depth=2){
+  const out = [];
+  async function walk(p, d){
+    const u = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${p}?ref=${encodeURIComponent(BRANCH)}`;
+    const r = await gh(u);
+    if (!r.ok) return;
+    const arr = await r.json();
+    for (const it of arr){
+      if (it.type === 'file' && /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(it.name)){
+        out.push({ path: it.path, name: it.name, publicUrl: toPublicUrlFromPath(it.path) });
+      } else if (it.type === 'dir' && d > 0){
+        await walk(it.path, d-1);
+      }
+    }
+  }
+  await walk(rootPath, depth);
+  return out;
+}
+
+function renderAssetBrowser(container, items, targetInput){
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'asset-grid';
+  for (const it of items){
+    const a = document.createElement('div');
+    a.className = 'asset';
+    a.innerHTML = `<img src="${it.publicUrl}" alt="${it.name}"><small class="meta">${it.name}</small>`;
+    a.onclick = () => { targetInput.value = it.publicUrl; container.classList.add('hidden'); };
+    wrap.appendChild(a);
+  }
+  container.appendChild(wrap);
+  container.classList.remove('hidden');
+}
 const byId = id => document.getElementById(id);
 const kebab = s => String(s||"").toLowerCase().trim()
   .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -228,6 +287,14 @@ const kebab = s => String(s||"").toLowerCase().trim()
   if (reloadBtn) reloadBtn.onclick = loadList;
   const uploadThumbInput = byId("uploadThumb");
   const btnUploadThumb = byId("btnUploadThumb");
+  const btnBrowseThumb = byId("btnBrowseThumb");
+  const thumbBrowser = byId("thumbBrowser");
+  const fThumb = byId("f_thumb");
+  const uploadCardInput = byId("uploadCard");
+  const btnUploadCard = byId("btnUploadCard");
+  const btnBrowseCard = byId("btnBrowseCard");
+  const cardBrowser = byId("cardBrowser");
+  const fCard = byId("f_card");
 
 function setWho(user){
   const el = byId("who");
@@ -326,6 +393,42 @@ if (btnUploadThumb && uploadThumbInput) {
   };
 }
 
+if (btnUploadCard && uploadCardInput) {
+  btnUploadCard.onclick = () => uploadCardInput.click();
+  uploadCardInput.onchange = async () => {
+    if (!uploadCardInput.files || !uploadCardInput.files[0]) return;
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    try {
+      saveStatus.textContent = 'Caricamento in corso…';
+      const file = uploadCardInput.files[0];
+      const { publicUrl } = await uploadAssetFile(file);
+      byId('f_card').value = publicUrl;
+      saveStatus.textContent = 'Immagine caricata';
+    } catch (e) {
+      alert(String(e && e.message || e));
+    } finally {
+      uploadCardInput.value = '';
+    }
+  };
+}
+
+if (btnBrowseThumb && thumbBrowser && fThumb) {
+  btnBrowseThumb.onclick = async () => {
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    const items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    renderAssetBrowser(thumbBrowser, items, fThumb);
+  };
+}
+if (btnBrowseCard && cardBrowser && fCard) {
+  btnBrowseCard.onclick = async () => {
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    const base = MEDIA_FOLDER.replace(/\/$/, '') + '/cards';
+    let items = await listImages(base, 1).catch(()=>[]);
+    if (!items.length) items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    renderAssetBrowser(cardBrowser, items, fCard);
+  };
+}
+
 /* ====== CARICAMENTO LISTA FILE ====== */
 async function loadList(){
   listEl.innerHTML = "";
@@ -343,7 +446,7 @@ async function loadList(){
   for (const f of arr) {
     const div = document.createElement("div");
     div.className = "item";
-    div.innerHTML = `<strong>${f.name}</strong><span class="meta">${f.path}</span>`;
+    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${f.name}</strong><span class="meta">${f.path}</span>`;
     div.onclick = () => openFile(f.path);
     listEl.appendChild(div);
   }
@@ -373,8 +476,10 @@ function fillForm(y, raw, path){
   byId("f_desc").value = y.desc||"";
   byId("f_id").value = y.id || "";
   byId("f_thumb").value = y.thumb || "";
+  byId("f_card").value = y.card || "";
   byId("f_tags").value = Array.isArray(y.tags) ? y.tags.join(", ") : (y.tags || "");
   byId("f_draft").checked = !!y.draft;
+  renderSavedTags(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
   if (y.updated) {
     try {
       const d = new Date(y.updated);
@@ -440,6 +545,7 @@ byId("saveBtn").onclick = async () => {
   const f_desc  = byId("f_desc").value;
   const f_id    = byId("f_id").value;
   const f_thumb = byId("f_thumb").value;
+  const f_card  = byId("f_card").value;
   const f_tags  = byId("f_tags").value;
   const f_draft = byId("f_draft").checked;
   const f_upd   = byId("f_updated").value;
@@ -452,9 +558,11 @@ byId("saveBtn").onclick = async () => {
   if (typeof f_desc === 'string') y.desc = f_desc; // consenti stringa vuota per cancellare la descrizione
   if (f_id) y.id = f_id; else delete y.id;
   if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
+  if (typeof f_card === 'string') y.card = f_card || undefined;
   if (typeof f_tags === 'string') {
     const arr = f_tags.split(',').map(s => s.trim()).filter(Boolean);
     y.tags = arr;
+    renderSavedTags(arr);
   }
   y.draft = !!f_draft;
   if (f_upd) {
@@ -534,14 +642,38 @@ byId("saveBtn").onclick = async () => {
 function addLinkRow(L={}){
   const row = document.createElement('div');
   row.className = 'row card link-row';
+  const opts = [
+    {val:'', lab:'(Nessuna)'},
+    {val:'btn--yt primary', lab:'YouTube (primario)'},
+    {val:'btn--yt', lab:'YouTube'},
+    {val:'btn--mox primary', lab:'Moxfield (primario)'},
+    {val:'btn--mox', lab:'Moxfield'},
+    {val:'btn--archi', lab:'Archidekt'},
+    {val:'btn--scry', lab:'Scryfall'},
+    {val:'btn--edh', lab:'EDHREC'},
+    {val:'btn--teal', lab:'Teal'},
+    {val:'btn--base', lab:'Base'},
+    {val:'__custom__', lab:'Custom…'}
+  ];
+  const btnClass = String(L.btn_class||'');
+  const isKnown = opts.some(o => o.val && o.val === btnClass) || btnClass === '';
+  const selHtml = '<select class="link-class-select">' + opts.map(o => '<option value="'+o.val+'" '+((!btnClass && o.val==='') || (btnClass===o.val)?'selected':'')+'>'+o.lab+'</option>').join('') + '</select>';
+  const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':btnClass)+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
   row.innerHTML = `
     <input type="text" placeholder="Label" class="link-label" value="${(L.label||'').replace(/"/g,'&quot;')}">
     <input type="text" placeholder="URL" class="link-href" value="${(L.href||'').replace(/"/g,'&quot;')}">
-    <input type="text" placeholder="Classe" class="link-class" value="${(L.btn_class||'').replace(/"/g,'&quot;')}">
+    ${selHtml}
+    ${inputHtml}
     <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}">
     <label class="muted link-primary-wrap">Primario <input type="checkbox" class="link-primary" ${L.primary? 'checked':''}></label>
     <button type="button" class="btn danger link-del">Rimuovi</button>
   `;
+  const sel = row.querySelector('.link-class-select');
+  const custom = row.querySelector('.link-class');
+  if (sel) sel.addEventListener('change', () => {
+    if (sel.value === '__custom__') { custom.style.display = ''; custom.focus(); }
+    else { if (custom) custom.style.display = 'none'; }
+  });
   row.querySelector('.link-del').onclick = () => row.remove();
   byId('linksList').appendChild(row);
 }
@@ -552,7 +684,13 @@ function readLinksFromUI(){
   for (const r of rows) {
     const label = r.querySelector('.link-label')?.value?.trim() || '';
     const href  = r.querySelector('.link-href')?.value?.trim() || '';
-    const cls   = r.querySelector('.link-class')?.value?.trim() || '';
+    let cls   = '';
+    const sel  = r.querySelector('.link-class-select');
+    const cus  = r.querySelector('.link-class');
+    if (sel) {
+      if (sel.value === '__custom__') cls = cus?.value?.trim() || '';
+      else cls = sel.value || '';
+    } else cls = r.querySelector('.link-class')?.value?.trim() || '';
     const ord   = parseInt(r.querySelector('.link-order')?.value || '0', 10) || 0;
     const prim  = !!r.querySelector('.link-primary')?.checked;
     if (!label && !href) continue;
@@ -569,6 +707,18 @@ function readLinksFromUI(){
   return out;
 }
 byId('addLinkBtn').onclick = () => addLinkRow({ sort_order: 0, primary: false });
+
+function renderSavedTags(arr){
+  const el = byId('tagsSaved');
+  if (!el) return;
+  el.innerHTML = '';
+  (arr||[]).forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'chip';
+    s.textContent = t;
+    el.appendChild(s);
+  });
+}
 
 /* ====== AVVIO ====== */
 (async function boot(){

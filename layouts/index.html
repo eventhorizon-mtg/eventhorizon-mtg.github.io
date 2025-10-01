@@ -128,6 +128,21 @@
           {{ range $i, $it := $items }}
             {{ $isVideo := eq (lower $it.kind) "video" }}
             {{ $thumbURL := ("images/cards/fblthp_placeholder.webp" | absURL) }}
+            {{ with $it.card }}
+              {{ if hasPrefix . "http" }}
+                {{ $thumbURL = . }}
+              {{ else }}
+                {{ $thumbURL = (. | absURL) }}
+              {{ end }}
+            {{ else }}
+              {{ with $it.thumb }}
+                {{ if hasPrefix . "http" }}
+                  {{ $thumbURL = . }}
+                {{ else }}
+                  {{ $thumbURL = (. | absURL) }}
+                {{ end }}
+              {{ end }}
+            {{ end }}
             {{ $over  := $it.overline }}
             {{ $tit   := $it.title }}
             {{ $desc  := $it.desc }}
