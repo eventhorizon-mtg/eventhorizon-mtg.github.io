@@ -232,6 +232,28 @@ const b64 = {
   }
 };
 
+async function fetchSiteVersion(){
+  const u = new URL('/', window.location.origin);
+  u.searchParams.set('t', String(Date.now()));
+  const res = await fetch(u.toString(), { cache: 'reload', credentials:'same-origin' });
+  if (!res.ok) throw new Error('fetchSiteVersion HTTP '+res.status);
+  const html = await res.text();
+  const m = html.match(/data-archive-ver="([^"]*)"/i);
+  return m ? m[1] : '';
+}
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+async function waitForNewBuild(prev, timeoutMs=60000, intervalMs=2000){
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    try {
+      const v = await fetchSiteVersion();
+      if (v && v !== prev) return true;
+    } catch(_) {}
+    await sleep(intervalMs);
+  }
+  return false;
+}
+
 function toPublicUrlFromPath(path){
   try{
     const mf = MEDIA_FOLDER.replace(/\\/g,'/');
@@ -279,6 +301,29 @@ async function resetSiteCaches(){
     ]);
   } catch(_) {}
   try { localStorage.setItem('site_cache_bust', String(stamp)); } catch(_) {}
+}
+
+// Legge una 'versione' dalla home per rilevare la nuova build
+async function fetchSiteVersion(){
+  const u = new URL('/', window.location.origin);
+  u.searchParams.set('t', String(Date.now()));
+  const res = await fetch(u.toString(), { cache: 'reload', credentials:'same-origin' });
+  if (!res.ok) throw new Error('fetchSiteVersion HTTP '+res.status);
+  const html = await res.text();
+  const m = html.match(/data-archive-ver=\"([^\"]*)\"/i);
+  return m ? m[1] : '';
+}
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+async function waitForNewBuild(prev, timeoutMs=60000, intervalMs=2000){
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    try {
+      const v = await fetchSiteVersion();
+      if (v && v !== prev) return true;
+    } catch(_) {}
+    await sleep(intervalMs);
+  }
+  return false;
 }
 
 function renderAssetBrowser(container, items, targetInput){
@@ -491,28 +536,29 @@ async function loadList(path){
     empty.textContent = 'Cartella vuota.';
     listEl.appendChild(empty);
   }
-  for (const f of files) {
+  // Preleva metadati (data/draft) e ordina per data desc
+  const metas = await Promise.all(files.map(async (f) => {
+    try {
+      const ur = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`;
+      const rr = await gh(ur);
+      if (!rr.ok) return { f, date: 0, draft: false };
+      const j = await rr.json();
+      const raw = b64.dec(j.content);
+      const yml = jsyaml.load(raw) || {};
+      const ds = String(yml.date || '');
+      const d = Date.parse(ds);
+      return { f, date: isNaN(d) ? 0 : d, draft: !!yml.draft };
+    } catch(_) { return { f, date: 0, draft: false }; }
+  }));
+  metas.sort((a,b) => (b.date - a.date) || a.f.name.localeCompare(b.f.name));
+  for (const m of metas) {
+    const f = m.f;
     const div = document.createElement('div');
-    div.className = 'item';
+    div.className = 'item' + (m.draft ? ' is-draft' : '');
     div.innerHTML = `<strong style="font-weight:600;font-size:13px">${f.name}</strong><span class="meta">${f.path}</span>`;
     div.onclick = () => openFile(f.path);
+    if (m.draft) { const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft'; div.appendChild(s); }
     listEl.appendChild(div);
-    (async () => {
-      try {
-        const ur = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`;
-        const rr = await gh(ur);
-        if (!rr.ok) return;
-        const j = await rr.json();
-        const raw = b64.dec(j.content);
-        const yml = jsyaml.load(raw) || {};
-        const isDraft = !!yml.draft;
-        if (isDraft) {
-          div.classList.add('is-draft');
-          const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft';
-          div.appendChild(s);
-        }
-      } catch(_) {}
-    })();
   }
 }
 
@@ -739,12 +785,16 @@ byId("saveBtn").onclick = async () => {
   // 7) Ricarica lista e bust cache dell'app
   await loadList();
   try { await resetSiteCaches(); } catch(_){ }
-  // Attendi la pubblicazione effettiva (fino a 90s) poi ricarica admin
-  setTimeout(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('t', String(Date.now()));
-    window.location.replace(url.toString());
-  }, 150);
+  // Avvisa e attendi build/deploy, poi ricarica
+  try {
+    alert('Salvato. Avvio build/deploy…');
+    const prev = await fetchSiteVersion();
+    const ok = await waitForNewBuild(prev, 90000, 2000);
+    alert(ok ? 'Deploy completato! Ricarico…' : 'Timeout: ricarico comunque.');
+  } catch(_) {}
+  const url = new URL(window.location.href);
+  url.searchParams.set('t', String(Date.now()));
+  window.location.replace(url.toString());
 };
 
 /* ====== LINKS UI ====== */
