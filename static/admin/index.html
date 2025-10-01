@@ -284,7 +284,7 @@ const kebab = s => String(s||"").toLowerCase().trim()
   const saveStatus = byId("saveStatus");
   const fileInfo = byId("fileInfo");
   const reloadBtn = byId("reloadBtn");
-  if (reloadBtn) reloadBtn.onclick = loadList;
+  if (reloadBtn) reloadBtn.onclick = () => loadList();
   const uploadThumbInput = byId("uploadThumb");
   const btnUploadThumb = byId("btnUploadThumb");
   const btnBrowseThumb = byId("btnBrowseThumb");
@@ -430,25 +430,66 @@ if (btnBrowseCard && cardBrowser && fCard) {
 }
 
 /* ====== CARICAMENTO LISTA FILE ====== */
-async function loadList(){
+let CURRENT_DIR = null;
+async function loadList(path){
+  if (path) CURRENT_DIR = path; else CURRENT_DIR = CURRENT_DIR || FOLDER;
   listEl.innerHTML = "";
-  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${encodeURIComponent(BRANCH)}`;
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT_DIR}?ref=${encodeURIComponent(BRANCH)}`;
   const r = await gh(url);
   if (!r.ok) {
     listEl.innerHTML = `<div class="muted">Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.</div>`;
     return;
   }
-  const arr = (await r.json()).filter(x => x.type==="file" && /\.ya?ml$/i.test(x.name));
-  if (arr.length === 0) {
-    listEl.innerHTML = `<div class="muted">Nessun file .yml nella cartella.</div>`;
-    return;
+  const items = await r.json();
+  if (CURRENT_DIR !== FOLDER) {
+    const up = document.createElement('div');
+    up.className = 'item item--dir';
+    up.innerHTML = `<strong>..</strong><span class="meta">Torna su</span>`;
+    up.onclick = () => {
+      const p = CURRENT_DIR.replace(/\\/g,'/');
+      const i = p.lastIndexOf('/');
+      const parent = i>0 ? p.slice(0,i) : FOLDER;
+      loadList(parent);
+    };
+    listEl.appendChild(up);
   }
-  for (const f of arr) {
-    const div = document.createElement("div");
-    div.className = "item";
+  const dirs = items.filter(x => x.type === 'dir');
+  const files = items.filter(x => x.type === 'file' && /\.ya?ml$/i.test(x.name));
+  dirs.forEach((d) => {
+    const div = document.createElement('div');
+    div.className = 'item item--dir';
+    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${d.name}</strong><span class="meta">${d.path}</span>`;
+    div.onclick = () => loadList(d.path);
+    listEl.appendChild(div);
+  });
+  if (files.length === 0 && dirs.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'muted';
+    empty.textContent = 'Cartella vuota.';
+    listEl.appendChild(empty);
+  }
+  for (const f of files) {
+    const div = document.createElement('div');
+    div.className = 'item';
     div.innerHTML = `<strong style="font-weight:600;font-size:13px">${f.name}</strong><span class="meta">${f.path}</span>`;
     div.onclick = () => openFile(f.path);
     listEl.appendChild(div);
+    (async () => {
+      try {
+        const ur = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`;
+        const rr = await gh(ur);
+        if (!rr.ok) return;
+        const j = await rr.json();
+        const raw = b64.dec(j.content);
+        const yml = jsyaml.load(raw) || {};
+        const isDraft = !!yml.draft;
+        if (isDraft) {
+          div.classList.add('is-draft');
+          const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft';
+          div.appendChild(s);
+        }
+      } catch(_) {}
+    })();
   }
 }
 
@@ -479,6 +520,20 @@ function fillForm(y, raw, path){
   byId("f_card").value = y.card || "";
   byId("f_tags").value = Array.isArray(y.tags) ? y.tags.join(", ") : (y.tags || "");
   byId("f_draft").checked = !!y.draft;
+  // Draft badge near file info (create if missing)
+  (function(){
+    let badge = document.getElementById('draftBadge');
+    if (!badge) {
+      const ref = document.getElementById('fileInfo');
+      if (ref && ref.parentNode) {
+        badge = document.createElement('span');
+        badge.id = 'draftBadge';
+        badge.className = 'pill pill--warn';
+        ref.parentNode.insertBefore(badge, ref.nextSibling);
+      }
+    }
+    if (badge) { badge.textContent = 'Draft'; badge.hidden = !y.draft; }
+  })();
   renderSavedTags(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
   if (y.updated) {
     try {
@@ -494,6 +549,11 @@ function fillForm(y, raw, path){
   list.innerHTML = "";
   const links = Array.isArray(y.links) ? y.links : (y.links ? [y.links] : []);
   for (const L of links) addLinkRow(L);
+  const fd = byId('f_draft');
+  if (fd) fd.onchange = () => {
+    const b = document.getElementById('draftBadge');
+    if (b) b.hidden = !fd.checked;
+  };
   byId("f_raw").value = raw || jsyaml.dump(y);
   fileInfo.textContent = path || "—";
 }
@@ -644,9 +704,7 @@ function addLinkRow(L={}){
   row.className = 'row card link-row';
   const opts = [
     {val:'', lab:'(Nessuna)'},
-    {val:'btn--yt primary', lab:'YouTube (primario)'},
     {val:'btn--yt', lab:'YouTube'},
-    {val:'btn--mox primary', lab:'Moxfield (primario)'},
     {val:'btn--mox', lab:'Moxfield'},
     {val:'btn--archi', lab:'Archidekt'},
     {val:'btn--scry', lab:'Scryfall'},
@@ -655,7 +713,9 @@ function addLinkRow(L={}){
     {val:'btn--base', lab:'Base'},
     {val:'__custom__', lab:'Custom…'}
   ];
-  const btnClass = String(L.btn_class||'');
+  let btnClass = String(L.btn_class||'');
+  const effectivePrim = !!(L.primary || /\bprimary\b/.test(btnClass));
+  btnClass = btnClass.replace(/\bprimary\b/g,'').replace(/\s{2,}/g,' ').trim();
   const isKnown = opts.some(o => o.val && o.val === btnClass) || btnClass === '';
   const selHtml = '<select class="link-class-select">' + opts.map(o => '<option value="'+o.val+'" '+((!btnClass && o.val==='') || (btnClass===o.val)?'selected':'')+'>'+o.lab+'</option>').join('') + '</select>';
   const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':btnClass)+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
@@ -665,7 +725,7 @@ function addLinkRow(L={}){
     ${selHtml}
     ${inputHtml}
     <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}">
-    <label class="muted link-primary-wrap">Primario <input type="checkbox" class="link-primary" ${L.primary? 'checked':''}></label>
+    <label class="muted link-primary-wrap">Primario <input type="checkbox" class="link-primary" ${effectivePrim? 'checked':''}></label>
     <button type="button" class="btn danger link-del">Rimuovi</button>
   `;
   const sel = row.querySelector('.link-class-select');
@@ -694,7 +754,9 @@ function readLinksFromUI(){
     const ord   = parseInt(r.querySelector('.link-order')?.value || '0', 10) || 0;
     const prim  = !!r.querySelector('.link-primary')?.checked;
     if (!label && !href) continue;
-    const L = { label, href, btn_class: cls, sort_order: ord };
+    if (prim && cls && !/\bprimary\b/.test(cls)) cls = (cls + ' primary').trim();
+    if (!prim && /\bprimary\b/.test(cls)) cls = cls.replace(/\bprimary\b/g,'').replace(/\s{2,}/g,' ').trim();
+    const L = { label, href, btn_class: cls, sort_order: ord, primary: prim };
     if (prim) L.primary = true;
     out.push(L);
   }

@@ -41,6 +41,13 @@ textarea{height:360px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Conso
 .link-row .link-class{min-width:120px; flex:1}
 .link-row .link-order{width:90px}
 .link-row .link-primary-wrap{display:flex; align-items:center; gap:6px}
+/* Draft + nav */
+.item.is-draft{background:#231f33;border-color:#5c3f8a}
+.item.is-draft strong{color:#e7d7ff}
+.pill--warn{background:#4a3b1a;border-color:#705b2a;color:#ffd;
+}
+.item--dir strong{color:#ffd666}
+.item--dir::before{content:"📁"; margin-right:6px}
 /* Extras */
 .textarea--sm{height:200px}
 .tags-saved{display:flex;gap:6px;flex-wrap:wrap}
