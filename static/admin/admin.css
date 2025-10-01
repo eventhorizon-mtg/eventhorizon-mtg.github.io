@@ -52,6 +52,8 @@ textarea{height:360px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Conso
 .textarea--sm{height:200px}
 .tags-saved{display:flex;gap:6px;flex-wrap:wrap}
 .chip{display:inline-block;background:#22304a;border:1px solid #35406d;color:#cfe3ff;padding:2px 8px;border-radius:999px;font-size:12px}
+.chip .x{background:transparent;border:0;color:#cfe3ff;cursor:pointer;margin-left:6px}
+.chip .x:hover{color:#fff}
 .asset-browser{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px; max-height:240px; overflow:auto; margin-top:6px}
 .asset-browser .asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 .asset-browser .asset{display:flex;flex-direction:column;gap:4px;cursor:pointer}

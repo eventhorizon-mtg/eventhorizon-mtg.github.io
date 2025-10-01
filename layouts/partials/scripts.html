@@ -42,6 +42,15 @@
     })();
   </script>
   <script>
+    // Version per cache-busting dell'endpoint Archivio, dipende dai dati
+    (function(){
+      try{
+        // Hugo inietta il valore al build-time
+        window.__ARCHIVE_VERSION__ = "{{- $v := "" -}}{{- $vapp := or site.Params.appVer "" -}}{{- $mod := 0 -}}{{- with (readDir "data/archive/items") -}}{{- range . -}}{{- if (not .IsDir) -}}{{- if gt .ModTime.Unix $mod -}}{{- $mod = .ModTime.Unix -}}{{- end -}}{{- end -}}{{- end -}}{{- end -}}{{- if $vapp -}}{{- printf "%s-%d" $vapp $mod -}}{{- else -}}{{- printf "%d" $mod -}}{{- end -}}";
+      }catch(_){/* no-op */}
+    })();
+  </script>
+  <script>
     // Normalize placeholder text on archive search (fix legacy artifacts)
     window.addEventListener('DOMContentLoaded', function () {
       var form = document.getElementById('archive-search-form');

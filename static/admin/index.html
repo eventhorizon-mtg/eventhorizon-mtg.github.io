@@ -521,7 +521,7 @@ function fillForm(y, raw, path){
   byId("f_id").value = y.id || "";
   byId("f_thumb").value = y.thumb || "";
   byId("f_card").value = y.card || "";
-  byId("f_tags").value = Array.isArray(y.tags) ? y.tags.join(", ") : (y.tags || "");
+  byId("f_tags").value = "";
   byId("f_draft").checked = !!y.draft;
   // Draft badge near file info (create if missing)
   (function(){
@@ -622,11 +622,15 @@ byId("saveBtn").onclick = async () => {
   if (f_id) y.id = f_id; else delete y.id;
   if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
   if (typeof f_card === 'string') y.card = f_card || undefined;
-  if (typeof f_tags === 'string') {
-    const arr = f_tags.split(',').map(s => s.trim()).filter(Boolean);
-    y.tags = arr;
-    renderSavedTags(arr);
-  }
+  // Tags: unisci chip salvate + input corrente (poi pulisci input)
+  const chipTags = readTagsChips();
+  const inputTags = (typeof f_tags === 'string')
+    ? f_tags.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
+  const set = new Set([...(chipTags||[]), ...inputTags]);
+  y.tags = Array.from(set);
+  renderSavedTags(y.tags);
+  byId("f_tags").value = "";
   y.draft = !!f_draft;
   if (f_upd) {
     try { y.updated = new Date(f_upd).toISOString(); } catch(_) {}
@@ -795,9 +799,17 @@ function renderSavedTags(arr){
   (arr||[]).forEach(t => {
     const s = document.createElement('span');
     s.className = 'chip';
-    s.textContent = t;
+    s.dataset.tag = t;
+    s.innerHTML = `${t} <button type="button" class="x" aria-label="Rimuovi">×</button>`;
+    const btn = s.querySelector('.x');
+    if (btn) btn.onclick = () => { s.remove(); };
     el.appendChild(s);
   });
+}
+
+function readTagsChips(){
+  const el = byId('tagsSaved'); if (!el) return [];
+  return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
 }
 
 /* ====== AVVIO ====== */

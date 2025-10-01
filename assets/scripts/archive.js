@@ -641,10 +641,11 @@
   const bootstrap = async () => {
     try {
       const appVer = trim(document.documentElement.getAttribute('data-app-ver') || '');
+      const injectedVer = (typeof window !== 'undefined' && window.__ARCHIVE_VERSION__ != null) ? String(window.__ARCHIVE_VERSION__) : '';
       const rawEndpoint = (typeof window !== 'undefined' && window.__ARCHIVE_ENDPOINT__ != null)
         ? window.__ARCHIVE_ENDPOINT__
         : '';
-      const endpoint = buildArchiveEndpoint(rawEndpoint, appVer);
+      const endpoint = buildArchiveEndpoint(rawEndpoint, injectedVer || appVer);
       const res = await fetch(endpoint, { credentials: 'same-origin' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json(); // [{id, kind, date, title, overline, desc, thumb, tags, links}]
