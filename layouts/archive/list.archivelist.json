@@ -2,7 +2,15 @@
 {{- with .Site.Data.archive.items -}}
   {{- range $k, $it := . -}}
     {{- if not $it.draft -}}
-      {{- $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) -}}
+      {{- $links := slice -}}
+      {{- with $it.links -}}
+        {{- $t := printf "%T" . -}}
+        {{- if hasPrefix $t "[]" -}}
+          {{- $links = sort . "sort_order" "asc" -}}
+        {{- else if hasPrefix $t "map[" -}}
+          {{- $links = slice . -}}
+        {{- end -}}
+      {{- end -}}
       {{- $tags  := cond (isset $it "tags")  $it.tags (slice) -}}
       {{- $list = $list | append (dict
         "id"        $it.id

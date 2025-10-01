@@ -131,7 +131,15 @@
             {{ $over  := $it.overline }}
             {{ $tit   := $it.title }}
             {{ $desc  := $it.desc }}
-            {{ $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) }}
+            {{ $links := slice }}
+            {{ with $it.links }}
+              {{ $t := printf "%T" . }}
+              {{ if hasPrefix $t "[]" }}
+                {{ $links = sort . "sort_order" "asc" }}
+              {{ else if hasPrefix $t "map[" }}
+                {{ $links = slice . }}
+              {{ end }}
+            {{ end }}
             {{ $prim  := where $links "primary" true }}
             {{ $purl  := "" }}
             {{ if gt (len $prim) 0 }}
