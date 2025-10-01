@@ -1,6 +1,6 @@
 date: '2025-10-01'
 title: Nuovo item
-kind: video
+kind: content
 overline: FORMATI fffffffffffff
 author: gigo
 desc: grgfdghfdgfdgfdgfd
@@ -12,8 +12,8 @@ tags:
 draft: false
 links:
   - label: bfff
-    href: www.google.com
-    btn_class: btn--teal primary
+    href: https://www.google.com
+    btn_class: btn--mox primary
     sort_order: 0
     primary: true
 slug: portale-risorse-TEST
