@@ -358,17 +358,20 @@ async function uploadAssetFile(file){
         const base64 = dataUrl.split(',')[1] || '';
         const path = uniqueMediaPath(file);
         const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-        const body = {
-          message: `chore(admin): upload ${path}`,
-          content: base64,
-          branch: BRANCH
-        };
-        const r = await gh(url, { method: 'PUT', body: JSON.stringify(body) });
-        if (!r.ok) {
-          const t = await r.text().catch(()=>String(r.status));
-          throw new Error(`Upload fallito: ${r.status} ${t}`);
+        async function putBody(sha){
+          const body = { message: `chore(admin): upload ${path}`, content: base64, branch: BRANCH, ...(sha?{sha}: {}) };
+          return gh(url, { method: 'PUT', body: JSON.stringify(body) });
         }
-        resolve({ path, publicUrl: `${PUBLIC_FOLDER}/${path.replace(/^.*\//,'')}` });
+        let r = await putBody(null);
+        if (r.status === 422) {
+          const g = await gh(url);
+          if (g.ok) {
+            const j = await g.json();
+            r = await putBody(j.sha);
+          }
+        }
+        if (!r.ok) { const t = await r.text().catch(()=>String(r.status)); throw new Error(`Upload fallito: ${r.status} ${t}`); }
+        resolve({ path, publicUrl: toPublicUrlFromPath(path) });
       } catch (err) { reject(err); }
     };
     fr.readAsDataURL(file);
@@ -646,25 +649,40 @@ byId("saveBtn").onclick = async () => {
   const newPath = `${FOLDER}/${slug}.${EXT}`;
   const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
 
-  // 6) Salva via GitHub API
-  async function putFile(path, shaOrNull) {
+  // 6) Salva via GitHub API (create-or-update robusto)
+  async function putFileSmart(path, shaMaybe) {
     const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-    const body = {
-      message: `chore(admin): ${shaOrNull ? 'update' : 'create'} ${path}`,
+    const mkBody = (sha) => JSON.stringify({
+      message: `chore(admin): ${sha ? 'update' : 'create'} ${path}`,
       content: b64.enc(content),
-      branch: BRANCH
-    };
-    if (shaOrNull) body.sha = shaOrNull;
-    return gh(url, { method: "PUT", body: JSON.stringify(body) });
+      branch: BRANCH,
+      ...(sha ? { sha } : {})
+    });
+
+    // Se abbiamo già la SHA la usiamo direttamente
+    if (shaMaybe) {
+      return gh(url, { method: 'PUT', body: mkBody(shaMaybe) });
+    }
+
+    // Tenta create, se esiste fallback a update ottenendo sha
+    let r = await gh(url, { method: 'PUT', body: mkBody(null) });
+    if (r.status === 422) {
+      const g = await gh(url);
+      if (g.ok) {
+        const j = await g.json();
+        r = await gh(url, { method: 'PUT', body: mkBody(j.sha) });
+      }
+    }
+    return r;
   }
 
   // Se è rinomina: crea nuovo file, poi (se vuoi) elimina il vecchio
   if (isRename) {
-    // Crea nuovo
-    let r = await putFile(newPath, null);
+    // Crea nuovo o aggiorna se già esiste
+    let r = await putFileSmart(newPath, null);
     if (!r.ok) {
       const t = await r.text().catch(()=>String(r.status));
-      return alert("Errore creazione nuovo file: " + r.status + " — " + t);
+      return alert("Errore creazione nuovo file: " + r.status + " – " + t);
     }
     const newRes = await r.json();
     // Elimina il vecchio file
@@ -683,10 +701,10 @@ byId("saveBtn").onclick = async () => {
   } else {
     // Update o create sul path corrente
     const sha = CURRENT ? CURRENT.sha : null;
-    let r = await putFile(newPath, sha || null);
+    let r = await putFileSmart(newPath, sha || null);
     if (!r.ok) {
       const t = await r.text().catch(()=>String(r.status));
-      return alert("Errore salvataggio: " + r.status + " — " + t);
+      return alert("Errore salvataggio: " + r.status + " – " + t);
     }
     const j = await r.json();
     saveStatus.textContent = "Salvato ✓";
