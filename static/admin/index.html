@@ -11,6 +11,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span>Aggiornamento in corso…</span></div>
   <header>
     <div class="row">
       <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
@@ -259,6 +260,25 @@ async function listImages(rootPath, depth=2){
   }
   await walk(rootPath, depth);
   return out;
+}
+
+// Cache reset helper: invalida SW caches (se presenti) e ricarica risorse chiave
+async function resetSiteCaches(){
+  try{
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch(_) {}
+  const stamp = Date.now();
+  try{
+    await Promise.allSettled([
+      fetch(`/archive/list.json?v=${stamp}`, { cache: 'reload', credentials: 'same-origin' }),
+      fetch(`/?cb=${stamp}`,               { cache: 'reload', credentials: 'same-origin' }),
+      fetch(`/archive/?cb=${stamp}`,       { cache: 'reload', credentials: 'same-origin' })
+    ]);
+  } catch(_) {}
+  try { localStorage.setItem('site_cache_bust', String(stamp)); } catch(_) {}
 }
 
 function renderAssetBrowser(container, items, targetInput){
@@ -716,8 +736,17 @@ byId("saveBtn").onclick = async () => {
     fileInfo.textContent = newPath;
   }
 
-  // 7) Ricarica lista
+  // 7) Ricarica lista e bust cache dell'app
   await loadList();
+  try { await resetSiteCaches(); } catch(_){ }
+  // Attendi la pubblicazione effettiva (fino a 90s) poi ricarica admin
+  try {
+    const prev = await fetchSiteVersion();
+    await waitForNewBuild(prev, 90000, 2000);
+  } catch(_) {}
+  const url = new URL(window.location.href);
+  url.searchParams.set('t', String(Date.now()));
+  window.location.replace(url.toString());
 };
 
 /* ====== LINKS UI ====== */

@@ -1,0 +1,64 @@
+:root{--bg:#0e0f1a;--card:#161927;--text:#eaeef8;--muted:#9aa4c7;--acc:#6c5ce7;--border:#2a2f44}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:18px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.justify-between{justify-content:space-between}
+.align-center{align-items:center}
+.gap-8{gap:8px}
+.mb-8{margin-bottom:8px}
+.mt-8{margin-top:8px}
+.mt-10{margin-top:10px}
+.mt-20{margin-top:20px}
+.ml-14{margin-left:14px}
+.m-0{margin:0}
+.card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.card--row{padding:8px}
+.grid{display:grid; grid-template-columns:280px 1fr; gap:14px}
+@media (max-width: 1024px){ .grid{ grid-template-columns:1fr; } .list{ max-height:none } }
+.list{max-height:calc(100vh - 220px); overflow:auto}
+.item{padding:6px 8px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;border:1px solid transparent;font-size:14px}
+.item:hover{background:#20253a}
+.item.active{background:#232a45;border-color:#3c4570}
+.meta{font-size:11px;color:var(--muted)}
+label{font-size:13px;color:#c8d2f2}
+input[type="text"], input[type="date"], input[type="datetime-local"], textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #3a4060;background:#0c0f1c;color:#eaf}
+input:focus, textarea:focus, select:focus{outline:2px solid #3b4a7a; outline-offset:2px}
+textarea{height:360px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.muted{color:var(--muted);font-size:12px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#263157;color:#cfe3ff;font-size:12px;border:1px solid #35406d}
+.status{font-size:12px;color:#a8b3e9}
+.btn{padding:9px 12px;border-radius:10px;border:1px solid transparent;background:#233; color:#cfe3ff; cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--acc); color:#fff}
+.btn.danger{background:#f44336}
+.links-list{display:grid; gap:8px; margin-top:6px}
+.link-row{padding:8px}
+.link-row .link-label{min-width:120px; flex:1}
+.link-row .link-href{min-width:200px; flex:2}
+.link-row .link-class{min-width:120px; flex:1}
+.link-row .link-order{width:90px}
+.link-row .link-primary-wrap{display:flex; align-items:center; gap:6px}
+/* Extras */
+.textarea--sm{height:200px}
+.tags-saved{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-block;background:#22304a;border:1px solid #35406d;color:#cfe3ff;padding:2px 8px;border-radius:999px;font-size:12px}
+.chip .x{background:transparent;border:0;color:#cfe3ff;cursor:pointer;margin-left:6px}
+.chip .x:hover{color:#fff}
+.asset-browser{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px; max-height:240px; overflow:auto; margin-top:6px}
+.asset-browser .asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.asset-browser .asset{display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.asset-browser .asset img{width:100%;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.hidden{display:none}
+/* Draft + nav */
+.item.is-draft{background:#231f33;border-color:#5c3f8a}
+.item.is-draft strong{color:#e7d7ff}
+.pill--warn{background:#4a3b1a;border-color:#705b2a;color:#ffd}
+.item--dir strong{color:#ffd666}
+.item--dir::before{content:"📁"; margin-right:6px}
+/* Build notice */
+.notice{position:fixed;right:12px;top:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);z-index:9999;box-shadow:0 6px 16px rgba(0,0,0,.35);display:flex;align-items:center;gap:10px}
+.notice .spinner{width:16px;height:16px;border:2px solid #455; border-top-color:#9cf; border-radius:50%; animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
