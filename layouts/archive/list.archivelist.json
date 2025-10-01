@@ -11,9 +11,17 @@
           {{- $links = slice . -}}
         {{- end -}}
       {{- end -}}
-      {{- $tags  := cond (isset $it "tags")  $it.tags (slice) -}}
+      {{- $tags := slice -}}
+      {{- with $it.tags -}}
+        {{- $tt := printf "%T" . -}}
+        {{- if hasPrefix $tt "[]" -}}
+          {{- $tags = . -}}
+        {{- else -}}
+          {{- $tags = slice . -}}
+        {{- end -}}
+      {{- end -}}
       {{- $list = $list | append (dict
-        "id"        $it.id
+        "id"        (or $it.id (or $it.slug $k))
         "slug"      $it.slug
         "kind"      $it.kind
         "date"      $it.date

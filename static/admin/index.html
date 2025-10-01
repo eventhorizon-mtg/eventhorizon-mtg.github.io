@@ -260,11 +260,11 @@ byId("deleteBtn").onclick = async () => {
   fillForm({}, "", "—");
 };
 
-/* ====== SALVA ====== */
+/* ====== SALVA (PATCH) ====== */
 byId("saveBtn").onclick = async () => {
   if (!TOKEN) { alert("Prima fai login."); return; }
 
-  // unisci form -> YAML
+  // 1) Parti SEMPRE dal YAML attuale (così non perdi proprietà non mappate nel form)
   let y = {};
   try {
     const raw = byId("f_raw").value.trim();
@@ -272,38 +272,86 @@ byId("saveBtn").onclick = async () => {
   } catch (e) {
     return alert("YAML non valido: " + e.message);
   }
-  // fields base
-  y.date = byId("f_date").value || y.date || "";
-  y.title = byId("f_title").value || y.title || "";
-  y.kind = byId("f_kind").value || y.kind || "content";
+
+  // 2) Unisci i campi del form (se valorizzati) senza azzerare chiavi esistenti
+  const f_date = byId("f_date").value;
+  const f_title = byId("f_title").value;
+  const f_slug  = byId("f_slug").value;
+  const f_kind  = byId("f_kind").value;
+  const f_over  = byId("f_overline").value;
+  const f_auth  = byId("f_author").value;
+  const f_desc  = byId("f_desc").value;
+
+  if (f_date) y.date = f_date;
+  if (f_title) y.title = f_title;
+  if (f_kind) y.kind = f_kind;
+  if (f_over) y.overline = f_over;
+  if (f_auth) y.author = f_auth;
+  if (typeof f_desc === 'string') y.desc = f_desc; // consenti stringa vuota per cancellare la descrizione
+
+  // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
+  let slug = f_slug || y.slug || kebab(y.title || "");
   if (!y.title) return alert("Titolo obbligatorio");
-  let slug = byId("f_slug").value || y.slug || kebab(y.title);
   if (!slug) return alert("Slug obbligatorio");
   y.slug = slug;
 
+  // 4) Serializza di nuovo (così f_raw riflette l’oggetto finale)
   const content = jsyaml.dump(y);
-  const path = `${FOLDER}/${slug}.yml`;
+  byId("f_raw").value = content;
 
-  const creatingNewPath = !CURRENT || !CURRENT.sha || (CURRENT.path && CURRENT.path !== path);
+  // 5) Path target: consenti rinomina file se cambi lo slug
+  const newPath = `${FOLDER}/${slug}.yml`;
+  const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
 
-  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-  const body = {
-    message: `chore(admin): ${creatingNewPath ? "create" : "update"} ${path}`,
-    content: b64.enc(content),
-    branch: BRANCH
-  };
-  if (!creatingNewPath && CURRENT.sha) body.sha = CURRENT.sha;
-
-  const r = await gh(url, { method:"PUT", body: JSON.stringify(body) });
-  if (!r.ok) { 
-    const t = await r.text().catch(()=>String(r.status));
-    alert("Errore salvataggio: " + r.status + " — " + t);
-    return;
+  // 6) Salva via GitHub API
+  async function putFile(path, shaOrNull) {
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+    const body = {
+      message: `chore(admin): ${shaOrNull ? 'update' : 'create'} ${path}`,
+      content: b64.enc(content),
+      branch: BRANCH
+    };
+    if (shaOrNull) body.sha = shaOrNull;
+    return gh(url, { method: "PUT", body: JSON.stringify(body) });
   }
-  const j = await r.json();
-  saveStatus.textContent = "Salvato ✓";
-  CURRENT = { path, sha: j.content.sha, yaml: y };
-  fileInfo.textContent = path;
+
+  // Se è rinomina: crea nuovo file, poi (se vuoi) elimina il vecchio
+  if (isRename) {
+    // Crea nuovo
+    let r = await putFile(newPath, null);
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      return alert("Errore creazione nuovo file: " + r.status + " — " + t);
+    }
+    const newRes = await r.json();
+    // Elimina il vecchio file
+    if (CURRENT && CURRENT.sha) {
+      const delUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
+      const delBody = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
+      const del = await gh(delUrl, { method: "DELETE", body: JSON.stringify(delBody) });
+      if (!del.ok) {
+        const t = await del.text().catch(()=>String(del.status));
+        alert("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " — " + t);
+      }
+    }
+    saveStatus.textContent = "Salvato (rinominato) ✓";
+    CURRENT = { path: newPath, sha: newRes.content.sha, yaml: y };
+    fileInfo.textContent = newPath;
+  } else {
+    // Update o create sul path corrente
+    const sha = CURRENT ? CURRENT.sha : null;
+    let r = await putFile(newPath, sha || null);
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      return alert("Errore salvataggio: " + r.status + " — " + t);
+    }
+    const j = await r.json();
+    saveStatus.textContent = "Salvato ✓";
+    CURRENT = { path: newPath, sha: j.content.sha, yaml: y };
+    fileInfo.textContent = newPath;
+  }
+
+  // 7) Ricarica lista
   await loadList();
 };
 
