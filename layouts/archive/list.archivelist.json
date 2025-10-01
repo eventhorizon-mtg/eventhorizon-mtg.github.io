@@ -1,7 +1,10 @@
 {{- $list := slice -}}
+{{- $seen := newScratch -}}
 {{- with .Site.Data.archive.items -}}
   {{- range $k, $it := . -}}
     {{- if not $it.draft -}}
+      {{- $key := or $it.id (or $it.slug $k) -}}
+      {{- if not ($seen.Get $key) -}}
       {{- $links := slice -}}
       {{- with $it.links -}}
         {{- $t := printf "%T" . -}}
@@ -21,7 +24,7 @@
         {{- end -}}
       {{- end -}}
       {{- $list = $list | append (dict
-        "id"        (or $it.id (or $it.slug $k))
+        "id"        $key
         "slug"      $it.slug
         "kind"      $it.kind
         "date"      $it.date
@@ -32,6 +35,8 @@
         "tags"      $tags
         "links"     $links
       ) -}}
+      {{- $seen.Set $key true -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
