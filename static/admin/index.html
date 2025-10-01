@@ -401,6 +401,18 @@ const kebab = s => String(s||"").toLowerCase().trim()
   function updateNotice(msg){ const n = byId('buildNotice'); if (!n) return; const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
   function hideNotice(){ const n = byId('buildNotice'); if (!n) return; n.classList.add('hidden'); }
 
+  // Pending uploads staged until Save
+  const PENDING = { thumb: null, card: null };
+  function planAsset(kind, file, baseDir, publicBase, inputId){
+    const path = uniqueMediaPath(file, baseDir);
+    const fname = path.replace(/^.*\//,'');
+    const pub = String(publicBase||'').replace(/\/$/,'') + '/' + fname;
+    PENDING[kind] = { file, path, publicUrl: pub };
+    const inp = byId(inputId);
+    if (inp) inp.value = pub;
+    if (saveStatus) saveStatus.textContent = `Immagine ${kind} pronta: verrà caricata al Salva`;
+  }
+
 function setWho(user){
   const el = byId("who");
   el.textContent = user ? `Autenticato come ${user.login}` : "Non autenticato";
@@ -492,22 +504,44 @@ async function uploadAssetFileTo(file, baseDir, publicBase){
     fr.readAsDataURL(file);
   });
 }
+
+async function uploadAssetFileToPath(file, fullPath){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error('Lettura file fallita'));
+    fr.onload = async () => {
+      try {
+        const dataUrl = String(fr.result||'');
+        const base64 = dataUrl.split(',')[1] || '';
+        const path = fullPath;
+        const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+        async function putBody(sha){
+          const body = { message: `chore(admin): upload ${path}` , content: base64, branch: BRANCH, ...(sha?{sha}: {}) };
+          return gh(url, { method: 'PUT', body: JSON.stringify(body) });
+        }
+        let r = await putBody(null);
+        if (r.status === 422) {
+          const g = await gh(url);
+          if (g.ok) {
+            const j = await g.json();
+            r = await putBody(j.sha);
+          }
+        }
+        if (!r.ok) { const t = await r.text().catch(()=>String(r.status)); throw new Error(`Upload fallito: ${r.status} ${t}`); }
+        const publicUrl = '/' + path.replace(/^static\//,'');
+        resolve({ path, publicUrl });
+      } catch (err) { reject(err); }
+    };
+    fr.readAsDataURL(file);
+  });
+}
 if (btnUploadThumb && uploadThumbInput) {
   btnUploadThumb.onclick = () => uploadThumbInput.click();
   uploadThumbInput.onchange = async () => {
     if (!uploadThumbInput.files || !uploadThumbInput.files[0]) return;
-    if (!TOKEN) { alert('Prima fai login.'); return; }
-    try {
-      saveStatus.textContent = 'Caricamento in corso…';
-      const file = uploadThumbInput.files[0];
-      const { publicUrl } = await uploadAssetFileTo(file, THUMBS_DIR, THUMBS_PUBLIC);
-      byId('f_thumb').value = publicUrl;
-      saveStatus.textContent = 'Immagine caricata';
-    } catch (e) {
-      alert(String(e && e.message || e));
-    } finally {
-      uploadThumbInput.value = '';
-    }
+    const file = uploadThumbInput.files[0];
+    planAsset('thumb', file, THUMBS_DIR, THUMBS_PUBLIC, 'f_thumb');
+    uploadThumbInput.value = '';
   };
 }
 
@@ -515,18 +549,9 @@ if (btnUploadCard && uploadCardInput) {
   btnUploadCard.onclick = () => uploadCardInput.click();
   uploadCardInput.onchange = async () => {
     if (!uploadCardInput.files || !uploadCardInput.files[0]) return;
-    if (!TOKEN) { alert('Prima fai login.'); return; }
-    try {
-      saveStatus.textContent = 'Caricamento in corso…';
-      const file = uploadCardInput.files[0];
-      const { publicUrl } = await uploadAssetFileTo(file, CARDS_DIR, CARDS_PUBLIC);
-      byId('f_card').value = publicUrl;
-      saveStatus.textContent = 'Immagine caricata';
-    } catch (e) {
-      alert(String(e && e.message || e));
-    } finally {
-      uploadCardInput.value = '';
-    }
+    const file = uploadCardInput.files[0];
+    planAsset('card', file, CARDS_DIR, CARDS_PUBLIC, 'f_card');
+    uploadCardInput.value = '';
   };
 }
 
@@ -535,6 +560,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
     if (!TOKEN) { alert('Prima fai login.'); return; }
     const items = await listImages(THUMBS_DIR, 2).catch(()=>[]);
     renderAssetBrowser(thumbBrowser, items, fThumb);
+    PENDING.thumb = null;
   };
 }
 if (btnBrowseCard && cardBrowser && fCard) {
@@ -542,6 +568,7 @@ if (btnBrowseCard && cardBrowser && fCard) {
     if (!TOKEN) { alert('Prima fai login.'); return; }
     let items = await listImages(CARDS_DIR, 2).catch(()=>[]);
     renderAssetBrowser(cardBrowser, items, fCard);
+    PENDING.card = null;
   };
 }
 
@@ -767,7 +794,32 @@ byId("saveBtn").onclick = async () => {
   const newPath = `${FOLDER}/${slug}.${EXT}`;
   const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
 
-  // 6) Salva via GitHub API (create-or-update robusto)
+    // 5.1) Carica eventuali immagini in coda (prima di salvare YAML)
+  if (PENDING.thumb) {
+    try {
+      const res = await uploadAssetFileToPath(PENDING.thumb.file, PENDING.thumb.path);
+      byId('f_thumb').value = res.publicUrl;
+      y.thumb = res.publicUrl;
+      PENDING.thumb = null;
+      if (saveStatus) saveStatus.textContent = 'Thumb caricata';
+    } catch(e) {
+      alert('Upload thumb fallito: '+(e && e.message || e));
+      return;
+    }
+  }
+  if (PENDING.card) {
+    try {
+      const res = await uploadAssetFileToPath(PENDING.card.file, PENDING.card.path);
+      byId('f_card').value = res.publicUrl;
+      y.card = res.publicUrl;
+      PENDING.card = null;
+      if (saveStatus) saveStatus.textContent = 'Card caricata';
+    } catch(e) {
+      alert('Upload card fallito: '+(e && e.message || e));
+      return;
+    }
+  }
+// 6) Salva via GitHub API (create-or-update robusto)
   async function putFileSmart(path, shaMaybe) {
     const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
     const mkBody = (sha) => JSON.stringify({
@@ -946,5 +998,6 @@ function readTagsChips(){
 </script>
 </body>
 </html>
+
 
 
