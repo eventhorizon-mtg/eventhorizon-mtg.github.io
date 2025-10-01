@@ -81,7 +81,7 @@
         <div>
           <label>Thumbnail</label>
           <div class="row align-center gap-8">
-            <input id="f_thumb" type="text" placeholder="/uploads/... oppure URL" />
+            <input id="f_thumb" type="text" placeholder="/images/thumbs/... oppure URL" />
             <input id="uploadThumb" type="file" accept="image/*" hidden />
             <button id="btnUploadThumb" class="btn">Carica</button>
             <button id="btnBrowseThumb" class="btn">Sfoglia</button>
@@ -112,7 +112,7 @@
       <div class="mt-8">
         <label>Immagine Card (home)</label>
         <div class="row align-center gap-8">
-          <input id="f_card" type="text" placeholder="/uploads/... oppure URL" />
+          <input id="f_card" type="text" placeholder="/images/cards/... oppure URL" />
           <input id="uploadCard" type="file" accept="image/*" hidden />
           <button id="btnUploadCard" class="btn">Carica</button>
           <button id="btnBrowseCard" class="btn">Sfoglia</button>
@@ -158,6 +158,11 @@ let APP_ID = ""; // Client ID (dal config)
 let WORKER_ORIGIN = new URL(WORKER_BASE).origin;
 let MEDIA_FOLDER = "static/uploads";
 let PUBLIC_FOLDER = "/uploads";
+// Destinazioni dedicate per immagini usate dal sito
+let CARDS_DIR    = "static/images/cards";
+let CARDS_PUBLIC = "/images/cards";
+let THUMBS_DIR   = "static/images/thumbs";
+let THUMBS_PUBLIC= "/images/thumbs";
 
 async function loadConfig() {
   try {
@@ -406,14 +411,15 @@ function sanitizeFilename(name){
   const ext = dot >= 0 ? name.slice(dot) : '';
   return `${kebab(base)}${ext.toLowerCase()}`;
 }
-function uniqueMediaPath(file){
+function uniqueMediaPath(file, baseDir){
   const now = new Date();
   const pad = (n)=> String(n).padStart(2,'0');
   const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   const clean = sanitizeFilename(file.name || 'asset');
-  return `${MEDIA_FOLDER}/${stamp}-${clean}`;
+  const root = String(baseDir||MEDIA_FOLDER).replace(/\/$/, '');
+  return `${root}/${stamp}-${clean}`;
 }
-async function uploadAssetFile(file){
+async function uploadAssetFileTo(file, baseDir, publicBase){
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
     fr.onerror = () => reject(new Error('Lettura file fallita'));
@@ -421,7 +427,7 @@ async function uploadAssetFile(file){
       try {
         const dataUrl = String(fr.result||'');
         const base64 = dataUrl.split(',')[1] || '';
-        const path = uniqueMediaPath(file);
+        const path = uniqueMediaPath(file, baseDir);
         const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
         async function putBody(sha){
           const body = { message: `chore(admin): upload ${path}`, content: base64, branch: BRANCH, ...(sha?{sha}: {}) };
@@ -436,7 +442,16 @@ async function uploadAssetFile(file){
           }
         }
         if (!r.ok) { const t = await r.text().catch(()=>String(r.status)); throw new Error(`Upload fallito: ${r.status} ${t}`); }
-        resolve({ path, publicUrl: toPublicUrlFromPath(path) });
+        // Calcola URL pubblico (static/... -> /...)
+        let pub = '';
+        if (publicBase) {
+          const base = String(publicBase).replace(/\/$/, '');
+          const fname = path.replace(/^.*\//,'');
+          pub = `${base}/${fname}`;
+        } else {
+          pub = `/${path.replace(/^static\//,'')}`;
+        }
+        resolve({ path, publicUrl: pub });
       } catch (err) { reject(err); }
     };
     fr.readAsDataURL(file);
@@ -450,7 +465,7 @@ if (btnUploadThumb && uploadThumbInput) {
     try {
       saveStatus.textContent = 'Caricamento in corso…';
       const file = uploadThumbInput.files[0];
-      const { publicUrl } = await uploadAssetFile(file);
+      const { publicUrl } = await uploadAssetFileTo(file, THUMBS_DIR, THUMBS_PUBLIC);
       byId('f_thumb').value = publicUrl;
       saveStatus.textContent = 'Immagine caricata';
     } catch (e) {
@@ -469,7 +484,7 @@ if (btnUploadCard && uploadCardInput) {
     try {
       saveStatus.textContent = 'Caricamento in corso…';
       const file = uploadCardInput.files[0];
-      const { publicUrl } = await uploadAssetFile(file);
+      const { publicUrl } = await uploadAssetFileTo(file, CARDS_DIR, CARDS_PUBLIC);
       byId('f_card').value = publicUrl;
       saveStatus.textContent = 'Immagine caricata';
     } catch (e) {
@@ -483,16 +498,14 @@ if (btnUploadCard && uploadCardInput) {
 if (btnBrowseThumb && thumbBrowser && fThumb) {
   btnBrowseThumb.onclick = async () => {
     if (!TOKEN) { alert('Prima fai login.'); return; }
-    const items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    const items = await listImages(THUMBS_DIR, 2).catch(()=>[]);
     renderAssetBrowser(thumbBrowser, items, fThumb);
   };
 }
 if (btnBrowseCard && cardBrowser && fCard) {
   btnBrowseCard.onclick = async () => {
     if (!TOKEN) { alert('Prima fai login.'); return; }
-    const base = MEDIA_FOLDER.replace(/\/$/, '') + '/cards';
-    let items = await listImages(base, 1).catch(()=>[]);
-    if (!items.length) items = await listImages(MEDIA_FOLDER, 2).catch(()=>[]);
+    let items = await listImages(CARDS_DIR, 2).catch(()=>[]);
     renderAssetBrowser(cardBrowser, items, fCard);
   };
 }
