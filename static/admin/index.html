@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin · Static CMS</title>
 
-    <!-- Niente auto-init: inizializziamo noi -->
+    <!-- Evita auto-init -->
     <script>window.CMS_MANUAL_INIT = true;</script>
-    <!-- Static CMS (app) -->
+
+    <!-- Static CMS UMD (app + core) -->
     <script src="https://unpkg.com/@staticcms/app@1.5.3/dist/static-cms-app.js"></script>
-    <!-- Backend GitHub (bundled in app, ma includo anche core per sicurezza) -->
     <script src="https://unpkg.com/@staticcms/core@1.5.3/dist/static-cms-core.js"></script>
 
     <style>
@@ -27,7 +27,7 @@
     <div id="status">Auth: <b id="s-auth">—</b> · Keys: <span id="s-keys">—</span> <button id="btn-reinit">Re-init</button></div>
 
     <script>
-      // ===== Helpers storage
+      // -------- helpers storage + status --------
       const KEYS = ['staticcms-user','netlify-cms-user','decap-cms-user'];
       const getLS = k => { try{return localStorage.getItem(k);}catch{return null;} };
       const setLS = (k,v) => { try{localStorage.setItem(k,v);}catch{} };
@@ -36,9 +36,7 @@
       function getStoredToken() {
         try { const raw = any(); if (!raw) return null; const obj = JSON.parse(raw); return typeof obj.token==='string'?obj.token:null; } catch { return null; }
       }
-      function mirrorKeys(payloadStr){
-        KEYS.forEach(k => setLS(k, payloadStr));
-      }
+      function mirrorKeys(payloadStr){ KEYS.forEach(k => setLS(k, payloadStr)); }
       function paintStatus(){
         const flags = KEYS.map(k => !!getLS(k));
         document.getElementById('s-auth').textContent = flags.some(Boolean) ? 'ready' : 'missing';
@@ -49,8 +47,24 @@
       });
       paintStatus();
 
-      // ===== Config INLINE (Hugo + GitHub Pages + Cloudflare Worker)
-      const config = {
+      // -------- attesa robusta del namespace CMS --------
+      function pickCMSGlobal(){
+        return window.CMS || window.StaticCMS || window.StaticCms || window.NetlifyCms || window.netlifyCmsApp || null;
+      }
+      function waitForCMS(ms=5000){
+        return new Promise((resolve,reject)=>{
+          const t0 = Date.now();
+          (function tick(){
+            const g = pickCMSGlobal();
+            if (g && typeof g.init === 'function') return resolve(g);
+            if (Date.now()-t0 > ms) return reject(new Error('CMS global not found'));
+            setTimeout(tick, 100);
+          })();
+        });
+      }
+
+      // -------- config inline (Hugo + GitHub + Worker) --------
+      const CONFIG_INLINE = {
         load_config_file: false,
         backend: {
           name: "github",
@@ -58,7 +72,7 @@
           branch: "test",
           base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
           auth_endpoint: "auth",
-          app_id: "Ov23liuGRKkJ7ujGpqXE" // <— INSERISCI QUI IL CLIENT ID REALE
+          app_id: "Ov23liuGRKkJ7ujGpqXE" // <— METTI QUI IL CLIENT ID REALE
         },
         media_folder: "static/uploads",
         public_folder: "/uploads",
@@ -102,32 +116,37 @@
         ]
       };
 
-      // ===== Init Static CMS
-      window.addEventListener('DOMContentLoaded', () => {
-        // specchia eventuale chiave esistente su tutte
-        const raw = any(); if (raw) mirrorKeys(raw); paintStatus();
+      // -------- init + handshake token (no loop) --------
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const CMS = await waitForCMS();
+          console.log('[ADMIN] Static CMS trovato, inizializzo…');
 
-        // Inizializza
-        CMS.init({ config });
-        console.log('[ADMIN] Static CMS avviato');
+          // specchia eventuale chiave esistente su tutte
+          const raw = any(); if (raw) mirrorKeys(raw); paintStatus();
 
-        // Forza handshake solo una volta se non già autenticato
-        setTimeout(() => {
-          if (sessionStorage.getItem('oauth_reposted') === '1') return;
-          const token = getStoredToken();
-          if (!token) return;
-          // prova a leggere stato; se non c'è utente, reinvia postMessage
-          let authed = false;
-          try { const s = CMS.getState().toJS(); authed = !!(s && s.auth && (s.auth.user || s.auth.token)); } catch {}
-          if (!authed) {
-            console.log('[ADMIN] Reinoltro token a Static CMS');
-            sessionStorage.setItem('oauth_reposted','1');
-            window.postMessage('authorization:github:success:' + token, '*');
-          }
-        }, 700);
+          CMS.init({ config: CONFIG_INLINE });
+          console.log('[ADMIN] Static CMS avviato');
+
+          // se c'è token salvato ma non risultiamo autenticati, reinvia il postMessage UNA volta
+          setTimeout(() => {
+            if (sessionStorage.getItem('oauth_reposted') === '1') return;
+            const token = getStoredToken();
+            if (!token) return;
+            let authed = false;
+            try { const s = CMS.getState().toJS(); authed = !!(s && s.auth && (s.auth.user || s.auth.token)); } catch {}
+            if (!authed) {
+              console.log('[ADMIN] Reinoltro token a Static CMS');
+              sessionStorage.setItem('oauth_reposted','1');
+              window.postMessage('authorization:github:success:' + token, '*');
+            }
+          }, 800);
+        } catch (e) {
+          console.error('[ADMIN error] Static CMS non trovato:', e);
+        }
       });
 
-      // ===== Hook popup OAuth: salva token (+user) in TUTTE le chiavi e ricarica (no loop se identico)
+      // Hook popup OAuth: salva token (+user) in tutte le chiavi e ricarica (no loop se identico)
       (function () {
         async function buildUserPayload(token) {
           const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
