@@ -1,149 +1,320 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin · Login + CMS</title>
-
-  <!-- CMS stabile -->
-  <script>window.CMS_MANUAL_INIT = true;</script>
-  <script src="https://unpkg.com/netlify-cms-app@2.15.72/dist/netlify-cms.js"></script>
-
-  <style>
-    :root{--bg:#0e0f1a;--fg:#eaeef8;--card:#1b1e2b}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
-    .wrap{display:flex;align-items:center;justify-content:center;height:100%}
-    .card{background:var(--card);padding:22px 20px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.35);max-width:560px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{padding:10px 14px;border:0;border-radius:10px;cursor:pointer}
-    .btn-primary{background:#6c5ce7;color:white}
-    .btn-ghost{background:transparent;color:#c8cfeb;border:1px solid rgba(255,255,255,.15)}
-    .hint{opacity:.8;font-size:12px;margin-top:10px}
-    .ok{color:#00c2b2}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin · Mini Editor (Hugo + GitHub)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<style>
+  :root{--bg:#0e0f1a;--card:#161927;--text:#eaeef8;--muted:#9aa4c7;--acc:#6c5ce7}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .btn{padding:9px 12px;border-radius:10px;border:1px solid transparent;background:#233; color:#cfe3ff; cursor:pointer}
+  .btn.primary{background:var(--acc); color:#fff}
+  .btn.danger{background:#f44336}
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .card{background:var(--card); border:1px solid #2a2f44; border-radius:12px; padding:14px; box-shadow:0 10px 28px rgba(0,0,0,.25)}
+  .grid{display:grid; grid-template-columns:280px 1fr; gap:14px}
+  .list{max-height:70vh; overflow:auto}
+  .item{padding:8px 10px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;border:1px solid transparent}
+  .item:hover{background:#20253a}
+  .item.active{background:#232a45;border-color:#3c4570}
+  .meta{font-size:12px;color:var(--muted)}
+  label{font-size:13px;color:#c8d2f2}
+  input[type="text"], input[type="date"], textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #3a4060;background:#0c0f1c;color:#eaf}
+  textarea{height:360px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .muted{color:var(--muted);font-size:12px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#263157;color:#cfe3ff;font-size:12px;border:1px solid #35406d}
+  .status{font-size:12px;color:#a8b3e9}
+</style>
 </head>
 <body>
-  <div class="wrap">
+<div class="wrap">
+  <header>
+    <div class="row">
+      <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
+      <button id="logoutBtn" class="btn">🚪 Logout</button>
+      <span id="who" class="status"></span>
+    </div>
+    <div class="row">
+      <button id="newBtn" class="btn">➕ Nuovo item</button>
+      <button id="saveBtn" class="btn primary">💾 Salva</button>
+      <span id="saveStatus" class="status"></span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Lista -->
     <div class="card">
-      <h2 style="margin:0 0 10px">Area Admin</h2>
-      <p id="authState">Stato: <b>non autenticato</b></p>
-      <div class="row" style="margin-top:8px">
-        <button id="loginBtn" class="btn btn-primary">🔑 Login con GitHub</button>
-        <button id="resetBtn" class="btn btn-ghost">♻️ Reset autenticazione</button>
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <div>
+          <strong>Archivio — Items</strong>
+          <div class="muted">folder: <code>data/archive/items</code> · branch: <code>test</code></div>
+        </div>
+        <button id="reloadBtn" class="btn">↻ Reload</button>
       </div>
-      <p class="hint">Se il login va a buon fine, questa pagina salva il token in LocalStorage e carica l’interfaccia del CMS.</p>
+      <div id="list" class="list"></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="card">
+      <div class="two">
+        <div>
+          <label>Data</label>
+          <input id="f_date" type="date" />
+        </div>
+        <div>
+          <label>Titolo</label>
+          <input id="f_title" type="text" placeholder="Titolo…" />
+        </div>
+      </div>
+
+      <div class="two" style="margin-top:8px">
+        <div>
+          <label>Slug (kebab-case)</label>
+          <input id="f_slug" type="text" placeholder="es. nuova-carta-xyz" />
+        </div>
+        <div>
+          <label>Tipo</label>
+          <input id="f_kind" type="text" placeholder="video | content" />
+        </div>
+      </div>
+
+      <div class="two" style="margin-top:8px">
+        <div>
+          <label>Overline</label>
+          <input id="f_overline" type="text" />
+        </div>
+        <div>
+          <label>Autore</label>
+          <input id="f_author" type="text" />
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <label>Descrizione</label>
+        <textarea id="f_desc" placeholder="Testo descrizione (opzionale)"></textarea>
+      </div>
+
+      <div style="margin-top:8px">
+        <label>YAML grezzo (avanzato)</label>
+        <textarea id="f_raw" placeholder="# qui vedi/modifichi l'intero YAML"></textarea>
+        <div class="muted">Puoi editare i campi sopra o direttamente il YAML. Al salvataggio unifichiamo.</div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+        <span id="fileInfo" class="pill">—</span>
+        <button id="deleteBtn" class="btn danger">🗑️ Elimina</button>
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    // --- Config (metti il tuo Client ID) ---
-    const CMS_CONFIG = {
-      load_config_file: false,
-      backend: {
-        name: "github",
-        repo: "eventhorizon-mtg/eventhorizon-mtg.github.io",
-        branch: "test",
-        base_url: "https://eventhorizon-oauth.cetriolo-mtg.workers.dev",
-        auth_endpoint: "auth",
-        app_id: "Ov23liuGRKkJ7ujGpqXE" // <-- Client ID REALE
-      },
-      media_folder: "static/uploads",
-      public_folder: "/uploads",
-      locale: "it",
-      collections: [
-        {
-          name: "archive_items",
-          label: "Archivio — Items",
-          folder: "data/archive/items",
-          create: true,
-          format: "yaml",
-          extension: "yml",
-          slug: "{{slug}}",
-          fields: [
-            { label: "Data", name: "date", widget: "date", format: "YYYY-MM-DD", required: true },
-            { label: "Titolo", name: "title", widget: "string", required: true },
-            { label: "ID", name: "id", widget: "string", required: false },
-            { label: "Slug", name: "slug", widget: "string", required: false,
-              pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Minuscole, numeri e trattini (kebab-case)."] },
-            { label: "Tipo", name: "kind", widget: "select", options: [
-                { label: "Video", value: "video" }, { label: "Contenuto", value: "content" }
-              ], required: false, default: "content" },
-            { label: "Overline", name: "overline", widget: "string", required: false },
-            { label: "Descrizione", name: "desc", widget: "text", required: false },
-            { label: "Thumbnail", name: "thumb", widget: "image", required: false, choose_url: true },
-            { label: "Tag", name: "tags", widget: "list", required: false,
-              field: { label: "Tag", name: "tag", widget: "string" } },
-            { label: "Link", name: "links", widget: "list", required: false, fields: [
-                { label: "Label", name: "label", widget: "string", required: false },
-                { label: "URL", name: "href", widget: "string", required: false,
-                  pattern: ["^https?://.*", "Inserisci un URL assoluto (http/https)."] },
-                { label: "Classe bottone", name: "btn_class", widget: "string", required: false },
-                { label: "Ordine", name: "sort_order", widget: "number", required: false, default: 0 },
-                { label: "Primario", name: "primary", widget: "boolean", required: false, default: false }
-              ]},
-            { label: "Bozza", name: "draft", widget: "boolean", required: false, default: false },
-            { label: "Autore", name: "author", widget: "string", required: false },
-            { label: "Aggiornato", name: "updated", widget: "datetime", required: false }
-          ]
-        }
-      ]
-    };
+<!-- YAML parser -->
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script>
+/* ====== CONFIGURAZIONE ====== */
+const OWNER = "eventhorizon-mtg";
+const REPO  = "eventhorizon-mtg.github.io";
+const BRANCH = "test";
+const FOLDER = "data/archive/items";
+const WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
+const APP_ID = "Ov23liuGRKkJ7ujGpqXE"; // <-- Client ID REALE
 
-    // --- Storage helpers ---
-    const STORAGE_KEYS = ['netlify-cms-user','decap-cms-user','staticcms-user'];
-    const getLS = k => { try{return localStorage.getItem(k);}catch{return null;} };
-    const setLS = (k,v) => { try{localStorage.setItem(k,v);}catch{} };
-    const rmLS = k => { try{localStorage.removeItem(k);}catch{} };
-    const any = () => STORAGE_KEYS.map(getLS).find(Boolean);
-    function setAuthStateUI(ok){
-      const el = document.getElementById('authState');
-      el.innerHTML = ok ? 'Stato: <b class="ok">autenticato</b>' : 'Stato: <b>non autenticato</b>';
-    }
+/* ====== STATO ====== */
+let TOKEN = localStorage.getItem("gh_token") || "";
+let CURRENT = null; // {path, sha, yaml}
 
-    // --- Init CMS UI se già autenticato ---
-    function initCMS() {
-      document.querySelector('.wrap').style.display = 'none'; // nascondi card login
-      CMS.init({ config: CMS_CONFIG });
-      console.log('[ADMIN] CMS avviato (2.15.72)');
-    }
+/* ====== UTILS ====== */
+const gh = (url, opts={}) => fetch(url, {
+  ...opts,
+  headers: {
+    "Accept":"application/vnd.github+json",
+    "Authorization": TOKEN ? `token ${TOKEN}` : undefined,
+    "Content-Type": opts.body ? "application/json" : undefined
+  }
+});
+const b64 = {
+  enc: s => btoa(unescape(encodeURIComponent(s))),
+  dec: s => decodeURIComponent(escape(atob(s)))
+};
+const byId = id => document.getElementById(id);
+const kebab = s => String(s||"").toLowerCase().trim()
+  .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 
-    // All'avvio: se ho già token, vado direttamente al CMS
-    (function boot(){
-      const raw = any();
-      if (raw) { setAuthStateUI(true); initCMS(); }
-      else { setAuthStateUI(false); }
-    })();
+/* ====== UI HOOKS ====== */
+const listEl = byId("list");
+const saveStatus = byId("saveStatus");
+const fileInfo = byId("fileInfo");
 
-    // --- Pulsante Login: apre il popup del Worker ---
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const origin = location.origin;
-      const url = CMS_CONFIG.backend.base_url + '/auth?origin=' + encodeURIComponent(origin);
-      window.open(url, 'oauth', 'width=980,height=720');
-    });
+function setWho(user){
+  const el = byId("who");
+  el.textContent = user ? `Autenticato come ${user.login}` : "Non autenticato";
+}
+async function fetchMe(){
+  if (!TOKEN) return null;
+  const r = await gh("https://api.github.com/user");
+  if (!r.ok) return null;
+  return r.json();
+}
 
-    // --- Reset ---
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      STORAGE_KEYS.forEach(rmLS); sessionStorage.clear(); location.reload();
-    });
+/* ====== LOGIN / LOGOUT ====== */
+byId("loginBtn").onclick = () => {
+  const origin = location.origin;
+  const url = `${WORKER_BASE}/auth?origin=${encodeURIComponent(origin)}&scope=repo`;
+  window.open(url, "oauth", "width=980,height=720");
+};
+byId("logoutBtn").onclick = () => {
+  localStorage.removeItem("gh_token");
+  TOKEN = "";
+  setWho(null);
+  alert("Logout eseguito.");
+};
 
-    // --- Quando rientra il token dal popup: salva e avvia CMS ---
-    async function buildUserPayload(token) {
-      const headers = { Authorization: 'token ' + token, Accept: 'application/vnd.github+json' };
-      let userJson = null;
-      try { const me = await fetch('https://api.github.com/user', { headers }); if (me.ok) userJson = await me.json(); } catch {}
-      return JSON.stringify(userJson ? { token: String(token), user: userJson } : { token: String(token) });
-    }
+/* Ricezione token dal popup */
+window.addEventListener("message", async (e) => {
+  if (typeof e.data !== "string") return;
+  if (!e.data.startsWith("authorization:github:success:")) return;
+  const tok = e.data.slice("authorization:github:success:".length);
+  if (!tok) return;
+  TOKEN = tok;
+  localStorage.setItem("gh_token", TOKEN);
+  const me = await fetchMe();
+  setWho(me);
+  await loadList();
+});
 
-    window.addEventListener('message', async (e) => {
-      if (typeof e.data !== 'string') return;
-      if (!e.data.startsWith('authorization:github:success:')) return;
-      const token = e.data.slice('authorization:github:success:'.length);
-      if (!token) return;
-      const payloadStr = await buildUserPayload(token);
-      STORAGE_KEYS.forEach(k => setLS(k, payloadStr));
-      setAuthStateUI(true);
-      initCMS();
-    });
-  </script>
+/* ====== CARICAMENTO LISTA FILE ====== */
+async function loadList(){
+  listEl.innerHTML = "";
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${encodeURIComponent(BRANCH)}`;
+  const r = await gh(url);
+  if (!r.ok) {
+    listEl.innerHTML = `<div class="muted">Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.</div>`;
+    return;
+  }
+  const arr = (await r.json()).filter(x => x.type==="file" && x.name.endsWith(".yml"));
+  if (arr.length === 0) {
+    listEl.innerHTML = `<div class="muted">Nessun file .yml nella cartella.</div>`;
+    return;
+  }
+  for (const f of arr) {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `<strong>${f.name}</strong><span class="meta">${f.path}</span>`;
+    div.onclick = () => openFile(f.path);
+    listEl.appendChild(div);
+  }
+}
+
+/* ====== APRI FILE ====== */
+async function openFile(path){
+  [...listEl.children].forEach(el => el.classList.toggle("active", el.querySelector(".meta").textContent===path));
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${encodeURIComponent(BRANCH)}`;
+  const r = await gh(url);
+  if (!r.ok) { alert("Errore apertura file: " + r.status); return; }
+  const j = await r.json();
+  const raw = b64.dec(j.content);
+  let yml;
+  try { yml = jsyaml.load(raw) || {}; } catch (e) { yml = {}; }
+  CURRENT = { path, sha: j.sha, yaml: yml };
+  fillForm(yml, raw, path);
+}
+
+function fillForm(y, raw, path){
+  byId("f_date").value = (y.date||"").slice(0,10);
+  byId("f_title").value = y.title||"";
+  byId("f_slug").value = y.slug||"";
+  byId("f_kind").value = y.kind||"";
+  byId("f_overline").value = y.overline||"";
+  byId("f_author").value = y.author||"";
+  byId("f_desc").value = y.desc||"";
+  byId("f_raw").value = raw || jsyaml.dump(y);
+  fileInfo.textContent = path || "—";
+}
+
+/* ====== CREA NUOVO ====== */
+byId("newBtn").onclick = () => {
+  const today = new Date().toISOString().slice(0,10);
+  const y = { date: today, title: "Nuovo item", kind: "content" };
+  const slug = "nuovo-item";
+  const path = `${FOLDER}/${slug}.yml`;
+  CURRENT = { path, sha: null, yaml: y };
+  fillForm(y, jsyaml.dump(y), path);
+};
+
+/* ====== ELIMINA ====== */
+byId("deleteBtn").onclick = async () => {
+  if (!CURRENT || !CURRENT.path) return alert("Nessun file aperto.");
+  if (!confirm(`Eliminare ${CURRENT.path}?`)) return;
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
+  const body = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
+  const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
+  if (!r.ok) { alert("Errore eliminazione: " + r.status); return; }
+  saveStatus.textContent = "File eliminato.";
+  CURRENT = null;
+  await loadList();
+  fillForm({}, "", "—");
+};
+
+/* ====== SALVA ====== */
+byId("saveBtn").onclick = async () => {
+  if (!TOKEN) { alert("Prima fai login."); return; }
+
+  // unisci form -> YAML
+  let y = {};
+  try {
+    const raw = byId("f_raw").value.trim();
+    y = raw ? (jsyaml.load(raw) || {}) : {};
+  } catch (e) {
+    return alert("YAML non valido: " + e.message);
+  }
+  // fields base
+  y.date = byId("f_date").value || y.date || "";
+  y.title = byId("f_title").value || y.title || "";
+  y.kind = byId("f_kind").value || y.kind || "content";
+  if (!y.title) return alert("Titolo obbligatorio");
+  let slug = byId("f_slug").value || y.slug || kebab(y.title);
+  if (!slug) return alert("Slug obbligatorio");
+  y.slug = slug;
+
+  const content = jsyaml.dump(y);
+  const path = `${FOLDER}/${slug}.yml`;
+
+  const creatingNewPath = !CURRENT || !CURRENT.sha || (CURRENT.path && CURRENT.path !== path);
+
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  const body = {
+    message: `chore(admin): ${creatingNewPath ? "create" : "update"} ${path}`,
+    content: b64.enc(content),
+    branch: BRANCH
+  };
+  if (!creatingNewPath && CURRENT.sha) body.sha = CURRENT.sha;
+
+  const r = await gh(url, { method:"PUT", body: JSON.stringify(body) });
+  if (!r.ok) { 
+    const t = await r.text().catch(()=>String(r.status));
+    alert("Errore salvataggio: " + r.status + " — " + t);
+    return;
+  }
+  const j = await r.json();
+  saveStatus.textContent = "Salvato ✓";
+  CURRENT = { path, sha: j.content.sha, yaml: y };
+  fileInfo.textContent = path;
+  await loadList();
+};
+
+/* ====== AVVIO ====== */
+(async function boot(){
+  if (TOKEN) {
+    const me = await fetchMe();
+    setWho(me);
+  }
+  await loadList();
+})();
+</script>
 </body>
 </html>
