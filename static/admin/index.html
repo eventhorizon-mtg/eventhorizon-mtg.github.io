@@ -309,27 +309,7 @@ async function resetSiteCaches(){
 }
 
 // Legge una 'versione' dalla home per rilevare la nuova build
-async function fetchSiteVersion(){
-  const u = new URL('/', window.location.origin);
-  u.searchParams.set('t', String(Date.now()));
-  const res = await fetch(u.toString(), { cache: 'reload', credentials:'same-origin' });
-  if (!res.ok) throw new Error('fetchSiteVersion HTTP '+res.status);
-  const html = await res.text();
-  const m = html.match(/data-archive-ver=\"([^\"]*)\"/i);
-  return m ? m[1] : '';
-}
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-async function waitForNewBuild(prev, timeoutMs=60000, intervalMs=2000){
-  const end = Date.now() + timeoutMs;
-  while (Date.now() < end) {
-    try {
-      const v = await fetchSiteVersion();
-      if (v && v !== prev) return true;
-    } catch(_) {}
-    await sleep(intervalMs);
-  }
-  return false;
-}
+ 
 
 async function getPagesLatest(){
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/pages/builds/latest`;
@@ -853,16 +833,13 @@ byId("saveBtn").onclick = async () => {
   // 7) Ricarica lista e bust cache dell'app
   await loadList();
   try { await resetSiteCaches(); } catch(_){ }
-  // Avvisa e attendi build/deploy, poi ricarica
-  try {
-    alert('Salvato. Avvio build/deploy…');
-    const prev = await fetchSiteVersion();
-    const ok = await waitForNewBuild(prev, 90000, 2000);
-    alert(ok ? 'Deploy completato! Ricarico…' : 'Timeout: ricarico comunque.');
-  } catch(_) {}
-  const url = new URL(window.location.href);
-  url.searchParams.set('t', String(Date.now()));
-  window.location.replace(url.toString());
+  // Monitora build/deploy e ricarica
+  const ok = await monitorDeployAndReload().catch(()=>false);
+  if (!ok) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('t', String(Date.now()));
+    window.location.replace(url.toString());
+  }
 };
 
 /* ====== LINKS UI ====== */
