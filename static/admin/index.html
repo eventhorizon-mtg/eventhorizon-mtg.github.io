@@ -94,9 +94,42 @@
         </div>
       </div>
 
+      <div class="two" style="margin-top:8px">
+        <div>
+          <label>ID</label>
+          <input id="f_id" type="text" placeholder="opzionale (fallback: slug)" />
+        </div>
+        <div>
+          <label>Thumbnail</label>
+          <input id="f_thumb" type="text" placeholder="/images/... oppure URL" />
+        </div>
+      </div>
+
       <div style="margin-top:8px">
         <label>Descrizione</label>
         <textarea id="f_desc" placeholder="Testo descrizione (opzionale)"></textarea>
+      </div>
+
+      <div class="two" style="margin-top:8px">
+        <div>
+          <label>Tag (separati da virgola)</label>
+          <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
+          <label for="f_draft" style="margin:0">Bozza</label>
+          <input id="f_draft" type="checkbox" />
+          <label for="f_updated" style="margin-left:14px">Aggiornato</label>
+          <input id="f_updated" type="datetime-local" />
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <label>Link</label>
+          <button id="addLinkBtn" class="btn">Aggiungi link</button>
+        </div>
+        <div id="linksList" class="links-list" style="display:grid;gap:8px;margin-top:6px"></div>
+        <div class="muted">Campi: Label, URL, Classe, Ordine, Primario</div>
       </div>
 
       <div style="margin-top:8px">
@@ -117,12 +150,58 @@
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 <script>
 /* ====== CONFIGURAZIONE ====== */
-const OWNER = "eventhorizon-mtg";
-const REPO  = "eventhorizon-mtg.github.io";
-const BRANCH = "test";
-const FOLDER = "data/archive/items";
-const WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
-const APP_ID = "Ov23liuGRKkJ7ujGpqXE"; // <-- Client ID REALE
+let OWNER = "eventhorizon-mtg";
+let REPO  = "eventhorizon-mtg.github.io";
+let BRANCH = "test";
+let FOLDER = "data/archive/items";
+let EXT    = "yml";
+let WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
+let AUTH_ENDPOINT = "auth";
+let APP_ID = ""; // Client ID (dal config)
+let WORKER_ORIGIN = new URL(WORKER_BASE).origin;
+
+async function loadConfig() {
+  try {
+    const res = await fetch("config.yml", { cache: "no-store" });
+    if (!res.ok) return; // fallback ai default hardcoded
+    const txt = await res.text();
+    const cfg = jsyaml.load(txt) || {};
+    if (cfg.backend) {
+      const repoStr = cfg.backend.repo || ""; // es. owner/name
+      if (repoStr.includes("/")) {
+        const [owner, repoName] = repoStr.split("/", 2);
+        if (owner) OWNER = owner;
+        if (repoName) REPO = repoName;
+      }
+      if (cfg.backend.branch) BRANCH = cfg.backend.branch;
+      if (cfg.backend.base_url) {
+        WORKER_BASE = cfg.backend.base_url.replace(/\/$/, "");
+        WORKER_ORIGIN = new URL(WORKER_BASE).origin;
+      }
+      if (cfg.backend.auth_endpoint) AUTH_ENDPOINT = cfg.backend.auth_endpoint;
+      if (cfg.backend.app_id) APP_ID = cfg.backend.app_id;
+    }
+    const coll = (cfg.collections || []).find(c => c.name === "archive_items");
+    if (coll) {
+      if (coll.folder) FOLDER = coll.folder.replace(/\/$/, "");
+      if (coll.extension) EXT = String(coll.extension).replace(/^\./, "");
+      // Se il config definisce opzioni per kind, trasforma input in select
+      const kindFieldCfg = (coll.fields || []).find(f => f.name === "kind");
+      const kindOpts = kindFieldCfg && Array.isArray(kindFieldCfg.options) ? kindFieldCfg.options : null;
+      if (kindOpts && kindOpts.length) {
+        const old = byId("f_kind");
+        if (old) {
+          const sel = document.createElement("select");
+          sel.id = "f_kind";
+          sel.innerHTML = kindOpts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+          old.parentNode.replaceChild(sel, old);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Config non caricato:", e);
+  }
+}
 
 /* ====== STATO ====== */
 let TOKEN = localStorage.getItem("gh_token") || "";
@@ -133,22 +212,34 @@ const gh = (url, opts={}) => fetch(url, {
   ...opts,
   headers: {
     "Accept":"application/vnd.github+json",
+    "X-GitHub-Api-Version":"2022-11-28",
     "Authorization": TOKEN ? `token ${TOKEN}` : undefined,
     "Content-Type": opts.body ? "application/json" : undefined
   }
 });
 const b64 = {
-  enc: s => btoa(unescape(encodeURIComponent(s))),
-  dec: s => decodeURIComponent(escape(atob(s)))
+  enc: (s) => {
+    const bytes = new TextEncoder().encode(String(s));
+    let bin = ""; bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  },
+  dec: (b) => {
+    const bin = atob(b || "");
+    const bytes = new Uint8Array(bin.length);
+    for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
 };
 const byId = id => document.getElementById(id);
 const kebab = s => String(s||"").toLowerCase().trim()
   .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 
 /* ====== UI HOOKS ====== */
-const listEl = byId("list");
-const saveStatus = byId("saveStatus");
-const fileInfo = byId("fileInfo");
+  const listEl = byId("list");
+  const saveStatus = byId("saveStatus");
+  const fileInfo = byId("fileInfo");
+  const reloadBtn = byId("reloadBtn");
+  if (reloadBtn) reloadBtn.onclick = loadList;
 
 function setWho(user){
   const el = byId("who");
@@ -164,7 +255,7 @@ async function fetchMe(){
 /* ====== LOGIN / LOGOUT ====== */
 byId("loginBtn").onclick = () => {
   const origin = location.origin;
-  const url = `${WORKER_BASE}/auth?origin=${encodeURIComponent(origin)}&scope=repo`;
+  const url = `${WORKER_BASE}/${AUTH_ENDPOINT}?origin=${encodeURIComponent(origin)}&scope=repo${APP_ID?`&client_id=${encodeURIComponent(APP_ID)}`:""}`;
   window.open(url, "oauth", "width=980,height=720");
 };
 byId("logoutBtn").onclick = () => {
@@ -176,6 +267,7 @@ byId("logoutBtn").onclick = () => {
 
 /* Ricezione token dal popup */
 window.addEventListener("message", async (e) => {
+  try { if (new URL(e.origin).origin !== WORKER_ORIGIN) return; } catch(_) { return; }
   if (typeof e.data !== "string") return;
   if (!e.data.startsWith("authorization:github:success:")) return;
   const tok = e.data.slice("authorization:github:success:".length);
@@ -196,7 +288,7 @@ async function loadList(){
     listEl.innerHTML = `<div class="muted">Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.</div>`;
     return;
   }
-  const arr = (await r.json()).filter(x => x.type==="file" && x.name.endsWith(".yml"));
+  const arr = (await r.json()).filter(x => x.type==="file" && /\.ya?ml$/i.test(x.name));
   if (arr.length === 0) {
     listEl.innerHTML = `<div class="muted">Nessun file .yml nella cartella.</div>`;
     return;
@@ -232,6 +324,24 @@ function fillForm(y, raw, path){
   byId("f_overline").value = y.overline||"";
   byId("f_author").value = y.author||"";
   byId("f_desc").value = y.desc||"";
+  byId("f_id").value = y.id || "";
+  byId("f_thumb").value = y.thumb || "";
+  byId("f_tags").value = Array.isArray(y.tags) ? y.tags.join(", ") : (y.tags || "");
+  byId("f_draft").checked = !!y.draft;
+  if (y.updated) {
+    try {
+      const d = new Date(y.updated);
+      const iso = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      byId("f_updated").value = iso;
+    } catch(_) { byId("f_updated").value = ""; }
+  } else {
+    byId("f_updated").value = "";
+  }
+  // Links UI
+  const list = byId("linksList");
+  list.innerHTML = "";
+  const links = Array.isArray(y.links) ? y.links : (y.links ? [y.links] : []);
+  for (const L of links) addLinkRow(L);
   byId("f_raw").value = raw || jsyaml.dump(y);
   fileInfo.textContent = path || "—";
 }
@@ -240,8 +350,8 @@ function fillForm(y, raw, path){
 byId("newBtn").onclick = () => {
   const today = new Date().toISOString().slice(0,10);
   const y = { date: today, title: "Nuovo item", kind: "content" };
-  const slug = "nuovo-item";
-  const path = `${FOLDER}/${slug}.yml`;
+  const slug = kebab(y.title);
+  const path = `${FOLDER}/${slug}.${EXT}`;
   CURRENT = { path, sha: null, yaml: y };
   fillForm(y, jsyaml.dump(y), path);
 };
@@ -281,6 +391,11 @@ byId("saveBtn").onclick = async () => {
   const f_over  = byId("f_overline").value;
   const f_auth  = byId("f_author").value;
   const f_desc  = byId("f_desc").value;
+  const f_id    = byId("f_id").value;
+  const f_thumb = byId("f_thumb").value;
+  const f_tags  = byId("f_tags").value;
+  const f_draft = byId("f_draft").checked;
+  const f_upd   = byId("f_updated").value;
 
   if (f_date) y.date = f_date;
   if (f_title) y.title = f_title;
@@ -288,6 +403,19 @@ byId("saveBtn").onclick = async () => {
   if (f_over) y.overline = f_over;
   if (f_auth) y.author = f_auth;
   if (typeof f_desc === 'string') y.desc = f_desc; // consenti stringa vuota per cancellare la descrizione
+  if (f_id) y.id = f_id; else delete y.id;
+  if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
+  if (typeof f_tags === 'string') {
+    const arr = f_tags.split(',').map(s => s.trim()).filter(Boolean);
+    y.tags = arr;
+  }
+  y.draft = !!f_draft;
+  if (f_upd) {
+    try { y.updated = new Date(f_upd).toISOString(); } catch(_) {}
+  }
+
+  // Links from UI
+  y.links = readLinksFromUI();
 
   // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
   let slug = f_slug || y.slug || kebab(y.title || "");
@@ -300,7 +428,7 @@ byId("saveBtn").onclick = async () => {
   byId("f_raw").value = content;
 
   // 5) Path target: consenti rinomina file se cambi lo slug
-  const newPath = `${FOLDER}/${slug}.yml`;
+  const newPath = `${FOLDER}/${slug}.${EXT}`;
   const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
 
   // 6) Salva via GitHub API
@@ -355,8 +483,50 @@ byId("saveBtn").onclick = async () => {
   await loadList();
 };
 
+/* ====== LINKS UI ====== */
+function addLinkRow(L={}){
+  const row = document.createElement('div');
+  row.className = 'row card';
+  row.style.padding = '8px';
+  row.innerHTML = `
+    <input type="text" placeholder="Label" class="link-label" value="${(L.label||'').replace(/"/g,'&quot;')}" style="min-width:120px;flex:1">
+    <input type="text" placeholder="URL" class="link-href" value="${(L.href||'').replace(/"/g,'&quot;')}" style="min-width:200px;flex:2">
+    <input type="text" placeholder="Classe" class="link-class" value="${(L.btn_class||'').replace(/"/g,'&quot;')}" style="min-width:120px;flex:1">
+    <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}" style="width:90px">
+    <label class="muted" style="display:flex;align-items:center;gap:6px">Primario <input type="checkbox" class="link-primary" ${L.primary? 'checked':''}></label>
+    <button type="button" class="btn danger link-del">Rimuovi</button>
+  `;
+  row.querySelector('.link-del').onclick = () => row.remove();
+  byId('linksList').appendChild(row);
+}
+function readLinksFromUI(){
+  const list = byId('linksList');
+  const rows = Array.from(list.querySelectorAll('.row.card'));
+  const out = [];
+  for (const r of rows) {
+    const label = r.querySelector('.link-label')?.value?.trim() || '';
+    const href  = r.querySelector('.link-href')?.value?.trim() || '';
+    const cls   = r.querySelector('.link-class')?.value?.trim() || '';
+    const ord   = parseInt(r.querySelector('.link-order')?.value || '0', 10) || 0;
+    const prim  = !!r.querySelector('.link-primary')?.checked;
+    if (!label && !href) continue;
+    const L = { label, href, btn_class: cls, sort_order: ord };
+    if (prim) L.primary = true;
+    out.push(L);
+  }
+  // Mantieni al massimo un "primary" vero
+  let sawPrimary = false;
+  for (const L of out) {
+    if (L.primary && !sawPrimary) { sawPrimary = true; }
+    else if (L.primary && sawPrimary) { delete L.primary; }
+  }
+  return out;
+}
+byId('addLinkBtn').onclick = () => addLinkRow({ sort_order: 0, primary: false });
+
 /* ====== AVVIO ====== */
 (async function boot(){
+  await loadConfig();
   if (TOKEN) {
     const me = await fetchMe();
     setWho(me);
