@@ -458,6 +458,7 @@ byId("logoutBtn").onclick = () => {
   try { sessionStorage.removeItem("gh_token"); } catch(_){ }
   try { localStorage.removeItem("gh_token"); } catch(_){ }
   TOKEN = "";
+  OAUTH_POPUP = null;
   setWho(null);
   alert("Logout eseguito.");
 };
@@ -473,6 +474,10 @@ window.addEventListener("message", async (e) => {
   TOKEN = tok;
   try { sessionStorage.setItem("gh_token", TOKEN); } catch(_){ }
   try { localStorage.removeItem("gh_token"); } catch(_){ }
+  if (OAUTH_POPUP) {
+    try { OAUTH_POPUP.close(); } catch(_){ }
+    OAUTH_POPUP = null;
+  }
   const me = await fetchMe();
   setWho(me);
   await loadList();
@@ -730,7 +735,7 @@ function fillForm(y, raw, path){
     }
     if (badge) { badge.textContent = 'Draft'; badge.hidden = !y.draft; }
   })();
-  renderSavedTagsSafe(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
+  renderSavedTags(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
   if (y.updated) {
     try {
       const d = new Date(y.updated);
@@ -822,7 +827,7 @@ byId("saveBtn").onclick = async () => {
     : [];
   const set = new Set([...(chipTags||[]), ...inputTags]);
   y.tags = Array.from(set);
-  renderSavedTagsSafe(y.tags);
+  renderSavedTags(y.tags);
   byId("f_tags").value = "";
   y.draft = !!f_draft;
   if (f_upd) {
@@ -970,12 +975,14 @@ function addLinkRow(L={}){
   const isKnown = opts.some(o => o.val && o.val === btnClass) || btnClass === '';
   const selHtml = '<select class="link-class-select">' + opts.map(o => '<option value="'+o.val+'" '+((!btnClass && o.val==='') || (btnClass===o.val)?'selected':'')+'>'+o.lab+'</option>').join('') + '</select>';
   const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':escAttr(btnClass))+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
+  const parsedOrder = parseInt(L.sort_order, 10);
+  const sortValue = Number.isFinite(parsedOrder) ? parsedOrder : 0;
   row.innerHTML = `
     <input type="text" placeholder="Label" class="link-label" value="${escAttr(L.label||'')}">
     <input type="text" placeholder="URL" class="link-href" value="${escAttr(L.href||'')}">
     ${selHtml}
     ${inputHtml}
-    <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}">
+    <input type="number" placeholder="Ordine" class="link-order" value="${sortValue}">
     <label class="muted link-primary-wrap">Primario <input type="checkbox" class="link-primary" ${effectivePrim? 'checked':''}></label>
     <button type="button" class="btn danger link-del">Rimuovi</button>
   `;
@@ -1022,30 +1029,10 @@ function readLinksFromUI(){
 byId('addLinkBtn').onclick = () => addLinkRow({ sort_order: 0, primary: false });
 
 function renderSavedTags(arr){
-  const el = byId('tagsSaved');
-  if (!el) return;
-  el.innerHTML = '';
-  (arr||[]).forEach(t => {
-    const s = document.createElement('span');
-    s.className = 'chip';
-    s.dataset.tag = t;
-    s.innerHTML = `${t} <button type="button" class="x" aria-label="Rimuovi">×</button>`;
-    const btn = s.querySelector('.x');
-    if (btn) btn.onclick = () => { s.remove(); };
-    el.appendChild(s);
-  });
-}
-
-function readTagsChips(){
-  const el = byId('tagsSaved'); if (!el) return [];
-  return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
-}
-
-// Safe alternative for rendering tags without innerHTML
-function renderSavedTagsSafe(arr){
   const el = byId('tagsSaved'); if (!el) return;
   el.innerHTML = '';
-  (arr || []).forEach(t => {
+  const list = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+  list.forEach(t => {
     const s = document.createElement('span');
     s.className = 'chip';
     s.dataset.tag = t;
@@ -1054,16 +1041,17 @@ function renderSavedTagsSafe(arr){
     btn.type = 'button';
     btn.className = 'x';
     btn.setAttribute('aria-label','Rimuovi');
-    btn.textContent = '×';
-    btn.onclick = () => { s.remove(); };
     btn.textContent = 'x';
+    btn.onclick = () => { s.remove(); };
     s.appendChild(btn);
     el.appendChild(s);
   });
 }
 
-// Backward-compat: ensure any legacy call uses safe renderer
-// removed legacy alias: calls use renderSavedTagsSafe directly
+function readTagsChips(){
+  const el = byId('tagsSaved'); if (!el) return [];
+  return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
+}
 /* ====== AVVIO ====== */
 (async function boot(){
   await loadConfig();
@@ -1076,6 +1064,7 @@ function renderSavedTagsSafe(arr){
 </script>
 </body>
 </html>
+
 
 
 
