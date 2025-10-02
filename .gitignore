@@ -17,3 +17,8 @@ dist/
 # OS / temp
 *.log
 *.tmp
+
+# Allow vendored npm assets mirrored for SRI validation
+!static/npm/
+!static/npm/**/
+!static/npm/**/*.js
