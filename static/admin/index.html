@@ -12,19 +12,24 @@
 <div class="wrap">
   <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
   <header>
-    <div class="row">
-      <button id="loginBtn" class="btn primary">🔑 Login con GitHub</button>
-      <button id="logoutBtn" class="btn">🚪 Logout</button>
+    <div class="row" id="authRow">
+      <button id="loginBtn" class="btn primary">Login con GitHub</button>
+      <button id="logoutBtn" class="btn" hidden>Logout</button>
       <span id="who" class="status"></span>
     </div>
-    <div class="row">
-      <button id="newBtn" class="btn">➕ Nuovo item</button>
-      <button id="saveBtn" class="btn primary">💾 Salva</button>
+    <div class="row hidden" id="actionsRow">
+      <button id="newBtn" class="btn">Nuovo item</button>
+      <button id="saveBtn" class="btn primary">Salva</button>
       <span id="saveStatus" class="status"></span>
     </div>
   </header>
 
-  <div class="grid">
+  <div id="lockedOverlay" class="card login-guard">
+    <strong>Accesso richiesto</strong>
+    <p class="muted">Effettua il login con GitHub per utilizzare l'editor.</p>
+  </div>
+
+  <div id="adminMain" class="grid hidden">
     <!-- Lista -->
     <div class="card">
       <div class="row justify-between mb-8">
@@ -467,6 +472,53 @@ function escAttr(s){ return escHtml(s); }
     return DEPLOY_LOCK;
   }
 
+  function setAuthState(isAuthed){
+    const authed = !!isAuthed;
+    if (!authed) setDeployLock(false);
+
+    const loginBtn = byId('loginBtn');
+    if (loginBtn) {
+      loginBtn.hidden = authed;
+      loginBtn.disabled = authed;
+    }
+    const logoutBtn = byId('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.hidden = !authed;
+      logoutBtn.disabled = !authed;
+    }
+
+    const actionsRow = byId('actionsRow');
+    if (actionsRow) actionsRow.classList.toggle('hidden', !authed);
+    const overlay = byId('lockedOverlay');
+    if (overlay) overlay.classList.toggle('hidden', authed);
+    const adminMain = byId('adminMain');
+    if (adminMain) adminMain.classList.toggle('hidden', !authed);
+
+    ['newBtn','saveBtn','deleteBtn','reloadBtn','addLinkBtn'].forEach(id => {
+      const btn = byId(id);
+      if (btn) btn.disabled = !authed;
+    });
+
+    if (adminMain) {
+      adminMain.querySelectorAll('input, textarea, select, button').forEach(el => {
+        el.disabled = !authed;
+      });
+      if (!authed) {
+        adminMain.querySelectorAll('input[type="text"], input[type="date"], input[type="datetime-local"], textarea').forEach(el => { el.value = ''; });
+        adminMain.querySelectorAll('input[type="checkbox"]').forEach(el => { el.checked = false; });
+        adminMain.querySelectorAll('select').forEach(el => { el.selectedIndex = -1; });
+      }
+    }
+
+    if (!authed) {
+      if (fileInfo) fileInfo.textContent = '';
+      if (listEl) listEl.innerHTML = '';
+      updateDeployStatus('');
+      const raw = byId('f_raw');
+      if (raw) raw.value = '';
+    }
+  }
+
   // Build/deploy notice helpers
   function showNotice(msg){ const n = byId('buildNotice'); if (!n) return; n.classList.remove('hidden'); const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
   function updateNotice(msg){ const n = byId('buildNotice'); if (!n) return; const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
@@ -486,7 +538,8 @@ function escAttr(s){ return escHtml(s); }
 
 function setWho(user){
   const el = byId("who");
-  el.textContent = user ? `Autenticato come ${user.login}` : "Non autenticato";
+  if (el) el.textContent = user ? `Autenticato come ${user.login}` : "Non autenticato";
+  setAuthState(!!user);
 }
 async function fetchMe(){
   if (!TOKEN) return null;
@@ -527,7 +580,14 @@ window.addEventListener("message", async (e) => {
   }
   const me = await fetchMe();
   setWho(me);
-  await loadList();
+  if (me) {
+    await loadList();
+  } else {
+    TOKEN = "";
+    try { sessionStorage.removeItem('gh_token'); } catch(_){ }
+    try { localStorage.removeItem('gh_token'); } catch(_){ }
+    alert('Autenticazione fallita. Riprova.');
+  }
 });
 
 /* ====== UPLOAD ASSET (THUMB) ====== */
@@ -654,6 +714,10 @@ if (btnBrowseCard && cardBrowser && fCard) {
 /* ====== CARICAMENTO LISTA FILE ====== */
 let CURRENT_DIR = null;
 async function loadList(path){
+  if (!TOKEN) {
+    listEl.innerHTML = '';
+    return;
+  }
   if (path) CURRENT_DIR = path; else CURRENT_DIR = CURRENT_DIR || FOLDER;
   listEl.innerHTML = "";
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT_DIR}?ref=${encodeURIComponent(BRANCH)}`;
@@ -818,16 +882,41 @@ byId("newBtn").onclick = () => {
 
 /* ====== ELIMINA ====== */
 byId("deleteBtn").onclick = async () => {
+  if (isDeployLocked()) {
+    alert("E' in corso un deploy precedente. Attendi il completamento prima di eliminare.");
+    return;
+  }
   if (!CURRENT || !CURRENT.path) return alert("Nessun file aperto.");
   if (!confirm(`Eliminare ${CURRENT.path}?`)) return;
+  setDeployLock(true, 'Eliminazione in corso...');
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
   const body = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
-  const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
-  if (!r.ok) { alert("Errore eliminazione: " + r.status); return; }
-  saveStatus.textContent = "File eliminato.";
-  CURRENT = null;
-  await loadList();
-  fillForm({}, "", "—");
+  try {
+    const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      throw new Error(`Errore eliminazione: ${r.status} - ${t}`);
+    }
+    saveStatus.textContent = "File eliminato.";
+    CURRENT = null;
+    await loadList();
+    fillForm({}, "", "-");
+    try { await resetSiteCaches(); } catch(_){ }
+    updateDeployStatus('Deploy in corso...');
+    const ok = await monitorDeployAndReload().catch(()=>false);
+    if (ok) {
+      updateDeployStatus('Deploy completato');
+    } else {
+      updateDeployStatus('Deploy non confermato, ricarico...');
+      const urlReload = new URL(window.location.href);
+      urlReload.searchParams.set('t', String(Date.now()));
+      window.location.replace(urlReload.toString());
+    }
+  } catch (err) {
+    alert(err && err.message ? err.message : err);
+  } finally {
+    setDeployLock(false);
+  }
 };
 
 /* ====== SALVA (PATCH) ====== */
@@ -1126,10 +1215,17 @@ function readTagsChips(){
 (async function boot(){
   await loadConfig();
   if (TOKEN) {
-    const me = await fetchMe();
-    setWho(me);
+    const me = await fetchMe().catch(() => null);
+    if (me) {
+      setWho(me);
+      await loadList();
+      return;
+    }
+    try { sessionStorage.removeItem('gh_token'); } catch(_){ }
+    try { localStorage.removeItem('gh_token'); } catch(_){ }
+    TOKEN = "";
   }
-  await loadList();
+  setWho(null);
 })();
 </script>
 </body>

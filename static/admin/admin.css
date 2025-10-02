@@ -96,6 +96,17 @@ header{
 }
 .card--row{ padding:var(--s-8) }
 
+.login-guard{
+  margin-top:var(--s-16);
+  padding:var(--s-24);
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:var(--s-8);
+  align-items:center;
+}
+.login-guard p{ margin:0; color:var(--muted); }
+
 .grid{
   display:grid;
   grid-template-columns:280px minmax(0,1fr);
