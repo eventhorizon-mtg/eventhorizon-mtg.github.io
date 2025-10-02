@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Admin · Mini Editor (Hugo + GitHub)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="stylesheet" href="admin.css">
 
 </head>
@@ -144,7 +143,7 @@
 </div>
 
 <!-- YAML parser -->
-<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" integrity="sha256-Rdw90D3AegZwWiwpibjH9wkBPwS9U4bjJ51ORH8H69c=" crossorigin="anonymous"></script>
 <script>
 /* ====== CONFIGURAZIONE ====== */
 let OWNER = "eventhorizon-mtg";
@@ -199,7 +198,12 @@ async function loadConfig() {
         if (old) {
           const sel = document.createElement("select");
           sel.id = "f_kind";
-          sel.innerHTML = kindOpts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+          for (const o of kindOpts) {
+            const opt = document.createElement('option');
+            opt.value = String(o.value ?? '');
+            opt.textContent = String(o.label ?? '');
+            sel.appendChild(opt);
+          }
           old.parentNode.replaceChild(sel, old);
         }
       }
@@ -210,7 +214,10 @@ async function loadConfig() {
 }
 
 /* ====== STATO ====== */
-let TOKEN = localStorage.getItem("gh_token") || "";
+let TOKEN = (typeof sessionStorage!=="undefined" && sessionStorage.getItem("gh_token"))
+  || (typeof localStorage!=="undefined" && localStorage.getItem("gh_token"))
+  || "";
+let OAUTH_POPUP = null;
 let CURRENT = null; // {path, sha, yaml}
 
 /* ====== UTILS ====== */
@@ -368,8 +375,15 @@ function renderAssetBrowser(container, items, targetInput){
   for (const it of items){
     const a = document.createElement('div');
     a.className = 'asset';
-    a.innerHTML = `<img src="${it.publicUrl}" alt="${it.name}"><small class="meta">${it.name}</small>`;
-    a.onclick = () => { targetInput.value = it.publicUrl; container.classList.add('hidden'); };
+    const img = document.createElement('img');
+    img.src = String(it.publicUrl || '');
+    img.alt = String(it.name || '');
+    const meta = document.createElement('small');
+    meta.className = 'meta';
+    meta.textContent = String(it.name || '');
+    a.appendChild(img);
+    a.appendChild(meta);
+    a.onclick = () => { targetInput.value = String(it.publicUrl || ''); container.classList.add('hidden'); };
     wrap.appendChild(a);
   }
   container.appendChild(wrap);
@@ -378,6 +392,16 @@ function renderAssetBrowser(container, items, targetInput){
 const byId = id => document.getElementById(id);
 const kebab = s => String(s||"").toLowerCase().trim()
   .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+// Escaping helpers to reduce XSS risk where innerHTML is used
+function escHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/\"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function escAttr(s){ return escHtml(s); }
 
 /* ====== UI HOOKS ====== */
   const listEl = byId("list");
@@ -428,10 +452,11 @@ async function fetchMe(){
 byId("loginBtn").onclick = () => {
   const origin = location.origin;
   const url = `${WORKER_BASE}/${AUTH_ENDPOINT}?origin=${encodeURIComponent(origin)}&scope=repo${APP_ID?`&client_id=${encodeURIComponent(APP_ID)}`:""}`;
-  window.open(url, "oauth", "width=980,height=720");
+  OAUTH_POPUP = window.open(url, "oauth", "width=980,height=720,noopener,noreferrer");
 };
 byId("logoutBtn").onclick = () => {
-  localStorage.removeItem("gh_token");
+  try { sessionStorage.removeItem("gh_token"); } catch(_){ }
+  try { localStorage.removeItem("gh_token"); } catch(_){ }
   TOKEN = "";
   setWho(null);
   alert("Logout eseguito.");
@@ -442,10 +467,12 @@ window.addEventListener("message", async (e) => {
   try { if (new URL(e.origin).origin !== WORKER_ORIGIN) return; } catch(_) { return; }
   if (typeof e.data !== "string") return;
   if (!e.data.startsWith("authorization:github:success:")) return;
+  if (OAUTH_POPUP && e.source !== OAUTH_POPUP) return;
   const tok = e.data.slice("authorization:github:success:".length);
   if (!tok) return;
   TOKEN = tok;
-  localStorage.setItem("gh_token", TOKEN);
+  try { sessionStorage.setItem("gh_token", TOKEN); } catch(_){ }
+  try { localStorage.removeItem("gh_token"); } catch(_){ }
   const me = await fetchMe();
   setWho(me);
   await loadList();
@@ -580,14 +607,23 @@ async function loadList(path){
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT_DIR}?ref=${encodeURIComponent(BRANCH)}`;
   const r = await gh(url);
   if (!r.ok) {
-    listEl.innerHTML = `<div class="muted">Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.</div>`;
+    const msg = document.createElement('div');
+    msg.className = 'muted';
+    msg.textContent = `Impossibile leggere la cartella (${r.status}). Verifica token/permessi/branch.`;
+    listEl.appendChild(msg);
     return;
   }
   const items = await r.json();
   if (CURRENT_DIR !== FOLDER) {
     const up = document.createElement('div');
     up.className = 'item item--dir';
-    up.innerHTML = `<strong>..</strong><span class="meta">Torna su</span>`;
+    const st = document.createElement('strong');
+    st.textContent = '..';
+    const sp = document.createElement('span');
+    sp.className = 'meta';
+    sp.textContent = 'Torna su';
+    up.appendChild(st);
+    up.appendChild(sp);
     up.onclick = () => {
       const p = CURRENT_DIR.replace(/\\/g,'/');
       const i = p.lastIndexOf('/');
@@ -601,7 +637,15 @@ async function loadList(path){
   dirs.forEach((d) => {
     const div = document.createElement('div');
     div.className = 'item item--dir';
-    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${d.name}</strong><span class="meta">${d.path}</span>`;
+    const strong = document.createElement('strong');
+    strong.style.fontWeight = '600';
+    strong.style.fontSize = '13px';
+    strong.textContent = String(d.name || '');
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = String(d.path || '');
+    div.appendChild(strong);
+    div.appendChild(meta);
     div.onclick = () => loadList(d.path);
     listEl.appendChild(div);
   });
@@ -630,7 +674,15 @@ async function loadList(path){
     const f = m.f;
     const div = document.createElement('div');
     div.className = 'item' + (m.draft ? ' is-draft' : '');
-    div.innerHTML = `<strong style="font-weight:600;font-size:13px">${f.name}</strong><span class="meta">${f.path}</span>`;
+    const strong = document.createElement('strong');
+    strong.style.fontWeight = '600';
+    strong.style.fontSize = '13px';
+    strong.textContent = String(f.name || '');
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = String(f.path || '');
+    div.appendChild(strong);
+    div.appendChild(meta);
     div.onclick = () => openFile(f.path);
     if (m.draft) { const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft'; div.appendChild(s); }
     listEl.appendChild(div);
@@ -678,7 +730,7 @@ function fillForm(y, raw, path){
     }
     if (badge) { badge.textContent = 'Draft'; badge.hidden = !y.draft; }
   })();
-  renderSavedTags(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
+  renderSavedTagsSafe(Array.isArray(y.tags) ? y.tags : (y.tags ? [y.tags] : []));
   if (y.updated) {
     try {
       const d = new Date(y.updated);
@@ -770,7 +822,7 @@ byId("saveBtn").onclick = async () => {
     : [];
   const set = new Set([...(chipTags||[]), ...inputTags]);
   y.tags = Array.from(set);
-  renderSavedTags(y.tags);
+  renderSavedTagsSafe(y.tags);
   byId("f_tags").value = "";
   y.draft = !!f_draft;
   if (f_upd) {
@@ -781,14 +833,13 @@ byId("saveBtn").onclick = async () => {
   y.links = readLinksFromUI();
 
   // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
-  let slug = f_slug || y.slug || kebab(y.title || "");
+  let slug = kebab(f_slug || y.slug || (y.title || ""));
   if (!y.title) return alert("Titolo obbligatorio");
   if (!slug) return alert("Slug obbligatorio");
   y.slug = slug;
 
   // 4) Serializza di nuovo (così f_raw riflette l’oggetto finale)
-  const content = jsyaml.dump(y);
-  byId("f_raw").value = content;
+  // will compute content after asset uploads
 
   // 5) Path target: consenti rinomina file se cambi lo slug
   const newPath = `${FOLDER}/${slug}.${EXT}`;
@@ -819,6 +870,10 @@ byId("saveBtn").onclick = async () => {
       return;
     }
   }
+  // 4b) Ora serializza (f_raw riflette l'oggetto finale)
+  const content = jsyaml.dump(y);
+  byId("f_raw").value = content;
+
 // 6) Salva via GitHub API (create-or-update robusto)
   async function putFileSmart(path, shaMaybe) {
     const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
@@ -914,10 +969,10 @@ function addLinkRow(L={}){
   btnClass = btnClass.replace(/\bprimary\b/g,'').replace(/\s{2,}/g,' ').trim();
   const isKnown = opts.some(o => o.val && o.val === btnClass) || btnClass === '';
   const selHtml = '<select class="link-class-select">' + opts.map(o => '<option value="'+o.val+'" '+((!btnClass && o.val==='') || (btnClass===o.val)?'selected':'')+'>'+o.lab+'</option>').join('') + '</select>';
-  const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':btnClass)+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
+  const inputHtml = '<input type="text" placeholder="Classe custom" class="link-class" value="'+(isKnown?'':escAttr(btnClass))+'" style="'+((btnClass && !isKnown)?'':'display:none')+'">';
   row.innerHTML = `
-    <input type="text" placeholder="Label" class="link-label" value="${(L.label||'').replace(/"/g,'&quot;')}">
-    <input type="text" placeholder="URL" class="link-href" value="${(L.href||'').replace(/"/g,'&quot;')}">
+    <input type="text" placeholder="Label" class="link-label" value="${escAttr(L.label||'')}">
+    <input type="text" placeholder="URL" class="link-href" value="${escAttr(L.href||'')}">
     ${selHtml}
     ${inputHtml}
     <input type="number" placeholder="Ordine" class="link-order" value="${Number(L.sort_order||0)}">
@@ -986,6 +1041,29 @@ function readTagsChips(){
   return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
 }
 
+// Safe alternative for rendering tags without innerHTML
+function renderSavedTagsSafe(arr){
+  const el = byId('tagsSaved'); if (!el) return;
+  el.innerHTML = '';
+  (arr || []).forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'chip';
+    s.dataset.tag = t;
+    s.textContent = String(t) + ' ';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'x';
+    btn.setAttribute('aria-label','Rimuovi');
+    btn.textContent = '×';
+    btn.onclick = () => { s.remove(); };
+    btn.textContent = 'x';
+    s.appendChild(btn);
+    el.appendChild(s);
+  });
+}
+
+// Backward-compat: ensure any legacy call uses safe renderer
+// removed legacy alias: calls use renderSavedTagsSafe directly
 /* ====== AVVIO ====== */
 (async function boot(){
   await loadConfig();
