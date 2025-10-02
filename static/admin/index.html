@@ -328,6 +328,16 @@ async function getPagesLatest(){
 async function monitorDeployAndReload(){
   showNotice('Build/deploy avviato…');
   const start = Date.now();
+  let autoReloaded = false;
+  const autoReloadTimer = setTimeout(() => {
+    autoReloaded = true;
+    try { updateNotice('Aggiornamento automatico in corso...'); } catch(_){ }
+    hideNotice();
+    const url = new URL(window.location.href);
+    url.searchParams.set('t', String(Date.now()));
+    window.location.replace(url.toString());
+  }, 40000);
+  const cancelAutoReload = () => { if (!autoReloaded) clearTimeout(autoReloadTimer); };
   let baseLatest = null;
   try { baseLatest = await getPagesLatest(); } catch(_) {}
   const baseTime = baseLatest ? (Date.parse(baseLatest.updated_at||'') || 0) : 0;
@@ -337,6 +347,7 @@ async function monitorDeployAndReload(){
   if (!baseTime && !baseLatest) {
     updateNotice('Attesa nuova versione del sito…');
     const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
+    cancelAutoReload();
     hideNotice();
     return ok;
   }
@@ -352,10 +363,12 @@ async function monitorDeployAndReload(){
       if (changed && /built/i.test(status)) {
         updateNotice('Build completata, finalizzo deploy…');
         const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
+        cancelAutoReload();
         hideNotice();
         return ok;
       }
       if (changed && /error/i.test(status)) {
+        cancelAutoReload();
         hideNotice();
         alert('Build GitHub Pages fallita. Controlla i log di Pages/Actions.');
         return false;
@@ -365,6 +378,7 @@ async function monitorDeployAndReload(){
     updateNotice(`Stato build: ${status} — ${secs}s`);
     await sleep(2000);
   }
+  cancelAutoReload();
   hideNotice();
   return false;
 }
