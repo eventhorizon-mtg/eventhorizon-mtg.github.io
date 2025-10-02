@@ -218,6 +218,7 @@ let TOKEN = (typeof sessionStorage!=="undefined" && sessionStorage.getItem("gh_t
   || (typeof localStorage!=="undefined" && localStorage.getItem("gh_token"))
   || "";
 let OAUTH_POPUP = null;
+let DEPLOY_LOCK = false;
 let CURRENT = null; // {path, sha, yaml}
 
 /* ====== UTILS ====== */
@@ -419,6 +420,38 @@ function escAttr(s){ return escHtml(s); }
   const btnBrowseCard = byId("btnBrowseCard");
   const cardBrowser = byId("cardBrowser");
   const fCard = byId("f_card");
+
+  function toggleLockOnButton(id, state){
+    const btn = byId(id);
+    if (!btn) return;
+    if (state) {
+      if (btn.getAttribute('data-lock-active') === '1') return;
+      btn.setAttribute('data-lock-prev', btn.disabled ? '1' : '0');
+      btn.disabled = true;
+      btn.setAttribute('data-lock-active', '1');
+      btn.setAttribute('aria-busy', 'true');
+    } else if (btn.getAttribute('data-lock-active') === '1') {
+      const prev = btn.getAttribute('data-lock-prev') === '1';
+      btn.disabled = prev;
+      btn.removeAttribute('data-lock-active');
+      btn.removeAttribute('data-lock-prev');
+      btn.removeAttribute('aria-busy');
+    }
+  }
+
+  function updateDeployStatus(message){
+    if (saveStatus) saveStatus.textContent = message || '';
+  }
+
+  function setDeployLock(state, message){
+    DEPLOY_LOCK = !!state;
+    ['saveBtn','deleteBtn','newBtn'].forEach(id => toggleLockOnButton(id, state));
+    if (typeof message === 'string') updateDeployStatus(message);
+  }
+
+  function isDeployLocked(){
+    return DEPLOY_LOCK;
+  }
 
   // Build/deploy notice helpers
   function showNotice(msg){ const n = byId('buildNotice'); if (!n) return; n.classList.remove('hidden'); const m = n.querySelector('.msg'); if (m) m.textContent = String(msg||''); }
@@ -785,175 +818,198 @@ byId("deleteBtn").onclick = async () => {
 
 /* ====== SALVA (PATCH) ====== */
 byId("saveBtn").onclick = async () => {
+  if (isDeployLocked()) {
+    alert("E' in corso un deploy precedente. Attendi il completamento prima di salvare nuovamente.");
+    return;
+  }
   if (!TOKEN) { alert("Prima fai login."); return; }
 
-  // 1) Parti SEMPRE dal YAML attuale (così non perdi proprietà non mappate nel form)
-  let y = {};
+  let lockAcquired = false;
   try {
-    const raw = byId("f_raw").value.trim();
-    y = raw ? (jsyaml.load(raw) || {}) : {};
-  } catch (e) {
-    return alert("YAML non valido: " + e.message);
-  }
+    setDeployLock(true, 'Preparazione salvataggio...');
+    lockAcquired = true;
 
-  // 2) Unisci i campi del form (se valorizzati) senza azzerare chiavi esistenti
-  const f_date = byId("f_date").value;
-  const f_title = byId("f_title").value;
-  const f_slug  = byId("f_slug").value;
-  const f_kind  = byId("f_kind").value;
-  const f_over  = byId("f_overline").value;
-  const f_auth  = byId("f_author").value;
-  const f_desc  = byId("f_desc").value;
-  const f_id    = byId("f_id").value;
-  const f_thumb = byId("f_thumb").value;
-  const f_card  = byId("f_card").value;
-  const f_tags  = byId("f_tags").value;
-  const f_draft = byId("f_draft").checked;
-  const f_upd   = byId("f_updated").value;
+    // 1) Parti SEMPRE dal YAML attuale (cosi non perdi proprieta non mappate nel form)
+    let y = {};
+    try {
+      const raw = byId("f_raw").value.trim();
+      y = raw ? (jsyaml.load(raw) || {}) : {};
+    } catch (e) {
+      updateDeployStatus('Errore: YAML non valido');
+      alert("YAML non valido: " + e.message);
+      return;
+    }
 
-  if (f_date) y.date = f_date;
-  if (f_title) y.title = f_title;
-  if (f_kind) y.kind = f_kind;
-  if (f_over) y.overline = f_over;
-  if (f_auth) y.author = f_auth;
-  if (typeof f_desc === 'string') y.desc = f_desc; // consenti stringa vuota per cancellare la descrizione
-  if (f_id) y.id = f_id; else delete y.id;
-  if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
-  if (typeof f_card === 'string') y.card = f_card || undefined;
-  // Tags: unisci chip salvate + input corrente (poi pulisci input)
-  const chipTags = readTagsChips();
-  const inputTags = (typeof f_tags === 'string')
-    ? f_tags.split(',').map(s => s.trim()).filter(Boolean)
-    : [];
-  const set = new Set([...(chipTags||[]), ...inputTags]);
-  y.tags = Array.from(set);
-  renderSavedTags(y.tags);
-  byId("f_tags").value = "";
-  y.draft = !!f_draft;
-  if (f_upd) {
-    try { y.updated = new Date(f_upd).toISOString(); } catch(_) {}
-  }
+    // 2) Unisci i campi del form (se valorizzati) senza azzerare chiavi esistenti
+    const f_date = byId("f_date").value;
+    const f_title = byId("f_title").value;
+    const f_slug  = byId("f_slug").value;
+    const f_kind  = byId("f_kind").value;
+    const f_over  = byId("f_overline").value;
+    const f_auth  = byId("f_author").value;
+    const f_desc  = byId("f_desc").value;
+    const f_id    = byId("f_id").value;
+    const f_thumb = byId("f_thumb").value;
+    const f_card  = byId("f_card").value;
+    const f_tags  = byId("f_tags").value;
+    const f_draft = byId("f_draft").checked;
+    const f_upd   = byId("f_updated").value;
 
-  // Links from UI
-  y.links = readLinksFromUI();
+    if (f_date) y.date = f_date;
+    if (f_title) y.title = f_title;
+    if (f_kind) y.kind = f_kind;
+    if (f_over) y.overline = f_over;
+    if (f_auth) y.author = f_auth;
+    if (typeof f_desc === 'string') y.desc = f_desc;
+    if (f_id) y.id = f_id; else delete y.id;
+    if (typeof f_thumb === 'string') y.thumb = f_thumb || undefined;
+    if (typeof f_card === 'string') y.card = f_card || undefined;
+    const chipTags = readTagsChips();
+    const inputTags = (typeof f_tags === 'string')
+      ? f_tags.split(',').map(s => s.trim()).filter(Boolean)
+      : [];
+    const set = new Set([...(chipTags||[]), ...inputTags]);
+    y.tags = Array.from(set);
+    renderSavedTags(y.tags);
+    byId("f_tags").value = "";
+    y.draft = !!f_draft;
+    if (f_upd) {
+      try { y.updated = new Date(f_upd).toISOString(); } catch(_) {}
+    }
 
-  // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
-  let slug = kebab(f_slug || y.slug || (y.title || ""));
-  if (!y.title) return alert("Titolo obbligatorio");
-  if (!slug) return alert("Slug obbligatorio");
-  y.slug = slug;
+    // Links from UI
+    y.links = readLinksFromUI();
 
-  // 4) Serializza di nuovo (così f_raw riflette l’oggetto finale)
-  // will compute content after asset uploads
+    // 3) Slug: se non dato, genera dal titolo o mantieni l'esistente
+    let slug = kebab(f_slug || y.slug || (y.title || ""));
+    if (!y.title) {
+      updateDeployStatus('Titolo obbligatorio');
+      return alert("Titolo obbligatorio");
+    }
+    if (!slug) {
+      updateDeployStatus('Slug obbligatorio');
+      return alert("Slug obbligatorio");
+    }
+    y.slug = slug;
 
-  // 5) Path target: consenti rinomina file se cambi lo slug
-  const newPath = `${FOLDER}/${slug}.${EXT}`;
-  const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
+    // 5) Path target: consenti rinomina file se cambi lo slug
+    const newPath = `${FOLDER}/${slug}.${EXT}`;
+    const isRename = CURRENT && CURRENT.path && CURRENT.path !== newPath;
 
     // 5.1) Carica eventuali immagini in coda (prima di salvare YAML)
-  if (PENDING.thumb) {
-    try {
-      const res = await uploadAssetFileToPath(PENDING.thumb.file, PENDING.thumb.path);
-      byId('f_thumb').value = res.publicUrl;
-      y.thumb = res.publicUrl;
-      PENDING.thumb = null;
-      if (saveStatus) saveStatus.textContent = 'Thumb caricata';
-    } catch(e) {
-      alert('Upload thumb fallito: '+(e && e.message || e));
-      return;
-    }
-  }
-  if (PENDING.card) {
-    try {
-      const res = await uploadAssetFileToPath(PENDING.card.file, PENDING.card.path);
-      byId('f_card').value = res.publicUrl;
-      y.card = res.publicUrl;
-      PENDING.card = null;
-      if (saveStatus) saveStatus.textContent = 'Card caricata';
-    } catch(e) {
-      alert('Upload card fallito: '+(e && e.message || e));
-      return;
-    }
-  }
-  // 4b) Ora serializza (f_raw riflette l'oggetto finale)
-  const content = jsyaml.dump(y);
-  byId("f_raw").value = content;
-
-// 6) Salva via GitHub API (create-or-update robusto)
-  async function putFileSmart(path, shaMaybe) {
-    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-    const mkBody = (sha) => JSON.stringify({
-      message: `chore(admin): ${sha ? 'update' : 'create'} ${path}`,
-      content: b64.enc(content),
-      branch: BRANCH,
-      ...(sha ? { sha } : {})
-    });
-
-    // Se abbiamo già la SHA la usiamo direttamente
-    if (shaMaybe) {
-      return gh(url, { method: 'PUT', body: mkBody(shaMaybe) });
-    }
-
-    // Tenta create, se esiste fallback a update ottenendo sha
-    let r = await gh(url, { method: 'PUT', body: mkBody(null) });
-    if (r.status === 422) {
-      const g = await gh(url);
-      if (g.ok) {
-        const j = await g.json();
-        r = await gh(url, { method: 'PUT', body: mkBody(j.sha) });
+    if (PENDING.thumb) {
+      updateDeployStatus('Caricamento thumb...');
+      try {
+        const res = await uploadAssetFileToPath(PENDING.thumb.file, PENDING.thumb.path);
+        byId('f_thumb').value = res.publicUrl;
+        y.thumb = res.publicUrl;
+        PENDING.thumb = null;
+        updateDeployStatus('Thumb caricata');
+      } catch(e) {
+        updateDeployStatus('Upload thumb fallito');
+        alert('Upload thumb fallito: '+(e && e.message || e));
+        return;
       }
     }
-    return r;
-  }
-
-  // Se è rinomina: crea nuovo file, poi (se vuoi) elimina il vecchio
-  if (isRename) {
-    // Crea nuovo o aggiorna se già esiste
-    let r = await putFileSmart(newPath, null);
-    if (!r.ok) {
-      const t = await r.text().catch(()=>String(r.status));
-      return alert("Errore creazione nuovo file: " + r.status + " – " + t);
-    }
-    const newRes = await r.json();
-    // Elimina il vecchio file
-    if (CURRENT && CURRENT.sha) {
-      const delUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
-      const delBody = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
-      const del = await gh(delUrl, { method: "DELETE", body: JSON.stringify(delBody) });
-      if (!del.ok) {
-        const t = await del.text().catch(()=>String(del.status));
-        alert("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " — " + t);
+    if (PENDING.card) {
+      updateDeployStatus('Caricamento card...');
+      try {
+        const res = await uploadAssetFileToPath(PENDING.card.file, PENDING.card.path);
+        byId('f_card').value = res.publicUrl;
+        y.card = res.publicUrl;
+        PENDING.card = null;
+        updateDeployStatus('Card caricata');
+      } catch(e) {
+        updateDeployStatus('Upload card fallito');
+        alert('Upload card fallito: '+(e && e.message || e));
+        return;
       }
     }
-    saveStatus.textContent = "Salvato (rinominato) ✓";
-    CURRENT = { path: newPath, sha: newRes.content.sha, yaml: y };
-    fileInfo.textContent = newPath;
-  } else {
-    // Update o create sul path corrente
-    const sha = CURRENT ? CURRENT.sha : null;
-    let r = await putFileSmart(newPath, sha || null);
-    if (!r.ok) {
-      const t = await r.text().catch(()=>String(r.status));
-      return alert("Errore salvataggio: " + r.status + " – " + t);
-    }
-    const j = await r.json();
-    saveStatus.textContent = "Salvato ✓";
-    CURRENT = { path: newPath, sha: j.content.sha, yaml: y };
-    fileInfo.textContent = newPath;
-  }
+    // 4b) Ora serializza (f_raw riflette l'oggetto finale)
+    const content = jsyaml.dump(y);
+    byId("f_raw").value = content;
 
-  // 7) Ricarica lista e bust cache dell'app
-  await loadList();
-  try { await resetSiteCaches(); } catch(_){ }
-  // Monitora build/deploy e ricarica
-  const ok = await monitorDeployAndReload().catch(()=>false);
-  if (!ok) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('t', String(Date.now()));
-    window.location.replace(url.toString());
+    updateDeployStatus('Salvataggio file in corso...');
+
+    // 6) Salva via GitHub API (create-or-update robusto)
+    async function putFileSmart(path, shaMaybe) {
+      const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+      const mkBody = (sha) => JSON.stringify({
+        message: `chore(admin): ${sha ? 'update' : 'create'} ${path}`,
+        content: b64.enc(content),
+        branch: BRANCH,
+        ...(sha ? { sha } : {})
+      });
+
+      if (shaMaybe) {
+        return gh(url, { method: 'PUT', body: mkBody(shaMaybe) });
+      }
+
+      let r = await gh(url, { method: 'PUT', body: mkBody(null) });
+      if (r.status === 422) {
+        const g = await gh(url);
+        if (g.ok) {
+          const j = await g.json();
+          r = await gh(url, { method: 'PUT', body: mkBody(j.sha) });
+        }
+      }
+      return r;
+    }
+
+    if (isRename) {
+      let r = await putFileSmart(newPath, null);
+      if (!r.ok) {
+        updateDeployStatus('Errore salvataggio');
+        const t = await r.text().catch(()=>String(r.status));
+        alert("Errore creazione nuovo file: " + r.status + " - " + t);
+        return;
+      }
+      const newRes = await r.json();
+      if (CURRENT && CURRENT.sha) {
+        const delUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
+        const delBody = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
+        const del = await gh(delUrl, { method: "DELETE", body: JSON.stringify(delBody) });
+        if (!del.ok) {
+          const t = await del.text().catch(()=>String(del.status));
+          alert("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " - " + t);
+        }
+      }
+      updateDeployStatus('Salvato (rinominato)');
+      CURRENT = { path: newPath, sha: newRes.content.sha, yaml: y };
+      fileInfo.textContent = newPath;
+    } else {
+      const sha = CURRENT ? CURRENT.sha : null;
+      let r = await putFileSmart(newPath, sha || null);
+      if (!r.ok) {
+        updateDeployStatus('Errore salvataggio');
+        const t = await r.text().catch(()=>String(r.status));
+        alert("Errore salvataggio: " + r.status + " - " + t);
+        return;
+      }
+      const j = await r.json();
+      updateDeployStatus('Salvato');
+      CURRENT = { path: newPath, sha: j.content.sha, yaml: y };
+      fileInfo.textContent = newPath;
+    }
+
+    updateDeployStatus('Aggiornamento locale...');
+    await loadList();
+    try { await resetSiteCaches(); } catch(_){ }
+
+    updateDeployStatus('Deploy in corso...');
+    const ok = await monitorDeployAndReload().catch(()=>false);
+    if (ok) {
+      updateDeployStatus('Deploy completato');
+    } else {
+      updateDeployStatus('Deploy non confermato, ricarico...');
+      const url = new URL(window.location.href);
+      url.searchParams.set('t', String(Date.now()));
+      window.location.replace(url.toString());
+    }
+  } finally {
+    if (lockAcquired) setDeployLock(false);
   }
 };
-
 /* ====== LINKS UI ====== */
 function addLinkRow(L={}){
   const row = document.createElement('div');
@@ -1064,6 +1120,7 @@ function readTagsChips(){
 </script>
 </body>
 </html>
+
 
 
 
