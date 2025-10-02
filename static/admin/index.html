@@ -452,7 +452,7 @@ async function fetchMe(){
 byId("loginBtn").onclick = () => {
   const origin = location.origin;
   const url = `${WORKER_BASE}/${AUTH_ENDPOINT}?origin=${encodeURIComponent(origin)}&scope=repo${APP_ID?`&client_id=${encodeURIComponent(APP_ID)}`:""}`;
-  OAUTH_POPUP = window.open(url, "oauth", "width=980,height=720,noopener,noreferrer");
+  OAUTH_POPUP = window.open(url, "oauth", "width=980,height=720"); // necessario mantenere opener per ricevere postMessage
 };
 byId("logoutBtn").onclick = () => {
   try { sessionStorage.removeItem("gh_token"); } catch(_){ }
@@ -1064,6 +1064,8 @@ function readTagsChips(){
 </script>
 </body>
 </html>
+
+
 
 
 
