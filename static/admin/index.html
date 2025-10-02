@@ -105,15 +105,19 @@
           <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
           <div id="tagsSaved" class="tags-saved mt-8"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:20px">
-          <label for="f_draft" style="margin:0">Bozza</label>
-          <input id="f_draft" type="checkbox" />
-          <label for="f_updated" style="margin-left:14px">Aggiornato</label>
-          <input id="f_updated" type="datetime-local" />
-        </div>
+    <div class="switch-row">
+      <div class="switch-pair">
+        <label for="f_draft">Bozza</label>
+        <input id="f_draft" type="checkbox" />
       </div>
+      <div class="switch-pair">
+        <label for="f_updated">Aggiornato</label>
+        <input id="f_updated" type="datetime-local" />
+      </div>
+    </div>
+  </div>
 
-      <div class="mt-8">
+  <div class="mt-8">
         <label>Immagine Card (home)</label>
         <div class="row align-center gap-8">
           <input id="f_card" type="text" placeholder="/images/cards/... oppure URL" />
@@ -319,6 +323,11 @@ async function resetSiteCaches(){
     ]);
   } catch(_) {}
   try { localStorage.setItem('site_cache_bust', String(stamp)); } catch(_) {}
+  try {
+    if (typeof loadList === 'function' && TOKEN) {
+      await loadList();
+    }
+  } catch(_){ }
 }
 
 // Legge una 'versione' dalla home per rilevare la nuova build

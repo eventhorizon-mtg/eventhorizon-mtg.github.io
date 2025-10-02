@@ -105,6 +105,22 @@ header{
   gap:var(--s-8);
   align-items:center;
 }
+
+.switch-row{
+  display:flex;
+  gap:var(--s-16);
+  margin-top:0;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+.switch-pair{
+  display:flex;
+  flex-direction:column;
+  gap:var(--s-8);
+  min-width:140px;
+}
+.switch-pair label{ margin:0; }
+.switch-pair input[type="checkbox"]{ width:18px; height:18px; }
 .login-guard p{ margin:0; color:var(--muted); }
 
 .grid{
@@ -501,4 +517,3 @@ textarea{
   .list{ max-height:none; padding-bottom:var(--s-8) }
   textarea{ height:200px }
 }
-
