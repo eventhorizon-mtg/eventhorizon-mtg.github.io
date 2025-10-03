@@ -283,6 +283,7 @@ textarea{
   font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 .textarea--sm{ height:200px }
+.textarea--lg{ height:360px }
 
 /* Due colonne */
 .two{
@@ -337,6 +338,19 @@ textarea{
   transition:filter var(--t-fast), transform var(--t-fast), background-color var(--t-base), border-color var(--t-base), box-shadow var(--t-base);
   user-select:none;
   line-height:1;
+}
+.btn.btn-tab{
+  background:transparent;
+  border-color:var(--border);
+  color:#cfe3ff;
+}
+.btn.btn-tab.active{
+  background:var(--acc);
+  border-color:var(--acc);
+  color:#fff;
+}
+.btn.btn-tab:not(.active):hover{
+  background:rgba(98,107,160,0.18);
 }
 .btn:hover{ filter:brightness(1.08) }
 .btn:active{ transform:translateY(1px) }

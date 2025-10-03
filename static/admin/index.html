@@ -3,19 +3,23 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin · Mini Editor (Hugo + GitHub)</title>
+<title>Admin Â· Mini Editor (Hugo + GitHub)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="admin.css">
 
 </head>
 <body>
 <div class="wrap">
-  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
+  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corsoâ€¦</span></div>
   <header>
     <div class="row" id="authRow">
       <button id="loginBtn" class="btn primary">Login con GitHub</button>
       <button id="logoutBtn" class="btn" hidden>Logout</button>
       <span id="who" class="status"></span>
+    </div>
+    <div class="row hidden" id="viewRow">
+      <button id="viewItemsBtn" class="btn btn-tab active">Archivio</button>
+      <button id="viewArticlesBtn" class="btn btn-tab">Articoli</button>
     </div>
     <div class="row hidden" id="actionsRow">
       <button id="newBtn" class="btn">Nuovo item</button>
@@ -24,6 +28,12 @@
       <button id="deleteSelectedBtn" class="btn danger hidden" disabled>Elimina selezionati</button>
       <span id="saveStatus" class="status"></span>
     </div>
+    <div class="row hidden" id="articleActionsRow">
+      <button id="newArticleBtn" class="btn">Nuovo articolo</button>
+      <button id="saveArticleBtn" class="btn primary">Salva articolo</button>
+      <button id="deleteArticleBtn" class="btn danger" disabled>Elimina articolo</button>
+      <span id="articleStatus" class="status"></span>
+    </div>
   </header>
 
   <div id="lockedOverlay" class="card login-guard">
@@ -31,15 +41,194 @@
     <p class="muted">Effettua il login con GitHub per utilizzare l'editor.</p>
   </div>
 
-  <div id="adminMain" class="grid hidden">
-    <!-- Lista -->
-    <div class="card">
-      <div class="row justify-between mb-8">
-        <div>
-          <strong>Archivio — Items</strong>
-          <div class="muted">folder: <code>data/archive/items</code> · branch: <code>test</code></div>
+  <div id="adminMain" class="hidden">
+    <div id="itemsSection" class="grid hidden">
+      <div class="card">
+        <div class="row justify-between mb-8">
+          <div>
+            <strong>Archivio - Items</strong>
+            <div class="muted">folder: <code>data/archive/items</code> - branch: <code>test</code></div>
+          </div>
+          <button id="reloadBtn" class="btn">Reload</button>
         </div>
-        <button id="reloadBtn" class="btn">↻ Reload</button>
+        <div id="list" class="list"></div>
+      </div>
+
+      <div class="card">
+        <div class="two mt-8">
+          <div>
+            <label>Data</label>
+            <input id="f_date" type="date" />
+          </div>
+          <div>
+            <label>Titolo</label>
+            <input id="f_title" type="text" placeholder="Titolo" />
+          </div>
+        </div>
+
+        <div class="two mt-8">
+          <div>
+            <label>Slug (kebab-case)</label>
+            <input id="f_slug" type="text" placeholder="es. nuova-carta-xyz" />
+          </div>
+          <div>
+            <label>Tipo</label>
+            <input id="f_kind" type="text" placeholder="video | content" />
+          </div>
+        </div>
+
+        <div class="two mt-8">
+          <div>
+            <label>Overline</label>
+            <input id="f_overline" type="text" />
+          </div>
+          <div>
+            <label>Autore</label>
+            <input id="f_author" type="text" />
+          </div>
+        </div>
+
+        <div class="two mt-8">
+          <div>
+            <label>ID</label>
+            <input id="f_id" type="text" placeholder="opzionale (fallback: slug)" />
+          </div>
+          <div>
+            <label>Thumbnail</label>
+            <div class="row align-center gap-8">
+              <input id="f_thumb" type="text" placeholder="/images/thumbs/... oppure URL" />
+              <input id="uploadThumb" type="file" accept="image/*" hidden />
+              <button id="btnUploadThumb" class="btn">Carica</button>
+              <button id="btnBrowseThumb" class="btn">Sfoglia</button>
+            </div>
+            <div id="thumbBrowser" class="asset-browser hidden"></div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <label>Descrizione</label>
+          <textarea id="f_desc" class="textarea--sm" placeholder="Testo descrizione (opzionale)"></textarea>
+        </div>
+
+        <div class="two" style="margin-top:8px">
+          <div>
+            <label>Tag (separati da virgola)</label>
+            <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
+            <div id="tagsSaved" class="tags-saved mt-8"></div>
+          </div>
+          <div class="switch-row">
+            <div class="switch-pair">
+              <label for="f_draft">Bozza</label>
+              <input id="f_draft" type="checkbox" />
+            </div>
+            <div class="switch-pair">
+              <label for="f_updated">Aggiornato</label>
+              <input id="f_updated" type="datetime-local" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <label>Immagine Card (home)</label>
+          <div class="row align-center gap-8">
+            <input id="f_card" type="text" placeholder="/images/cards/... oppure URL" />
+            <input id="uploadCard" type="file" accept="image/*" hidden />
+            <button id="btnUploadCard" class="btn">Carica</button>
+            <button id="btnBrowseCard" class="btn">Sfoglia</button>
+          </div>
+          <div id="cardBrowser" class="asset-browser hidden"></div>
+        </div>
+
+        <div class="mt-8">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <label>Link</label>
+            <button id="addLinkBtn" class="btn">Aggiungi link</button>
+          </div>
+          <div id="linksList" class="links-list"></div>
+          <div class="muted">Campi: Label, URL, Classe, Ordine, Primario</div>
+        </div>
+
+        <div style="margin-top:8px">
+          <label>YAML grezzo (avanzato)</label>
+          <textarea id="f_raw" placeholder="# qui vedi/modifichi l'intero YAML"></textarea>
+          <div class="muted">Puoi editare i campi sopra o direttamente il YAML. Al salvataggio unifichiamo.</div>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <span id="fileInfo" class="pill">-</span>
+          <button id="deleteBtn" class="btn danger">Elimina</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="articlesSection" class="grid hidden">
+      <div class="card">
+        <div class="row justify-between mb-8">
+          <div>
+            <strong>Elenco Articoli</strong>
+            <div class="muted">folder: <code>content/article</code> - branch: <code>test</code></div>
+          </div>
+          <button id="reloadArticlesBtn" class="btn">Reload</button>
+        </div>
+        <div id="articleList" class="list"></div>
+      </div>
+
+      <div class="card">
+        <div class="two mt-8">
+          <div>
+            <label>Titolo</label>
+            <input id="a_title" type="text" placeholder="Titolo articolo" />
+          </div>
+          <div>
+            <label>Slug</label>
+            <input id="a_slug" type="text" placeholder="es. nuovo-articolo" />
+          </div>
+        </div>
+
+        <div class="two mt-8">
+          <div>
+            <label>Data</label>
+            <input id="a_date" type="datetime-local" />
+          </div>
+          <div class="switch-pair">
+            <label for="a_draft">Bozza</label>
+            <input id="a_draft" type="checkbox" />
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <label>Descrizione (SEO)</label>
+          <textarea id="a_description" class="textarea--sm" placeholder="Breve descrizione"></textarea>
+        </div>
+
+        <div class="mt-8">
+          <label>Tag (separati da virgola)</label>
+          <input id="a_tags" type="text" placeholder="es. mtg, gameplay" />
+        </div>
+
+        <div class="mt-8">
+          <label>Cover</label>
+          <div class="row align-center gap-8">
+            <input id="a_cover" type="text" placeholder="images/articles/..." />
+            <input id="a_coverUpload" type="file" accept="image/*" hidden />
+            <button id="a_btnUploadCover" class="btn">Upload cover</button>
+            <button id="a_btnBrowseCover" class="btn">Sfoglia</button>
+          </div>
+          <div id="a_coverBrowser" class="asset-browser hidden"></div>
+        </div>
+
+        <div class="mt-8">
+          <label>Contenuto (Markdown)</label>
+          <textarea id="a_body" class="textarea--lg" placeholder="Contenuto dell'articolo"></textarea>
+        </div>
+
+        <div class="mt-8" style="display:flex;gap:8px;align-items:center">
+          <span id="articleFileInfo" class="pill">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+        <button id="reloadBtn" class="btn">â†» Reload</button>
       </div>
       <div id="list" class="list"></div>
     </div>
@@ -53,7 +242,7 @@
         </div>
         <div>
           <label>Titolo</label>
-          <input id="f_title" type="text" placeholder="Titolo…" />
+          <input id="f_title" type="text" placeholder="Titoloâ€¦" />
         </div>
       </div>
 
@@ -146,8 +335,8 @@
       </div>
 
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <span id="fileInfo" class="pill">—</span>
-        <button id="deleteBtn" class="btn danger">🗑️ Elimina</button>
+        <span id="fileInfo" class="pill">â€”</span>
+        <button id="deleteBtn" class="btn danger">ðŸ—‘ï¸ Elimina</button>
       </div>
     </div>
   </div>
@@ -173,6 +362,10 @@ let CARDS_DIR    = "static/images/cards";
 let CARDS_PUBLIC = "/images/cards";
 let THUMBS_DIR   = "static/images/thumbs";
 let THUMBS_PUBLIC= "/images/thumbs";
+let ARTICLES_DIR = "content/article";
+let ARTICLES_EXT = "md";
+let ARTICLES_MEDIA_DIR = "static/images/articles";
+let ARTICLES_MEDIA_PUBLIC = "images/articles";
 
 async function loadConfig() {
   try {
@@ -232,7 +425,11 @@ let OAUTH_POPUP = null;
 let DEPLOY_LOCK = false;
 let MULTI_MODE = false;
 const SELECTED_ITEMS = new Map(); // path -> { sha }
+const ARTICLES_CACHE = new Map();
 let CURRENT = null; // {path, sha, yaml}
+let CURRENT_VIEW = 'items';
+let ARTICLE_CURRENT = null; // {path, sha, front, body}
+const ARTICLE_PENDING = { cover: null };
 
 /* ====== UTILS ====== */
 const gh = (url, opts={}) => fetch(url, {
@@ -331,6 +528,9 @@ async function resetSiteCaches(){
     if (typeof loadList === 'function' && TOKEN) {
       await loadList();
     }
+    if (typeof loadArticlesList === 'function' && TOKEN) {
+      await loadArticlesList();
+    }
   } catch(_){ }
 }
 
@@ -344,7 +544,7 @@ async function getPagesLatest(){
   return r.json();
 }
 async function monitorDeployAndReload(){
-  showNotice('Build/deploy avviato…');
+  showNotice('Build/deploy avviatoâ€¦');
   const start = Date.now();
   let autoReloaded = false;
   const autoReloadTimer = setTimeout(() => {
@@ -361,9 +561,9 @@ async function monitorDeployAndReload(){
   const baseTime = baseLatest ? (Date.parse(baseLatest.updated_at||'') || 0) : 0;
   const prevVersion = await fetchSiteVersion().catch(()=> '');
 
-  // Se l'endpoint Pages non è disponibile, fallback diretto su versione
+  // Se l'endpoint Pages non Ã¨ disponibile, fallback diretto su versione
   if (!baseTime && !baseLatest) {
-    updateNotice('Attesa nuova versione del sito…');
+    updateNotice('Attesa nuova versione del sitoâ€¦');
     const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
     cancelAutoReload();
     hideNotice();
@@ -372,14 +572,14 @@ async function monitorDeployAndReload(){
 
   const deadline = Date.now() + 180000; // 3 minuti
   while (Date.now() < deadline) {
-    let status = 'in attesa…';
+    let status = 'in attesaâ€¦';
     try {
       const latest = await getPagesLatest();
       const t = Date.parse(latest.updated_at||'') || 0;
       const changed = t > baseTime;
       status = String(latest.status || 'processing');
       if (changed && /built/i.test(status)) {
-        updateNotice('Build completata, finalizzo deploy…');
+        updateNotice('Build completata, finalizzo deployâ€¦');
         const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
         cancelAutoReload();
         hideNotice();
@@ -393,7 +593,7 @@ async function monitorDeployAndReload(){
       }
     } catch(_) { /* ignora e riprova */ }
     const secs = Math.floor((Date.now()-start)/1000);
-    updateNotice(`Stato build: ${status} — ${secs}s`);
+    updateNotice(`Stato build: ${status} â€” ${secs}s`);
     await sleep(2000);
   }
   cancelAutoReload();
@@ -440,6 +640,11 @@ function escAttr(s){ return escHtml(s); }
   const listEl = byId("list");
   const saveStatus = byId("saveStatus");
   const fileInfo = byId("fileInfo");
+  const actionsRow = byId("actionsRow");
+  const articleActionsRow = byId("articleActionsRow");
+  const viewRow = byId("viewRow");
+  const viewItemsBtn = byId("viewItemsBtn");
+  const viewArticlesBtn = byId("viewArticlesBtn");
   const reloadBtn = byId("reloadBtn");
   if (reloadBtn) reloadBtn.onclick = () => loadList();
   const uploadThumbInput = byId("uploadThumb");
@@ -454,6 +659,29 @@ function escAttr(s){ return escHtml(s); }
   const fCard = byId("f_card");
   const multiBtn = byId("multiBtn");
   const deleteSelectedBtn = byId("deleteSelectedBtn");
+  const adminMain = byId("adminMain");
+  const itemsSection = byId("itemsSection");
+  const articlesSection = byId("articlesSection");
+  const articleStatus = byId("articleStatus");
+  const articleList = byId("articleList");
+  const articleFileInfo = byId("articleFileInfo");
+  const reloadArticlesBtn = byId("reloadArticlesBtn");
+  if (reloadArticlesBtn) reloadArticlesBtn.onclick = () => loadArticlesList();
+  const newArticleBtn = byId("newArticleBtn");
+  const saveArticleBtn = byId("saveArticleBtn");
+  const deleteArticleBtn = byId("deleteArticleBtn");
+  const aTitle = byId("a_title");
+  const aSlug = byId("a_slug");
+  const aDate = byId("a_date");
+  const aDraft = byId("a_draft");
+  const aDescription = byId("a_description");
+  const aTags = byId("a_tags");
+  const aCover = byId("a_cover");
+  const aCoverUpload = byId("a_coverUpload");
+  const aBtnUploadCover = byId("a_btnUploadCover");
+  const aBtnBrowseCover = byId("a_btnBrowseCover");
+  const aCoverBrowser = byId("a_coverBrowser");
+  const aBody = byId("a_body");
 
   function toggleLockOnButton(id, state){
     const btn = byId(id);
@@ -477,9 +705,13 @@ function escAttr(s){ return escHtml(s); }
     if (saveStatus) saveStatus.textContent = message || '';
   }
 
+  function updateArticleStatus(message){
+    if (articleStatus) articleStatus.textContent = message || '';
+  }
+
   function setDeployLock(state, message){
     DEPLOY_LOCK = !!state;
-    ['saveBtn','deleteBtn','newBtn','deleteSelectedBtn','multiBtn'].forEach(id => toggleLockOnButton(id, state));
+    ['saveBtn','deleteBtn','newBtn','deleteSelectedBtn','multiBtn','saveArticleBtn','deleteArticleBtn','newArticleBtn','reloadArticlesBtn','reloadBtn'].forEach(id => toggleLockOnButton(id, state));
     if (typeof message === 'string') updateDeployStatus(message);
     if (!state) updateSelectionStatus();
   }
@@ -500,6 +732,13 @@ function escAttr(s){ return escHtml(s); }
     if (multiBtn) multiBtn.textContent = MULTI_MODE ? 'Annulla selezione multipla' : 'Seleziona multipli';
     const statusEl = byId('saveStatus');
     if (!statusEl) return;
+    if (CURRENT_VIEW !== 'items') {
+      if (statusEl.dataset.selectionStatus === '1') {
+        delete statusEl.dataset.selectionStatus;
+        if (!DEPLOY_LOCK) statusEl.textContent = '';
+      }
+      return;
+    }
     if (MULTI_MODE) {
       statusEl.dataset.selectionStatus = '1';
       statusEl.textContent = count ? `${count} elemento/i selezionati` : 'Seleziona elementi da eliminare';
@@ -553,6 +792,35 @@ function escAttr(s){ return escHtml(s); }
     }
   }
 
+  function setView(view, opts={}){
+    const target = view === 'articles' ? 'articles' : 'items';
+    const previous = CURRENT_VIEW;
+    const changed = previous !== target || !!opts.force;
+    CURRENT_VIEW = target;
+
+    if (itemsSection) itemsSection.classList.toggle('hidden', target !== 'items');
+    if (articlesSection) articlesSection.classList.toggle('hidden', target !== 'articles');
+    if (actionsRow) actionsRow.classList.toggle('hidden', !TOKEN || target !== 'items');
+    if (articleActionsRow) articleActionsRow.classList.toggle('hidden', !TOKEN || target !== 'articles');
+    if (viewRow) viewRow.classList.toggle('hidden', !TOKEN);
+    if (adminMain) adminMain.classList.toggle('hidden', !TOKEN);
+    if (viewItemsBtn) viewItemsBtn.classList.toggle('active', target === 'items');
+    if (viewArticlesBtn) viewArticlesBtn.classList.toggle('active', target === 'articles');
+
+    if (target === 'articles') {
+      setMultiMode(false, { skipReload: true, resetSelection: true, force: true });
+    }
+
+    if (!TOKEN) return;
+    if (!changed || opts.skipLoad) return;
+
+    if (target === 'items') {
+      loadList().catch(()=>{});
+    } else {
+      loadArticlesList().catch(()=>{});
+    }
+  }
+
   function setAuthState(isAuthed){
     const authed = !!isAuthed;
     if (!authed) setDeployLock(false);
@@ -569,14 +837,16 @@ function escAttr(s){ return escHtml(s); }
       logoutBtn.disabled = !authed;
     }
 
-    const actionsRow = byId('actionsRow');
-    if (actionsRow) actionsRow.classList.toggle('hidden', !authed);
+    if (viewRow) viewRow.classList.toggle('hidden', !authed);
+    if (actionsRow) actionsRow.classList.toggle('hidden', !authed || CURRENT_VIEW !== 'items');
+    if (articleActionsRow) articleActionsRow.classList.toggle('hidden', !authed || CURRENT_VIEW !== 'articles');
     const overlay = byId('lockedOverlay');
     if (overlay) overlay.classList.toggle('hidden', authed);
-    const adminMain = byId('adminMain');
     if (adminMain) adminMain.classList.toggle('hidden', !authed);
+    if (itemsSection) itemsSection.classList.toggle('hidden', !authed || CURRENT_VIEW !== 'items');
+    if (articlesSection) articlesSection.classList.toggle('hidden', !authed || CURRENT_VIEW !== 'articles');
 
-    ['newBtn','saveBtn','deleteBtn','reloadBtn','addLinkBtn','multiBtn','deleteSelectedBtn'].forEach(id => {
+    ['newBtn','saveBtn','deleteBtn','reloadBtn','addLinkBtn','multiBtn','deleteSelectedBtn','newArticleBtn','saveArticleBtn','deleteArticleBtn','reloadArticlesBtn','viewItemsBtn','viewArticlesBtn'].forEach(id => {
       const btn = byId(id);
       if (btn) btn.disabled = !authed;
     });
@@ -598,9 +868,16 @@ function escAttr(s){ return escHtml(s); }
       updateDeployStatus('');
       const raw = byId('f_raw');
       if (raw) raw.value = '';
+      if (articleList) articleList.innerHTML = '';
+      if (articleStatus) articleStatus.textContent = '';
+      if (articleFileInfo) articleFileInfo.textContent = '-';
+      ARTICLE_CURRENT = null;
+      ARTICLE_PENDING.cover = null;
     }
 
     updateSelectionStatus();
+
+    if (authed) setView(CURRENT_VIEW, { force: true });
   }
 
   // Build/deploy notice helpers
@@ -617,7 +894,7 @@ function escAttr(s){ return escHtml(s); }
     PENDING[kind] = { file, path, publicUrl: pub };
     const inp = byId(inputId);
     if (inp) inp.value = pub;
-    if (saveStatus) saveStatus.textContent = `Immagine ${kind} pronta: verrà caricata al Salva`;
+    if (saveStatus) saveStatus.textContent = `Immagine ${kind} pronta: verrÃ  caricata al Salva`;
   }
 
 function setWho(user){
@@ -665,7 +942,11 @@ window.addEventListener("message", async (e) => {
   const me = await fetchMe();
   setWho(me);
   if (me) {
-    await loadList();
+    setView(CURRENT_VIEW, { force: true, skipLoad: true });
+    await Promise.all([
+      loadList().catch(()=>{}),
+      loadArticlesList().catch(()=>{})
+    ]);
   } else {
     TOKEN = "";
     try { sessionStorage.removeItem('gh_token'); } catch(_){ }
@@ -853,6 +1134,245 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
     };
   }
 
+  if (viewItemsBtn) {
+    viewItemsBtn.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      setView('items');
+    };
+  }
+
+  if (viewArticlesBtn) {
+    viewArticlesBtn.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      setView('articles');
+    };
+  }
+
+  if (newArticleBtn) {
+    newArticleBtn.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      const now = new Date();
+      const baseSlug = kebab((aTitle && aTitle.value) || 'nuovo-articolo');
+      const slug = baseSlug || `articolo-${now.getTime()}`;
+      const iso = now.toISOString();
+      const front = { title: 'Nuovo articolo', date: iso, draft: true, description: '', tags: [], cover: '' };
+      const body = '# Nuovo articolo\n\n';
+      ARTICLE_CURRENT = { path: articlePathFromSlug(slug), sha: null, front, body, slug };
+      ARTICLE_PENDING.cover = null;
+      fillArticleForm(front, body, ARTICLE_CURRENT.path, slug);
+      applyArticleFormDefaults();
+      if (aDraft) aDraft.checked = true;
+      if (deleteArticleBtn) deleteArticleBtn.disabled = true;
+      updateArticleStatus('Articolo pronto: compila i campi e salva.');
+      setView('articles', { force: true, skipLoad: true });
+    };
+  }
+
+  if (aTitle && aSlug) {
+    aTitle.addEventListener('blur', () => {
+      if (!aSlug.value.trim()) aSlug.value = kebab(aTitle.value || '');
+    });
+    aSlug.addEventListener('blur', () => {
+      const val = kebab(aSlug.value || '');
+      aSlug.value = val;
+      ARTICLE_PENDING.cover = null;
+    });
+    aSlug.addEventListener('input', () => { ARTICLE_PENDING.cover = null; });
+  }
+
+  if (aBtnUploadCover && aCoverUpload) {
+    aBtnUploadCover.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      const slug = kebab(aSlug?.value || aTitle?.value || '');
+      if (!slug) { alert('Imposta titolo o slug prima di caricare la cover.'); return; }
+      aSlug.value = slug;
+      aCoverUpload.click();
+    };
+    aCoverUpload.onchange = () => {
+      if (!aCoverUpload.files || !aCoverUpload.files[0]) return;
+      try {
+        const slug = kebab(aSlug?.value || aTitle?.value || '');
+        if (!slug) throw new Error('Imposta titolo o slug prima di caricare la cover.');
+        planArticleCover(aCoverUpload.files[0], slug);
+      } catch (err) {
+        alert(err && err.message ? err.message : err);
+      } finally {
+        aCoverUpload.value = '';
+      }
+    };
+  }
+
+  if (aBtnBrowseCover && aCoverBrowser && aCover) {
+    aBtnBrowseCover.onclick = async () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      const slug = kebab(aSlug?.value || '');
+      let items = await listImages(slug ? `${ARTICLES_MEDIA_DIR}/${slug}` : ARTICLES_MEDIA_DIR, 3).catch(()=>[]);
+      if ((!items || !items.length) && slug) {
+        items = await listImages(ARTICLES_MEDIA_DIR, 2).catch(()=>[]);
+      }
+      renderAssetBrowser(aCoverBrowser, items, aCover);
+      ARTICLE_PENDING.cover = null;
+    };
+  }
+
+  async function saveArticle(){
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    const form = collectArticleForm();
+    if (!form.title) return alert('Titolo articolo obbligatorio.');
+    if (!form.slug) return alert('Slug articolo obbligatorio.');
+    if (aSlug) aSlug.value = form.slug;
+    const front = {
+      title: form.title,
+      date: form.date || new Date().toISOString(),
+      draft: form.draft,
+      description: form.description,
+      tags: form.tags,
+      cover: form.cover
+    };
+    const body = form.body;
+    const newPath = articlePathFromSlug(form.slug);
+    const previousPath = ARTICLE_CURRENT ? ARTICLE_CURRENT.path : null;
+    const isRename = previousPath && previousPath !== newPath;
+
+    setDeployLock(true, 'Salvataggio articolo...');
+    updateArticleStatus('Salvataggio articolo...');
+    try {
+      if (ARTICLE_PENDING.cover) {
+        updateArticleStatus('Upload cover in corso...');
+        const res = await uploadAssetFileToPath(ARTICLE_PENDING.cover.file, ARTICLE_PENDING.cover.path);
+        ARTICLE_PENDING.cover = null;
+        front.cover = res.publicUrl;
+        if (aCover) aCover.value = res.publicUrl;
+      }
+
+      const content = buildArticleContent(front, body);
+      const encoded = b64.enc(content);
+      const putArticleSmart = async (path, shaMaybe) => {
+        const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+        const makeBody = (sha) => JSON.stringify({
+          message: `chore(admin): ${sha ? 'update' : 'create'} ${path}`,
+          content: encoded,
+          branch: BRANCH,
+          ...(sha ? { sha } : {})
+        });
+        if (shaMaybe) return gh(url, { method: 'PUT', body: makeBody(shaMaybe) });
+        let r = await gh(url, { method: 'PUT', body: makeBody(null) });
+        if (r.status === 422) {
+          const g = await gh(url);
+          if (g.ok) {
+            const j = await g.json();
+            r = await gh(url, { method: 'PUT', body: makeBody(j.sha) });
+          }
+        }
+        return r;
+      };
+
+      let response;
+      if (isRename) {
+        response = await putArticleSmart(newPath, null);
+        if (!response.ok) {
+          const t = await response.text().catch(() => String(response.status));
+          throw new Error(`Errore salvataggio: ${response.status} - ${t}`);
+        }
+        const created = await response.json();
+        if (previousPath) {
+          const prevSha = await ensureContentSha(previousPath, ARTICLE_CURRENT ? ARTICLE_CURRENT.sha : null);
+          try {
+            await deleteContent(previousPath, prevSha);
+          } catch (err) {
+            console.warn('Impossibile eliminare il vecchio articolo:', err);
+          }
+        }
+        ARTICLE_CURRENT = { path: newPath, sha: created.content.sha, front, body, slug: form.slug };
+      } else {
+        const shaMaybe = ARTICLE_CURRENT ? ARTICLE_CURRENT.sha : null;
+        response = await putArticleSmart(newPath, shaMaybe);
+        if (!response.ok) {
+          const t = await response.text().catch(() => String(response.status));
+          throw new Error(`Errore salvataggio: ${response.status} - ${t}`);
+        }
+        const saved = await response.json();
+        ARTICLE_CURRENT = { path: newPath, sha: saved.content.sha, front, body, slug: form.slug };
+      }
+
+      fillArticleForm(front, body, ARTICLE_CURRENT.path, form.slug);
+      ARTICLES_CACHE.set(ARTICLE_CURRENT.path, {
+        path: ARTICLE_CURRENT.path,
+        sha: ARTICLE_CURRENT.sha,
+        title: front.title,
+        date: Date.parse(front.date || '') || 0,
+        draft: !!front.draft,
+        front: { ...front },
+        body
+      });
+      updateArticleStatus('Articolo salvato.');
+      if (deleteArticleBtn) deleteArticleBtn.disabled = false;
+      await loadArticlesList();
+      try { await resetSiteCaches(); } catch(_){ }
+      const ok = await monitorDeployAndReload().catch(()=>false);
+      if (ok) updateArticleStatus('Deploy completato');
+      else {
+        updateArticleStatus('Deploy non confermato, ricarico...');
+        const urlReload = new URL(window.location.href);
+        urlReload.searchParams.set('t', String(Date.now()));
+        window.location.replace(urlReload.toString());
+      }
+    } catch (err) {
+      alert(err && err.message ? err.message : err);
+      updateArticleStatus('Errore salvataggio articolo');
+    } finally {
+      setDeployLock(false);
+    }
+  }
+
+  async function deleteArticle(){
+    if (!TOKEN) { alert('Prima fai login.'); return; }
+    if (!ARTICLE_CURRENT || !ARTICLE_CURRENT.path) return alert('Nessun articolo aperto.');
+    if (!ARTICLE_CURRENT.sha) return alert('Salva prima l\'articolo prima di eliminarlo.');
+    if (!confirm(`Eliminare ${ARTICLE_CURRENT.path}?`)) return;
+    setDeployLock(true, 'Eliminazione articolo...');
+    updateArticleStatus('Eliminazione articolo...');
+    try {
+      const prevPath = ARTICLE_CURRENT.path;
+      const sha = await ensureContentSha(prevPath, ARTICLE_CURRENT.sha);
+      await deleteContent(prevPath, sha);
+      ARTICLES_CACHE.delete(prevPath);
+      ARTICLE_CURRENT = null;
+      clearArticleForm();
+      if (deleteArticleBtn) deleteArticleBtn.disabled = true;
+      await loadArticlesList();
+      try { await resetSiteCaches(); } catch(_){ }
+      const ok = await monitorDeployAndReload().catch(()=>false);
+      if (ok) updateArticleStatus('Articolo eliminato');
+      else {
+        updateArticleStatus('Deploy non confermato, ricarico...');
+        const urlReload = new URL(window.location.href);
+        urlReload.searchParams.set('t', String(Date.now()));
+        window.location.replace(urlReload.toString());
+      }
+    } catch (err) {
+      alert(err && err.message ? err.message : err);
+      updateArticleStatus('Errore eliminazione articolo');
+    } finally {
+      setDeployLock(false);
+    }
+  }
+
+  if (saveArticleBtn) {
+    saveArticleBtn.onclick = () => {
+      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      saveArticle();
+    };
+  }
+
+  if (deleteArticleBtn) {
+    deleteArticleBtn.onclick = () => {
+      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      deleteArticle();
+    };
+  }
+
 /* ====== CARICAMENTO LISTA FILE ====== */
 let CURRENT_DIR = null;
 async function loadList(path){
@@ -998,6 +1518,260 @@ async function loadList(path){
   updateSelectionStatus();
 }
 
+/* ====== ARTICOLI ====== */
+function parseTomlValue(str){
+  if (str == null) return '';
+  const trimmed = String(str).trim();
+  if (/^".*"$/.test(trimmed)) {
+    return trimmed.slice(1, -1).replace(/\\"/g, '"');
+  }
+  if (/^(true|false)$/i.test(trimmed)) return trimmed.toLowerCase() === 'true';
+  if (/^\[.*\]$/.test(trimmed)) {
+    const inner = trimmed.slice(1, -1).trim();
+    if (!inner) return [];
+    return inner.split(',').map(s => parseTomlValue(s)).filter(Boolean);
+  }
+  return trimmed;
+}
+
+function serializeTomlValue(val){
+  if (Array.isArray(val)) {
+    return `[${val.map(v => serializeTomlValue(v)).join(', ')}]`;
+  }
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  const str = String(val ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${str}"`;
+}
+
+function parseArticleFile(raw){
+  const match = raw.match(/^\s*\+\+\+[\r\n]+([\s\S]*?)[\r\n]+\+\+\+[\r\n]*([\s\S]*)$/);
+  if (!match) return { front: {}, body: raw };
+  const frontText = match[1];
+  const body = match[2].replace(/^\s+/, '');
+  const front = {};
+  frontText.split(/\r?\n/).forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return;
+    const idx = trimmed.indexOf('=');
+    if (idx < 0) return;
+    const key = trimmed.slice(0, idx).trim();
+    const val = trimmed.slice(idx + 1).trim();
+    front[key] = parseTomlValue(val);
+  });
+  return { front, body };
+}
+
+function buildArticleContent(front, body){
+  const lines = [];
+  lines.push(`title = ${serializeTomlValue(front.title || '')}`);
+  if (front.date) lines.push(`date = ${serializeTomlValue(front.date)}`);
+  lines.push(`draft = ${serializeTomlValue(!!front.draft)}`);
+  if (front.description) lines.push(`description = ${serializeTomlValue(front.description)}`);
+  const tags = Array.isArray(front.tags) ? front.tags.filter(Boolean) : [];
+  lines.push(`tags = ${serializeTomlValue(tags)}`);
+  if (front.cover) lines.push(`cover = ${serializeTomlValue(front.cover)}`);
+  const bodyOut = (body || '').replace(/\s+$/, '');
+  return `+++\n${lines.join('\n')}\n+++\n\n${bodyOut}\n`;
+}
+
+function articlePathFromSlug(slug){
+  return `${ARTICLES_DIR}/${slug}.${ARTICLES_EXT}`;
+}
+
+function toDateInputValue(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0,16);
+}
+
+function toIsoFromInput(value){
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString();
+}
+
+function fillArticleForm(front={}, body='', path='', slug=''){
+  if (aTitle) aTitle.value = front.title || '';
+  const resolvedSlug = slug || (path ? path.split('/').pop().replace(/\.[^/.]+$/, '') : '');
+  if (aSlug) aSlug.value = resolvedSlug;
+  if (aDate) aDate.value = toDateInputValue(front.date || '');
+  if (aDraft) aDraft.checked = !!front.draft;
+  if (aDescription) aDescription.value = front.description || '';
+  if (aTags) aTags.value = Array.isArray(front.tags) ? front.tags.join(', ') : '';
+  if (aCover) aCover.value = front.cover || '';
+  if (aBody) aBody.value = body || '';
+  if (articleFileInfo) articleFileInfo.textContent = path || '-';
+  if (deleteArticleBtn) deleteArticleBtn.disabled = !ARTICLE_CURRENT || !ARTICLE_CURRENT.sha;
+  ARTICLE_PENDING.cover = null;
+  updateArticleStatus('');
+}
+
+function clearArticleForm(){
+  fillArticleForm({}, '', '', '');
+}
+
+async function loadArticlesList(){
+  if (!articleList) return;
+  if (!TOKEN) { articleList.innerHTML = ''; return; }
+  articleList.innerHTML = '';
+  try {
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${ARTICLES_DIR}?ref=${encodeURIComponent(BRANCH)}`;
+    const r = await gh(url);
+    if (!r.ok) {
+      const div = document.createElement('div');
+      div.className = 'muted';
+      div.textContent = `Impossibile leggere la cartella articoli (${r.status}).`;
+      articleList.appendChild(div);
+      return;
+    }
+    const items = await r.json();
+    const files = items.filter(x => x.type === 'file' && /\.(md|markdown)$/i.test(x.name));
+    if (!files.length) {
+      const div = document.createElement('div');
+      div.className = 'muted';
+      div.textContent = 'Nessun articolo presente.';
+      articleList.appendChild(div);
+      return;
+    }
+    const metas = await Promise.all(files.map(async (f) => {
+      try {
+        const rr = await gh(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`);
+        if (!rr.ok) throw new Error(`HTTP ${rr.status}`);
+        const j = await rr.json();
+        const raw = b64.dec(j.content);
+        const parsed = parseArticleFile(raw);
+        const dateVal = parsed.front.date ? Date.parse(parsed.front.date) : 0;
+        return {
+          path: f.path,
+          sha: j.sha,
+          title: parsed.front.title || f.name.replace(/\.[^/.]+$/, ''),
+          date: Number.isNaN(dateVal) ? 0 : dateVal,
+          draft: !!parsed.front.draft,
+          front: parsed.front,
+          body: parsed.body
+        };
+      } catch (err) {
+        return {
+          path: f.path,
+          sha: f.sha,
+          title: f.name.replace(/\.[^/.]+$/, ''),
+          date: 0,
+          draft: false,
+          front: {},
+          body: ''
+        };
+      }
+    }));
+    metas.sort((a, b) => (b.date - a.date) || a.title.localeCompare(b.title));
+    ARTICLES_CACHE.clear();
+    metas.forEach(meta => {
+      ARTICLES_CACHE.set(meta.path, meta);
+      const div = document.createElement('div');
+      div.className = 'item' + (meta.draft ? ' is-draft' : '');
+      div.dataset.path = meta.path;
+      div.dataset.sha = meta.sha || '';
+      const info = document.createElement('div');
+      info.className = 'item-info';
+      const strong = document.createElement('strong');
+      strong.textContent = meta.title;
+      const span = document.createElement('span');
+      span.className = 'meta';
+      span.textContent = meta.path;
+      info.appendChild(strong);
+      info.appendChild(span);
+      if (meta.draft) {
+        const badge = document.createElement('span');
+        badge.className = 'pill pill--warn';
+        badge.textContent = 'Draft';
+        info.appendChild(badge);
+      }
+      div.appendChild(info);
+      div.classList.toggle('active', ARTICLE_CURRENT && ARTICLE_CURRENT.path === meta.path);
+      div.onclick = () => openArticle(meta.path);
+      articleList.appendChild(div);
+    });
+  } catch (err) {
+    const div = document.createElement('div');
+    div.className = 'muted';
+    div.textContent = 'Errore nel caricamento degli articoli.';
+    articleList.appendChild(div);
+  }
+}
+
+async function openArticle(path){
+  try {
+    let meta = ARTICLES_CACHE.get(path);
+    if (!meta) {
+      const r = await gh(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${encodeURIComponent(BRANCH)}`);
+      if (!r.ok) {
+        const t = await r.text().catch(()=>String(r.status));
+        throw new Error(`Impossibile aprire l'articolo: ${r.status} - ${t}`);
+      }
+      const j = await r.json();
+      const parsed = parseArticleFile(b64.dec(j.content));
+      meta = {
+        path,
+        sha: j.sha,
+        title: parsed.front.title || path.split('/').pop().replace(/\.[^/.]+$/, ''),
+        date: parsed.front.date ? Date.parse(parsed.front.date) : 0,
+        draft: !!parsed.front.draft,
+        front: parsed.front,
+        body: parsed.body
+      };
+      ARTICLES_CACHE.set(path, meta);
+    }
+    const slug = path.split('/').pop().replace(/\.[^/.]+$/, '');
+    ARTICLE_CURRENT = { path, sha: meta.sha, front: { ...meta.front }, body: meta.body, slug };
+    fillArticleForm(ARTICLE_CURRENT.front, ARTICLE_CURRENT.body, path, slug);
+    const nodes = articleList ? articleList.children : [];
+    Array.from(nodes).forEach(el => el.classList.toggle('active', el.dataset && el.dataset.path === path));
+    updateArticleStatus('Articolo caricato.');
+    if (deleteArticleBtn) deleteArticleBtn.disabled = !ARTICLE_CURRENT.sha;
+  } catch (err) {
+    alert(err && err.message ? err.message : err);
+  }
+}
+
+function planArticleCover(file, slug){
+  const cleanSlug = kebab(slug || '');
+  if (!cleanSlug) throw new Error('Slug non valido per l\'upload della cover.');
+  const path = uniqueMediaPath(file, `${ARTICLES_MEDIA_DIR}/${cleanSlug}`);
+  const fileName = path.replace(/^.*\//,'');
+  const publicUrl = `${ARTICLES_MEDIA_PUBLIC}/${cleanSlug}/${fileName}`.replace(/\/+/, '/');
+  ARTICLE_PENDING.cover = { file, path, publicUrl };
+  if (aCover) aCover.value = publicUrl;
+  updateArticleStatus('Cover pronta: verrà caricata al salvataggio.');
+}
+
+function collectArticleForm(){
+  const title = aTitle?.value?.trim() || '';
+  const slugInput = aSlug?.value?.trim() || '';
+  const slug = kebab(slugInput || title);
+  return {
+    title,
+    slug,
+    date: toIsoFromInput(aDate?.value?.trim() || ''),
+    draft: !!(aDraft && aDraft.checked),
+    description: aDescription?.value?.trim() || '',
+    tags: (aTags?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+    cover: aCover?.value?.trim() || '',
+    body: aBody?.value || ''
+  };
+}
+
+function applyArticleFormDefaults(){
+  if (aTitle && !aTitle.value) aTitle.value = 'Nuovo articolo';
+  if (aSlug && !aSlug.value) aSlug.value = kebab(aTitle.value || 'nuovo-articolo');
+  if (aDate && !aDate.value) {
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    aDate.value = local.toISOString().slice(0,16);
+  }
+}
+
 /* ====== APRI FILE ====== */
 async function openFile(path){
   [...listEl.children].forEach(el => el.classList.toggle("active", el.querySelector(".meta").textContent===path));
@@ -1060,7 +1834,7 @@ function fillForm(y, raw, path){
     if (b) b.hidden = !fd.checked;
   };
   byId("f_raw").value = raw || jsyaml.dump(y);
-  fileInfo.textContent = path || "—";
+  fileInfo.textContent = path || "â€”";
 }
 
 /* ====== CREA NUOVO ====== */
@@ -1317,7 +2091,7 @@ function addLinkRow(L={}){
     {val:'btn--edh', lab:'EDHREC'},
     {val:'btn--teal', lab:'Teal'},
     {val:'btn--base', lab:'Base'},
-    {val:'__custom__', lab:'Custom…'}
+    {val:'__custom__', lab:'Customâ€¦'}
   ];
   let btnClass = String(L.btn_class||'');
   const effectivePrim = !!(L.primary || /\bprimary\b/.test(btnClass));
