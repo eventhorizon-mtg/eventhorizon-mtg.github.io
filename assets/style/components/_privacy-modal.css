@@ -1,0 +1,293 @@
+/* ============================================================
+   Privacy Modal Component
+   ============================================================ */
+
+/* Modal wrapper */
+.privacy-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease-standard, cubic-bezier(.2,.8,.2,1));
+}
+
+.privacy-modal:not([hidden]) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Backdrop */
+.privacy-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(14, 15, 26, 0.85);
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Content box */
+.privacy-modal__content {
+  position: relative;
+  z-index: 2;
+  background: var(--bg-primary, #FFFFFF);
+  color: var(--text-primary, #0E0F1A);
+  border-radius: var(--radius-s, 8px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: min(90vw, 680px);
+  max-height: min(90vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.privacy-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(16px, 4vw, 24px);
+  border-bottom: 1px solid color-mix(in oklab, var(--text-primary, #0E0F1A) 12%, transparent);
+  flex-shrink: 0;
+}
+
+.privacy-modal__title {
+  font-family: var(--font-display, "Lexend Giga", system-ui, sans-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-tight, 1.15);
+  margin: 0;
+}
+
+.privacy-modal__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #4A4A5E);
+  border-radius: 4px;
+  transition: all 160ms var(--ease-standard, cubic-bezier(.2,.8,.2,1));
+}
+
+.privacy-modal__close:hover {
+  background: color-mix(in oklab, var(--text-primary, #0E0F1A) 8%, transparent);
+  color: var(--text-primary, #0E0F1A);
+}
+
+.privacy-modal__close:focus-visible {
+  outline: 2px solid var(--gold-600, #E0A402);
+  outline-offset: 2px;
+}
+
+/* Body */
+.privacy-modal__body {
+  overflow-y: auto;
+  padding: clamp(20px, 5vw, 32px);
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--text-primary, #0E0F1A) 20%, transparent) transparent;
+}
+
+.privacy-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.privacy-modal__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.privacy-modal__body::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--text-primary, #0E0F1A) 20%, transparent);
+  border-radius: 4px;
+}
+
+.privacy-modal__body::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--text-primary, #0E0F1A) 30%, transparent);
+}
+
+/* Typography */
+.privacy-modal__body section {
+  margin-bottom: clamp(20px, 4vw, 28px);
+}
+
+.privacy-modal__body section:last-child {
+  margin-bottom: 0;
+}
+
+.privacy-modal__body h3 {
+  font-family: var(--font-display, "Lexend Giga", system-ui, sans-serif);
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  font-weight: var(--fw-bold, 700);
+  line-height: var(--lh-tight, 1.15);
+  margin: 0 0 12px 0;
+  color: var(--indigo-700, #5B4E9D);
+}
+
+.privacy-modal__body p {
+  font-family: var(--font-sans, "Lexend Deca", system-ui, sans-serif);
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+  line-height: var(--lh-normal, 1.45);
+  margin: 0 0 12px 0;
+  color: var(--text-primary, #0E0F1A);
+}
+
+.privacy-modal__body p:last-child {
+  margin-bottom: 0;
+}
+
+.privacy-modal__body ul {
+  margin: 8px 0 12px 20px;
+  padding: 0;
+  list-style: disc;
+}
+
+.privacy-modal__body li {
+  font-family: var(--font-sans, "Lexend Deca", system-ui, sans-serif);
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+  line-height: var(--lh-normal, 1.45);
+  margin-bottom: 6px;
+  color: var(--text-primary, #0E0F1A);
+}
+
+.privacy-modal__body code {
+  background: color-mix(in oklab, var(--indigo-500, #9F7BB8) 12%, transparent);
+  color: var(--indigo-900, #2F2760);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9em;
+}
+
+.privacy-modal__body a {
+  color: var(--indigo-700, #5B4E9D);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 140ms var(--ease-standard, cubic-bezier(.2,.8,.2,1));
+}
+
+.privacy-modal__body a:hover {
+  color: var(--indigo-900, #2F2760);
+  text-decoration-thickness: 2px;
+}
+
+.privacy-modal__body a:focus-visible {
+  outline: 2px solid var(--gold-600, #E0A402);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.privacy-modal__body strong {
+  font-weight: var(--fw-bold, 700);
+}
+
+.privacy-modal__body small {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #4A4A5E);
+}
+
+/* Privacy link nel footer */
+.privacy-link {
+  font-weight: var(--fw-medium, 500);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 140ms var(--ease-standard, cubic-bezier(.2,.8,.2,1));
+}
+
+.privacy-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Dark mode */
+[data-theme="dark"] .privacy-modal__content {
+  background: var(--neutral-900, #0E0F1A);
+  color: var(--neutral-50, #F3F2F7);
+}
+
+[data-theme="dark"] .privacy-modal__header {
+  border-bottom-color: color-mix(in oklab, var(--neutral-50, #F3F2F7) 12%, transparent);
+}
+
+[data-theme="dark"] .privacy-modal__title {
+  color: var(--neutral-50, #F3F2F7);
+}
+
+[data-theme="dark"] .privacy-modal__close {
+  color: color-mix(in oklab, var(--neutral-50, #F3F2F7) 70%, transparent);
+}
+
+[data-theme="dark"] .privacy-modal__close:hover {
+  background: color-mix(in oklab, var(--neutral-50, #F3F2F7) 12%, transparent);
+  color: var(--neutral-50, #F3F2F7);
+}
+
+[data-theme="dark"] .privacy-modal__body h3 {
+  color: var(--indigo-500, #9F7BB8);
+}
+
+[data-theme="dark"] .privacy-modal__body p,
+[data-theme="dark"] .privacy-modal__body li {
+  color: var(--neutral-50, #F3F2F7);
+}
+
+[data-theme="dark"] .privacy-modal__body code {
+  background: color-mix(in oklab, var(--indigo-500, #9F7BB8) 20%, transparent);
+  color: var(--indigo-300, #C9B3DA);
+}
+
+[data-theme="dark"] .privacy-modal__body a {
+  color: var(--indigo-500, #9F7BB8);
+}
+
+[data-theme="dark"] .privacy-modal__body a:hover {
+  color: var(--indigo-300, #C9B3DA);
+}
+
+[data-theme="dark"] .privacy-modal__body scrollbar-color {
+  scrollbar-color: color-mix(in oklab, var(--neutral-50, #F3F2F7) 20%, transparent) transparent;
+}
+
+[data-theme="dark"] .privacy-modal__body::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--neutral-50, #F3F2F7) 20%, transparent);
+}
+
+[data-theme="dark"] .privacy-modal__body::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--neutral-50, #F3F2F7) 30%, transparent);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .privacy-modal,
+  .privacy-modal__close,
+  .privacy-modal__body a {
+    transition: none !important;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .privacy-modal__content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .privacy-modal__header {
+    padding: 16px;
+  }
+
+  .privacy-modal__body {
+    padding: 20px 16px;
+  }
+}
