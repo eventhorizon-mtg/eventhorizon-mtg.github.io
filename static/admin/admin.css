@@ -6,20 +6,20 @@
 
 /* ---------- Design Tokens ---------- */
 :root{
-  /* Palette */
+  /* Palette - Allineata al sito principale */
   --bg:#0e0f1a;
-  --card:#161927;
+  --card:#1a1b2e;
   --text:#eaeef8;
   --muted:#9aa4c7;
   --acc:#6c5ce7;
   --border:#2a2f44;
 
   /* Semantica UI */
-  --field-bg:#0c0f1c;
+  --field-bg:#16172a;
   --field-border:#3a4060;
-  --ring:#3b4a7a;
-  --danger:#c62828;
-  --warn:#705b2a;
+  --ring:#6c5ce7;
+  --danger:#dc2626;
+  --warn:#d97706;
   --warn-bg:#4a3b1a;
 
   /* Raggi (8pt) */
@@ -39,8 +39,8 @@
   --s-32:32px;
 
   /* Scrollbar */
-  --scrollbar-thumb:#2e3550;
-  --scrollbar-track:#1a1f33;
+  --scrollbar-thumb:#3a4060;
+  --scrollbar-track:#0e0f1a;
 
   /* Transizioni */
   --t-fast:.12s ease;
@@ -242,11 +242,18 @@ textarea{
   border-radius:var(--radius-8);
   border:1px solid var(--field-border);
   background:var(--field-bg);
-  color:#eaf;
+  color:#eaeef8;
   line-height:1.4;
   min-height:40px;
   min-width:0;
+  font-family:inherit;
   transition:border-color var(--t-base), box-shadow var(--t-base), background-color var(--t-base);
+}
+
+input:hover,
+textarea:hover,
+select:hover{
+  border-color:#4a5080;
 }
 
 input::placeholder,
@@ -332,12 +339,13 @@ textarea{
   padding:var(--s-8) var(--s-16);
   border-radius:var(--radius-8);
   border:1px solid transparent;
-  background:#223336;
-  color:#cfe3ff;
+  background:#2a2f44;
+  color:#eaeef8;
   cursor:pointer;
   transition:filter var(--t-fast), transform var(--t-fast), background-color var(--t-base), border-color var(--t-base), box-shadow var(--t-base);
   user-select:none;
   line-height:1;
+  font-weight:500;
 }
 .btn.btn-tab{
   background:transparent;
@@ -363,8 +371,8 @@ textarea{
 .btn.primary{ background:var(--acc); color:#fff }
 .btn.primary:hover{ filter:brightness(1.06) }
 
-.btn.danger{ background:var(--danger); color:#fff }
-.btn.danger:hover{ filter:brightness(1.05) }
+.btn.danger{ background:var(--danger); color:#fff; font-weight:600 }
+.btn.danger:hover{ filter:brightness(1.1); background:#b91c1c }
 
 /* ---------- Links Composer ---------- */
 .links-list{ display:grid; gap:var(--s-8); margin-top:var(--s-8) }

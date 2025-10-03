@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin Â· Mini Editor (Hugo + GitHub)</title>
+<title>Admin · Mini Editor (Hugo + GitHub)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="admin.css">
 
 </head>
 <body>
 <div class="wrap">
-  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corsoâ€¦</span></div>
+  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
   <header>
     <div class="row" id="authRow">
       <button id="loginBtn" class="btn primary">Login con GitHub</button>
@@ -47,7 +47,7 @@
         <div class="row justify-between mb-8">
           <div>
             <strong>Archivio - Items</strong>
-            <div class="muted">folder: <code>data/archive/items</code> - branch: <code>test</code></div>
+            <div class="muted">folder: <code>data/archive/items</code> - branch: <code>main</code></div>
           </div>
           <button id="reloadBtn" class="btn">Reload</button>
         </div>
@@ -166,7 +166,7 @@
         <div class="row justify-between mb-8">
           <div>
             <strong>Elenco Articoli</strong>
-            <div class="muted">folder: <code>content/article</code> - branch: <code>test</code></div>
+            <div class="muted">folder: <code>content/article</code> - branch: <code>main</code></div>
           </div>
           <button id="reloadArticlesBtn" class="btn">Reload</button>
         </div>
@@ -228,118 +228,6 @@
       </div>
     </div>
   </div>
-        <button id="reloadBtn" class="btn">â†» Reload</button>
-      </div>
-      <div id="list" class="list"></div>
-    </div>
-
-    <!-- Editor -->
-    <div class="card">
-      <div class="two mt-8">
-        <div>
-          <label>Data</label>
-          <input id="f_date" type="date" />
-        </div>
-        <div>
-          <label>Titolo</label>
-          <input id="f_title" type="text" placeholder="Titoloâ€¦" />
-        </div>
-      </div>
-
-      <div class="two mt-8">
-        <div>
-          <label>Slug (kebab-case)</label>
-          <input id="f_slug" type="text" placeholder="es. nuova-carta-xyz" />
-        </div>
-        <div>
-          <label>Tipo</label>
-          <input id="f_kind" type="text" placeholder="video | content" />
-        </div>
-      </div>
-
-      <div class="two mt-8">
-        <div>
-          <label>Overline</label>
-          <input id="f_overline" type="text" />
-        </div>
-        <div>
-          <label>Autore</label>
-          <input id="f_author" type="text" />
-        </div>
-      </div>
-
-      <div class="two mt-8">
-        <div>
-          <label>ID</label>
-          <input id="f_id" type="text" placeholder="opzionale (fallback: slug)" />
-        </div>
-        <div>
-          <label>Thumbnail</label>
-          <div class="row align-center gap-8">
-            <input id="f_thumb" type="text" placeholder="/images/thumbs/... oppure URL" />
-            <input id="uploadThumb" type="file" accept="image/*" hidden />
-            <button id="btnUploadThumb" class="btn">Carica</button>
-            <button id="btnBrowseThumb" class="btn">Sfoglia</button>
-          </div>
-          <div id="thumbBrowser" class="asset-browser hidden"></div>
-        </div>
-      </div>
-
-      <div style="margin-top:8px">
-        <label>Descrizione</label>
-        <textarea id="f_desc" class="textarea--sm" placeholder="Testo descrizione (opzionale)"></textarea>
-      </div>
-
-      <div class="two" style="margin-top:8px">
-        <div>
-          <label>Tag (separati da virgola)</label>
-          <input id="f_tags" type="text" placeholder="es. commander, edh, guide" />
-          <div id="tagsSaved" class="tags-saved mt-8"></div>
-        </div>
-    <div class="switch-row">
-      <div class="switch-pair">
-        <label for="f_draft">Bozza</label>
-        <input id="f_draft" type="checkbox" />
-      </div>
-      <div class="switch-pair">
-        <label for="f_updated">Aggiornato</label>
-        <input id="f_updated" type="datetime-local" />
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-8">
-        <label>Immagine Card (home)</label>
-        <div class="row align-center gap-8">
-          <input id="f_card" type="text" placeholder="/images/cards/... oppure URL" />
-          <input id="uploadCard" type="file" accept="image/*" hidden />
-          <button id="btnUploadCard" class="btn">Carica</button>
-          <button id="btnBrowseCard" class="btn">Sfoglia</button>
-        </div>
-        <div id="cardBrowser" class="asset-browser hidden"></div>
-      </div>
-
-      <div class="mt-8">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <label>Link</label>
-          <button id="addLinkBtn" class="btn">Aggiungi link</button>
-        </div>
-        <div id="linksList" class="links-list"></div>
-        <div class="muted">Campi: Label, URL, Classe, Ordine, Primario</div>
-      </div>
-
-      <div style="margin-top:8px">
-        <label>YAML grezzo (avanzato)</label>
-        <textarea id="f_raw" placeholder="# qui vedi/modifichi l'intero YAML"></textarea>
-        <div class="muted">Puoi editare i campi sopra o direttamente il YAML. Al salvataggio unifichiamo.</div>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <span id="fileInfo" class="pill">â€”</span>
-        <button id="deleteBtn" class="btn danger">ðŸ—‘ï¸ Elimina</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- YAML parser -->
@@ -348,7 +236,7 @@
 /* ====== CONFIGURAZIONE ====== */
 let OWNER = "eventhorizon-mtg";
 let REPO  = "eventhorizon-mtg.github.io";
-let BRANCH = "test";
+let BRANCH = "main";  // Branch principale (corretto da "test")
 let FOLDER = "data/archive/items";
 let EXT    = "yml";
 let WORKER_BASE = "https://eventhorizon-oauth.cetriolo-mtg.workers.dev";
@@ -544,7 +432,7 @@ async function getPagesLatest(){
   return r.json();
 }
 async function monitorDeployAndReload(){
-  showNotice('Build/deploy avviatoâ€¦');
+  showNotice('Build/deploy avviato…');
   const start = Date.now();
   let autoReloaded = false;
   const autoReloadTimer = setTimeout(() => {
@@ -563,7 +451,7 @@ async function monitorDeployAndReload(){
 
   // Se l'endpoint Pages non Ã¨ disponibile, fallback diretto su versione
   if (!baseTime && !baseLatest) {
-    updateNotice('Attesa nuova versione del sitoâ€¦');
+    updateNotice('Attesa nuova versione del sito…');
     const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
     cancelAutoReload();
     hideNotice();
@@ -572,14 +460,14 @@ async function monitorDeployAndReload(){
 
   const deadline = Date.now() + 180000; // 3 minuti
   while (Date.now() < deadline) {
-    let status = 'in attesaâ€¦';
+    let status = 'in attesa…';
     try {
       const latest = await getPagesLatest();
       const t = Date.parse(latest.updated_at||'') || 0;
       const changed = t > baseTime;
       status = String(latest.status || 'processing');
       if (changed && /built/i.test(status)) {
-        updateNotice('Build completata, finalizzo deployâ€¦');
+        updateNotice('Build completata, finalizzo deploy…');
         const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
         cancelAutoReload();
         hideNotice();
@@ -593,7 +481,7 @@ async function monitorDeployAndReload(){
       }
     } catch(_) { /* ignora e riprova */ }
     const secs = Math.floor((Date.now()-start)/1000);
-    updateNotice(`Stato build: ${status} â€” ${secs}s`);
+    updateNotice(`Stato build: ${status} — ${secs}s`);
     await sleep(2000);
   }
   cancelAutoReload();
@@ -1834,7 +1722,7 @@ function fillForm(y, raw, path){
     if (b) b.hidden = !fd.checked;
   };
   byId("f_raw").value = raw || jsyaml.dump(y);
-  fileInfo.textContent = path || "â€”";
+  fileInfo.textContent = path || "—";
 }
 
 /* ====== CREA NUOVO ====== */
@@ -2091,7 +1979,7 @@ function addLinkRow(L={}){
     {val:'btn--edh', lab:'EDHREC'},
     {val:'btn--teal', lab:'Teal'},
     {val:'btn--base', lab:'Base'},
-    {val:'__custom__', lab:'Customâ€¦'}
+    {val:'__custom__', lab:'Custom…'}
   ];
   let btnClass = String(L.btn_class||'');
   const effectivePrim = !!(L.primary || /\bprimary\b/.test(btnClass));

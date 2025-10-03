@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(s/ðŸ— 'ï¸/🗑️/g\" /tmp/admin_clean.html && echo \"UTF-8 characters fixed \")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -112,6 +112,22 @@ html{ scroll-behavior: smooth; }
   --section-bg-dark: var(--neutral-900);
   --section-text-light: var(--neutral-900);
   --section-text-dark: var(--neutral-50);
+
+  /* Navbar & Hero (sempre leggibile) */
+  --nav-bg: rgba(14, 15, 26, 0.75);
+  --nav-bg-scrolled: rgba(14, 15, 26, 0.85);
+  --nav-text: #FFFFFF;
+  --nav-text-hover: rgba(255, 255, 255, 0.08);
+  --hero-text: #FFFFFF;
+  --hero-bg-overlay: rgba(14, 15, 26, 0.65);
+
+  /* Buttons sistema unificato */
+  --btn-primary-bg: var(--teal-600);
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: var(--teal-700);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: currentColor;
+  --btn-secondary-text: var(--text-primary);
 }
 
 /* Dark Mode */
@@ -142,6 +158,22 @@ html{ scroll-behavior: smooth; }
   --section-bg-dark: var(--neutral-900);
   --section-text-light: var(--neutral-50);
   --section-text-dark: var(--neutral-900);
+
+  /* Navbar & Hero dark mode (resta scuro, testo bianco) */
+  --nav-bg: rgba(14, 15, 26, 0.75);
+  --nav-bg-scrolled: rgba(14, 15, 26, 0.85);
+  --nav-text: #FFFFFF;
+  --nav-text-hover: rgba(255, 255, 255, 0.08);
+  --hero-text: #FFFFFF;
+  --hero-bg-overlay: rgba(14, 15, 26, 0.65);
+
+  /* Buttons dark mode */
+  --btn-primary-bg: var(--teal-600);
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: var(--teal-300);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: var(--text-primary);
+  --btn-secondary-text: var(--text-primary);
 }
 
 /* Rispetta preferenza di sistema se non impostata manualmente */
@@ -168,6 +200,22 @@ html{ scroll-behavior: smooth; }
     --section-bg-dark: var(--neutral-900);
     --section-text-light: var(--neutral-50);
     --section-text-dark: var(--neutral-900);
+
+    /* Navbar & Hero dark mode (resta scuro, testo bianco) */
+    --nav-bg: rgba(14, 15, 26, 0.75);
+    --nav-bg-scrolled: rgba(14, 15, 26, 0.85);
+    --nav-text: #FFFFFF;
+    --nav-text-hover: rgba(255, 255, 255, 0.08);
+    --hero-text: #FFFFFF;
+    --hero-bg-overlay: rgba(14, 15, 26, 0.65);
+
+    /* Buttons dark mode */
+    --btn-primary-bg: var(--teal-600);
+    --btn-primary-text: #FFFFFF;
+    --btn-primary-hover: var(--teal-300);
+    --btn-secondary-bg: transparent;
+    --btn-secondary-border: var(--text-primary);
+    --btn-secondary-text: var(--text-primary);
   }
 }
 
@@ -198,7 +246,7 @@ main{ display: block; }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: var(--z-nav);
-  background: rgba(25,26,35,0.38);
+  background: var(--nav-bg);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   backdrop-filter: blur(10px) saturate(1.4);
   box-shadow: var(--shadow-nav);
@@ -207,7 +255,7 @@ main{ display: block; }
 }
 .nav.is-scrolled{
   box-shadow: var(--shadow-nav-strong);
-  background: rgba(25,26,35,0.42);
+  background: var(--nav-bg-scrolled);
 }
 .nav__inner{
   display: flex;
@@ -243,7 +291,7 @@ main{ display: block; }
 .nav__toggle-bar{
   width: 22px;
   height: 2px;
-  background: #fff;
+  background: var(--nav-text);
   opacity: 0.9;
   border-radius: 1px;
 }
@@ -282,11 +330,11 @@ main{ display: block; }
 .nav__link{
   display: block;
   padding: 10px 8px;
-  color: #fff;
+  color: var(--nav-text);
   text-decoration: none;
   border-radius: 8px;
 }
-.nav__link:hover{ background: rgba(255,255,255,0.06); }
+.nav__link:hover{ background: var(--nav-text-hover); }
 .nav__link:focus-visible{
   outline: 2px solid var(--gold-600);
   outline-offset: 2px;
@@ -413,7 +461,7 @@ main{ display: block; }
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(55deg, #161430 0%, rgba(0,0,0,0) 86.57%),
+    linear-gradient(55deg, var(--hero-bg-overlay) 0%, rgba(0,0,0,0) 86.57%),
     linear-gradient(194.96deg, var(--indigo-900) 10.69%, var(--indigo-700) 61.97%, var(--indigo-500) 99.1%);
 }
 .hero.has-hero-bg::after{
@@ -454,13 +502,16 @@ main{ display: block; }
   font-weight: var(--fw-black);
   font-size: var(--fs-h1);
   line-height: var(--lh-tight);
+  color: var(--hero-text);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 .hero__subtitle{
   margin: 0;
   max-width: 62ch;
-  color: var(--neutral-50);
+  color: var(--hero-text);
   font-weight: var(--fw-medium);
   line-height: var(--lh-normal);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
 }
 
 /* CTA Hero — 3 chevron a V animate */
@@ -486,13 +537,14 @@ main{ display: block; }
 .hero-cta--chevrons .v{
   width: 24px;
   height: 24px;
-  stroke: #fff;
+  stroke: var(--hero-text);
   fill: none;
   stroke-width: 2.25;
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: .85;
   animation: heroV 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
 }
 .hero-cta--chevrons .v:nth-child(1){ animation-delay: 0s; }
 .hero-cta--chevrons .v:nth-child(2){ animation-delay: .12s; }
@@ -549,7 +601,7 @@ main{ display: block; }
 .hero__subtitle{ letter-spacing: 0; } /* neutro per leggibilità */
 
 /* =======================
-   CTA Variants
+   CTA Variants (Sistema Unificato)
    ======================= */
 .btn{
   --btn-radius: var(--radius-s);
@@ -562,11 +614,49 @@ main{ display: block; }
   min-width: 149px;
   border-radius: var(--btn-radius);
   text-decoration: none;
-  color: #fff;
+  font-weight: var(--fw-medium);
+  border: 2px solid transparent;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.25);
   transition: transform var(--dur-1) var(--ease-standard),
               background-color var(--dur-1) var(--ease-standard),
-              box-shadow var(--dur-1) var(--ease-standard);
+              box-shadow var(--dur-1) var(--ease-standard),
+              border-color var(--dur-1) var(--ease-standard);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Primary (Default - Teal) */
+.btn,
+.btn--primary{
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+.btn:hover,
+.btn--primary:hover{
+  background: var(--btn-primary-hover);
+  transform: scale(0.99);
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+}
+.btn:focus-visible,
+.btn--primary:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
+}
+
+/* Secondary (Outline) */
+.btn--secondary{
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border-color: var(--btn-secondary-border);
+  box-shadow: none;
+}
+.btn--secondary:hover{
+  background: color-mix(in oklab, var(--btn-secondary-text) 8%, transparent);
+  transform: scale(0.99);
+}
+.btn--secondary:focus-visible{
+  outline: 2px solid var(--gold-600);
+  outline-offset: 2px;
 }
 
 /* Teal (default) */
