@@ -1,15 +1,10 @@
 +++
 title = "Benvenuto su EventHorizon.mtg"
-date = 2025-09-27T12:00:00Z
+date = "2025-09-27T12:00:00.000Z"
 draft = false
-
-# SEO
 description = "Che cos'è la sezione Articoli e come verrà usata sul sito."
-tags = []
-
-# Media (puoi sostituire in futuro con un file sotto images/articles/benvenuto/cover.webp)
+tags = ["benvenuto"]
 cover = "images/bg_image.webp"
-
 +++
 
 ## Benvenuto!
