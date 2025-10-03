@@ -20,6 +20,8 @@
     <div class="row hidden" id="actionsRow">
       <button id="newBtn" class="btn">Nuovo item</button>
       <button id="saveBtn" class="btn primary">Salva</button>
+      <button id="multiBtn" class="btn">Seleziona multipli</button>
+      <button id="deleteSelectedBtn" class="btn danger hidden" disabled>Elimina selezionati</button>
       <span id="saveStatus" class="status"></span>
     </div>
   </header>
@@ -228,6 +230,8 @@ let TOKEN = (typeof sessionStorage!=="undefined" && sessionStorage.getItem("gh_t
   || "";
 let OAUTH_POPUP = null;
 let DEPLOY_LOCK = false;
+let MULTI_MODE = false;
+const SELECTED_ITEMS = new Map(); // path -> { sha }
 let CURRENT = null; // {path, sha, yaml}
 
 /* ====== UTILS ====== */
@@ -448,6 +452,8 @@ function escAttr(s){ return escHtml(s); }
   const btnBrowseCard = byId("btnBrowseCard");
   const cardBrowser = byId("cardBrowser");
   const fCard = byId("f_card");
+  const multiBtn = byId("multiBtn");
+  const deleteSelectedBtn = byId("deleteSelectedBtn");
 
   function toggleLockOnButton(id, state){
     const btn = byId(id);
@@ -473,17 +479,84 @@ function escAttr(s){ return escHtml(s); }
 
   function setDeployLock(state, message){
     DEPLOY_LOCK = !!state;
-    ['saveBtn','deleteBtn','newBtn'].forEach(id => toggleLockOnButton(id, state));
+    ['saveBtn','deleteBtn','newBtn','deleteSelectedBtn','multiBtn'].forEach(id => toggleLockOnButton(id, state));
     if (typeof message === 'string') updateDeployStatus(message);
+    if (!state) updateSelectionStatus();
   }
 
   function isDeployLocked(){
     return DEPLOY_LOCK;
   }
 
+  function updateSelectionStatus(){
+    const count = SELECTED_ITEMS.size;
+    const delBtn = byId('deleteSelectedBtn');
+    if (delBtn) {
+      delBtn.classList.toggle('hidden', !MULTI_MODE);
+      delBtn.disabled = !MULTI_MODE || count === 0 || DEPLOY_LOCK;
+      delBtn.textContent = count ? `Elimina selezionati (${count})` : 'Elimina selezionati';
+    }
+    const multiBtn = byId('multiBtn');
+    if (multiBtn) multiBtn.textContent = MULTI_MODE ? 'Annulla selezione multipla' : 'Seleziona multipli';
+    const statusEl = byId('saveStatus');
+    if (!statusEl) return;
+    if (MULTI_MODE) {
+      statusEl.dataset.selectionStatus = '1';
+      statusEl.textContent = count ? `${count} elemento/i selezionati` : 'Seleziona elementi da eliminare';
+    } else if (statusEl.dataset.selectionStatus === '1') {
+      delete statusEl.dataset.selectionStatus;
+      if (!DEPLOY_LOCK) statusEl.textContent = '';
+    }
+  }
+
+  function setMultiMode(on, opts={}){
+    const target = !!on;
+    if (target === MULTI_MODE && !opts.force) {
+      if (!target && opts.resetSelection) SELECTED_ITEMS.clear();
+      updateSelectionStatus();
+      return;
+    }
+    MULTI_MODE = target;
+    if (!MULTI_MODE || opts.resetSelection) SELECTED_ITEMS.clear();
+    updateSelectionStatus();
+    if (!opts.skipReload && TOKEN) {
+      loadList().catch(()=>{});
+    }
+  }
+
+  function toggleSelection(path, sha, isSelected, el){
+    if (isSelected) SELECTED_ITEMS.set(path, { sha });
+    else SELECTED_ITEMS.delete(path);
+    if (el) el.classList.toggle('is-selected', isSelected);
+    updateSelectionStatus();
+  }
+
+  async function ensureContentSha(path, knownSha){
+    if (knownSha) return knownSha;
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${encodeURIComponent(BRANCH)}`;
+    const r = await gh(url);
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      throw new Error(`Impossibile ottenere SHA per ${path}: ${r.status} - ${t}`);
+    }
+    const j = await r.json();
+    return j.sha;
+  }
+
+  async function deleteContent(path, sha){
+    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+    const body = { message: `chore(admin): delete ${path}`, sha, branch: BRANCH };
+    const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
+    if (!r.ok) {
+      const t = await r.text().catch(()=>String(r.status));
+      throw new Error(`Errore eliminazione ${path}: ${r.status} - ${t}`);
+    }
+  }
+
   function setAuthState(isAuthed){
     const authed = !!isAuthed;
     if (!authed) setDeployLock(false);
+    if (!authed) setMultiMode(false, { skipReload: true, resetSelection: true, force: true });
 
     const loginBtn = byId('loginBtn');
     if (loginBtn) {
@@ -503,7 +576,7 @@ function escAttr(s){ return escHtml(s); }
     const adminMain = byId('adminMain');
     if (adminMain) adminMain.classList.toggle('hidden', !authed);
 
-    ['newBtn','saveBtn','deleteBtn','reloadBtn','addLinkBtn'].forEach(id => {
+    ['newBtn','saveBtn','deleteBtn','reloadBtn','addLinkBtn','multiBtn','deleteSelectedBtn'].forEach(id => {
       const btn = byId(id);
       if (btn) btn.disabled = !authed;
     });
@@ -526,6 +599,8 @@ function escAttr(s){ return escHtml(s); }
       const raw = byId('f_raw');
       if (raw) raw.value = '';
     }
+
+    updateSelectionStatus();
   }
 
   // Build/deploy notice helpers
@@ -711,14 +786,72 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
     PENDING.thumb = null;
   };
 }
-if (btnBrowseCard && cardBrowser && fCard) {
-  btnBrowseCard.onclick = async () => {
-    if (!TOKEN) { alert('Prima fai login.'); return; }
-    let items = await listImages(CARDS_DIR, 2).catch(()=>[]);
-    renderAssetBrowser(cardBrowser, items, fCard);
-    PENDING.card = null;
-  };
-}
+  if (btnBrowseCard && cardBrowser && fCard) {
+    btnBrowseCard.onclick = async () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      let items = await listImages(CARDS_DIR, 2).catch(()=>[]);
+      renderAssetBrowser(cardBrowser, items, fCard);
+      PENDING.card = null;
+    };
+  }
+
+  if (multiBtn) {
+    multiBtn.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      setMultiMode(!MULTI_MODE);
+    };
+  }
+
+  if (deleteSelectedBtn) {
+    deleteSelectedBtn.onclick = async () => {
+      if (!MULTI_MODE) return;
+      if (SELECTED_ITEMS.size === 0) return alert('Nessun elemento selezionato.');
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (isDeployLocked()) { alert('E\' in corso un deploy precedente. Attendi il completamento.'); return; }
+      if (!confirm(`Eliminare ${SELECTED_ITEMS.size} elementi selezionati?`)) return;
+
+      setDeployLock(true, 'Eliminazione multipla in corso...');
+      const entries = Array.from(SELECTED_ITEMS.entries());
+      let success = false;
+      try {
+        let idx = 0;
+        for (const [path, info] of entries) {
+          idx += 1;
+          updateDeployStatus(`Elimino ${path} (${idx}/${entries.length})...`);
+          const sha = await ensureContentSha(path, info && info.sha);
+          await deleteContent(path, sha);
+        }
+        SELECTED_ITEMS.clear();
+        CURRENT = null;
+        fillForm({}, "", "-");
+        await loadList();
+        try { await resetSiteCaches(); } catch(_){ }
+        updateDeployStatus('Deploy in corso...');
+        const ok = await monitorDeployAndReload().catch(()=>false);
+        if (ok) updateDeployStatus('Deploy completato');
+        else {
+          updateDeployStatus('Deploy non confermato, ricarico...');
+          const urlReload = new URL(window.location.href);
+          urlReload.searchParams.set('t', String(Date.now()));
+          window.location.replace(urlReload.toString());
+        }
+        setMultiMode(false, { skipReload: true, resetSelection: true, force: true });
+        const statusEl = byId('saveStatus');
+        if (statusEl) {
+          delete statusEl.dataset.selectionStatus;
+          statusEl.textContent = `Eliminati ${entries.length} file.`;
+        }
+        updateSelectionStatus();
+        success = true;
+      } catch (err) {
+        alert(err && err.message ? err.message : err);
+      } finally {
+        setDeployLock(false);
+        if (!success) updateSelectionStatus();
+      }
+    };
+  }
 
 /* ====== CARICAMENTO LISTA FILE ====== */
 let CURRENT_DIR = null;
@@ -742,13 +875,16 @@ async function loadList(path){
   if (CURRENT_DIR !== FOLDER) {
     const up = document.createElement('div');
     up.className = 'item item--dir';
+    const info = document.createElement('div');
+    info.className = 'item-info';
     const st = document.createElement('strong');
     st.textContent = '..';
     const sp = document.createElement('span');
     sp.className = 'meta';
     sp.textContent = 'Torna su';
-    up.appendChild(st);
-    up.appendChild(sp);
+    info.appendChild(st);
+    info.appendChild(sp);
+    up.appendChild(info);
     up.onclick = () => {
       const p = CURRENT_DIR.replace(/\\/g,'/');
       const i = p.lastIndexOf('/');
@@ -795,10 +931,14 @@ async function loadList(path){
     } catch(_) { return { f, date: 0, draft: false }; }
   }));
   metas.sort((a,b) => (b.date - a.date) || a.f.name.localeCompare(b.f.name));
+  const availablePaths = new Set();
   for (const m of metas) {
     const f = m.f;
+    availablePaths.add(f.path);
     const div = document.createElement('div');
     div.className = 'item' + (m.draft ? ' is-draft' : '');
+    div.dataset.path = f.path;
+    div.dataset.sha = f.sha || '';
     const strong = document.createElement('strong');
     strong.style.fontWeight = '600';
     strong.style.fontSize = '13px';
@@ -806,12 +946,56 @@ async function loadList(path){
     const meta = document.createElement('span');
     meta.className = 'meta';
     meta.textContent = String(f.path || '');
-    div.appendChild(strong);
-    div.appendChild(meta);
-    div.onclick = () => openFile(f.path);
-    if (m.draft) { const s = document.createElement('span'); s.className = 'pill pill--warn'; s.textContent = 'Draft'; div.appendChild(s); }
+
+    if (MULTI_MODE) {
+      const chkWrap = document.createElement('label');
+      chkWrap.className = 'item-checkbox';
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'item-select';
+      chk.checked = SELECTED_ITEMS.has(f.path);
+      chk.onclick = (ev) => ev.stopPropagation();
+      chk.onchange = (ev) => {
+        const next = !!ev.target.checked;
+        const sha = f.sha || div.dataset.sha || '';
+        toggleSelection(f.path, sha, next, div);
+      };
+      chkWrap.appendChild(chk);
+      div.appendChild(chkWrap);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'item-info';
+    info.appendChild(strong);
+    info.appendChild(meta);
+    if (m.draft) {
+      const s = document.createElement('span');
+      s.className = 'pill pill--warn';
+      s.textContent = 'Draft';
+      info.appendChild(s);
+    }
+    div.appendChild(info);
+
+    if (MULTI_MODE) {
+      div.classList.toggle('is-selected', SELECTED_ITEMS.has(f.path));
+      div.onclick = () => {
+        const next = !SELECTED_ITEMS.has(f.path);
+        const sha = f.sha || div.dataset.sha || '';
+        toggleSelection(f.path, sha, next, div);
+        const cb = div.querySelector('.item-select');
+        if (cb) cb.checked = next;
+      };
+    } else {
+      div.onclick = () => openFile(f.path);
+    }
     listEl.appendChild(div);
   }
+  if (MULTI_MODE) {
+    for (const key of Array.from(SELECTED_ITEMS.keys())) {
+      if (!availablePaths.has(key)) SELECTED_ITEMS.delete(key);
+    }
+  }
+  updateSelectionStatus();
 }
 
 /* ====== APRI FILE ====== */
@@ -898,18 +1082,15 @@ byId("deleteBtn").onclick = async () => {
   if (!CURRENT || !CURRENT.path) return alert("Nessun file aperto.");
   if (!confirm(`Eliminare ${CURRENT.path}?`)) return;
   setDeployLock(true, 'Eliminazione in corso...');
-  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CURRENT.path}`;
-  const body = { message: `chore(admin): delete ${CURRENT.path}`, sha: CURRENT.sha, branch: BRANCH };
   try {
-    const r = await gh(url, { method:"DELETE", body: JSON.stringify(body) });
-    if (!r.ok) {
-      const t = await r.text().catch(()=>String(r.status));
-      throw new Error(`Errore eliminazione: ${r.status} - ${t}`);
-    }
+    const sha = await ensureContentSha(CURRENT.path, CURRENT.sha);
+    await deleteContent(CURRENT.path, sha);
     saveStatus.textContent = "File eliminato.";
+    SELECTED_ITEMS.delete(CURRENT.path);
     CURRENT = null;
     await loadList();
     fillForm({}, "", "-");
+    updateSelectionStatus();
     try { await resetSiteCaches(); } catch(_){ }
     updateDeployStatus('Deploy in corso...');
     const ok = await monitorDeployAndReload().catch(()=>false);
@@ -925,6 +1106,7 @@ byId("deleteBtn").onclick = async () => {
     alert(err && err.message ? err.message : err);
   } finally {
     setDeployLock(false);
+    updateSelectionStatus();
   }
 };
 
