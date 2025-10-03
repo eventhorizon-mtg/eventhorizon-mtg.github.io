@@ -111,7 +111,11 @@ html{ scroll-behavior: smooth; }
 
   /* NEW: contact icons base color (overridden in dark) */
   --contact-icon: var(--indigo-900);
+  /* Link colors */
+  --link-color: var(--indigo-700);
+  --link-hover: var(--indigo-900);
 }
+
 
 /* =======================
    DESIGN TOKENS — DARK
@@ -167,7 +171,11 @@ html{ scroll-behavior: smooth; }
 
   /* Contact icons in dark (AA+) */
   --contact-icon: var(--teal-300); /* #00ADB1 on #1A1B2E ~6.1:1 */
+  /* Link colors for dark */
+  --link-color: var(--teal-300);
+  --link-hover: var(--teal-600);
 }
+
 
 /* Respect system preference if no manual theme is set */
 @media (prefers-color-scheme: dark){
@@ -236,6 +244,11 @@ body{
 img{ max-width: 100%; display: block; }
 main{ display: block; }
 
+/* Default link colors based on theme tokens */
+a{ color: var(--link-color); }
+a:hover{ color: var(--link-hover); }
+a:focus-visible{ outline: 2px solid var(--gold-600); outline-offset: 2px; }
+
 /* =======================
    NAVBAR
    ======================= */
@@ -266,11 +279,12 @@ main{ display: block; }
   align-items: center;
   gap: var(--space-2);
   text-decoration: none;
-  color: inherit;
+  color: #FFFFFF !important; /* force white brand link */
 }
 .brand__name{
   font-weight: var(--fw-bold);
   letter-spacing: 0.2px;
+  color: #FFFFFF !important; /* keep left brand white */
 }
 .brand__name:hover{
   text-shadow: 0 0 4px var(--teal-300);
@@ -990,3 +1004,36 @@ footer .footer__inner, .site-footer .footer__inner{
 #cards-title { scroll-margin-top: 80px; } /* avoid overlap with fixed navbar */
 
 /* You can append the rest of your components' CSS here if needed */
+
+
+/* Dark-mode text defaults for common content elements to prevent low-contrast cases */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] li,
+[data-theme="dark"] dd,
+[data-theme="dark"] dt,
+[data-theme="dark"] small,
+[data-theme="dark"] label{
+  color: var(--text-primary);
+}
+
+/* Dark-mode explicit components */
+[data-theme="dark"] .slide__title,
+[data-theme="dark"] .slide__desc,
+[data-theme="dark"] .card__title,
+[data-theme="dark"] .card__desc,
+[data-theme="dark"] .links__title,
+[data-theme="dark"] .link-card__meta,
+[data-theme="dark"] .portal__title,
+[data-theme="dark"] .portal__intro,
+[data-theme="dark"] .portal__sub{
+  color: var(--text-primary);
+}
+
+/* Keep all top navbar links readable */
+.nav__link{ color: var(--nav-text); }
