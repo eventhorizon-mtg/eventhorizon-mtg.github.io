@@ -4,6 +4,70 @@
      Sorgenti attesi in: /assets/scripts/
 */}}
 
+<!-- Theme Toggle Script (inline per evitare flash) -->
+<script>
+(function() {
+  const STORAGE_KEY = 'theme-preference';
+  const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const getStoredTheme = () => {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  };
+  const setStoredTheme = (theme) => {
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
+  };
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+  };
+
+  // Applica tema immediatamente (previene flash)
+  const storedTheme = getStoredTheme();
+  const initialTheme = storedTheme || getSystemTheme();
+  applyTheme(initialTheme);
+
+  // Setup toggle dopo DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+
+    const updateToggle = (theme) => {
+      const sunIcon = toggle.querySelector('.theme-toggle__icon--sun');
+      const moonIcon = toggle.querySelector('.theme-toggle__icon--moon');
+      if (theme === 'dark') {
+        sunIcon && (sunIcon.style.display = 'block');
+        moonIcon && (moonIcon.style.display = 'none');
+        toggle.setAttribute('aria-label', 'Passa a tema chiaro');
+      } else {
+        sunIcon && (sunIcon.style.display = 'none');
+        moonIcon && (moonIcon.style.display = 'block');
+        toggle.setAttribute('aria-label', 'Passa a tema scuro');
+      }
+    };
+
+    updateToggle(initialTheme);
+
+    toggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+      setStoredTheme(newTheme);
+      updateToggle(newTheme);
+    });
+
+    // Ascolta cambi preferenza sistema
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e) => {
+      if (!getStoredTheme()) {
+        const systemTheme = e.matches ? 'dark' : 'light';
+        applyTheme(systemTheme);
+        updateToggle(systemTheme);
+      }
+    };
+    mediaQuery.addEventListener ? mediaQuery.addEventListener('change', handleSystemChange)
+                                 : mediaQuery.addListener(handleSystemChange);
+  });
+})();
+</script>
+
 {{- $jsPaths := slice
     "scripts/script.js"
     "scripts/subhero.js"

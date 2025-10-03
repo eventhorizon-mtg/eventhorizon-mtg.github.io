@@ -1,0 +1,106 @@
+{{/* Schema.org Structured Data - JSON-LD */}}
+{{- $baseURL := strings.TrimSuffix "/" .Site.BaseURL -}}
+{{- $title := .Title | default .Site.Title -}}
+{{- $description := .Description | default (.Summary | default (index .Site.Params.og "description")) -}}
+{{- $image := "" -}}
+
+{{- /* Determina immagine */ -}}
+{{- with .Params.ogImage -}}
+  {{- $image = . -}}
+{{- else with .Params.image -}}
+  {{- $image = . -}}
+{{- else with (index .Site.Params.og "image") -}}
+  {{- $image = . -}}
+{{- end -}}
+
+{{- /* Rendi immagine assoluta */ -}}
+{{- if $image -}}
+  {{- if not (hasPrefix $image "http") -}}
+    {{- $image = printf "%s/%s" $baseURL (strings.TrimPrefix "/" $image) -}}
+  {{- end -}}
+{{- end -}}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "{{ $baseURL }}/#organization",
+      "name": "{{ .Site.Title }}",
+      "url": "{{ $baseURL }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ $baseURL }}/images/logo.webp",
+        "width": 115,
+        "height": 115
+      },
+      "sameAs": [
+        "https://www.youtube.com/@EventHorizonMtG",
+        "https://www.instagram.com/eventhorizon.mtg",
+        "https://www.tiktok.com/@eventhorizonmtg",
+        "https://t.me/eventhorizonmtg",
+        "https://discord.com/invite/tQrbzhUa4k"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ $baseURL }}/#website",
+      "url": "{{ $baseURL }}",
+      "name": "{{ .Site.Title }}",
+      "description": "{{ with (index .Site.Params.og "description") }}{{ . }}{{ end }}",
+      "publisher": {
+        "@id": "{{ $baseURL }}/#organization"
+      }
+    }
+    {{- if .IsPage -}}
+    {{- if eq .Section "article" -}}
+    ,{
+      "@type": "Article",
+      "@id": "{{ .Permalink }}#article",
+      "headline": "{{ $title }}",
+      "description": "{{ $description }}",
+      "datePublished": "{{ .PublishDate.Format "2006-01-02T15:04:05Z07:00" }}",
+      "dateModified": "{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}",
+      {{- if $image }}
+      "image": {
+        "@type": "ImageObject",
+        "url": "{{ $image }}",
+        "width": 1200,
+        "height": 630
+      },
+      {{- end }}
+      "author": {
+        "@type": "Organization",
+        "name": "{{ .Site.Title }}",
+        "@id": "{{ $baseURL }}/#organization"
+      },
+      "publisher": {
+        "@id": "{{ $baseURL }}/#organization"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ .Permalink }}"
+      },
+      "url": "{{ .Permalink }}"
+    }
+    {{- end -}}
+    {{- end -}}
+    {{- if .IsHome -}}
+    ,{
+      "@type": "WebPage",
+      "@id": "{{ .Permalink }}#webpage",
+      "url": "{{ .Permalink }}",
+      "name": "{{ $title }}",
+      "description": "{{ $description }}",
+      "isPartOf": {
+        "@id": "{{ $baseURL }}/#website"
+      },
+      "about": {
+        "@id": "{{ $baseURL }}/#organization"
+      }
+    }
+    {{- end -}}
+  ]
+}
+</script>

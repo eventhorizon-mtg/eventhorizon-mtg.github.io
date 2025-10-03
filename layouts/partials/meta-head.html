@@ -65,6 +65,14 @@
 {{- if $ogDesc }}<meta name="twitter:description" content="{{ $ogDesc }}">{{ end -}}
 {{- if $ogImageAbs }}<meta name="twitter:image" content="{{ $ogImageAbs }}">{{ end -}}
 
+<!-- Schema.org Structured Data -->
+{{ partial "schema-org.html" . }}
+
+<!-- RSS Feed -->
+{{ with .OutputFormats.Get "rss" -}}
+  {{ printf `<link rel=%q type=%q href=%q title=%q />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+{{ end }}
+
 <!-- Fonts (self-hosted) -->
 {{/* NOTE: font-face rules are loaded via assets/style/base/_fonts.css included in the main bundle below. */}}
 
@@ -94,6 +102,7 @@
     "style/components/_portal.css"
     "style/components/_links.css"
     "style/components/_contacts.css"
+    "style/components/_theme-toggle.css"
 
 -}}
 
