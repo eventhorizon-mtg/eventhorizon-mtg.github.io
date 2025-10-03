@@ -8,7 +8,7 @@
     <ul class="tax-terms__list">
       {{ range .Data.Terms.Alphabetical }}
         <li class="tax-terms__item">
-          <a class="tax-terms__link" href="{{ .Page.RelPermalink }}">{{ .LinkTitle }}</a>
+          <a class="tax-terms__link" href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a>
           <small class="tax-terms__count">({{ .Count }})</small>
         </li>
       {{ end }}
