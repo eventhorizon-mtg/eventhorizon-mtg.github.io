@@ -1,6 +1,6 @@
 <header class="nav glass-nav" id="site-nav">
   <div class="nav__inner">
-    <a class="brand" href="{{ .Site.BaseURL }}" aria-label="Home">
+    <a class="brand" href="{{ "/" | absURL }}" aria-label="Home">
       <span class="brand__name">{{ .Site.Title }}</span>
     </a>
 
@@ -19,7 +19,7 @@
       </ul>
       <ul class="nav__list">
         <li class="nav__item">
-          <a class="nav__link" href="{{ .Site.BaseURL }}#contacts">Contatti</a>
+          <a class="nav__link" href="{{ "/" | absURL }}#contacts">Contatti</a>
         </li>
       </ul>
     </nav>

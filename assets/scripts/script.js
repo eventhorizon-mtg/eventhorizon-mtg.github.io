@@ -140,3 +140,51 @@
 
   chevrons.addEventListener('click', onChevronClick, { passive: false });
 })();
+
+/* Image fallback handler >>> */
+(function() {
+  // Placeholder path relativo alla base del sito
+  const FALLBACK_IMAGE = 'images/cards/fblthp_placeholder.webp';
+
+  const handleImageError = (img) => {
+    // Evita loop infiniti
+    if (img.dataset.fallbackApplied === '1') return;
+    img.dataset.fallbackApplied = '1';
+
+    // Ottieni base URL dal documento
+    const base = document.documentElement.getAttribute('data-base-url') || window.location.origin;
+    const normalized = base.replace(/\/$/, '');
+
+    // Applica il fallback
+    img.src = `${normalized}/${FALLBACK_IMAGE}`;
+    img.alt = img.alt || 'Immagine non disponibile';
+
+    // Aggiungi classe per styling opzionale
+    img.classList.add('img-fallback');
+  };
+
+  // Gestione errori su tutte le immagini esistenti e future
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeName === 'IMG') {
+          node.addEventListener('error', function() { handleImageError(this); }, { once: true });
+        } else if (node.querySelectorAll) {
+          node.querySelectorAll('img').forEach((img) => {
+            img.addEventListener('error', function() { handleImageError(this); }, { once: true });
+          });
+        }
+      });
+    });
+  });
+
+  // Osserva tutto il documento per immagini dinamiche
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // Gestisci immagini già presenti nel DOM
+  document.querySelectorAll('img').forEach((img) => {
+    img.addEventListener('error', function() { handleImageError(this); }, { once: true });
+  });
+})();

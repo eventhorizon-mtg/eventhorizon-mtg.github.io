@@ -181,7 +181,7 @@
     const q = qs('#q', form);
     const onMQ = () => {
       if (!q) return;
-      q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione o tagâ€¦';
+      q.placeholder = mqPhone.matches ? 'Cerca' : 'Cerca per titolo, descrizione, tag';
     };
     onMQ();
     mqPhone.addEventListener && mqPhone.addEventListener('change', onMQ);
@@ -660,7 +660,25 @@
       renderList(paged.slice);
       updatePager(paged);
     } catch (err) {
-      console.error('[archive] dataset error:', err);
+      // Gestione errore: mostra messaggio user-friendly
+      const sectionArchive = document.querySelector('section.archive');
+      if (!sectionArchive) return;
+      const container = sectionArchive.querySelector('.container') || sectionArchive;
+
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'archive-error';
+      errorMsg.setAttribute('role', 'alert');
+      errorMsg.setAttribute('aria-live', 'assertive');
+      errorMsg.innerHTML = `
+        <p><strong>Impossibile caricare l'archivio.</strong></p>
+        <p>Riprova più tardi o <a href="${window.location.origin}">torna alla home</a>.</p>
+      `;
+      container.appendChild(errorMsg);
+
+      // Log solo in development (se presente flag data-debug)
+      if (document.documentElement.hasAttribute('data-debug')) {
+        console.error('[archive] dataset error:', err);
+      }
     }
   };
 

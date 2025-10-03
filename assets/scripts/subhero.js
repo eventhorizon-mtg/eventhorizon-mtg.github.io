@@ -404,24 +404,30 @@
     document.querySelector('.cards__inner') ||
     document.querySelector('.links__inner');
 
+  // Unifica i ResizeObserver in uno solo per evitare overhead
   if ('ResizeObserver' in window) {
-    _alignRO = new ResizeObserver(() => requestAlign());
+    _alignRO = new ResizeObserver(() => {
+      requestAlign();
+      measureViewport();
+      alignArrows?.();
+    });
+
+    // Osserva tutti gli elementi necessari con un solo observer
     if (refForRO) _alignRO.observe(refForRO);
     _alignRO.observe(document.documentElement);
+    slides.forEach(s => _alignRO.observe(s));
+    _alignRO.observe(viewport);
+  } else {
+    // Fallback per browser senza ResizeObserver
+    window.addEventListener('resize', () => {
+      requestAlign();
+      measureViewport();
+      alignArrows?.();
+    });
   }
-  window.addEventListener('resize', requestAlign);
+
   window.addEventListener('load', requestAlign);
 
   // allinea quando il layout è pronto
   window.requestAnimationFrame(() => { alignArrows?.(); });
-  window.addEventListener('load', () => { alignArrows?.(); });
-
-  // resize re-measure + realinea
-  if ('ResizeObserver' in window){
-    const ro = new ResizeObserver(() => { measureViewport(); alignArrows?.(); });
-    slides.forEach(s => ro.observe(s));
-    ro.observe(viewport);
-  } else {
-    window.addEventListener('resize', () => { measureViewport(); alignArrows?.(); });
-  }
 })();
