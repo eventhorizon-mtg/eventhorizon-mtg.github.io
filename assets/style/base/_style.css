@@ -136,8 +136,8 @@ html{ scroll-behavior: smooth; }
   --surface-1: #1F2038;
 
   /* Shadows (dark) */
-  --shadow-nav: 0 8px 20px rgba(0,0,0,0.4);
-  --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
+  --shadow-nav: none;
+  --shadow-nav-strong: none;
 
   /* Card / section */
   --card-bg: #2A2B45;
@@ -192,8 +192,8 @@ html{ scroll-behavior: smooth; }
     --surface-0: #16172A;
     --surface-1: #1F2038;
 
-    --shadow-nav: 0 8px 20px rgba(0,0,0,0.4);
-    --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
+    --shadow-nav: none;
+    --shadow-nav-strong: none;
 
     --card-bg: #2A2B45;
     --card-border: color-mix(in oklab, var(--text-primary) 18%, transparent);
@@ -1037,3 +1037,58 @@ footer .footer__inner, .site-footer .footer__inner{
 
 /* Keep all top navbar links readable */
 .nav__link{ color: var(--nav-text); }
+
+/* Dark theme: remove navbar drop shadow entirely */
+[data-theme="dark"] .nav,
+[data-theme="dark"] .nav.is-scrolled{
+  box-shadow: none !important;
+}
+
+
+/* Contacts: stronger specificity and theme-aware links */
+#contacts.contacts{
+  background: var(--section-bg-light);
+  color: var(--section-text-light);
+}
+[data-theme="dark"] #contacts.contacts{
+  background: var(--section-bg-dark);
+  color: var(--section-text-dark);
+}
+#contacts.contacts a{ color: var(--link-color); }
+#contacts.contacts a:hover{ color: var(--link-hover); }
+#contacts .contact__icon{ background-color: var(--contact-icon); }
+#contacts .contact:hover .contact__icon{ background-color: var(--teal-600); }
+
+
+/* Archive pages consistency */
+.archive-hero,
+.archive-hero ~ *,
+.archive,
+.archive-list,
+.archive-grid{
+  background: var(--under-hero-bg);
+  color: var(--text-primary);
+}
+
+.archive a{ color: var(--link-color); }
+.archive a:hover{ color: var(--link-hover); }
+
+/* Cards normalisation for archive/home if card CSS exists elsewhere */
+.card{
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+}
+.card__title, .card__desc{ color: var(--text-primary); }
+.card__overline{ color: var(--text-secondary); }
+.card__actions .btn{ color: inherit; }
+
+
+/* Home page: headings on white backgrounds use indigo dark in light theme */
+:root .home :where(h1,h2,h3,h4){
+  color: var(--indigo-900);
+}
+/* Keep dark theme headings to primary (light text) */
+[data-theme="dark"] .home :where(h1,h2,h3,h4){
+  color: var(--text-primary);
+}
