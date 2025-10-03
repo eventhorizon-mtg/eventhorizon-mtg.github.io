@@ -3,8 +3,8 @@
    ============================================================ */
 /* Sezione + variabili (dimensioni card e gap) */
 .cards{
-  background: var(--neutral-50, #F3F2F7);
-  color: var(--neutral-900, #191A23);
+  background: var(--section-bg-light);
+  color: var(--section-text-light);
   padding: clamp(32px, 6vw, 72px) 0;
 
   /* Card fisse per breakpoint */
@@ -73,7 +73,9 @@
   height: var(--card-h);
   display: flex;
   flex-direction: column;
-  background: var(--surface-0, #FFFFFF);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   box-shadow:
     0 0.5px 1px rgba(0,0,0,0.03),

@@ -2,9 +2,9 @@
    Links.css
    ============================================================ */
 .links {
-  /* Tema sezione (scuro) */
-  --links-bg: var(--neutral-900, #0E0F1A);
-  --links-text: var(--neutral-50, #F3F2F7);
+  /* Tema sezione (scuro) - usa variabili responsive dark mode */
+  --links-bg: var(--section-bg-dark);
+  --links-text: var(--section-text-dark);
   background: var(--links-bg);
   color: var(--links-text);
   padding: clamp(32px, 6vw, 72px) 0;

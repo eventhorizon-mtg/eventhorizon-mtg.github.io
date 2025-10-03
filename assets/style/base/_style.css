@@ -102,6 +102,16 @@ html{ scroll-behavior: smooth; }
   --trk-tight-lg: -0.6px; /* titoli compatti (desktop) */
   --trk-slight: -0.2px;   /* titoli medi, testi evidenziati */
   --trk-wide:  0.04em;    /* overline/label */
+
+  /* Card backgrounds */
+  --card-bg: var(--surface-0);
+  --card-border: color-mix(in oklab, var(--text-primary) 10%, transparent);
+
+  /* Section backgrounds (light mode defaults) */
+  --section-bg-light: var(--neutral-50);
+  --section-bg-dark: var(--neutral-900);
+  --section-text-light: var(--neutral-900);
+  --section-text-dark: var(--neutral-50);
 }
 
 /* Dark Mode */
@@ -123,8 +133,15 @@ html{ scroll-behavior: smooth; }
   --shadow-nav: 0 8px 20px rgba(0,0,0,0.4);
   --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
 
-  /* Card background più scuro */
+  /* Card backgrounds dark mode */
   --card-bg: #2A2B45;
+  --card-border: color-mix(in oklab, var(--text-primary) 15%, transparent);
+
+  /* Section backgrounds inverted */
+  --section-bg-light: var(--neutral-50);
+  --section-bg-dark: var(--neutral-900);
+  --section-text-light: var(--neutral-50);
+  --section-text-dark: var(--neutral-900);
 }
 
 /* Rispetta preferenza di sistema se non impostata manualmente */
@@ -145,6 +162,12 @@ html{ scroll-behavior: smooth; }
     --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
 
     --card-bg: #2A2B45;
+    --card-border: color-mix(in oklab, var(--text-primary) 15%, transparent);
+
+    --section-bg-light: var(--neutral-50);
+    --section-bg-dark: var(--neutral-900);
+    --section-text-light: var(--neutral-50);
+    --section-text-dark: var(--neutral-900);
   }
 }
 
