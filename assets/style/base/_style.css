@@ -158,7 +158,7 @@ main{ display: block; }
 }
 .brand__name{
   font-weight: var(--fw-bold);
-  color: var(--text-primary, #fff);
+  color: #fff;
   letter-spacing: 0.2px;
 }
 .brand__name:hover{
@@ -388,6 +388,7 @@ main{ display: block; }
   font-weight: var(--fw-black);
   font-size: var(--fs-h1);
   line-height: var(--lh-tight);
+  color: #fff;
 }
 .hero__subtitle{
   margin: 0;
