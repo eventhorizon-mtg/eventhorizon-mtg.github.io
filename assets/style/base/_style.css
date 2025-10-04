@@ -104,50 +104,6 @@ html{ scroll-behavior: smooth; }
   --trk-wide:  0.04em;    /* overline/label */
 }
 
-/* Dark Mode */
-[data-theme="dark"] {
-  /* Neutral invertiti */
-  --neutral-00: #0E0F1A;
-  --neutral-50: #1A1B2E;
-  --neutral-900: #F3F2F7;
-
-  /* Theme colors (Dark Mode) */
-  --bg-primary: #0E0F1A;
-  --bg-secondary: #1A1B2E;
-  --text-primary: #F3F2F7;
-  --text-secondary: #C8C6D8;
-  --surface-0: #16172A;
-  --surface-1: #1F2038;
-
-  /* Shadows più leggere per dark mode */
-  --shadow-nav: 0 8px 20px rgba(0,0,0,0.4);
-  --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
-
-  /* Card background più scuro */
-  --card-bg: #2A2B45;
-}
-
-/* Rispetta preferenza di sistema se non impostata manualmente */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --neutral-00: #0E0F1A;
-    --neutral-50: #1A1B2E;
-    --neutral-900: #F3F2F7;
-
-    --bg-primary: #0E0F1A;
-    --bg-secondary: #1A1B2E;
-    --text-primary: #F3F2F7;
-    --text-secondary: #C8C6D8;
-    --surface-0: #16172A;
-    --surface-1: #1F2038;
-
-    --shadow-nav: 0 8px 20px rgba(0,0,0,0.4);
-    --shadow-nav-strong: 0 12px 28px rgba(0,0,0,0.6);
-
-    --card-bg: #2A2B45;
-  }
-}
-
 /* =======================
    BASE
    ======================= */
