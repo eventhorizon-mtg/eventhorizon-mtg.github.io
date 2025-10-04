@@ -6,12 +6,23 @@
 <title>Admin · Mini Editor (Hugo + GitHub)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="vendor/virtual-scroller.css">
 <script src="vendor/marked.min.js"></script>
+<script src="vendor/virtual-scroller.js"></script>
+<script src="vendor/auto-save.js"></script>
+<script src="vendor/asset-manager.js"></script>
 
 </head>
 <body>
+<!-- Skip Links -->
+<a href="#main-content" class="skip-link">Vai al contenuto principale</a>
+<a href="#itemsSection" class="skip-link">Vai alla lista items</a>
+
 <div class="wrap">
-  <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
+  <div id="buildNotice" class="notice hidden" role="status" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="msg">Build in corso…</span>
+  </div>
 
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-label="Notifiche"></div>

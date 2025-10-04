@@ -47,6 +47,25 @@
   --t-base:.18s ease;
 }
 
+/* ---------- Skip Links ---------- */
+.skip-link{
+  position:absolute;
+  top:-100px;
+  left:0;
+  padding:var(--s-8) var(--s-16);
+  background:var(--acc);
+  color:#fff;
+  z-index:9999;
+  text-decoration:none;
+  transition:top .2s ease;
+}
+
+.skip-link:focus{
+  top:0;
+  outline:none;
+  box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--ring);
+}
+
 /* ---------- Base ---------- */
 *,
 *::before,
@@ -131,9 +150,72 @@ header{
 @media (max-width:1366px){
   .grid{ grid-template-columns:240px minmax(0,1fr) }
 }
+
 @media (max-width:1024px){
   .grid{ grid-template-columns:1fr }
   .list{ max-height:none }
+  
+  /* Migliore gestione spazio */
+  .wrap{ padding:var(--s-8) }
+  .card{ padding:var(--s-8) }
+  
+  /* Miglior layout form */
+  .two{ grid-template-columns:1fr }
+  
+  /* Bottoni più grandi e spaziati */
+  .btn{
+    padding:var(--s-16) var(--s-24);
+    min-height:48px;
+  }
+  
+  /* Campi form ottimizzati per touch */
+  input[type="text"],
+  input[type="date"],
+  input[type="datetime-local"],
+  select,
+  textarea{
+    font-size:16px; /* Previene zoom iOS */
+    min-height:48px;
+    padding:var(--s-8) var(--s-16);
+  }
+  
+  /* Lista più compatta */
+  .item{
+    padding:var(--s-16);
+    gap:var(--s-16);
+  }
+}
+
+/* Extra ottimizzazioni mobile */
+@media (max-width:480px){
+  /* Header più compatto */
+  header{ 
+    flex-direction:column;
+    gap:var(--s-8);
+    align-items:stretch;
+  }
+  
+  /* Bottoni full width */
+  .row{ flex-direction:column }
+  .btn{ width:100% }
+  
+  /* Input più grandi */
+  input[type="checkbox"]{ 
+    width:24px;
+    height:24px;
+  }
+  
+  /* Toast più compatti */
+  .toast{
+    min-width:auto;
+    max-width:100%;
+    margin:0 var(--s-8);
+  }
+  
+  /* Asset browser ottimizzato */
+  .asset-browser .asset-grid{
+    grid-template-columns:repeat(2, 1fr);
+  }
 }
 
 /* ---------- List & Items ---------- */
