@@ -1301,13 +1301,21 @@ Opzioni più economiche per le carte costose.`
   };
 
   if (aTemplate && aBody) {
-    aTemplate.addEventListener('change', () => {
+    aTemplate.addEventListener('change', async () => {
       const tpl = ARTICLE_TEMPLATES[aTemplate.value];
       if (!tpl) return;
 
-      if (aBody.value && !confirm('Sovrascrivere il contenuto attuale con il template?')) {
-        aTemplate.value = '';
-        return;
+      if (aBody.value) {
+        const confirmed = await showConfirm({
+          title: 'Sovrascrivi contenuto',
+          message: 'Sovrascrivere il contenuto attuale con il template?',
+          confirmText: 'Sovrascrivi',
+          cancelText: 'Annulla'
+        });
+        if (!confirmed) {
+          aTemplate.value = '';
+          return;
+        }
       }
 
       if (aTitle && !aTitle.value) aTitle.value = tpl.title;
@@ -1789,7 +1797,7 @@ if (btnUploadCard && uploadCardInput) {
 
 if (btnBrowseThumb && thumbBrowser && fThumb) {
   btnBrowseThumb.onclick = async () => {
-    if (!TOKEN) { alert('Prima fai login.'); return; }
+    if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
     const items = await listImages(THUMBS_DIR, 2).catch(()=>[]);
     renderAssetBrowser(thumbBrowser, items, fThumb);
     PENDING.thumb = null;
@@ -1797,7 +1805,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 }
   if (btnBrowseCard && cardBrowser && fCard) {
     btnBrowseCard.onclick = async () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       let items = await listImages(CARDS_DIR, 2).catch(()=>[]);
       renderAssetBrowser(cardBrowser, items, fCard);
       PENDING.card = null;
@@ -1806,8 +1814,8 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (multiBtn) {
     multiBtn.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
-      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
+      if (isDeployLocked()) { Toast.warning('Operazione non disponibile durante un deploy.'); return; }
       setMultiMode(!MULTI_MODE);
     };
   }
@@ -1815,10 +1823,18 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
   if (deleteSelectedBtn) {
     deleteSelectedBtn.onclick = async () => {
       if (!MULTI_MODE) return;
-      if (SELECTED_ITEMS.size === 0) return alert('Nessun elemento selezionato.');
-      if (!TOKEN) { alert('Prima fai login.'); return; }
-      if (isDeployLocked()) { alert('E\' in corso un deploy precedente. Attendi il completamento.'); return; }
-      if (!confirm(`Eliminare ${SELECTED_ITEMS.size} elementi selezionati?`)) return;
+      if (SELECTED_ITEMS.size === 0) { Toast.warning('Nessun elemento selezionato.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
+      if (isDeployLocked()) { Toast.warning('È in corso un deploy precedente. Attendi il completamento.'); return; }
+
+      const confirmed = await showConfirm({
+        title: 'Elimina elementi',
+        message: `Eliminare ${SELECTED_ITEMS.size} elementi selezionati?`,
+        confirmText: 'Elimina',
+        cancelText: 'Annulla',
+        danger: true
+      });
+      if (!confirmed) return;
 
       setDeployLock(true, 'Eliminazione multipla in corso...');
       const entries = Array.from(SELECTED_ITEMS.entries());
@@ -1854,7 +1870,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
         updateSelectionStatus();
         success = true;
       } catch (err) {
-        alert(err && err.message ? err.message : err);
+        Toast.error(err && err.message ? err.message : String(err));
       } finally {
         setDeployLock(false);
         if (!success) updateSelectionStatus();
@@ -1864,22 +1880,22 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (viewItemsBtn) {
     viewItemsBtn.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       setView('items');
     };
   }
 
   if (viewArticlesBtn) {
     viewArticlesBtn.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       setView('articles');
     };
   }
 
   if (newArticleBtn) {
     newArticleBtn.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
-      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
+      if (isDeployLocked()) { Toast.warning('Operazione non disponibile durante un deploy.'); return; }
       const now = new Date();
       const baseSlug = kebab((aTitle && aTitle.value) || 'nuovo-articolo');
       const slug = baseSlug || `articolo-${now.getTime()}`;
@@ -1959,9 +1975,9 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (aBtnUploadCover && aCoverUpload) {
     aBtnUploadCover.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       const slug = kebab(aSlug?.value || aTitle?.value || '');
-      if (!slug) { alert('Imposta titolo o slug prima di caricare la cover.'); return; }
+      if (!slug) { Toast.warning('Imposta titolo o slug prima di caricare la cover.'); return; }
       aSlug.value = slug;
       aCoverUpload.click();
     };
@@ -1972,7 +1988,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
         if (!slug) throw new Error('Imposta titolo o slug prima di caricare la cover.');
         planArticleCover(aCoverUpload.files[0], slug);
       } catch (err) {
-        alert(err && err.message ? err.message : err);
+        Toast.error(err && err.message ? err.message : String(err));
       } finally {
         aCoverUpload.value = '';
       }
@@ -1986,9 +2002,9 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (btnUploadContentImage && contentImageUpload && contentImagesList) {
     btnUploadContentImage.onclick = () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       const slug = kebab(aSlug?.value || aTitle?.value || '');
-      if (!slug) { alert('Imposta titolo o slug prima di caricare immagini.'); return; }
+      if (!slug) { Toast.warning('Imposta titolo o slug prima di caricare immagini.'); return; }
       contentImageUpload.click();
     };
 
@@ -1998,7 +2014,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
       const slug = kebab(aSlug?.value || aTitle?.value || '');
       if (!slug) {
-        alert('Imposta titolo o slug prima di caricare immagini.');
+        Toast.warning('Imposta titolo o slug prima di caricare immagini.');
         contentImageUpload.value = '';
         return;
       }
@@ -2016,7 +2032,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
           updateArticleStatus(`Upload ${i + 1}/${files.length}...`);
         } catch (e) {
           console.error('Upload fallito:', e);
-          alert(`Errore upload immagine ${i + 1}: ${e.message || e}`);
+          Toast.error(`Errore upload immagine ${i + 1}: ${e.message || e}`);
         }
       }
 
@@ -2063,7 +2079,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (aBtnBrowseCover && aCoverBrowser && aCover) {
     aBtnBrowseCover.onclick = async () => {
-      if (!TOKEN) { alert('Prima fai login.'); return; }
+      if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
       const slug = kebab(aSlug?.value || '');
       let items = await listImages(slug ? `${ARTICLES_MEDIA_DIR}/${slug}` : ARTICLES_MEDIA_DIR, 3).catch(()=>[]);
       if ((!items || !items.length) && slug) {
@@ -2075,10 +2091,10 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
   }
 
   async function saveArticle(){
-    if (!TOKEN) { alert('Prima fai login.'); return; }
+    if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
     const form = collectArticleForm();
-    if (!form.title) return alert('Titolo articolo obbligatorio.');
-    if (!form.slug) return alert('Slug articolo obbligatorio.');
+    if (!form.title) { Toast.warning('Titolo articolo obbligatorio.'); return; }
+    if (!form.slug) { Toast.warning('Slug articolo obbligatorio.'); return; }
     if (aSlug) aSlug.value = form.slug;
     const front = {
       title: form.title,
@@ -2178,7 +2194,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
         window.location.replace(urlReload.toString());
       }
     } catch (err) {
-      alert(err && err.message ? err.message : err);
+      Toast.error(err && err.message ? err.message : String(err));
       updateArticleStatus('Errore salvataggio articolo');
     } finally {
       setDeployLock(false);
@@ -2186,10 +2202,18 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
   }
 
   async function deleteArticle(){
-    if (!TOKEN) { alert('Prima fai login.'); return; }
-    if (!ARTICLE_CURRENT || !ARTICLE_CURRENT.path) return alert('Nessun articolo aperto.');
-    if (!ARTICLE_CURRENT.sha) return alert('Salva l\'articolo prima di eliminarlo.');
-    if (!confirm(`Eliminare ${ARTICLE_CURRENT.path}?`)) return;
+    if (!TOKEN) { Toast.warning('Prima fai login.'); return; }
+    if (!ARTICLE_CURRENT || !ARTICLE_CURRENT.path) { Toast.warning('Nessun articolo aperto.'); return; }
+    if (!ARTICLE_CURRENT.sha) { Toast.warning('Salva l\'articolo prima di eliminarlo.'); return; }
+
+    const confirmed = await showConfirm({
+      title: 'Elimina articolo',
+      message: `Eliminare ${ARTICLE_CURRENT.path}?`,
+      confirmText: 'Elimina',
+      cancelText: 'Annulla',
+      danger: true
+    });
+    if (!confirmed) return;
     setDeployLock(true, 'Eliminazione articolo...');
     updateArticleStatus('Eliminazione articolo...');
     try {
@@ -2211,7 +2235,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
         window.location.replace(urlReload.toString());
       }
     } catch (err) {
-      alert(err && err.message ? err.message : err);
+      Toast.error(err && err.message ? err.message : String(err));
       updateArticleStatus('Errore eliminazione articolo');
     } finally {
       setDeployLock(false);
@@ -2220,14 +2244,14 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
 
   if (saveArticleBtn) {
     saveArticleBtn.onclick = () => {
-      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      if (isDeployLocked()) { Toast.warning('Operazione non disponibile durante un deploy.'); return; }
       saveArticle();
     };
   }
 
   if (deleteArticleBtn) {
     deleteArticleBtn.onclick = () => {
-      if (isDeployLocked()) { alert('Operazione non disponibile durante un deploy.'); return; }
+      if (isDeployLocked()) { Toast.warning('Operazione non disponibile durante un deploy.'); return; }
       deleteArticle();
     };
   }
@@ -2758,7 +2782,7 @@ async function openArticle(path){
     loadArticleDraft();
     startAutoSave();
   } catch (err) {
-    alert(err && err.message ? err.message : err);
+    Toast.error(err && err.message ? err.message : String(err));
   }
 }
 
@@ -2804,7 +2828,7 @@ async function openFile(path){
   [...listEl.children].forEach(el => el.classList.toggle("active", el.querySelector(".meta").textContent===path));
   const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${encodeURIComponent(BRANCH)}`;
   const r = await gh(url);
-  if (!r.ok) { alert("Errore apertura file: " + r.status); return; }
+  if (!r.ok) { Toast.error("Errore apertura file: " + r.status); return; }
   const j = await r.json();
   const raw = b64.dec(j.content);
   let yml;
@@ -2888,11 +2912,19 @@ byId("newBtn").onclick = () => {
 /* ====== ELIMINA ====== */
 byId("deleteBtn").onclick = async () => {
   if (isDeployLocked()) {
-    alert("E' in corso un deploy precedente. Attendi il completamento prima di eliminare.");
+    Toast.warning("È in corso un deploy precedente. Attendi il completamento prima di eliminare.");
     return;
   }
-  if (!CURRENT || !CURRENT.path) return alert("Nessun file aperto.");
-  if (!confirm(`Eliminare ${CURRENT.path}?`)) return;
+  if (!CURRENT || !CURRENT.path) { Toast.warning("Nessun file aperto."); return; }
+
+  const confirmed = await showConfirm({
+    title: 'Elimina file',
+    message: `Eliminare ${CURRENT.path}?`,
+    confirmText: 'Elimina',
+    cancelText: 'Annulla',
+    danger: true
+  });
+  if (!confirmed) return;
   setDeployLock(true, 'Eliminazione in corso...');
   try {
     const sha = await ensureContentSha(CURRENT.path, CURRENT.sha);
@@ -2915,7 +2947,7 @@ byId("deleteBtn").onclick = async () => {
       window.location.replace(urlReload.toString());
     }
   } catch (err) {
-    alert(err && err.message ? err.message : err);
+    Toast.error(err && err.message ? err.message : String(err));
   } finally {
     setDeployLock(false);
     updateSelectionStatus();
@@ -2925,10 +2957,10 @@ byId("deleteBtn").onclick = async () => {
 /* ====== SALVA (PATCH) ====== */
 byId("saveBtn").onclick = async () => {
   if (isDeployLocked()) {
-    alert("E' in corso un deploy precedente. Attendi il completamento prima di salvare nuovamente.");
+    Toast.warning("È in corso un deploy precedente. Attendi il completamento prima di salvare nuovamente.");
     return;
   }
-  if (!TOKEN) { alert("Prima fai login."); return; }
+  if (!TOKEN) { Toast.warning("Prima fai login."); return; }
 
   let lockAcquired = false;
   try {
@@ -2942,7 +2974,7 @@ byId("saveBtn").onclick = async () => {
       y = raw ? (jsyaml.load(raw) || {}) : {};
     } catch (e) {
       updateDeployStatus('Errore: YAML non valido');
-      alert("YAML non valido: " + e.message);
+      Toast.error("YAML non valido: " + e.message);
       return;
     }
 
@@ -2990,11 +3022,13 @@ byId("saveBtn").onclick = async () => {
     let slug = kebab(f_slug || y.slug || (y.title || ""));
     if (!y.title) {
       updateDeployStatus('Titolo obbligatorio');
-      return alert("Titolo obbligatorio");
+      Toast.warning("Titolo obbligatorio");
+      return;
     }
     if (!slug) {
       updateDeployStatus('Slug obbligatorio');
-      return alert("Slug obbligatorio");
+      Toast.warning("Slug obbligatorio");
+      return;
     }
     y.slug = slug;
 
@@ -3013,7 +3047,7 @@ byId("saveBtn").onclick = async () => {
         updateDeployStatus('Thumb caricata');
       } catch(e) {
         updateDeployStatus('Upload thumb fallito');
-        alert('Upload thumb fallito: '+(e && e.message || e));
+        Toast.error('Upload thumb fallito: '+(e && e.message || e));
         return;
       }
     }
@@ -3027,7 +3061,7 @@ byId("saveBtn").onclick = async () => {
         updateDeployStatus('Card caricata');
       } catch(e) {
         updateDeployStatus('Upload card fallito');
-        alert('Upload card fallito: '+(e && e.message || e));
+        Toast.error('Upload card fallito: '+(e && e.message || e));
         return;
       }
     }
@@ -3067,7 +3101,7 @@ byId("saveBtn").onclick = async () => {
       if (!r.ok) {
         updateDeployStatus('Errore salvataggio');
         const t = await r.text().catch(()=>String(r.status));
-        alert("Errore creazione nuovo file: " + r.status + " - " + t);
+        Toast.error("Errore creazione nuovo file: " + r.status + " - " + t);
         return;
       }
       const newRes = await r.json();
@@ -3077,7 +3111,7 @@ byId("saveBtn").onclick = async () => {
         const del = await gh(delUrl, { method: "DELETE", body: JSON.stringify(delBody) });
         if (!del.ok) {
           const t = await del.text().catch(()=>String(del.status));
-          alert("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " - " + t);
+          Toast.warning("Avviso: nuovo file creato ma non sono riuscito a eliminare il vecchio: " + del.status + " - " + t);
         }
       }
       updateDeployStatus('Salvato (rinominato)');
@@ -3089,7 +3123,7 @@ byId("saveBtn").onclick = async () => {
       if (!r.ok) {
         updateDeployStatus('Errore salvataggio');
         const t = await r.text().catch(()=>String(r.status));
-        alert("Errore salvataggio: " + r.status + " - " + t);
+        Toast.error("Errore salvataggio: " + r.status + " - " + t);
         return;
       }
       const j = await r.json();
@@ -3379,7 +3413,7 @@ function saveArticleDraft() {
   }
 }
 
-function loadArticleDraft() {
+async function loadArticleDraft() {
   if (!ARTICLE_CURRENT) return false;
 
   const slug = ARTICLE_CURRENT.slug || 'temp';
@@ -3400,7 +3434,14 @@ function loadArticleDraft() {
     const minutes = Math.floor(age / 60000);
     const message = `Trovata bozza locale di "${draft.title || slug}" salvata ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'} fa.\n\nRipristinare?`;
 
-    if (confirm(message)) {
+    const confirmed = await showConfirm({
+      title: 'Ripristina bozza',
+      message: `Trovata bozza locale di "${draft.title || slug}" salvata ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'} fa.\n\nRipristinare?`,
+      confirmText: 'Ripristina',
+      cancelText: 'Ignora'
+    });
+
+    if (confirmed) {
       if (aTitle) aTitle.value = draft.title || '';
       if (aBody) aBody.value = draft.body || '';
       if (aDescription) aDescription.value = draft.description || '';
