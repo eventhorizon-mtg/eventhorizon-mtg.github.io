@@ -171,10 +171,29 @@
           </div>
           <button id="reloadArticlesBtn" class="btn">Reload</button>
         </div>
+        <div class="row mb-8" style="gap:8px;">
+          <input type="text" id="articleSearchInput" placeholder="🔍 Cerca articoli..." style="flex:1;min-width:0;" />
+          <select id="articleFilterDraft" style="width:auto;">
+            <option value="all">Tutti</option>
+            <option value="published">Pubblicati</option>
+            <option value="drafts">Solo bozze</option>
+          </select>
+        </div>
         <div id="articleList" class="list"></div>
       </div>
 
       <div class="card">
+        <div class="mt-8">
+          <label>Template</label>
+          <select id="a_template" style="width:100%;">
+            <option value="">Nessun template (vuoto)</option>
+            <option value="tutorial">Tutorial / Guida</option>
+            <option value="news">News / Aggiornamento</option>
+            <option value="review">Recensione / Review</option>
+            <option value="deck">Deck Tech / Lista</option>
+          </select>
+        </div>
+
         <div class="two mt-8">
           <div>
             <label>Titolo</label>
@@ -199,7 +218,11 @@
 
         <div class="mt-8">
           <label>Descrizione (SEO)</label>
-          <textarea id="a_description" class="textarea--sm" placeholder="Breve descrizione"></textarea>
+          <textarea id="a_description" class="textarea--sm" placeholder="Breve descrizione (120-160 caratteri consigliati)"></textarea>
+          <div class="muted" style="display:flex;justify-content:space-between;margin-top:4px;font-size:13px;">
+            <span id="a_descCount">0 caratteri</span>
+            <span id="a_descHint" style="color:var(--muted);"></span>
+          </div>
         </div>
 
         <div class="mt-8">
@@ -215,7 +238,20 @@
             <button id="a_btnUploadCover" class="btn">Upload cover</button>
             <button id="a_btnBrowseCover" class="btn">Sfoglia</button>
           </div>
+          <div id="a_coverPreview" style="margin-top:8px;display:none;">
+            <img id="a_coverPreviewImg" src="" alt="Cover preview" style="max-width:300px;max-height:200px;border-radius:8px;border:1px solid var(--border);" />
+          </div>
           <div id="a_coverBrowser" class="asset-browser hidden"></div>
+        </div>
+
+        <div class="mt-8">
+          <label>Immagini per Contenuto</label>
+          <div class="row align-center gap-8">
+            <input id="a_contentImageUpload" type="file" accept="image/*" multiple hidden />
+            <button id="a_btnUploadContentImage" class="btn">Carica immagini</button>
+            <span class="muted" style="font-size:13px;">Upload multiplo in static/images/articles/{slug}/</span>
+          </div>
+          <div id="a_contentImagesList" class="asset-grid mt-8" style="display:none;"></div>
         </div>
 
         <div class="mt-8">
@@ -598,6 +634,18 @@ function escAttr(s){ return escHtml(s); }
   const articleFileInfo = byId("articleFileInfo");
   const reloadArticlesBtn = byId("reloadArticlesBtn");
   if (reloadArticlesBtn) reloadArticlesBtn.onclick = () => loadArticlesList();
+
+  // Ricerca e filtro articoli
+  const articleSearchInput = byId('articleSearchInput');
+  const articleFilterDraft = byId('articleFilterDraft');
+
+  if (articleSearchInput) {
+    articleSearchInput.addEventListener('input', debounce(applyArticleFilters, 300));
+  }
+
+  if (articleFilterDraft) {
+    articleFilterDraft.addEventListener('change', applyArticleFilters);
+  }
   const newArticleBtn = byId("newArticleBtn");
   const saveArticleBtn = byId("saveArticleBtn");
   const deleteArticleBtn = byId("deleteArticleBtn");
@@ -613,6 +661,202 @@ function escAttr(s){ return escHtml(s); }
   const aBtnBrowseCover = byId("a_btnBrowseCover");
   const aCoverBrowser = byId("a_coverBrowser");
   const aBody = byId("a_body");
+  const aCoverPreview = byId("a_coverPreview");
+  const aCoverPreviewImg = byId("a_coverPreviewImg");
+  const aTemplate = byId("a_template");
+
+  // Preview cover image quando cambia URL
+  if (aCover && aCoverPreview && aCoverPreviewImg) {
+    const updateCoverPreview = () => {
+      const url = aCover.value.trim();
+      if (url && /\.(jpg|jpeg|png|gif|webp|avif|svg)$/i.test(url)) {
+        aCoverPreviewImg.src = url.startsWith('http') ? url : `/${url.replace(/^\//, '')}`;
+        aCoverPreview.style.display = 'block';
+        aCoverPreviewImg.onerror = () => {
+          aCoverPreview.style.display = 'none';
+        };
+      } else {
+        aCoverPreview.style.display = 'none';
+      }
+    };
+
+    aCover.addEventListener('input', debounce(updateCoverPreview, 500));
+    aCover.addEventListener('blur', updateCoverPreview);
+  }
+
+  // SEO Stats per descrizione
+  const descCount = byId('a_descCount');
+  const descHint = byId('a_descHint');
+
+  if (aDescription && descCount && descHint) {
+    const updateDescStats = () => {
+      const len = aDescription.value.length;
+      descCount.textContent = `${len} caratteri`;
+
+      if (len === 0) {
+        descHint.textContent = '⚠️ Descrizione mancante';
+        descHint.style.color = 'var(--warn)';
+      } else if (len < 120) {
+        descHint.textContent = 'Troppo corta per SEO';
+        descHint.style.color = 'var(--warn)';
+      } else if (len > 160) {
+        descHint.textContent = 'Troppo lunga, verrà troncata';
+        descHint.style.color = 'var(--danger)';
+      } else {
+        descHint.textContent = '✓ Lunghezza ottimale';
+        descHint.style.color = '#4ade80';
+      }
+    };
+
+    aDescription.addEventListener('input', updateDescStats);
+    updateDescStats();
+  }
+
+  // Template articoli
+  const ARTICLE_TEMPLATES = {
+    tutorial: {
+      title: 'Guida: [Titolo Tutorial]',
+      body: `# Introduzione
+
+Breve introduzione al topic di questa guida.
+
+## Requisiti
+
+- Requisito 1
+- Requisito 2
+- Requisito 3
+
+## Passo 1: [Nome Passo]
+
+Descrizione dettagliata del primo passo.
+
+## Passo 2: [Nome Passo]
+
+Descrizione dettagliata del secondo passo.
+
+## Conclusioni
+
+Riassunto di ciò che è stato imparato.
+
+---
+*Hai domande? Lascia un commento!*`
+    },
+    news: {
+      title: 'News: [Titolo Notizia]',
+      body: `# [Titolo Principale]
+
+**Data:** [Inserisci data evento]
+
+## Cosa è successo?
+
+Descrizione della notizia principale.
+
+## Dettagli
+
+- Punto chiave 1
+- Punto chiave 2
+- Punto chiave 3
+
+## Implicazioni
+
+Come questa notizia impatta la community/metagame.
+
+---
+*Fonte:* [Link fonte se applicabile]`
+    },
+    review: {
+      title: 'Recensione: [Nome Carta/Prodotto]',
+      body: `# Recensione: [Nome]
+
+## Panoramica
+
+Descrizione generale di cosa stiamo recensendo.
+
+## Pro
+
+- ✅ Vantaggio 1
+- ✅ Vantaggio 2
+- ✅ Vantaggio 3
+
+## Contro
+
+- ❌ Svantaggio 1
+- ❌ Svantaggio 2
+
+## Valutazione
+
+**Voto:** [X/10]
+
+## Conclusioni
+
+Riassunto finale e raccomandazioni.`
+    },
+    deck: {
+      title: 'Deck Tech: [Nome Deck]',
+      body: `# Deck Tech: [Nome Deck]
+
+## Strategia
+
+Descrizione della strategia principale del deck.
+
+## Decklist
+
+### Comandante
+- 1x [Nome Comandante]
+
+### Creature ([XX])
+- Lista creature
+
+### Instant ([XX])
+- Lista instant
+
+### Sorcery ([XX])
+- Lista sorcery
+
+### Artifact ([XX])
+- Lista artifact
+
+### Enchantment ([XX])
+- Lista enchantment
+
+### Land ([XX])
+- Lista terre
+
+## Combo Chiave
+
+Descrizione delle combo principali.
+
+## Matchup
+
+- **VS Aggro:** Come giocare
+- **VS Control:** Come giocare
+- **VS Combo:** Come giocare
+
+## Budget Alternative
+
+Opzioni più economiche per le carte costose.`
+    }
+  };
+
+  if (aTemplate && aBody) {
+    aTemplate.addEventListener('change', () => {
+      const tpl = ARTICLE_TEMPLATES[aTemplate.value];
+      if (!tpl) return;
+
+      if (aBody.value && !confirm('Sovrascrivere il contenuto attuale con il template?')) {
+        aTemplate.value = '';
+        return;
+      }
+
+      if (aTitle && !aTitle.value) aTitle.value = tpl.title;
+      if (aBody) aBody.value = tpl.body;
+
+      updateCharCount();
+      updateMarkdownPreview();
+      updateArticleStatus('✓ Template applicato');
+      aTemplate.value = '';
+    });
+  }
 
   function toggleLockOnButton(id, state){
     const btn = byId(id);
@@ -1098,10 +1342,23 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       updateArticleStatus('Articolo pronto: compila i campi e salva.');
       setView('articles', { force: true, skipLoad: true });
       initMarkdownEditor();
+      startAutoSave();
     };
   }
 
   if (aTitle && aSlug) {
+    // Validazione lunghezza titolo
+    aTitle.addEventListener('input', () => {
+      const len = aTitle.value.length;
+      if (len > 0 && len < 10) {
+        aTitle.style.borderColor = 'var(--warn)';
+      } else if (len > 100) {
+        aTitle.style.borderColor = 'var(--danger)';
+      } else {
+        aTitle.style.borderColor = '';
+      }
+    });
+
     aTitle.addEventListener('blur', () => {
       if (!aSlug.value.trim()) aSlug.value = kebab(aTitle.value || '');
     });
@@ -1109,6 +1366,21 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       const val = kebab(aSlug.value || '');
       aSlug.value = val;
       ARTICLE_PENDING.cover = null;
+
+      // Validate slug format and length
+      if (val.length > 0 && val.length < 3) {
+        aSlug.style.borderColor = 'var(--warn)';
+        updateArticleStatus('⚠️ Slug troppo corto (min 3 caratteri)');
+        return;
+      } else if (val.length > 100) {
+        aSlug.style.borderColor = 'var(--danger)';
+        updateArticleStatus('⚠️ Slug troppo lungo (max 100 caratteri)');
+        return;
+      } else if (val && !/^[a-z0-9-]+$/.test(val)) {
+        aSlug.style.borderColor = 'var(--danger)';
+        updateArticleStatus('⚠️ Slug deve contenere solo lettere minuscole, numeri e trattini');
+        return;
+      }
 
       // Validate duplicate slug
       if (val && TOKEN) {
@@ -1120,10 +1392,12 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
             updateArticleStatus('⚠️ Attenzione: questo slug esiste già!');
           } else {
             aSlug.style.borderColor = '';
-            if (byId('articleStatus').textContent.includes('slug esiste')) {
+            if (byId('articleStatus').textContent.includes('slug') || byId('articleStatus').textContent.includes('Slug')) {
               updateArticleStatus('');
             }
           }
+        } else {
+          aSlug.style.borderColor = '';
         }
       }
     });
@@ -1149,6 +1423,88 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       } finally {
         aCoverUpload.value = '';
       }
+    };
+  }
+
+  // Upload multiplo immagini contenuto
+  const btnUploadContentImage = byId('a_btnUploadContentImage');
+  const contentImageUpload = byId('a_contentImageUpload');
+  const contentImagesList = byId('a_contentImagesList');
+
+  if (btnUploadContentImage && contentImageUpload && contentImagesList) {
+    btnUploadContentImage.onclick = () => {
+      if (!TOKEN) { alert('Prima fai login.'); return; }
+      const slug = kebab(aSlug?.value || aTitle?.value || '');
+      if (!slug) { alert('Imposta titolo o slug prima di caricare immagini.'); return; }
+      contentImageUpload.click();
+    };
+
+    contentImageUpload.onchange = async () => {
+      const files = contentImageUpload.files;
+      if (!files || !files.length) return;
+
+      const slug = kebab(aSlug?.value || aTitle?.value || '');
+      if (!slug) {
+        alert('Imposta titolo o slug prima di caricare immagini.');
+        contentImageUpload.value = '';
+        return;
+      }
+
+      updateArticleStatus(`Upload ${files.length} immagini in corso...`);
+      btnUploadContentImage.disabled = true;
+
+      const uploaded = [];
+      for (let i = 0; i < files.length; i++) {
+        try {
+          const file = files[i];
+          const path = uniqueMediaPath(file, `${ARTICLES_MEDIA_DIR}/${slug}`);
+          const res = await uploadAssetFileToPath(file, path);
+          uploaded.push(res);
+          updateArticleStatus(`Upload ${i + 1}/${files.length}...`);
+        } catch (e) {
+          console.error('Upload fallito:', e);
+          alert(`Errore upload immagine ${i + 1}: ${e.message || e}`);
+        }
+      }
+
+      // Mostra immagini caricate
+      contentImagesList.innerHTML = '';
+      contentImagesList.style.display = uploaded.length > 0 ? 'grid' : 'none';
+
+      uploaded.forEach(img => {
+        const div = document.createElement('div');
+        div.className = 'asset';
+        div.style.cssText = 'position:relative;';
+
+        const imgEl = document.createElement('img');
+        imgEl.src = img.publicUrl;
+        imgEl.alt = img.name || '';
+        imgEl.style.cssText = 'width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border);';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn';
+        copyBtn.style.cssText = 'width:100%;padding:4px 8px;font-size:12px;margin-top:4px;';
+        copyBtn.textContent = 'Copia Markdown';
+        copyBtn.type = 'button';
+        copyBtn.onclick = () => {
+          const md = `![${img.name || 'alt'}](${img.publicUrl})`;
+          navigator.clipboard.writeText(md).then(() => {
+            const oldText = copyBtn.textContent;
+            copyBtn.textContent = '✓ Copiato!';
+            setTimeout(() => { copyBtn.textContent = oldText; }, 1500);
+          }).catch(() => {
+            prompt('Copia questo Markdown:', md);
+          });
+        };
+
+        div.appendChild(imgEl);
+        div.appendChild(copyBtn);
+        contentImagesList.appendChild(div);
+      });
+
+      updateArticleStatus(`✓ ${uploaded.length} immagini caricate`);
+      btnUploadContentImage.disabled = false;
+      contentImageUpload.value = '';
     };
   }
 
@@ -1257,6 +1613,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       });
       updateArticleStatus('Articolo salvato.');
       if (deleteArticleBtn) deleteArticleBtn.disabled = false;
+      clearArticleDraft();
       await loadArticlesList();
       try { await resetSiteCaches(); } catch(_){ }
       const ok = await monitorDeployAndReload().catch(()=>false);
@@ -1562,6 +1919,48 @@ function clearArticleForm(){
   fillArticleForm({}, '', '', '');
 }
 
+function applyArticleFilters() {
+  if (!articleList) return;
+
+  const searchInput = byId('articleSearchInput');
+  const filterDraft = byId('articleFilterDraft');
+
+  const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const draftFilter = filterDraft ? filterDraft.value : 'all';
+
+  const items = articleList.querySelectorAll('.item');
+  let visibleCount = 0;
+  let draftCount = 0;
+  let publishedCount = 0;
+
+  items.forEach(item => {
+    const searchText = item.dataset.searchText || '';
+    const isDraft = item.dataset.isDraft === 'true';
+
+    // Search filter
+    const matchesSearch = !searchQuery || searchText.includes(searchQuery);
+
+    // Draft filter
+    let matchesDraft = true;
+    if (draftFilter === 'drafts') matchesDraft = isDraft;
+    else if (draftFilter === 'published') matchesDraft = !isDraft;
+
+    const visible = matchesSearch && matchesDraft;
+    item.style.display = visible ? '' : 'none';
+
+    if (visible) visibleCount++;
+    if (isDraft) draftCount++;
+    else publishedCount++;
+  });
+
+  // Update filter dropdown with counts
+  if (filterDraft && filterDraft.options) {
+    filterDraft.options[0].textContent = `Tutti (${items.length})`;
+    filterDraft.options[1].textContent = `Pubblicati (${publishedCount})`;
+    filterDraft.options[2].textContent = `Solo bozze (${draftCount})`;
+  }
+}
+
 async function loadArticlesList(){
   if (!articleList) return;
   if (!TOKEN) { articleList.innerHTML = ''; return; }
@@ -1640,8 +2039,13 @@ async function loadArticlesList(){
       div.appendChild(info);
       div.classList.toggle('active', ARTICLE_CURRENT && ARTICLE_CURRENT.path === meta.path);
       div.onclick = () => openArticle(meta.path);
+      div.dataset.isDraft = meta.draft ? 'true' : 'false';
+      div.dataset.searchText = `${meta.title.toLowerCase()} ${meta.path.toLowerCase()}`;
       articleList.appendChild(div);
     });
+
+    // Applica filtri esistenti se presenti
+    applyArticleFilters();
   } catch (err) {
     const div = document.createElement('div');
     div.className = 'muted';
@@ -1680,6 +2084,8 @@ async function openArticle(path){
     updateArticleStatus('Articolo caricato.');
     if (deleteArticleBtn) deleteArticleBtn.disabled = !ARTICLE_CURRENT.sha;
     initMarkdownEditor();
+    loadArticleDraft();
+    startAutoSave();
   } catch (err) {
     alert(err && err.message ? err.message : err);
   }
@@ -2215,6 +2621,98 @@ function initMarkdownEditor() {
 
     // Initial count
     updateCharCount();
+  }
+}
+
+/* ====== AUTO-SAVE LOCALE ====== */
+let autoSaveTimer = null;
+const AUTO_SAVE_KEY = 'article_autosave';
+const AUTO_SAVE_INTERVAL = 30000; // 30 secondi
+
+function saveArticleDraft() {
+  if (!ARTICLE_CURRENT || !aBody) return;
+
+  const draft = {
+    path: ARTICLE_CURRENT.path,
+    slug: ARTICLE_CURRENT.slug,
+    title: aTitle?.value || '',
+    body: aBody.value || '',
+    description: aDescription?.value || '',
+    tags: aTags?.value || '',
+    cover: aCover?.value || '',
+    draft: aDraft?.checked || false,
+    timestamp: Date.now()
+  };
+
+  try {
+    localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(draft));
+    const status = byId('articleStatus');
+    if (status && !status.textContent.includes('salvat')) {
+      const oldText = status.textContent;
+      status.textContent = '💾 Bozza salvata localmente';
+      setTimeout(() => {
+        if (status.textContent.includes('Bozza salvata')) {
+          status.textContent = oldText;
+        }
+      }, 2000);
+    }
+  } catch (e) {
+    console.warn('Auto-save fallito:', e);
+  }
+}
+
+function loadArticleDraft() {
+  try {
+    const saved = localStorage.getItem(AUTO_SAVE_KEY);
+    if (!saved) return false;
+
+    const draft = JSON.parse(saved);
+    const age = Date.now() - draft.timestamp;
+
+    // Solo se meno di 1 ora fa
+    if (age > 3600000) {
+      localStorage.removeItem(AUTO_SAVE_KEY);
+      return false;
+    }
+
+    const minutes = Math.floor(age / 60000);
+    const message = `Trovata bozza locale salvata ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'} fa.\n\nRipristinare?`;
+
+    if (confirm(message)) {
+      if (aTitle) aTitle.value = draft.title || '';
+      if (aBody) aBody.value = draft.body || '';
+      if (aDescription) aDescription.value = draft.description || '';
+      if (aTags) aTags.value = draft.tags || '';
+      if (aCover) aCover.value = draft.cover || '';
+      if (aDraft) aDraft.checked = draft.draft;
+
+      updateCharCount();
+      updateArticleStatus('✓ Bozza locale ripristinata');
+      return true;
+    }
+  } catch (e) {
+    console.warn('Caricamento auto-save fallito:', e);
+  }
+  return false;
+}
+
+function startAutoSave() {
+  stopAutoSave();
+  autoSaveTimer = setInterval(saveArticleDraft, AUTO_SAVE_INTERVAL);
+}
+
+function stopAutoSave() {
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
+}
+
+function clearArticleDraft() {
+  try {
+    localStorage.removeItem(AUTO_SAVE_KEY);
+  } catch (e) {
+    console.warn('Impossibile cancellare auto-save:', e);
   }
 }
 
