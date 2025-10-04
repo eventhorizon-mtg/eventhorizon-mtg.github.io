@@ -390,6 +390,8 @@ let TOKEN = (typeof sessionStorage!=="undefined" && sessionStorage.getItem("gh_t
   || "";
 let OAUTH_POPUP = null;
 let DEPLOY_LOCK = false;
+const DEPLOY_LOCK_KEY = 'admin_deploy_lock';
+const DEPLOY_LOCK_TIMEOUT = 180000; // 3 minuti max per deploy
 let MULTI_MODE = false;
 const SELECTED_ITEMS = new Map(); // path -> { sha }
 const ARTICLES_CACHE = new Map();
@@ -399,15 +401,100 @@ let ARTICLE_CURRENT = null; // {path, sha, front, body}
 const ARTICLE_PENDING = { cover: null };
 
 /* ====== UTILS ====== */
-const gh = (url, opts={}) => fetch(url, {
-  ...opts,
-  headers: {
-    "Accept":"application/vnd.github+json",
-    "X-GitHub-Api-Version":"2022-11-28",
-    "Authorization": TOKEN ? `token ${TOKEN}` : undefined,
-    "Content-Type": opts.body ? "application/json" : undefined
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const gh = async (url, opts={}, retryCount=0) => {
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1 secondo
+
+  const response = await fetch(url, {
+    ...opts,
+    headers: {
+      "Accept":"application/vnd.github+json",
+      "X-GitHub-Api-Version":"2022-11-28",
+      "Authorization": TOKEN ? `token ${TOKEN}` : undefined,
+      "Content-Type": opts.body ? "application/json" : undefined
+    }
+  });
+
+  // Intercetta 401 Unauthorized (token scaduto o invalido)
+  if (response.status === 401 && TOKEN) {
+    console.warn('GitHub API 401: Token scaduto o invalido');
+
+    // Mostra messaggio e richiedi re-autenticazione
+    const reauth = confirm(
+      'La tua sessione è scaduta o il token non è più valido.\n\n' +
+      'Clicca OK per effettuare nuovamente il login con GitHub.'
+    );
+
+    if (reauth) {
+      // Pulisci token e ricarica per forzare login
+      try { sessionStorage.removeItem('gh_token'); } catch(_) {}
+      try { localStorage.removeItem('gh_token'); } catch(_) {}
+      TOKEN = '';
+      window.location.reload();
+    } else {
+      // Utente ha cancellato: mostra overlay login
+      setWho(null);
+    }
+
+    return response;
   }
-});
+
+  // Intercetta 403 Rate Limit (GitHub API limit exceeded)
+  if (response.status === 403 && retryCount < maxRetries) {
+    const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
+    const rateLimitReset = response.headers.get('x-ratelimit-reset');
+
+    // Check se è veramente rate limit o altro 403
+    if (rateLimitRemaining === '0' || response.headers.get('x-ratelimit-limit')) {
+      console.warn(`GitHub API Rate Limit raggiunto. Retry ${retryCount + 1}/${maxRetries}...`);
+
+      // Calcola delay: exponential backoff
+      const delay = baseDelay * Math.pow(2, retryCount);
+
+      // Se conosciamo il reset time, usiamo quello
+      let waitTime = delay;
+      if (rateLimitReset) {
+        const resetTime = parseInt(rateLimitReset) * 1000;
+        const now = Date.now();
+        const timeUntilReset = resetTime - now;
+
+        // Se reset è tra meno di 60 secondi, aspetta fino a reset + 1 sec
+        if (timeUntilReset > 0 && timeUntilReset < 60000) {
+          waitTime = timeUntilReset + 1000;
+        }
+      }
+
+      // Mostra notifica all'utente
+      const maxWait = 30000; // Max 30 secondi di attesa
+      if (waitTime > maxWait) waitTime = maxWait;
+
+      console.log(`Attesa ${Math.floor(waitTime/1000)}s prima di riprovare...`);
+
+      await sleep(waitTime);
+
+      // Retry ricorsivo
+      return gh(url, opts, retryCount + 1);
+    }
+  }
+
+  // Intercetta errori di rete temporanei (retry solo per GET)
+  if (!response.ok && retryCount < maxRetries && (!opts.method || opts.method === 'GET')) {
+    if (response.status >= 500 || response.status === 0) {
+      console.warn(`GitHub API errore ${response.status}. Retry ${retryCount + 1}/${maxRetries}...`);
+
+      const delay = baseDelay * Math.pow(2, retryCount);
+      await sleep(delay);
+
+      return gh(url, opts, retryCount + 1);
+    }
+  }
+
+  return response;
+};
 const b64 = {
   enc: (s) => {
     const bytes = new TextEncoder().encode(String(s));
@@ -431,7 +518,6 @@ async function fetchSiteVersion(){
   const m = html.match(/data-archive-ver="([^"]*)"/i);
   return m ? m[1] : '';
 }
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 async function waitForNewBuild(prev, timeoutMs=60000, intervalMs=2000){
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
@@ -886,13 +972,75 @@ Opzioni più economiche per le carte costose.`
 
   function setDeployLock(state, message){
     DEPLOY_LOCK = !!state;
+
+    if (state) {
+      // Acquisisce lock in localStorage con timestamp
+      try {
+        const lockData = {
+          timestamp: Date.now(),
+          message: message || 'Deploy in corso'
+        };
+        localStorage.setItem(DEPLOY_LOCK_KEY, JSON.stringify(lockData));
+      } catch(e) {
+        console.warn('Impossibile impostare deploy lock in localStorage:', e);
+      }
+    } else {
+      // Rilascia lock
+      try {
+        localStorage.removeItem(DEPLOY_LOCK_KEY);
+      } catch(e) {
+        console.warn('Impossibile rimuovere deploy lock da localStorage:', e);
+      }
+    }
+
     ['saveBtn','deleteBtn','newBtn','deleteSelectedBtn','multiBtn','saveArticleBtn','deleteArticleBtn','newArticleBtn','reloadArticlesBtn','reloadBtn'].forEach(id => toggleLockOnButton(id, state));
     if (typeof message === 'string') updateDeployStatus(message);
     if (!state) updateSelectionStatus();
   }
 
   function isDeployLocked(){
-    return DEPLOY_LOCK;
+    // Check lock in memoria
+    if (DEPLOY_LOCK) return true;
+
+    // Check lock in localStorage (persiste tra reload)
+    try {
+      const lockStr = localStorage.getItem(DEPLOY_LOCK_KEY);
+      if (!lockStr) return false;
+
+      const lockData = JSON.parse(lockStr);
+      const age = Date.now() - lockData.timestamp;
+
+      // Se lock è più vecchio del timeout, consideralo scaduto e rimuovilo
+      if (age > DEPLOY_LOCK_TIMEOUT) {
+        localStorage.removeItem(DEPLOY_LOCK_KEY);
+        return false;
+      }
+
+      // Lock valido
+      return true;
+    } catch(e) {
+      // Errore parsing, rimuovi lock corrotto
+      try { localStorage.removeItem(DEPLOY_LOCK_KEY); } catch(_) {}
+      return false;
+    }
+  }
+
+  // Cleanup lock scaduti al boot
+  function cleanupExpiredLocks() {
+    try {
+      const lockStr = localStorage.getItem(DEPLOY_LOCK_KEY);
+      if (!lockStr) return;
+
+      const lockData = JSON.parse(lockStr);
+      const age = Date.now() - lockData.timestamp;
+
+      if (age > DEPLOY_LOCK_TIMEOUT) {
+        localStorage.removeItem(DEPLOY_LOCK_KEY);
+        console.log('Rimosso deploy lock scaduto (età: ' + Math.floor(age/1000) + 's)');
+      }
+    } catch(e) {
+      try { localStorage.removeItem(DEPLOY_LOCK_KEY); } catch(_) {}
+    }
   }
 
   function updateSelectionStatus(){
@@ -1101,12 +1249,38 @@ byId("logoutBtn").onclick = () => {
 
 /* Ricezione token dal popup */
 window.addEventListener("message", async (e) => {
-  try { if (new URL(e.origin).origin !== WORKER_ORIGIN) return; } catch(_) { return; }
-  if (typeof e.data !== "string") return;
+  // Validazione origin robusta
+  try {
+    const eventOrigin = new URL(e.origin).origin;
+    if (eventOrigin !== WORKER_ORIGIN) {
+      console.warn('Messaggio OAuth ricevuto da origin non autorizzato:', eventOrigin);
+      return;
+    }
+  } catch(err) {
+    console.error('Errore parsing origin OAuth:', err);
+    return;
+  }
+
+  // Validazione tipo messaggio
+  if (typeof e.data !== "string") {
+    console.warn('Messaggio OAuth non stringa:', typeof e.data);
+    return;
+  }
+
+  // Validazione formato messaggio
   if (!e.data.startsWith("authorization:github:success:")) return;
-  if (OAUTH_POPUP && e.source !== OAUTH_POPUP) return;
+
+  // Validazione source (deve essere il popup aperto da noi)
+  if (OAUTH_POPUP && e.source !== OAUTH_POPUP) {
+    console.warn('Messaggio OAuth da source non autorizzato');
+    return;
+  }
+
   const tok = e.data.slice("authorization:github:success:".length);
-  if (!tok) return;
+  if (!tok || tok.length < 10) {
+    console.warn('Token OAuth invalido o troppo corto');
+    return;
+  }
   TOKEN = tok;
   try { sessionStorage.setItem("gh_token", TOKEN); } catch(_){ }
   try { localStorage.removeItem("gh_token"); } catch(_){ }
@@ -1828,15 +2002,63 @@ async function loadList(path){
 function parseTomlValue(str){
   if (str == null) return '';
   const trimmed = String(str).trim();
-  if (/^".*"$/.test(trimmed)) {
-    return trimmed.slice(1, -1).replace(/\\"/g, '"');
-  }
+
+  // Boolean
   if (/^(true|false)$/i.test(trimmed)) return trimmed.toLowerCase() === 'true';
-  if (/^\[.*\]$/.test(trimmed)) {
+
+  // Stringhe quotate (singole o doppie)
+  if (/^["'].*["']$/.test(trimmed)) {
+    const quote = trimmed[0];
+    const content = trimmed.slice(1, -1);
+    // Unescape solo le quote matchate
+    return content.replace(new RegExp(`\\\\${quote}`, 'g'), quote);
+  }
+
+  // Array: usiamo regex più robusta per evitare false match su stringhe con brackets
+  // Match solo se inizia con [ e finisce con ] SENZA quotes attorno
+  if (/^\[/.test(trimmed) && /\]$/.test(trimmed) && !/^["']/.test(trimmed)) {
     const inner = trimmed.slice(1, -1).trim();
     if (!inner) return [];
-    return inner.split(',').map(s => parseTomlValue(s)).filter(Boolean);
+
+    // Split su virgole MA rispettando le quote
+    const items = [];
+    let current = '';
+    let inQuote = false;
+    let quoteChar = '';
+
+    for (let i = 0; i < inner.length; i++) {
+      const char = inner[i];
+      const prevChar = i > 0 ? inner[i-1] : '';
+
+      if ((char === '"' || char === "'") && prevChar !== '\\') {
+        if (!inQuote) {
+          inQuote = true;
+          quoteChar = char;
+        } else if (char === quoteChar) {
+          inQuote = false;
+          quoteChar = '';
+        }
+      }
+
+      if (char === ',' && !inQuote) {
+        items.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    if (current.trim()) items.push(current.trim());
+    return items.map(s => parseTomlValue(s)).filter(v => v !== '');
   }
+
+  // Numero
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    const num = parseFloat(trimmed);
+    return isNaN(num) ? trimmed : num;
+  }
+
+  // Default: stringa senza quote (bare string)
   return trimmed;
 }
 
@@ -2185,10 +2407,21 @@ function fillForm(y, raw, path){
   const links = Array.isArray(y.links) ? y.links : (y.links ? [y.links] : []);
   for (const L of links) addLinkRow(L);
   const fd = byId('f_draft');
-  if (fd) fd.onchange = () => {
-    const b = document.getElementById('draftBadge');
-    if (b) b.hidden = !fd.checked;
-  };
+  if (fd) {
+    // Rimuovi listener esistente per evitare memory leak
+    const oldHandler = fd._draftChangeHandler;
+    if (oldHandler) {
+      fd.removeEventListener('change', oldHandler);
+    }
+
+    // Crea nuovo handler e salvalo per futura rimozione
+    const newHandler = () => {
+      const b = document.getElementById('draftBadge');
+      if (b) b.hidden = !fd.checked;
+    };
+    fd._draftChangeHandler = newHandler;
+    fd.addEventListener('change', newHandler);
+  }
   byId("f_raw").value = raw || jsyaml.dump(y);
   fileInfo.textContent = path || "—";
 }
@@ -2568,9 +2801,39 @@ function updateMarkdownPreview() {
 
   if (typeof marked !== 'undefined') {
     try {
-      preview.innerHTML = marked.parse(bodyInput.value || '');
+      // Configure marked per sicurezza: disabilita HTML raw e sanitizza output
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
+        mangle: false,
+        sanitize: false  // Deprecato in marked v5+, usiamo DOMPurify pattern
+      });
+
+      // Parse markdown
+      const rawHTML = marked.parse(bodyInput.value || '');
+
+      // Sanitize output manualmente (light sanitization - rimuove script/style/iframe)
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = rawHTML;
+
+      // Rimuovi elementi potenzialmente pericolosi
+      const dangerousTags = tempDiv.querySelectorAll('script, style, iframe, object, embed, link[rel="import"]');
+      dangerousTags.forEach(el => el.remove());
+
+      // Rimuovi attributi event handler (onclick, onerror, ecc.)
+      const allElements = tempDiv.querySelectorAll('*');
+      allElements.forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:')) {
+            el.removeAttribute(attr.name);
+          }
+        });
+      });
+
+      preview.innerHTML = tempDiv.innerHTML;
     } catch(e) {
-      preview.innerHTML = '<p style="color:red;">Errore rendering Markdown: ' + e.message + '</p>';
+      preview.innerHTML = '<p style="color:red;">Errore rendering Markdown: ' + escHtml(e.message) + '</p>';
     }
   } else {
     preview.innerHTML = '<p style="color:#999;">marked.js non disponibile. Preview disabilitata.</p>';
@@ -2626,15 +2889,21 @@ function initMarkdownEditor() {
 
 /* ====== AUTO-SAVE LOCALE ====== */
 let autoSaveTimer = null;
-const AUTO_SAVE_KEY = 'article_autosave';
+const AUTO_SAVE_KEY_PREFIX = 'article_autosave_';
 const AUTO_SAVE_INTERVAL = 30000; // 30 secondi
+const AUTO_SAVE_MAX_AGE = 3600000; // 1 ora
+
+function getAutoSaveKey(slug) {
+  return AUTO_SAVE_KEY_PREFIX + (slug || 'temp');
+}
 
 function saveArticleDraft() {
   if (!ARTICLE_CURRENT || !aBody) return;
 
+  const slug = ARTICLE_CURRENT.slug || 'temp';
   const draft = {
     path: ARTICLE_CURRENT.path,
-    slug: ARTICLE_CURRENT.slug,
+    slug: slug,
     title: aTitle?.value || '',
     body: aBody.value || '',
     description: aDescription?.value || '',
@@ -2645,7 +2914,7 @@ function saveArticleDraft() {
   };
 
   try {
-    localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(draft));
+    localStorage.setItem(getAutoSaveKey(slug), JSON.stringify(draft));
     const status = byId('articleStatus');
     if (status && !status.textContent.includes('salvat')) {
       const oldText = status.textContent;
@@ -2662,21 +2931,25 @@ function saveArticleDraft() {
 }
 
 function loadArticleDraft() {
+  if (!ARTICLE_CURRENT) return false;
+
+  const slug = ARTICLE_CURRENT.slug || 'temp';
+
   try {
-    const saved = localStorage.getItem(AUTO_SAVE_KEY);
+    const saved = localStorage.getItem(getAutoSaveKey(slug));
     if (!saved) return false;
 
     const draft = JSON.parse(saved);
     const age = Date.now() - draft.timestamp;
 
     // Solo se meno di 1 ora fa
-    if (age > 3600000) {
-      localStorage.removeItem(AUTO_SAVE_KEY);
+    if (age > AUTO_SAVE_MAX_AGE) {
+      localStorage.removeItem(getAutoSaveKey(slug));
       return false;
     }
 
     const minutes = Math.floor(age / 60000);
-    const message = `Trovata bozza locale salvata ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'} fa.\n\nRipristinare?`;
+    const message = `Trovata bozza locale di "${draft.title || slug}" salvata ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'} fa.\n\nRipristinare?`;
 
     if (confirm(message)) {
       if (aTitle) aTitle.value = draft.title || '';
@@ -2709,10 +2982,42 @@ function stopAutoSave() {
 }
 
 function clearArticleDraft() {
+  if (!ARTICLE_CURRENT) return;
+
+  const slug = ARTICLE_CURRENT.slug || 'temp';
+
   try {
-    localStorage.removeItem(AUTO_SAVE_KEY);
+    localStorage.removeItem(getAutoSaveKey(slug));
   } catch (e) {
     console.warn('Impossibile cancellare auto-save:', e);
+  }
+}
+
+// Cleanup auto-save vecchi (eseguito al boot)
+function cleanupOldAutoSaves() {
+  try {
+    const keys = Object.keys(localStorage);
+    const autoSaveKeys = keys.filter(k => k.startsWith(AUTO_SAVE_KEY_PREFIX));
+
+    autoSaveKeys.forEach(key => {
+      try {
+        const data = localStorage.getItem(key);
+        if (!data) return;
+
+        const draft = JSON.parse(data);
+        const age = Date.now() - draft.timestamp;
+
+        if (age > AUTO_SAVE_MAX_AGE) {
+          localStorage.removeItem(key);
+          console.log('Rimossa bozza auto-save scaduta:', key);
+        }
+      } catch (e) {
+        // Corrotta, rimuovi
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (e) {
+    console.warn('Errore cleanup auto-save:', e);
   }
 }
 
@@ -2754,6 +3059,10 @@ document.addEventListener('keydown', (e) => {
 
 /* ====== AVVIO ====== */
 (async function boot(){
+  // Cleanup lock scaduti e auto-save vecchi
+  cleanupExpiredLocks();
+  cleanupOldAutoSaves();
+
   await loadConfig();
   if (TOKEN) {
     const me = await fetchMe().catch(() => null);
