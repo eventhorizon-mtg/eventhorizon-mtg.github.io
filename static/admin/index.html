@@ -6,6 +6,7 @@
 <title>Admin · Mini Editor (Hugo + GitHub)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="admin.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha256-R8p7K6kOLfi+dUDuO8vwNPjAF5RNiFdvLuPNQP0ySog=" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -218,8 +219,50 @@
         </div>
 
         <div class="mt-8">
-          <label>Contenuto (Markdown)</label>
-          <textarea id="a_body" class="textarea--lg" placeholder="Contenuto dell'articolo"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label>Contenuto (Markdown)</label>
+            <button id="a_togglePreview" class="btn" type="button">Mostra Preview</button>
+          </div>
+
+          <div class="markdown-toolbar" style="display:flex;gap:4px;margin:8px 0;flex-wrap:wrap;">
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('**', '**')" title="Bold">
+              <strong>B</strong>
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('*', '*')" title="Italic">
+              <em>I</em>
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('## ', '')" title="Titolo H2">
+              H2
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('### ', '')" title="Titolo H3">
+              H3
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('[', '](url)')" title="Link">
+              Link
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('![alt](', ')')" title="Immagine">
+              Img
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('\`\`\`\n', '\n\`\`\`')" title="Blocco codice">
+              Code
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('- ', '')" title="Lista">
+              Lista
+            </button>
+            <button type="button" class="btn" style="padding:4px 8px;font-size:13px;" onclick="insertMarkdown('> ', '')" title="Citazione">
+              Quote
+            </button>
+          </div>
+
+          <div class="editor-wrapper" style="display:grid;grid-template-columns:1fr;gap:16px;">
+            <textarea id="a_body" class="textarea--lg" placeholder="Contenuto dell'articolo"></textarea>
+            <div id="a_preview" class="markdown-preview" style="border:1px solid var(--border-color, #ddd);padding:16px;min-height:400px;display:none;overflow-y:auto;background:#fff;border-radius:4px;"></div>
+          </div>
+
+          <div class="muted" style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span id="a_charCount">0 caratteri, 0 parole</span>
+            <span id="a_readTime">~0 min di lettura</span>
+          </div>
         </div>
 
         <div class="mt-8" style="display:flex;gap:8px;align-items:center">
@@ -1054,6 +1097,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       if (deleteArticleBtn) deleteArticleBtn.disabled = true;
       updateArticleStatus('Articolo pronto: compila i campi e salva.');
       setView('articles', { force: true, skipLoad: true });
+      initMarkdownEditor();
     };
   }
 
@@ -1065,6 +1109,23 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
       const val = kebab(aSlug.value || '');
       aSlug.value = val;
       ARTICLE_PENDING.cover = null;
+
+      // Validate duplicate slug
+      if (val && TOKEN) {
+        const testPath = articlePathFromSlug(val);
+        if (!ARTICLE_CURRENT || ARTICLE_CURRENT.path !== testPath) {
+          const exists = Array.from(ARTICLES_CACHE.values()).some(a => a.path === testPath);
+          if (exists) {
+            aSlug.style.borderColor = 'red';
+            updateArticleStatus('⚠️ Attenzione: questo slug esiste già!');
+          } else {
+            aSlug.style.borderColor = '';
+            if (byId('articleStatus').textContent.includes('slug esiste')) {
+              updateArticleStatus('');
+            }
+          }
+        }
+      }
     });
     aSlug.addEventListener('input', () => { ARTICLE_PENDING.cover = null; });
   }
@@ -1217,7 +1278,7 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
   async function deleteArticle(){
     if (!TOKEN) { alert('Prima fai login.'); return; }
     if (!ARTICLE_CURRENT || !ARTICLE_CURRENT.path) return alert('Nessun articolo aperto.');
-    if (!ARTICLE_CURRENT.sha) return alert('Salva prima l\'articolo prima di eliminarlo.');
+    if (!ARTICLE_CURRENT.sha) return alert('Salva l\'articolo prima di eliminarlo.');
     if (!confirm(`Eliminare ${ARTICLE_CURRENT.path}?`)) return;
     setDeployLock(true, 'Eliminazione articolo...');
     updateArticleStatus('Eliminazione articolo...');
@@ -1618,6 +1679,7 @@ async function openArticle(path){
     Array.from(nodes).forEach(el => el.classList.toggle('active', el.dataset && el.dataset.path === path));
     updateArticleStatus('Articolo caricato.');
     if (deleteArticleBtn) deleteArticleBtn.disabled = !ARTICLE_CURRENT.sha;
+    initMarkdownEditor();
   } catch (err) {
     alert(err && err.message ? err.message : err);
   }
@@ -1628,7 +1690,7 @@ function planArticleCover(file, slug){
   if (!cleanSlug) throw new Error('Slug non valido per l\'upload della cover.');
   const path = uniqueMediaPath(file, `${ARTICLES_MEDIA_DIR}/${cleanSlug}`);
   const fileName = path.replace(/^.*\//,'');
-  const publicUrl = `${ARTICLES_MEDIA_PUBLIC}/${cleanSlug}/${fileName}`.replace(/\/+/, '/');
+  const publicUrl = `${ARTICLES_MEDIA_PUBLIC}/${cleanSlug}/${fileName}`.replace(/\/+/g, '/');
   ARTICLE_PENDING.cover = { file, path, publicUrl };
   if (aCover) aCover.value = publicUrl;
   updateArticleStatus('Cover pronta: verrà caricata al salvataggio.');
@@ -2064,6 +2126,134 @@ function readTagsChips(){
   const el = byId('tagsSaved'); if (!el) return [];
   return Array.from(el.querySelectorAll('.chip')).map(ch => ch.dataset.tag).filter(Boolean);
 }
+
+/* ====== MARKDOWN EDITOR ENHANCEMENTS ====== */
+function insertMarkdown(before, after) {
+  const textarea = byId('a_body');
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selected = text.substring(start, end);
+
+  const newText = text.substring(0, start) + before + selected + after + text.substring(end);
+  textarea.value = newText;
+  textarea.focus();
+  textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
+
+  // Update preview if visible
+  updateMarkdownPreview();
+  updateCharCount();
+}
+
+function debounce(fn, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function updateMarkdownPreview() {
+  const preview = byId('a_preview');
+  const bodyInput = byId('a_body');
+  if (!preview || !bodyInput || preview.style.display === 'none') return;
+
+  if (typeof marked !== 'undefined') {
+    try {
+      preview.innerHTML = marked.parse(bodyInput.value || '');
+    } catch(e) {
+      preview.innerHTML = '<p style="color:red;">Errore rendering Markdown: ' + e.message + '</p>';
+    }
+  } else {
+    preview.innerHTML = '<p style="color:#999;">marked.js non disponibile. Preview disabilitata.</p>';
+  }
+}
+
+function updateCharCount() {
+  const bodyInput = byId('a_body');
+  const charEl = byId('a_charCount');
+  const readEl = byId('a_readTime');
+
+  if (!bodyInput) return;
+
+  const text = bodyInput.value || '';
+  const chars = text.length;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const readTime = Math.max(1, Math.ceil(words / 200)); // 200 words/min
+
+  if (charEl) charEl.textContent = chars + ' caratteri, ' + words + ' parole';
+  if (readEl) readEl.textContent = '~' + readTime + ' min di lettura';
+}
+
+function initMarkdownEditor() {
+  const togglePreviewBtn = byId('a_togglePreview');
+  const preview = byId('a_preview');
+  const bodyInput = byId('a_body');
+  const editorWrapper = preview?.parentElement;
+
+  if (togglePreviewBtn && preview && bodyInput && editorWrapper) {
+    togglePreviewBtn.onclick = () => {
+      const isVisible = preview.style.display !== 'none';
+      if (isVisible) {
+        preview.style.display = 'none';
+        editorWrapper.style.gridTemplateColumns = '1fr';
+        togglePreviewBtn.textContent = 'Mostra Preview';
+      } else {
+        preview.style.display = 'block';
+        editorWrapper.style.gridTemplateColumns = '1fr 1fr';
+        togglePreviewBtn.textContent = 'Nascondi Preview';
+        updateMarkdownPreview();
+      }
+    };
+
+    bodyInput.addEventListener('input', debounce(() => {
+      updateMarkdownPreview();
+      updateCharCount();
+    }, 300));
+
+    // Initial count
+    updateCharCount();
+  }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  const aBody = byId('a_body');
+
+  // Ctrl/Cmd + S to save
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    if (CURRENT_VIEW === 'articles') {
+      const saveBtn = byId('saveArticleBtn');
+      if (saveBtn && !saveBtn.disabled) saveBtn.click();
+    } else if (CURRENT_VIEW === 'items') {
+      const saveBtn = byId('saveBtn');
+      if (saveBtn && !saveBtn.disabled) saveBtn.click();
+    }
+  }
+
+  // Markdown shortcuts when focused on article body
+  if (document.activeElement === aBody) {
+    // Ctrl/Cmd + B for bold
+    if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+      e.preventDefault();
+      insertMarkdown('**', '**');
+    }
+    // Ctrl/Cmd + I for italic
+    if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+      e.preventDefault();
+      insertMarkdown('*', '*');
+    }
+    // Ctrl/Cmd + K for link
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      insertMarkdown('[', '](url)');
+    }
+  }
+});
+
 /* ====== AVVIO ====== */
 (async function boot(){
   await loadConfig();
