@@ -12,6 +12,10 @@
 <body>
 <div class="wrap">
   <div id="buildNotice" class="notice hidden"><span class="spinner"></span><span class="msg">Build in corso…</span></div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-label="Notifiche"></div>
+
   <header>
     <div class="row" id="authRow">
       <button id="loginBtn" class="btn primary">Login con GitHub</button>
@@ -51,6 +55,19 @@
             <div class="muted">folder: <code>data/archive/items</code> - branch: <code>main</code></div>
           </div>
           <button id="reloadBtn" class="btn">Reload</button>
+        </div>
+        <div class="row mb-8" style="gap:8px;">
+          <input type="text" id="itemSearchInput" placeholder="🔍 Cerca items..." style="flex:1;min-width:0;" />
+          <select id="itemFilterType" style="width:auto;">
+            <option value="all">Tutti i tipi</option>
+            <option value="video">Video</option>
+            <option value="content">Content</option>
+          </select>
+          <select id="itemFilterDraft" style="width:auto;">
+            <option value="all">Tutti</option>
+            <option value="published">Pubblicati</option>
+            <option value="drafts">Solo bozze</option>
+          </select>
         </div>
         <div id="list" class="list"></div>
       </div>
@@ -400,6 +417,269 @@ let CURRENT_VIEW = 'items';
 let ARTICLE_CURRENT = null; // {path, sha, front, body}
 const ARTICLE_PENDING = { cover: null };
 
+/* ====== PERSISTENT STATE MANAGEMENT ====== */
+const STATE_KEY = 'admin_ui_state';
+const STATE_RETENTION = 3600000; // 1 ora
+
+function saveUIState() {
+  if (!TOKEN) return; // Solo se autenticato
+
+  try {
+    const state = {
+      timestamp: Date.now(),
+      currentView: CURRENT_VIEW,
+      currentItemPath: CURRENT?.path || null,
+      currentArticlePath: ARTICLE_CURRENT?.path || null,
+      itemsScrollPosition: listEl ? listEl.scrollTop : 0,
+      articlesScrollPosition: articleList ? articleList.scrollTop : 0,
+      itemSearchQuery: byId('itemSearchInput')?.value || '',
+      itemFilterType: byId('itemFilterType')?.value || 'all',
+      itemFilterDraft: byId('itemFilterDraft')?.value || 'all',
+      articleSearchQuery: byId('articleSearchInput')?.value || '',
+      articleFilterDraft: byId('articleFilterDraft')?.value || 'all'
+    };
+
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn('Impossibile salvare stato UI:', e);
+  }
+}
+
+function restoreUIState() {
+  if (!TOKEN) return;
+
+  try {
+    const stateStr = localStorage.getItem(STATE_KEY);
+    if (!stateStr) return;
+
+    const state = JSON.parse(stateStr);
+    const age = Date.now() - (state.timestamp || 0);
+
+    // Ignora stato troppo vecchio
+    if (age > STATE_RETENTION) {
+      localStorage.removeItem(STATE_KEY);
+      return;
+    }
+
+    // Ripristina view
+    if (state.currentView) {
+      CURRENT_VIEW = state.currentView;
+      setView(CURRENT_VIEW, { force: true, skipLoad: true });
+    }
+
+    // Ripristina filtri items
+    const itemSearchInput = byId('itemSearchInput');
+    const itemFilterType = byId('itemFilterType');
+    const itemFilterDraft = byId('itemFilterDraft');
+
+    if (itemSearchInput && state.itemSearchQuery) itemSearchInput.value = state.itemSearchQuery;
+    if (itemFilterType && state.itemFilterType) itemFilterType.value = state.itemFilterType;
+    if (itemFilterDraft && state.itemFilterDraft) itemFilterDraft.value = state.itemFilterDraft;
+
+    // Ripristina filtri articoli
+    const articleSearchInput = byId('articleSearchInput');
+    const articleFilterDraft = byId('articleFilterDraft');
+
+    if (articleSearchInput && state.articleSearchQuery) articleSearchInput.value = state.articleSearchQuery;
+    if (articleFilterDraft && state.articleFilterDraft) articleFilterDraft.value = state.articleFilterDraft;
+
+    // Ripristina scroll position (dopo load)
+    if (state.currentView === 'items' && state.itemsScrollPosition && listEl) {
+      setTimeout(() => {
+        if (listEl) listEl.scrollTop = state.itemsScrollPosition;
+      }, 500);
+    } else if (state.currentView === 'articles' && state.articlesScrollPosition && articleList) {
+      setTimeout(() => {
+        if (articleList) articleList.scrollTop = state.articlesScrollPosition;
+      }, 500);
+    }
+
+    // Ripristina file aperto (dopo load)
+    if (state.currentView === 'items' && state.currentItemPath) {
+      setTimeout(() => {
+        openFile(state.currentItemPath).catch(() => {});
+      }, 800);
+    } else if (state.currentView === 'articles' && state.currentArticlePath) {
+      setTimeout(() => {
+        openArticle(state.currentArticlePath).catch(() => {});
+      }, 800);
+    }
+  } catch (e) {
+    console.warn('Errore ripristino stato UI:', e);
+    localStorage.removeItem(STATE_KEY);
+  }
+}
+
+// Salva stato periodicamente (ogni 10 secondi)
+setInterval(() => {
+  if (TOKEN) saveUIState();
+}, 10000);
+
+// Salva stato prima di chiudere/ricaricare pagina
+window.addEventListener('beforeunload', () => {
+  if (TOKEN) saveUIState();
+});
+
+/* ====== TOAST NOTIFICATION SYSTEM ====== */
+const Toast = {
+  container: null,
+  init() {
+    this.container = document.getElementById('toastContainer');
+  },
+
+  show(message, options = {}) {
+    if (!this.container) this.init();
+
+    const {
+      type = 'info', // 'success', 'error', 'warning', 'info'
+      duration = 5000,
+      actions = [],
+      progress = false
+    } = options;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', 'alert');
+
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type] || icons.info}</div>
+      <div class="toast-content">
+        <div class="toast-message">${escHtml(message)}</div>
+        ${actions.length ? `<div class="toast-actions"></div>` : ''}
+      </div>
+      <button class="toast-close" aria-label="Chiudi notifica">×</button>
+      ${progress ? '<div class="toast-progress"><div class="toast-progress-bar" style="width:100%"></div></div>' : ''}
+    `;
+
+    const closeBtn = toast.querySelector('.toast-close');
+    const remove = () => {
+      toast.classList.add('toast-exit');
+      setTimeout(() => toast.remove(), 200);
+    };
+
+    closeBtn.onclick = remove;
+
+    if (actions.length) {
+      const actionsContainer = toast.querySelector('.toast-actions');
+      actions.forEach(action => {
+        const btn = document.createElement('button');
+        btn.className = 'toast-btn';
+        btn.textContent = action.label;
+        btn.onclick = () => {
+          if (action.onClick) action.onClick();
+          if (!action.persistent) remove();
+        };
+        actionsContainer.appendChild(btn);
+      });
+    }
+
+    this.container.appendChild(toast);
+
+    if (duration > 0) {
+      let remaining = duration;
+      const progressBar = toast.querySelector('.toast-progress-bar');
+
+      if (progress && progressBar) {
+        const interval = setInterval(() => {
+          remaining -= 100;
+          const percent = (remaining / duration) * 100;
+          progressBar.style.width = `${Math.max(0, percent)}%`;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            remove();
+          }
+        }, 100);
+
+        toast.addEventListener('mouseenter', () => clearInterval(interval));
+      } else {
+        setTimeout(remove, duration);
+      }
+    }
+
+    return { remove, element: toast };
+  },
+
+  success(message, options = {}) {
+    return this.show(message, { ...options, type: 'success' });
+  },
+
+  error(message, options = {}) {
+    return this.show(message, { ...options, type: 'error', duration: options.duration || 7000 });
+  },
+
+  warning(message, options = {}) {
+    return this.show(message, { ...options, type: 'warning' });
+  },
+
+  info(message, options = {}) {
+    return this.show(message, { ...options, type: 'info' });
+  }
+};
+
+/* ====== MODAL CONFIRMATION SYSTEM ====== */
+function showConfirm(options = {}) {
+  return new Promise((resolve) => {
+    const {
+      title = 'Conferma',
+      message = 'Sei sicuro di voler procedere?',
+      confirmText = 'Conferma',
+      cancelText = 'Annulla',
+      danger = false
+    } = options;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'modal-title');
+
+    overlay.innerHTML = `
+      <div class="modal">
+        <h2 id="modal-title" class="modal-title">${escHtml(title)}</h2>
+        <p class="modal-message">${escHtml(message)}</p>
+        <div class="modal-actions">
+          <button class="btn" data-action="cancel">${escHtml(cancelText)}</button>
+          <button class="btn ${danger ? 'danger' : 'primary'}" data-action="confirm">${escHtml(confirmText)}</button>
+        </div>
+      </div>
+    `;
+
+    const remove = () => {
+      overlay.style.animation = 'fadeOut .2s ease';
+      setTimeout(() => overlay.remove(), 200);
+    };
+
+    overlay.querySelector('[data-action="cancel"]').onclick = () => {
+      remove();
+      resolve(false);
+    };
+
+    overlay.querySelector('[data-action="confirm"]').onclick = () => {
+      remove();
+      resolve(true);
+    };
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        remove();
+        resolve(false);
+      }
+    };
+
+    document.body.appendChild(overlay);
+
+    // Focus primo button
+    setTimeout(() => overlay.querySelector('[data-action="confirm"]').focus(), 100);
+  });
+}
+
 /* ====== UTILS ====== */
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -424,10 +704,12 @@ const gh = async (url, opts={}, retryCount=0) => {
     console.warn('GitHub API 401: Token scaduto o invalido');
 
     // Mostra messaggio e richiedi re-autenticazione
-    const reauth = confirm(
-      'La tua sessione è scaduta o il token non è più valido.\n\n' +
-      'Clicca OK per effettuare nuovamente il login con GitHub.'
-    );
+    const reauth = await showConfirm({
+      title: 'Sessione scaduta',
+      message: 'La tua sessione è scaduta o il token non è più valido.\n\nVuoi effettuare nuovamente il login con GitHub?',
+      confirmText: 'Login',
+      cancelText: 'Annulla'
+    });
 
     if (reauth) {
       // Pulisci token e ricarica per forzare login
@@ -597,61 +879,138 @@ async function getPagesLatest(){
   return r.json();
 }
 async function monitorDeployAndReload(){
-  showNotice('Build/deploy avviato…');
+  // Versione NON-BLOCCANTE con Toast
   const start = Date.now();
-  let autoReloaded = false;
-  const autoReloadTimer = setTimeout(() => {
-    autoReloaded = true;
-    try { updateNotice('Aggiornamento automatico in corso...'); } catch(_){ }
-    hideNotice();
-    const url = new URL(window.location.href);
-    url.searchParams.set('t', String(Date.now()));
-    window.location.replace(url.toString());
-  }, 40000);
-  const cancelAutoReload = () => { if (!autoReloaded) clearTimeout(autoReloadTimer); };
+  const prevVersion = await fetchSiteVersion().catch(()=> '');
   let baseLatest = null;
   try { baseLatest = await getPagesLatest(); } catch(_) {}
   const baseTime = baseLatest ? (Date.parse(baseLatest.updated_at||'') || 0) : 0;
-  const prevVersion = await fetchSiteVersion().catch(()=> '');
 
-  // Se l'endpoint Pages non Ã¨ disponibile, fallback diretto su versione
-  if (!baseTime && !baseLatest) {
-    updateNotice('Attesa nuova versione del sito…');
-    const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
-    cancelAutoReload();
-    hideNotice();
-    return ok;
-  }
+  // Toast persistente con azioni
+  const deployToast = Toast.info('Deploy in background...', {
+    duration: 0, // Persistente
+    progress: false,
+    actions: [
+      {
+        label: 'Monitora',
+        persistent: true,
+        onClick: () => {
+          console.log('Monitoraggio deploy attivo');
+        }
+      }
+    ]
+  });
 
-  const deadline = Date.now() + 180000; // 3 minuti
-  while (Date.now() < deadline) {
-    let status = 'in attesa…';
-    try {
-      const latest = await getPagesLatest();
-      const t = Date.parse(latest.updated_at||'') || 0;
-      const changed = t > baseTime;
-      status = String(latest.status || 'processing');
-      if (changed && /built/i.test(status)) {
-        updateNotice('Build completata, finalizzo deploy…');
-        const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
-        cancelAutoReload();
-        hideNotice();
-        return ok;
+  // Monitoraggio in background
+  (async () => {
+    const deadline = Date.now() + 180000; // 3 minuti
+    let deployed = false;
+
+    // Fallback versione se Pages API non disponibile
+    if (!baseTime && !baseLatest) {
+      const ok = await waitForNewBuild(prevVersion, 90000, 2000).catch(()=>false);
+      deployToast.remove();
+      if (ok) {
+        Toast.success('Deploy completato! Ricarica la pagina per vedere le modifiche.', {
+          duration: 0,
+          actions: [{
+            label: 'Ricarica ora',
+            onClick: () => {
+              saveUIState();
+              window.location.reload();
+            }
+          }]
+        });
+      } else {
+        Toast.warning('Deploy non confermato. Ricarica manualmente per verificare.', {
+          duration: 8000
+        });
       }
-      if (changed && /error/i.test(status)) {
-        cancelAutoReload();
-        hideNotice();
-        alert('Build GitHub Pages fallita. Controlla i log di Pages/Actions.');
-        return false;
+      return;
+    }
+
+    // Polling Pages API
+    while (Date.now() < deadline) {
+      try {
+        const latest = await getPagesLatest();
+        const t = Date.parse(latest.updated_at||'') || 0;
+        const changed = t > baseTime;
+        const status = String(latest.status || 'processing');
+
+        // Update toast message
+        const elapsed = Math.floor((Date.now()-start)/1000);
+        deployToast.element.querySelector('.toast-message').textContent =
+          `Deploy in corso: ${status} (${elapsed}s)`;
+
+        if (changed && /built/i.test(status)) {
+          const ok = await waitForNewBuild(prevVersion, 30000, 2000).catch(()=>false);
+          deployToast.remove();
+
+          if (ok) {
+            Toast.success('✓ Deploy completato! Ricarica per vedere le modifiche.', {
+              duration: 0,
+              actions: [{
+                label: 'Ricarica ora',
+                onClick: () => {
+                  saveUIState();
+                  window.location.reload();
+                }
+              }]
+            });
+          } else {
+            Toast.warning('Deploy probabilmente completato. Ricarica per verificare.', {
+              duration: 8000,
+              actions: [{
+                label: 'Ricarica',
+                onClick: () => {
+                  saveUIState();
+                  window.location.reload();
+                }
+              }]
+            });
+          }
+          deployed = true;
+          break;
+        }
+
+        if (changed && /error/i.test(status)) {
+          deployToast.remove();
+          Toast.error('Build GitHub Pages fallita. Controlla i log di Pages/Actions.', {
+            duration: 10000,
+            actions: [{
+              label: 'Apri Actions',
+              onClick: () => {
+                window.open(`https://github.com/${OWNER}/${REPO}/actions`, '_blank');
+              }
+            }]
+          });
+          deployed = true;
+          break;
+        }
+      } catch(e) {
+        console.warn('Errore polling deploy:', e);
       }
-    } catch(_) { /* ignora e riprova */ }
-    const secs = Math.floor((Date.now()-start)/1000);
-    updateNotice(`Stato build: ${status} — ${secs}s`);
-    await sleep(2000);
-  }
-  cancelAutoReload();
-  hideNotice();
-  return false;
+
+      await sleep(3000); // Polling ogni 3s
+    }
+
+    if (!deployed) {
+      deployToast.remove();
+      Toast.warning('Timeout deploy (3 min). Ricarica manualmente per verificare.', {
+        duration: 8000,
+        actions: [{
+          label: 'Ricarica',
+          onClick: () => {
+            saveUIState();
+            window.location.reload();
+          }
+        }]
+      });
+    }
+  })();
+
+  // Ritorna subito senza bloccare
+  return true;
 }
 
 function renderAssetBrowser(container, items, targetInput){
@@ -721,12 +1080,29 @@ function escAttr(s){ return escHtml(s); }
   const reloadArticlesBtn = byId("reloadArticlesBtn");
   if (reloadArticlesBtn) reloadArticlesBtn.onclick = () => loadArticlesList();
 
+  // Ricerca e filtro items
+  const itemSearchInput = byId('itemSearchInput');
+  const itemFilterType = byId('itemFilterType');
+  const itemFilterDraft = byId('itemFilterDraft');
+
+  if (itemSearchInput) {
+    itemSearchInput.addEventListener('input', debounce(applyItemFilters, 150));
+  }
+
+  if (itemFilterType) {
+    itemFilterType.addEventListener('change', applyItemFilters);
+  }
+
+  if (itemFilterDraft) {
+    itemFilterDraft.addEventListener('change', applyItemFilters);
+  }
+
   // Ricerca e filtro articoli
   const articleSearchInput = byId('articleSearchInput');
   const articleFilterDraft = byId('articleFilterDraft');
 
   if (articleSearchInput) {
-    articleSearchInput.addEventListener('input', debounce(applyArticleFilters, 300));
+    articleSearchInput.addEventListener('input', debounce(applyArticleFilters, 150));
   }
 
   if (articleFilterDraft) {
@@ -1244,7 +1620,7 @@ byId("logoutBtn").onclick = () => {
   TOKEN = "";
   OAUTH_POPUP = null;
   setWho(null);
-  alert("Logout eseguito.");
+  Toast.success("Logout eseguito");
 };
 
 /* Ricezione token dal popup */
@@ -1291,7 +1667,10 @@ window.addEventListener("message", async (e) => {
   const me = await fetchMe();
   setWho(me);
   if (me) {
-    setView(CURRENT_VIEW, { force: true, skipLoad: true });
+    // Ripristina stato UI salvato
+    restoreUIState();
+
+    // Carica liste
     await Promise.all([
       loadList().catch(()=>{}),
       loadArticlesList().catch(()=>{})
@@ -1300,7 +1679,7 @@ window.addEventListener("message", async (e) => {
     TOKEN = "";
     try { sessionStorage.removeItem('gh_token'); } catch(_){ }
     try { localStorage.removeItem('gh_token'); } catch(_){ }
-    alert('Autenticazione fallita. Riprova.');
+    Toast.error('Autenticazione fallita. Riprova.');
   }
 });
 
@@ -1916,19 +2295,25 @@ async function loadList(path){
     empty.textContent = 'Cartella vuota.';
     listEl.appendChild(empty);
   }
-  // Preleva metadati (data/draft) e ordina per data desc
+  // Preleva metadati (data/draft/kind/title) e ordina per data desc
   const metas = await Promise.all(files.map(async (f) => {
     try {
       const ur = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f.path}?ref=${encodeURIComponent(BRANCH)}`;
       const rr = await gh(ur);
-      if (!rr.ok) return { f, date: 0, draft: false };
+      if (!rr.ok) return { f, date: 0, draft: false, kind: '', title: '' };
       const j = await rr.json();
       const raw = b64.dec(j.content);
       const yml = jsyaml.load(raw) || {};
       const ds = String(yml.date || '');
       const d = Date.parse(ds);
-      return { f, date: isNaN(d) ? 0 : d, draft: !!yml.draft };
-    } catch(_) { return { f, date: 0, draft: false }; }
+      return {
+        f,
+        date: isNaN(d) ? 0 : d,
+        draft: !!yml.draft,
+        kind: String(yml.kind || 'content'),
+        title: String(yml.title || f.name)
+      };
+    } catch(_) { return { f, date: 0, draft: false, kind: 'content', title: f.name }; }
   }));
   metas.sort((a,b) => (b.date - a.date) || a.f.name.localeCompare(b.f.name));
   const availablePaths = new Set();
@@ -1939,6 +2324,9 @@ async function loadList(path){
     div.className = 'item' + (m.draft ? ' is-draft' : '');
     div.dataset.path = f.path;
     div.dataset.sha = f.sha || '';
+    div.dataset.isDraft = String(!!m.draft);
+    div.dataset.kind = m.kind || 'content';
+    div.dataset.searchText = `${m.title} ${f.name} ${f.path}`.toLowerCase();
     const strong = document.createElement('strong');
     strong.style.fontWeight = '600';
     strong.style.fontSize = '13px';
@@ -1996,6 +2384,7 @@ async function loadList(path){
     }
   }
   updateSelectionStatus();
+  applyItemFilters();
 }
 
 /* ====== ARTICOLI ====== */
@@ -2139,6 +2528,66 @@ function fillArticleForm(front={}, body='', path='', slug=''){
 
 function clearArticleForm(){
   fillArticleForm({}, '', '', '');
+}
+
+function applyItemFilters() {
+  if (!listEl) return;
+
+  const searchInput = byId('itemSearchInput');
+  const filterType = byId('itemFilterType');
+  const filterDraft = byId('itemFilterDraft');
+
+  const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const typeFilter = filterType ? filterType.value : 'all';
+  const draftFilter = filterDraft ? filterDraft.value : 'all';
+
+  const items = listEl.querySelectorAll('.item:not(.item--dir)');
+  let visibleCount = 0;
+  let videoCount = 0;
+  let contentCount = 0;
+  let draftCount = 0;
+  let publishedCount = 0;
+
+  items.forEach(item => {
+    const searchText = item.dataset.searchText || '';
+    const isDraft = item.dataset.isDraft === 'true';
+    const itemKind = item.dataset.kind || 'content';
+
+    // Search filter
+    const matchesSearch = !searchQuery || searchText.includes(searchQuery);
+
+    // Type filter
+    let matchesType = true;
+    if (typeFilter === 'video') matchesType = itemKind === 'video';
+    else if (typeFilter === 'content') matchesType = itemKind === 'content';
+
+    // Draft filter
+    let matchesDraft = true;
+    if (draftFilter === 'drafts') matchesDraft = isDraft;
+    else if (draftFilter === 'published') matchesDraft = !isDraft;
+
+    const visible = matchesSearch && matchesType && matchesDraft;
+    item.style.display = visible ? '' : 'none';
+
+    if (visible) visibleCount++;
+    if (itemKind === 'video') videoCount++;
+    else contentCount++;
+    if (isDraft) draftCount++;
+    else publishedCount++;
+  });
+
+  // Update filter dropdowns with counts
+  if (filterType && filterType.options) {
+    filterType.options[0].textContent = `Tutti i tipi`;
+    filterType.options[1].textContent = `Video (${videoCount})`;
+    filterType.options[2].textContent = `Content (${contentCount})`;
+  }
+
+  if (filterDraft && filterDraft.options) {
+    filterDraft.options[0].textContent = `Tutti`;
+    filterDraft.options[1].textContent = `Pubblicati (${publishedCount})`;
+    filterDraft.options[2].textContent = `Solo bozze (${draftCount})`;
+  }
 }
 
 function applyArticleFilters() {
@@ -3068,7 +3517,12 @@ document.addEventListener('keydown', (e) => {
     const me = await fetchMe().catch(() => null);
     if (me) {
       setWho(me);
-      await loadList();
+      // Ripristina stato UI salvato
+      restoreUIState();
+      await Promise.all([
+        loadList().catch(()=>{}),
+        loadArticlesList().catch(()=>{})
+      ]);
       return;
     }
     try { sessionStorage.removeItem('gh_token'); } catch(_){ }

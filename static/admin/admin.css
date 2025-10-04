@@ -445,6 +445,208 @@ textarea{
 }
 @keyframes spin{ to{ transform:rotate(360deg) } }
 
+/* ---------- Toast Notification System ---------- */
+.toast-container{
+  position:fixed;
+  top:var(--s-16);
+  right:var(--s-16);
+  z-index:10000;
+  display:flex;
+  flex-direction:column;
+  gap:var(--s-8);
+  pointer-events:none;
+  max-width:420px;
+}
+
+.toast{
+  pointer-events:all;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-16);
+  padding:var(--s-16);
+  box-shadow:var(--shadow-2);
+  display:flex;
+  align-items:flex-start;
+  gap:var(--s-16);
+  min-width:280px;
+  animation:toastSlideIn .3s cubic-bezier(.21,1.02,.73,1);
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.toast.toast-exit{
+  animation:toastSlideOut .2s ease forwards;
+}
+
+@keyframes toastSlideIn{
+  from{ transform:translateX(120%); opacity:0 }
+  to{ transform:translateX(0); opacity:1 }
+}
+
+@keyframes toastSlideOut{
+  to{ transform:translateX(120%); opacity:0 }
+}
+
+.toast-icon{
+  flex-shrink:0;
+  width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  line-height:1;
+}
+
+.toast-content{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:var(--s-8);
+}
+
+.toast-message{
+  color:var(--text);
+  font-size:14px;
+  line-height:1.4;
+  word-wrap:break-word;
+}
+
+.toast-actions{
+  display:flex;
+  gap:var(--s-8);
+  margin-top:4px;
+}
+
+.toast-btn{
+  padding:4px var(--s-16);
+  border-radius:var(--radius-8);
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--acc);
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:background var(--t-fast), border-color var(--t-fast);
+}
+
+.toast-btn:hover{
+  background:rgba(108,92,231,.1);
+  border-color:var(--acc);
+}
+
+.toast-close{
+  flex-shrink:0;
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+  padding:0;
+  width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:color var(--t-fast);
+}
+
+.toast-close:hover{ color:var(--text) }
+
+/* Toast variants */
+.toast.toast-success{ border-left:4px solid #10b981 }
+.toast.toast-success .toast-icon{ color:#10b981 }
+
+.toast.toast-error{ border-left:4px solid var(--danger) }
+.toast.toast-error .toast-icon{ color:var(--danger) }
+
+.toast.toast-warning{ border-left:4px solid var(--warn) }
+.toast.toast-warning .toast-icon{ color:var(--warn) }
+
+.toast.toast-info{ border-left:4px solid #3b82f6 }
+.toast.toast-info .toast-icon{ color:#3b82f6 }
+
+/* Toast con progress bar */
+.toast-progress{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:rgba(108,92,231,.3);
+  border-radius:0 0 var(--radius-16) var(--radius-16);
+}
+
+.toast-progress-bar{
+  height:100%;
+  background:var(--acc);
+  border-radius:0 0 var(--radius-16) var(--radius-16);
+  transition:width .1s linear;
+}
+
+.toast.toast-success .toast-progress-bar{ background:#10b981 }
+.toast.toast-error .toast-progress-bar{ background:var(--danger) }
+.toast.toast-warning .toast-progress-bar{ background:var(--warn) }
+
+/* Confirmation modal (per sostituire confirm()) */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:9998;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--s-16);
+  animation:fadeIn .2s ease;
+}
+
+.modal{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-16);
+  padding:var(--s-24);
+  max-width:480px;
+  width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:modalSlideUp .3s cubic-bezier(.21,1.02,.73,1);
+}
+
+@keyframes fadeIn{
+  from{ opacity:0 }
+  to{ opacity:1 }
+}
+
+@keyframes modalSlideUp{
+  from{ transform:translateY(20px); opacity:0 }
+  to{ transform:translateY(0); opacity:1 }
+}
+
+.modal-title{
+  font-size:18px;
+  font-weight:600;
+  color:var(--text);
+  margin:0 0 var(--s-16) 0;
+}
+
+.modal-message{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.5;
+  margin:0 0 var(--s-24) 0;
+}
+
+.modal-actions{
+  display:flex;
+  gap:var(--s-16);
+  justify-content:flex-end;
+}
+
+.modal-actions .btn{
+  min-width:80px;
+}
+
 /* ---------- Utilities ---------- */
 .hidden{ display:none }
 .status{ font-size:12px; color:#a8b3e9 }
