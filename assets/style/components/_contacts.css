@@ -2,8 +2,8 @@
    Contacts
    ======================= */
 .contacts{
-  background: var(--section-bg-light);
-  color: var(--section-text-light);
+  background: var(--neutral-50);
+  color: var(--indigo-900);
   padding: clamp(32px, 6vw, 72px) 0;
 }
 .contacts__inner{
@@ -63,7 +63,7 @@
   width: 24px;
   height: 24px;
   display: inline-block;
-  background-color: var(--section-text-light); /* colore icona adattivo */
+  background-color: var(--indigo-900); /* colore icona */
   transition: background-color var(--dur-1) var(--ease-standard);
 }
 
@@ -112,7 +112,7 @@
 @supports not (mask-image: url("")) {
   /* coloriamo via currentColor e usiamo uno pseudo-elemento con background-image */
   .contact{
-    color: var(--section-text-light);
+    color: var(--indigo-900);
   }
   .contact:hover{
     color: var(--teal-600);

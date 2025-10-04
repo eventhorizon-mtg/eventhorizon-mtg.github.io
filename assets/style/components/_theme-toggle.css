@@ -17,7 +17,7 @@
 }
 
 .theme-toggle:hover {
-  background: var(--nav-text-hover);
+  background: rgba(255,255,255,0.1);
 }
 
 .theme-toggle:focus-visible {
@@ -33,7 +33,7 @@
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  color: var(--nav-text);
+  color: #fff;
   transition: transform 300ms ease, opacity 200ms ease;
   position: absolute;
 }

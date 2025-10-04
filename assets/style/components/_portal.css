@@ -2,8 +2,8 @@
    Portal
    ======================= */
 .portal{
-  background: var(--section-bg-light);
-  color: var(--section-text-light);
+  background: var(--neutral-50);
+  color: var(--indigo-900);
   padding: clamp(32px, 6vw, 72px) 0;
   /* Evita che l'anchor #portal finisca sotto la navbar fissa */
   scroll-margin-top: 80px;
