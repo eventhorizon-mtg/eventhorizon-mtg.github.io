@@ -2130,8 +2130,11 @@ if (btnBrowseThumb && thumbBrowser && fThumb) {
           branch: BRANCH,
           ...(sha ? { sha } : {})
         });
-        if (shaMaybe) return gh(url, { method: 'PUT', body: makeBody(shaMaybe) });
-        let r = await gh(url, { method: 'PUT', body: makeBody(null) });
+
+        // Prova prima con SHA fornito se presente
+        let r = await gh(url, { method: 'PUT', body: makeBody(shaMaybe || null) });
+
+        // Se 422, il file esiste ma SHA non corrisponde → fetch SHA corrente
         if (r.status === 422) {
           const g = await gh(url);
           if (g.ok) {
