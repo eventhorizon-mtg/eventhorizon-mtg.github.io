@@ -1008,9 +1008,20 @@
 }
 
 /* Hover uniforme - mantiene colori del modificatore */
-/* Hover/active gestiti dalle classi dei button; nessun override necessario qui */
-
-/* (intenzionalmente vuoto) */
+.item-ctas .btn:hover,
+.item-ctas .btn:focus-visible,
+.item-ctas .pill:hover,
+.item-ctas .pill:focus-visible,
+.item-content-extended .btn:hover,
+.item-content-extended .btn:focus-visible,
+.item-content-extended .pill:hover,
+.item-content-extended .pill:focus-visible,
+.item-panel .btn:hover,
+.item-panel .btn:focus-visible,
+.item-panel .pill:hover,
+.item-panel .pill:focus-visible {
+  color: var(--btn-color);
+}
 
 .archive-timeline .empty,
 .archive-error {
@@ -1285,9 +1296,12 @@
 }
 
 /* Hover uniforme - mantiene colori del modificatore */
-/* Hover/active delegati alle varianti dei button */
-
-/* (intenzionalmente vuoto) */
+.archive-sheet__ctas .btn:hover,
+.archive-sheet__ctas .btn:focus-visible,
+.archive-sheet__ctas .pill:hover,
+.archive-sheet__ctas .pill:focus-visible {
+  color: var(--btn-color);
+}
 
 body.is-sheet-open {
   position: fixed;
