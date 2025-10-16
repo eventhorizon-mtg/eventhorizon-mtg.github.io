@@ -346,10 +346,6 @@
         hr.className = 'item-separator';
         sheetFragment.appendChild(hr);
       }
-      // Aggiungi separator prima dei link se c'è altro contenuto
-      if (links.length > 0 && sheetHtml) {
-        sheetHtml += `<hr class="item-separator">`;
-      }
 
       openSheet({
         title,
