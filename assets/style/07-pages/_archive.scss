@@ -850,11 +850,6 @@
   pointer-events: none;
 }
 
-/* Rimuovi anche la classe has-overflow quando scrollabile (pulizia stato) */
-.item-panel.is-scrollable {
-  /* Il gradient viene nascosto dalle regole sopra */
-}
-
 /* Mobile: nascondi sempre gradient e indicatore (non serve unlock su mobile) */
 @media (max-width: 767.98px) {
   .item-panel::after,
