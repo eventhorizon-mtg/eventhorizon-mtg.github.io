@@ -75,7 +75,14 @@
       const scrollY = window.scrollY;
 
       titleEl.textContent = payload.title || '';
-      content.innerHTML   = payload.descHtml || '';
+      content.innerHTML   = ''; // Clear first
+      if (payload.descHtml) {
+        if (payload.descHtml instanceof Node) {
+          content.appendChild(payload.descHtml);
+        } else {
+          content.innerHTML = payload.descHtml; // Fallback for string type, if necessary
+        }
+      }
       ctas.innerHTML      = '';
       (payload.links || []).forEach(link => {
         const a = document.createElement('a');
@@ -313,15 +320,32 @@
       }));
 
       // Build sheet content with separators (stesso formato del pannello)
-      let sheetHtml = '';
+      // Build sheet content as DOM nodes to avoid text escaping issues
+      const sheetFragment = document.createDocumentFragment();
       if (desc) {
-        sheetHtml += `<p class="item-summary">${desc.textContent}</p>`;
+        const p = document.createElement('p');
+        p.className = 'item-summary';
+        p.textContent = desc.textContent;
+        sheetFragment.appendChild(p);
       }
       if (contentExt) {
-        if (sheetHtml) sheetHtml += `<hr class="item-separator">`;
-        sheetHtml += `<div class="item-content-extended">${contentExt.innerHTML}</div>`;
+        if (desc) {
+          const hr = document.createElement('hr');
+          hr.className = 'item-separator';
+          sheetFragment.appendChild(hr);
+        }
+        const extContainer = document.createElement('div');
+        extContainer.className = 'item-content-extended';
+        // Assume contentExt.innerHTML is safe/trusted; if not, sanitize it here
+        extContainer.innerHTML = contentExt.innerHTML;
+        sheetFragment.appendChild(extContainer);
       }
-
+      // Add separator before links if sheetFragment is not empty and there are links
+      if (links.length > 0 && sheetFragment.childNodes.length > 0) {
+        const hr = document.createElement('hr');
+        hr.className = 'item-separator';
+        sheetFragment.appendChild(hr);
+      }
       // Aggiungi separator prima dei link se c'è altro contenuto
       if (links.length > 0 && sheetHtml) {
         sheetHtml += `<hr class="item-separator">`;
@@ -329,7 +353,7 @@
 
       openSheet({
         title,
-        descHtml: sheetHtml,
+        descHtml: sheetFragment, // Now passing DOM Fragment, not string
         links,
         kind // Passa il tipo allo sheet
       }, article);
