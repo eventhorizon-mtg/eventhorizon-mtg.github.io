@@ -938,9 +938,9 @@
 .cards--stack .card__cta-row .card__cta.pill:focus-visible,
 .cards--stack .card__cta-row .card__cta.btn:hover,
 .cards--stack .card__cta-row .card__cta.btn:focus-visible {
-  color: var(--btn-color);
-  background: var(--btn-bg);
-  border-color: var(--btn-border);
+  color: var(--btn-color) !important;
+  background: var(--btn-bg) !important;
+  border-color: var(--btn-border) !important;
 }
 
 .cards--stack .card__cta-row {
@@ -1637,7 +1637,7 @@
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:focus-visible,
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:hover,
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:focus-visible {
-      color: var(--btn-color);
+      color: var(--btn-color) !important;
     }
 
     /* Ensure stacking order: media below, body above, play within media */
