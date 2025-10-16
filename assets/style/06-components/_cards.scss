@@ -1606,6 +1606,18 @@
       transform: none;
     }
 
+    /* Preserve button color on hover for standard btn/pill classes on mobile */
+    #cards.cards--stack.cards--panels .card .card__actions .btn:hover,
+    #cards.cards--stack.cards--panels .card .card__actions .btn:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__actions .pill:hover,
+    #cards.cards--stack.cards--panels .card .card__actions .pill:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__cta-row .btn:hover,
+    #cards.cards--stack.cards--panels .card .card__cta-row .btn:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__cta-row .pill:hover,
+    #cards.cards--stack.cards--panels .card .card__cta-row .pill:focus-visible {
+      color: var(--btn-color);
+    }
+
     /* Ensure stacking order: media below, body above, play within media */
     .card .card__media { z-index: 1; }
     .card .card__header { z-index: 2; }
