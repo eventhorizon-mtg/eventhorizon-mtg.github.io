@@ -181,7 +181,22 @@
 
     // Ottieni base URL dal documento
     const base = document.documentElement.getAttribute('data-base-url') || window.location.origin;
-    const normalized = base.replace(/\/$/, '');
+    // Sanitize base: allow only URLs or safe relative paths
+    function sanitizeBase(input) {
+      try {
+        // If absolute URL: allow only http(s) origins
+        const urlObj = new URL(input, window.location.origin);
+        if (!['http:', 'https:'].includes(urlObj.protocol)) return window.location.origin;
+        // Remove fragment and query for safer src
+        urlObj.hash = '';
+        urlObj.search = '';
+        return urlObj.href.replace(/\/$/, '');
+      } catch (e) {
+        // If invalid: use location.origin
+        return window.location.origin;
+      }
+    }
+    const normalized = sanitizeBase(base);
 
     // Applica il fallback
     img.src = `${normalized}/${FALLBACK_IMAGE}`;
