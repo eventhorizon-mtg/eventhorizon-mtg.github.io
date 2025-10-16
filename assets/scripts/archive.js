@@ -845,11 +845,13 @@
   const variantFromUrl = (url) => {
     try {
       const host = new URL(url, window.location.origin).host.toLowerCase();
-      if (host.includes('youtube.com') || host.includes('youtu.be')) return 'btn--yt';
-      if (host.includes('scryfall.com')) return 'btn--scry';
-      if (host.includes('edhrec.com'))   return 'btn--edh';
-      if (host.includes('moxfield.com')) return 'btn--mox';
-      if (host.includes('archidekt.com'))return 'btn--archi';
+      // Helper to check for exact host or subdomains
+      const isHostOrSub = (h, d) => h === d || h.endsWith('.' + d);
+      if (isHostOrSub(host, 'youtube.com') || host === 'youtu.be') return 'btn--yt';
+      if (isHostOrSub(host, 'scryfall.com')) return 'btn--scry';
+      if (isHostOrSub(host, 'edhrec.com'))   return 'btn--edh';
+      if (isHostOrSub(host, 'moxfield.com')) return 'btn--mox';
+      if (isHostOrSub(host, 'archidekt.com'))return 'btn--archi';
     } catch {}
     return null;
   };
