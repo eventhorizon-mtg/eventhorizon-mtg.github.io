@@ -1,0 +1,107 @@
+/* ==========================================
+   UTILITIES - EventHorizon.mtg 2.0
+   Helper classes and layout containers
+   ========================================== */
+
+/* Container: defined in 05-objects/_container.scss to avoid duplication */
+
+/* Icons */
+.icon {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.icon--search,
+.icon--filter,
+.icon--reset {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: var(--color-surface-glass);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(var(--blur-nav));
+  box-shadow: var(--shadow-soft);
+}
+
+/* Image filters */
+.img-fallback {
+  filter: grayscale(0.35) saturate(0.8);
+  opacity: 0.9;
+}
+
+/* Text utilities */
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center,
+.text-centered {
+  text-align: center;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.text-color-primary {
+  color: var(--color-primary);
+}
+
+.text-color-secondary {
+  color: var(--color-secondary);
+}
+
+.text-color-accent {
+  color: var(--color-accent);
+}
+
+.text-color-success {
+  color: var(--color-success);
+}
+
+.text-color-warning {
+  color: var(--color-warning);
+}
+
+.text-color-danger {
+  color: var(--color-danger);
+}
+
+.text-color-light {
+  color: var(--color-white);
+}
+
+.text-color-muted {
+  color: var(--color-text-muted);
+}
+
+/* .sr-only defined in 04-elements/_base.scss */
+
+/* Shadow utilities */
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Focus outline default + narrow to :focus-visible where supported */
+*:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Browsers that support :focus-visible will apply this and remove outline from non-visible focus */
+*:focus:not(:focus-visible) {
+  outline: none;
+}

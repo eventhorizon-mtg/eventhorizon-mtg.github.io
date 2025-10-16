@@ -1,0 +1,17 @@
+id: Video003
+slug: Episodio3
+kind: video
+date: 2025-05-06
+title: "LA STORIA DI RAVNICA: IL PIANETA CITTÀ"
+overline: "LA STORIA DI MAGIC - EPISODIO #03"
+desc: >-
+  Ravnica, l'immenso pianeta città, è uno dei piani più affascinanti di Magic
+  the Gathering. Fin dalla sua uscita nell'ormai lontano 2005, questa
+  ambientazione ha conquistato il cuore di milioni di giocatori. 
+
+  In questo video vediamo perché. 
+links:
+  - btn_class: btn--yt
+    primary: true
+    label: YouTube
+    href: https://www.youtube.com/watch?v=mjgHTFyQp30

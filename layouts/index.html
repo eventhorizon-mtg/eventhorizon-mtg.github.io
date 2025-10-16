@@ -1,0 +1,358 @@
+﻿{{ define "main" }}
+<main id="main-content" class="home" tabindex="-1">
+
+  <!-- >>> START HERO SECTION -->
+  <div class="hero-layout">
+    <section
+      class="hero has-hero-bg"
+      data-bg="{{ ("images/bg_image.webp" | absURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
+      aria-label="Hero EventHorizon.mtg"
+    >
+      <div class="hero__inner">
+        <div class="hero__content">
+          <!-- >>> START HERO LOGO (responsive with srcset) -->
+          <img class="hero__logo"
+                src="{{ ("images/logo.webp" | absURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}"
+                srcset="{{ ("images/logo.webp" | absURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }} 1x,
+                        {{ ("images/logo.webp" | absURL) }}?v={{ with site.Params.appVer }}{{ . }}{{ end }} 2x"
+                alt="Logo {{ .Site.Title }}"
+                width="140" height="140"
+                decoding="async"
+                fetchpriority="high" />
+          <!-- <<< END HERO LOGO -->
+
+          <!-- Text hero -->
+          <h1 class="hero__title">BEYOND THE HORIZON</h1>
+          <p class="hero__subtitle">
+            Narrativa e mazzi Commander.
+            <br>Tutto su un'unica rotta!
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--special" href="{{ "/archive/" | absURL }}">Esplora l'Archivio</a>
+            <a class="btn btn--mox-glass" href="https://moxfield.com/users/EventHorizonMtG" target="_blank" rel="noopener noreferrer">Le nostre Decklist</a>
+          </div>
+          
+          <!-- Scroll indicator -->
+          <div class="hero__scroll-hint" aria-hidden="true">
+            <svg class="hero__scroll-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+  <!-- <<< END HERO -->
+
+    <!-- >>> START CARDS SECTION -->
+  <section id="cards" class="cards cards--stack cards--panels" aria-labelledby="cards-title">
+    <div class="cards__inner">
+      <header class="cards__header">
+        <div class="cards__intro">
+          <span class="cards__eyebrow">Dal Logbook</span>
+          <h2 id="cards-title" class="cards__title">Ultimi contenuti</h2>
+        </div>
+      </header>
+
+      <div class="cards__stack">
+        {{/* Ultime 4 dal data archive: data/archive/items/*.yml */}}
+        {{ $items := slice }}
+        {{ with .Site.Data.archive.items }}
+          {{ range $k, $v := . }}
+            {{ if not $v.draft }}{{ $items = $items | append $v }}{{ end }}
+          {{ end }}
+        {{ end }}
+        {{ $items = sort $items "date" "desc" }}
+        {{ $items = first (cond (gt (len $items) 4) 4 (len $items)) $items }}
+
+        {{ if gt (len $items) 0 }}
+          {{ range $i, $it := $items }}
+            {{ $kindRaw := cond (isset $it "kind") (lower $it.kind) "content" }}
+            {{ $kind := cond (gt (len $kindRaw) 0) $kindRaw "content" }}
+            {{ $isVideo := eq $kind "video" }}
+            {{ $thumbURL := ("images/cards/fblthp_placeholder.webp" | absURL) }}
+            {{ with $it.card }}
+              {{ $c := . }}
+              {{ if hasPrefix $c "http" }}{{ $thumbURL = $c }}{{ else }}{{ $thumbURL = ($c | absURL) }}{{ end }}
+            {{ else }}
+              {{ with $it.thumb }}
+                {{ $t := . }}
+                {{ if hasPrefix $t "http" }}{{ $thumbURL = $t }}{{ else }}{{ $thumbURL = ($t | absURL) }}{{ end }}
+              {{ end }}
+            {{ end }}
+            {{ $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) }}
+            {{ $primaryLinks := where $links "primary" true }}
+            {{ $primaryLinkData := dict }}
+            {{ if gt (len $primaryLinks) 0 }}
+              {{ $primaryLinkData = index $primaryLinks 0 }}
+            {{ else if gt (len $links) 0 }}
+              {{ $primaryLinkData = index $links 0 }}
+            {{ end }}
+            {{ $primaryLink := "" }}
+            {{ $primaryLabel := "" }}
+            {{ $primaryClass := "" }}
+            {{ if gt (len $primaryLinkData) 0 }}
+              {{ with $primaryLinkData.href }}{{ $primaryLink = . }}{{ end }}
+              {{ with $primaryLinkData.label }}{{ $primaryLabel = . }}{{ end }}
+              {{ if isset $primaryLinkData "btn_class" }}
+                {{ $primaryClass = trim $primaryLinkData.btn_class " " }}
+              {{ end }}
+            {{ end }}
+            {{ $hasPrimary := ne $primaryLink "" }}
+            {{ $ctaHref := cond $hasPrimary $primaryLink ("/archive/" | absURL) }}
+            {{ $ctaExternal := and $hasPrimary (hasPrefix $primaryLink "http") }}
+            {{ $playHref := cond (and $isVideo $hasPrimary) $primaryLink "" }}
+            {{ $playExternal := and (ne $playHref "") (hasPrefix $playHref "http") }}
+            {{ $ctaLabel := "" }}
+            {{ if $hasPrimary }}
+              {{ $ctaLabel = cond (gt (len $primaryLabel) 0) $primaryLabel (cond $isVideo "Guarda" "Vai al contenuto") }}
+            {{ else }}
+              {{ $ctaLabel = "Altro" }}
+            {{ end }}
+            {{ $hasSecondary := false }}
+            {{ range $links }}
+              {{ $href := .href }}
+              {{ if and $href (not .primary) }}
+                {{ $hasSecondary = true }}
+              {{ end }}
+            {{ end }}
+            {{ $bgImageURL := "" }}
+            {{ with $it.background_image }}
+              {{ $bg := . }}
+              {{ if hasPrefix $bg "http" }}{{ $bgImageURL = $bg }}{{ else }}{{ $bgImageURL = ($bg | absURL) }}{{ end }}
+            {{ end }}
+            <article class="card card--stack-item card--{{ $kind }} {{ if $isVideo }}is-video{{ else }}is-content{{ end }}{{ if $bgImageURL }} has-bg-image{{ end }}" {{ if $bgImageURL }}data-bg-url="{{ $bgImageURL }}"{{ end }}>
+              <header class="card__header">
+                <span class="card__overline">{{ with $it.overline }}{{ . }}{{ else }}&nbsp;{{ end }}</span>
+                <h3 class="card__title">{{ $it.title }}</h3>
+              </header>
+
+              <figure class="card__media">
+                <img
+                  class="card__img"
+                  src="{{ $thumbURL }}"
+                  width="720" height="1280"
+                  alt="{{ if $it.title }}{{ $it.title }}{{ else }}Immagine contenuto{{ end }}"
+                  loading="{{ if eq $i 0 }}eager{{ else }}lazy{{ end }}"
+                  fetchpriority="{{ if eq $i 0 }}high{{ else }}low{{ end }}"
+                  decoding="async" />
+                {{ if $playHref }}
+                  <span class="card__media-overlay" aria-hidden="true"></span>
+                  {{ $playClasses := "card__play" }}
+                  {{ if $primaryClass }}
+                    {{ $playClasses = printf "%s %s" $playClasses $primaryClass }}
+                  {{ end }}
+                  <a class="{{ $playClasses }}"
+                     href="{{ $playHref }}"
+                     {{ if $playExternal }}target="_blank" rel="noopener noreferrer"{{ end }}
+                     aria-label="{{ if gt (len $primaryLabel) 0 }}{{ $primaryLabel }}{{ else }}Guarda video: {{ $it.title }}{{ end }}">
+                    <svg class="card__play-icon" viewBox="0 0 68 48" aria-hidden="true" focusable="false">
+                      <path class="card__play-shape" d="M66.52 7.85a8.06 8.06 0 00-5.68-5.68C55.16 0 34 0 34 0S12.84 0 7.16 2.17a8.06 8.06 0 00-5.68 5.68A83.5 83.5 0 000 24a83.5 83.5 0 001.48 16.15 8.06 8.06 0 005.68 5.68C12.84 48 34 48 34 48s21.16 0 27.84-2.17a8.06 8.06 0 005.68-5.68A83.5 83.5 0 0068 24a83.5 83.5 0 00-1.48-16.15z" />
+                      <polygon class="card__play-symbol" points="27,14 45,24 27,34" />
+                    </svg>
+                  </a>
+                {{ else if and (not $isVideo) $hasPrimary }}
+                  <span class="card__media-overlay" aria-hidden="true"></span>
+                  {{/* For content cards, force primary-glass button style as centered overlay */}}
+                  {{ $ctaPlayClasses := "card__play btn btn--primary-glass" }}
+                  <a class="{{ $ctaPlayClasses }}"
+                     href="{{ $ctaHref }}"
+                     {{ if $ctaExternal }}target="_blank" rel="noopener noreferrer"{{ end }}
+                     aria-label="{{ if gt (len $primaryLabel) 0 }}{{ $primaryLabel }}{{ else }}Apri: {{ $it.title }}{{ end }}">
+                    <span>{{ $ctaLabel }}</span>
+                  </a>
+                {{ end }}
+              </figure>
+
+              <div class="card__body">
+                <div class="card__desc">{{ with $it.desc }}{{ . | markdownify }}{{ else }}&nbsp;{{ end }}</div>
+                {{ if isset $it "content" }}
+                  {{ if $it.content }}
+                    <div class="card__content">{{ $it.content | markdownify }}</div>
+                  {{ end }}
+                {{ end }}
+                {{ if $hasSecondary }}
+                  <div class="card__actions">
+                    {{ range $links }}
+                      {{ $href := .href }}
+                      {{ if and $href (not .primary) }}
+                        {{ $secondaryExternal := hasPrefix $href "http" }}
+                        {{ $secondaryClasses := "card__btn" }}
+                        {{ if isset . "btn_class" }}
+                          {{ $secondaryClassValue := trim .btn_class " " }}
+                          {{ if ne $secondaryClassValue "" }}
+                            {{ $secondaryClasses = printf "%s %s %s" $secondaryClasses "pill" $secondaryClassValue }}
+                          {{ end }}
+                        {{ end }}
+                        <a class="{{ $secondaryClasses }}" href="{{ $href }}"{{ if $secondaryExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>
+                          {{ .label | default "Apri" }}
+                        </a>
+                      {{ end }}
+                    {{ end }}
+                  </div>
+                {{ end }}
+                {{ if not $hasPrimary }}
+                  <div class="card__cta-row">
+                    {{ $ctaClasses := "card__cta" }}
+                    {{ if $primaryClass }}
+                      {{ $ctaClasses = printf "%s %s %s" $ctaClasses "pill" $primaryClass }}
+                    {{ end }}
+                    <a class="{{ $ctaClasses }}" href="{{ $ctaHref }}"{{ if $ctaExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>
+                      <span>{{ $ctaLabel }}</span>
+                    </a>
+                  </div>
+                {{ end }}
+              </div>
+            </article>
+          {{ end }}
+        {{ else }}
+          <article class="card card--stack-item card--content">
+            <header class="card__header">
+              <span class="card__overline">Logbook</span>
+              <h3 class="card__title">Nessun contenuto</h3>
+            </header>
+            <figure class="card__media">
+              <img class="card__img" src="{{ "images/cards/fblthp_placeholder.webp" | absURL }}" width="720" height="1280" alt="" />
+            </figure>
+            <div class="card__body">
+              <p class="card__desc">Contenuti in arrivo.</p>
+              <div class="card__cta-row">
+                <a class="card__cta" href="{{ "/archive/" | absURL }}">
+                  <span>Visita l'archivio</span>
+                </a>
+              </div>
+            </div>
+          </article>
+        {{ end }}
+      </div>
+    </div>
+  </section>
+  <!-- <<< END CARDS SECTION -->
+
+  <!-- >>> START LINKS -->
+  <section class="links" aria-labelledby="links-title">
+    <div class="links__inner">
+      <h2 id="links-title" class="links__title">Amici, Partners &amp; Links</h2>
+
+      <div class="links__carousel">
+        <ul class="links__track" role="list">
+          <li class="link-card link-card--logo-only" data-category="tool">
+            <a class="link-card__link" href="https://www.ebay.it/" target="_blank" rel="noopener noreferrer" aria-label="eBay">
+              <img class="link-card__logo" src="{{ "images/links/ebay_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="eBay" width="160" height="56" loading="lazy" decoding="async">
+            </a>
+          </li>
+
+          <li class="link-card" data-category="friends">
+            <a class="link-card__link" href="https://linktr.ee/boosemtg" target="_blank" rel="noopener noreferrer">
+              <img class="link-card__logo" src="{{ "images/links/boose_logo.webp" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="B&#216;&#216;SE MTG" width="64" height="64" loading="lazy" decoding="async">
+              <div class="link-card__meta">
+                <span class="link-card__name">B&#216;&#216;SE MTG</span>
+                <span class="link-card__copy">Friends &amp; Games</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="link-card" data-category="lgs">
+            <a class="link-card__link" href="https://www.facebook.com/Multiverseofgames/" target="_blank" rel="noopener noreferrer">
+              <img class="link-card__logo" src="{{ "images/links/multiverse_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="Multiverse of Games" width="64" height="64" loading="lazy" decoding="async">
+              <div class="link-card__meta">
+                <span class="link-card__name">Multiverse of Games</span>
+                <span class="link-card__copy">Friendly LGS</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="link-card" data-category="artist">
+            <a class="link-card__link" href="https://www.domenicocava.com/" target="_blank" rel="noopener noreferrer">
+              <img class="link-card__logo" src="{{ "images/links/cava_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="Domenico Cava" width="64" height="64" loading="lazy" decoding="async">
+              <div class="link-card__meta">
+                <span class="link-card__name">Domenico Cava</span>
+                <span class="link-card__copy">Illustrator for MtG</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="link-card" data-category="content">
+            <a class="link-card__link" href="https://archidekt.com/search/decks?ownerUsername=Mtg.derrick" target="_blank" rel="noopener noreferrer">
+              <img class="link-card__logo" src="{{ "images/links/derrick_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="mtg.Derrick" width="64" height="64" loading="lazy" decoding="async">
+              <div class="link-card__meta">
+                <span class="link-card__name">MtG Derrick</span>
+                <span class="link-card__copy">Liste Commander</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="link-card" data-category="content">
+            <a class="link-card__link" href="https://magicthegathering.fandom.com/it/wiki/Magic:_the_Gathering_Wiki" target="_blank" rel="noopener noreferrer">
+              <img class="link-card__logo" src="{{ "images/links/mtgwiki_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="mtg.Derrick" width="64" height="64" loading="lazy" decoding="async">
+              <div class="link-card__meta">
+                <span class="link-card__name">MTG Wiki Italia</span>
+                <span class="link-card__copy">Scopri tutto di tutto</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </section>
+  <!-- <<< END LINKS -->
+
+  <!-- >>> START CONTACTS -->
+  <section id="contacts" class="contacts" aria-labelledby="contacts-title">
+  <div class="contacts__inner">
+    <div class="contacts__grid">
+      <div class="contacts__copy">
+        <h2 id="contacts-title" class="contacts__title">Chi siamo</h2>
+        <p class="contacts__intro">
+          Siamo Vincenzo e Francesco, amici appassionati di Magic: The Gathering, Dungeons & Dragons, giochi da tavolo e videogiochi.
+        </p>
+        <p class="contacts__sub">Restiamo in contatto</p>
+      </div>
+
+      <div class="contacts__actions">
+        <ul class="contacts__list" role="list">
+          <li>
+            <a class="contact" href="https://www.tiktok.com/@eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
+              <span class="contact__icon icon-tiktok" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="contact" href="https://www.instagram.com/eventhorizon.mtg" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+              <span class="contact__icon icon-instagram" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="contact" href="https://www.youtube.com/@EventHorizonMtG" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+              <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="contact" href="https://t.me/eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
+              <span class="contact__icon icon-telegram" aria-hidden="true"></span>
+            </a>
+          </li>
+          <li>
+            <a class="contact" href="https://discord.com/invite/tQrbzhUa4k" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
+              <span class="contact__icon icon-discord" aria-hidden="true"></span>
+            </a>
+          </li>
+        </ul>
+        <a class="contact contact--mail" href="mailto:eventhorizon@growupnetwork.it" aria-label="Email" title="Email">
+          <span class="contact__icon icon-mail" aria-hidden="true"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+  </section>
+  <!-- <<< END CONTACTS -->
+
+
+</main>
+{{ end }}
+
+
+
+
+

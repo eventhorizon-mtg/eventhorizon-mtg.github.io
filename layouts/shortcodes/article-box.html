@@ -1,0 +1,6 @@
+{{/* Shortcode di box generico per contenuti demo, evita HTML inline nel markdown */}}
+{{ $class := .Get "class" | default "article-box" }}
+{{ $style := .Get "style" }}
+<div class="{{ $class }}" {{ with $style }}style="{{ . }}"{{ end }}>
+  {{ .Inner | markdownify }}
+</div>

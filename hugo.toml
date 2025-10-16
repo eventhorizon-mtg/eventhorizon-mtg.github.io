@@ -1,0 +1,63 @@
+baseURL = "https://eventhorizon-mtg.github.io/"
+languageCode = "it-it"
+title = "EventHorizon.mtg"
+
+publishDir = "public"
+canonifyURLs = false
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 12
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[permalinks]
+  article = "/articles/:slug/"
+
+[params]
+  siteName = "EventHorizon.mtg"
+  appVer = "63ab118"
+
+  # Open Graph (fallback globali; sovrascrivibili per pagina con front matter)
+  [params.og]
+    title = "EventHorizon.mtg"
+    description = "Video e risorse per Magic: The Gathering."
+    image = "images/logo.webp"
+    locale = "it_IT"
+
+  # UI
+  themeColor = "#0E0F1A"
+
+  # Preload hero LCP (opzionale: lascia o cambia path)
+  preloadHero = "images/bg_image.webp"
+
+  # Fonts (self-hosted) preload list (WOFF2) - solo font critici usati
+[params.fonts]
+  preload = [
+    "fonts/LexendDeca-Regular.woff2",   # --font-sans fallback
+    "fonts/LexendGiga-Regular.woff2",   # --font-display primary
+    "fonts/Merriweather-Light.woff2"    # --font-serif
+  ]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+    [markup.goldmark.parser]
+      wrapStandAloneImageWithinParagraph = false
+      [markup.goldmark.parser.attribute]
+        block = true
+        title = true
+
+[outputFormats.ArchiveList]
+mediaType    = "application/json"
+baseName     = "list"
+isPlainText  = true
+notAlternative = true
+permalinkable  = true
+
+
+relativeURLs = true
+

@@ -1,0 +1,235 @@
+backend:
+  name: github
+  repo: eventhorizon-mtg/eventhorizon-mtg.github.io
+  branch: main
+  base_url: https://eventhorizon-oauth.cetriolo-mtg.workers.dev
+  auth_endpoint: /auth
+
+media_folder: static/uploads
+public_folder: /uploads
+
+collections:
+  - name: articles
+    label: "Articoli"
+    folder: content/article
+    create: true
+    format: toml-frontmatter
+    extension: md
+    slug: "{{slug}}"
+    fields:
+      - label: "Titolo"
+        name: title
+        widget: string
+        required: true
+
+      - label: "Data Pubblicazione"
+        name: date
+        widget: datetime
+        required: true
+        format: "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        date_format: "DD/MM/YYYY"
+        time_format: "HH:mm"
+
+      - label: "Bozza"
+        name: draft
+        widget: boolean
+        required: false
+        default: false
+        hint: "Imposta su true per nascondere l'articolo"
+
+      - label: "Descrizione"
+        name: description
+        widget: markdown
+        required: false
+        buttons:
+          - bold
+          - italic
+          - link
+          - quote
+          - code
+          - heading-two
+          - heading-three
+          - bulleted-list
+          - numbered-list
+        sanitize_preview: false
+        modes:
+          - rich_text
+        hint: "Puoi utilizzare Markdown o HTML (con classi .text-center, .text-color-primary, ecc.) per gestire tipografia e colori"
+
+      - label: "Tags"
+        name: tags
+        widget: list
+        required: false
+        hint: "Lista di tag (es. commander, tutorial, regole)"
+
+      - label: "Immagine Copertina"
+        name: cover
+        widget: image
+        required: false
+        media_folder: "/static/images/articles"
+        public_folder: "/images/articles"
+        hint: "Immagine di copertina dell'articolo"
+
+      - label: "Contenuto"
+        name: body
+        widget: markdown
+        required: true
+
+  - name: items
+    label: "Archivio Items"
+    folder: data/archive/items
+    create: true
+    format: yaml
+    extension: yml
+    slug: "{{slug}}"
+    fields:
+      - label: "ID"
+        name: id
+        widget: string
+        required: true
+        hint: "Identificativo univoco (es. eh-0001, Video001)"
+
+      - label: "Slug"
+        name: slug
+        widget: string
+        required: true
+        hint: "URL-friendly identifier"
+
+      - label: "Tipo Contenuto"
+        name: kind
+        widget: select
+        required: true
+        options:
+          - { label: "Video", value: "video" }
+          - { label: "Content", value: "content" }
+
+      - label: "Data"
+        name: date
+        widget: datetime
+        required: true
+        format: "YYYY-MM-DD"
+        date_format: "DD/MM/YYYY"
+        time_format: false
+
+      - label: "Titolo"
+        name: title
+        widget: string
+        required: true
+
+      - label: "Overline"
+        name: overline
+        widget: string
+        required: false
+        hint: "Testo sopra il titolo (es. 'LA STORIA DI MAGIC - EPISODIO #06')"
+
+      - label: "Descrizione"
+        name: desc
+        widget: text
+        required: true
+        hint: |
+          Breve descrizione (MASSIMO 400 caratteri - mostrata sempre su mobile e desktop).
+          Puoi usare Markdown o HTML per la formattazione.
+
+          ESEMPI:
+          • Grassetto: **testo in grassetto**
+          • Corsivo: *testo in corsivo*
+          • Testo blu: <span class="text-color-primary">testo blu</span>
+          • Testo oro: <span class="text-color-accent">testo oro</span>
+          • Mix: Questo è un <span class="text-color-primary">**deck Commander**</span> potente!
+
+          Per l'immagine della card usa il campo "Immagine Card Homepage" qui sotto.
+
+        pattern:
+          - "^[\\s\\S]{1,400}$"
+          - "Massimo 400 caratteri consentiti"
+
+      - label: "Contenuto Esteso"
+        name: content
+        widget: markdown
+        required: false
+        buttons:
+          - bold
+          - italic
+          - link
+          - quote
+          - code
+          - heading-two
+          - heading-three
+          - bulleted-list
+          - numbered-list
+        sanitize_preview: false
+        modes:
+          - rich_text
+        hint: |
+          Contenuto dettagliato (mostrato SOLO su desktop quando la card è espansa). Supporta Markdown completo e HTML.
+          Su mobile questo campo NON viene visualizzato.
+
+      - label: "Immagine Card Homepage"
+        name: thumb
+        widget: image
+        required: false
+        media_folder: "/static/images/cards"
+        public_folder: "/images/cards"
+        hint: "Immagine visualizzata nella card in homepage (es. /images/cards/nome.webp)"
+
+      - label: "Tags"
+        name: tags
+        widget: list
+        required: false
+        hint: "Lista di tag separati da virgola"
+
+      - label: "Links"
+        name: links
+        widget: list
+        required: false
+        fields:
+          - label: "Label"
+            name: label
+            widget: string
+            required: true
+
+          - label: "URL"
+            name: href
+            widget: string
+            required: true
+
+          - label: "Classe Pulsante"
+            name: btn_class
+            widget: select
+            required: false
+            default: "btn--primary"
+            options:
+              - { label: "Primary (Indigo)", value: "btn--primary" }
+              - { label: "Primary Glass (Indigo trasparente)", value: "btn--primary-glass" }
+              - { label: "Secondary (Magenta)", value: "btn--secondary" }
+              - { label: "Secondary Glass (Magenta trasparente)", value: "btn--secondary-glass" }
+              - { label: "Special (Cyan)", value: "btn--special" }
+              - { label: "Special Glass (Cyan trasparente)", value: "btn--special-glass" }
+              - { label: "Accent/Gold (Oro)", value: "btn--accent" }
+              - { label: "Accent Glass (Oro trasparente)", value: "btn--accent-glass" }
+              - { label: "YouTube (Rosso)", value: "btn--yt" }
+              - { label: "YouTube Glass (Rosso trasparente)", value: "btn--yt-glass" }
+              - { label: "Scryfall (Rosa-Grigio)", value: "btn--scry" }
+              - { label: "Scryfall Glass (Rosa-Grigio trasparente)", value: "btn--scry-glass" }
+              - { label: "EDH (Nero-Giallo)", value: "btn--edh" }
+              - { label: "EDH Glass (Nero-Giallo trasparente)", value: "btn--edh-glass" }
+              - { label: "Moxfield (Viola-Rosa)", value: "btn--mox" }
+              - { label: "Moxfield Glass (Viola-Rosa trasparente)", value: "btn--mox-glass" }
+              - { label: "Archidekt (Grigio-Arancio)", value: "btn--archi" }
+              - { label: "Archidekt Glass (Grigio-Arancio trasparente)", value: "btn--archi-glass" }
+              - { label: "Clear (Trasparente)", value: "btn--clear" }
+              - { label: "Disabled (Disabilitato)", value: "btn--disabled1" }
+            hint: "Stile del pulsante/pill"
+
+          - label: "Ordine"
+            name: sort_order
+            widget: number
+            required: false
+            value_type: int
+            hint: "Ordine di visualizzazione"
+
+          - label: "Link Primario"
+            name: primary
+            widget: boolean
+            required: false
+            default: false

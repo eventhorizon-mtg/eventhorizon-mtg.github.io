@@ -1,0 +1,33 @@
+{{ define "main" }}
+<section class="articles" aria-labelledby="articles-title">
+  <div class="container">
+    <h1 id="articles-title">Articoli</h1>
+
+    {{ $pages := .Pages.ByDate.Reverse }}
+    {{ if gt (len $pages) 0 }}
+      <div class="cards__grid">
+        {{ range $pages }}
+          {{ $cover := .Params.cover }}
+          {{ $img := cond (and $cover (ne (lower (substr $cover 0 4)) "http")) ($cover | relURL) $cover }}
+          <article class="card is-content">
+            <div class="card__media">
+              <img class="card__img" src="{{ cond $img $img ( "images/cards/fblthp_placeholder.webp" | relURL ) }}" alt="{{ .Title }}" loading="lazy" decoding="async">
+              <span class="card__media-overlay"></span>
+            </div>
+            <div class="card__body">
+              <p class="card__overline">{{ .Date.Format "02 Jan 2006" }}</p>
+              <h3 class="card__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+              {{ with .Params.description }}<p class="card__desc">{{ . }}</p>{{ end }}
+            </div>
+            <div class="card__actions">
+              <a class="btn btn--primary" href="{{ .RelPermalink }}">Apri</a>
+            </div>
+          </article>
+        {{ end }}
+      </div>
+    {{ else }}
+      <p>Nessun articolo presente.</p>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

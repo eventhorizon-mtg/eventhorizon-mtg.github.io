@@ -1,0 +1,24 @@
+# Hugo build output
+/public/
+/resources/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+/.idea/
+
+# Node / tooling (se in futuro userai tool JS)
+node_modules/
+dist/
+
+# OS / temp
+*.log
+*.tmp
+
+# Allow vendored npm assets mirrored for SRI validation
+!static/npm/
+!static/npm/**/
+!static/npm/**/*.js

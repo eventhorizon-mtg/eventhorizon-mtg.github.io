@@ -1,0 +1,32 @@
+{{- /*
+  Partial: versioned-url
+  Usage: {{ partial "versioned-url.html" "path/to/asset.png" }}
+  Accepts either a string path or a dict with keys "path" and optional "ver".
+  - If the path is absolute (starts with http/https), it is returned as-is (with version appended if requested).
+  - Otherwise it is converted through absURL.
+  - If a version is available (site.Params.appVer or provided), the query string is amended with ?v=
+*/ -}}
+{{- $input := . -}}
+{{- $path := "" -}}
+{{- $ver := or site.Params.appVer "" -}}
+{{- if (reflect.IsMap $input) -}}
+  {{- with (index $input "path") -}}
+    {{- $path = . -}}
+  {{- end -}}
+  {{- with (index $input "ver") -}}
+    {{- $ver = . -}}
+  {{- end -}}
+{{- else -}}
+  {{- $path = $input -}}
+{{- end -}}
+{{- if not $path -}}
+  {{- warnf "versioned-url: path non fornito (input=%v)" $input -}}
+  {{- return "" -}}
+{{- end -}}
+{{- $abs := cond (hasPrefix (lower (printf "%v" $path)) "http") (printf "%v" $path) ((printf "%v" $path) | absURL) -}}
+{{- if $ver -}}
+  {{- $join := cond (in $abs "?") "&" "?" -}}
+  {{- printf "%s%sv=%s" $abs $join $ver -}}
+{{- else -}}
+  {{- $abs -}}
+{{- end -}}

@@ -1,0 +1,93 @@
+{{ define "main" }}
+<!-- Archivio (migrazione fedele da archivio.php) -->
+
+<!-- Mini-hero Archivio -->
+<header class="archive-hero" aria-label="Archivio contenuti"
+        style="
+          --archive-hero-bg-mobile: url('https://images.ctfassets.net/s5n2t79q9icq/3F12CcoEDrB9Ka3p1nSDiW/6eb8341a346329977dcb6291e687b3dc/teferi-master-of-time_m21_iphone_wallpaper.jpg');
+          --archive-hero-bg-tablet: url('https://images.ctfassets.net/s5n2t79q9icq/3oNz69tHlzoQOda6RK2n8H/f7c62c70f71d57cb0c8fdbb464278c56/teferi-master-of-time_m21_tablet_wallpaper.jpg');
+          --archive-hero-bg-desktop: url('https://images.ctfassets.net/s5n2t79q9icq/nOwl41ouoK4PYOwDXKxGW/813897a458dc6444ed001c99f56895f7/teferi-master-of-time_m21_1920x1080_wallpaper.jpg');
+          --archive-hero-bg-opacity: 0.50;
+          --archive-hero-bg-pos-y: 10%;
+          --archive-hero-bg-pos-y-tablet: -150px;
+        ">
+  <div class="container">
+    <h1 class="page-title">Archivio</h1>
+    <p class="filter-note">
+      Cerca tra video e contenuti. Totale risultati:
+      <strong aria-live="polite">0</strong>
+    </p>
+  </div>
+</header>
+
+<!-- Barra ricerca -->
+<section class="archive-search" aria-label="Ricerca Archivio">
+  <div class="container">
+    <form id="archive-search-form" class="archive-search__form" method="get" action="{{ .RelPermalink }}">
+      <input
+        id="q"
+        name="q"
+        class="archive-search__input"
+        type="search"
+        placeholder="Cerca per titolo, descrizione, tag"
+        aria-label="Cerca"
+        value=""
+        inputmode="search"
+      >
+      <label for="kind" class="sr-only">Tipo</label>
+      <select id="kind" name="kind" class="archive-search__select" aria-label="Tipo contenuto">
+        <option value="">Tutti</option>
+        <option value="content">Contenuti</option>
+        <option value="video">Video</option>
+      </select>
+      <button class="archive-search__btn" type="submit" aria-label="Cerca">
+        <img src="{{ "icons/search.svg" | absURL }}" class="icon icon--search" alt="" aria-hidden="true">
+      </button>
+      <button class="archive-search__filter-toggle" type="button" aria-label="Filtri" aria-controls="kind" aria-expanded="false">
+        <img src="{{ "icons/filter.svg" | absURL }}" class="icon icon--filter" alt="" aria-hidden="true">
+      </button>
+      <button class="archive-search__reset" type="button" aria-label="Svuota ricerca">
+        <img src="{{ "icons/reset.svg" | absURL }}" class="icon icon--reset" alt="" aria-hidden="true">
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- Elenco archivio -->
+<section class="archive" aria-label="Risultati">
+  <div class="container">
+
+    <!-- La lista è popolata da assets/scripts/archive.js -->
+    <ol class="archive-timeline"></ol>
+
+    <!-- Pager (pilotato dal JS) -->
+    <nav class="archive-pager" aria-label="Paginazione risultati">
+      <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina precedente" rel="prev">« Prec</a>
+      <span class="curr" aria-current="page">Pag. 1 / 1</span>
+      <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina successiva" rel="next">Succ »</a>
+    </nav>
+
+  </div>
+</section>
+
+<!-- Backdrop (necessario al bottom-sheet mobile) -->
+<div class="archive-sheet-backdrop" aria-hidden="true"></div>
+
+<!-- Bottom-sheet globale (mobile) — Opzione B -->
+<aside
+  class="archive-sheet"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="archive-sheet-title"
+  tabindex="-1"
+>
+  <div class="archive-sheet__handle" aria-hidden="true"></div>
+  <button class="archive-sheet__close" type="button" aria-label="Chiudi">X</button>
+  <h3 id="archive-sheet-title" class="archive-sheet__title"></h3>
+  <div class="archive-sheet__content"></div>
+  <div class="archive-sheet__ctas" role="group" aria-label="Collegamenti"></div>
+</aside>
+
+{{ end }}
+

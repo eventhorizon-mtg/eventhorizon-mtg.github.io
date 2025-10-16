@@ -1,0 +1,176 @@
+backend:
+  name: github
+  repo: eventhorizon-mtg/eventhorizon-mtg.github.io
+  branch: main
+  base_url: https://eventhorizon-oauth.cetriolo-mtg.workers.dev
+  auth_endpoint: /auth
+
+media_folder: static/uploads
+public_folder: /uploads
+
+collections:
+  - name: articles
+    label: "Articoli"
+    folder: content/article
+    create: true
+    format: toml-frontmatter
+    extension: md
+    slug: "{{slug}}"
+    fields:
+      - label: "Titolo"
+        name: title
+        widget: string
+        required: true
+
+      - label: "Data Pubblicazione"
+        name: date
+        widget: datetime
+        required: true
+        format: "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        date_format: "DD/MM/YYYY"
+        time_format: "HH:mm"
+
+      - label: "Bozza"
+        name: draft
+        widget: boolean
+        required: false
+        default: false
+        hint: "Imposta su true per nascondere l'articolo"
+
+      - label: "Descrizione"
+        name: description
+        widget: text
+        required: false
+        hint: "Breve descrizione per SEO e anteprima"
+
+      - label: "Tags"
+        name: tags
+        widget: list
+        required: false
+        hint: "Lista di tag (es. commander, tutorial, regole)"
+
+      - label: "Immagine Copertina"
+        name: cover
+        widget: image
+        required: false
+        media_folder: "/static/images/articles"
+        public_folder: "/images/articles"
+        hint: "Immagine di copertina dell'articolo"
+
+      - label: "Contenuto"
+        name: body
+        widget: markdown
+        required: true
+
+  - name: items
+    label: "Archivio Items"
+    folder: data/archive/items
+    create: true
+    format: yaml
+    extension: yml
+    slug: "{{slug}}"
+    fields:
+      - label: "ID"
+        name: id
+        widget: string
+        required: true
+        hint: "Identificativo univoco (es. eh-0001, Video001)"
+
+      - label: "Slug"
+        name: slug
+        widget: string
+        required: true
+        hint: "URL-friendly identifier"
+
+      - label: "Tipo Contenuto"
+        name: kind
+        widget: select
+        required: true
+        options:
+          - { label: "Video", value: "video" }
+          - { label: "Content", value: "content" }
+
+      - label: "Data"
+        name: date
+        widget: datetime
+        required: true
+        format: "YYYY-MM-DD"
+        date_format: "DD/MM/YYYY"
+        time_format: false
+
+      - label: "Titolo"
+        name: title
+        widget: string
+        required: true
+
+      - label: "Overline"
+        name: overline
+        widget: string
+        required: false
+        hint: "Testo sopra il titolo (es. 'LA STORIA DI MAGIC - EPISODIO #06')"
+
+      - label: "Descrizione"
+        name: desc
+        widget: text
+        required: true
+
+      - label: "Immagine Card Homepage"
+        name: thumb
+        widget: image
+        required: false
+        media_folder: "/static/images/cards"
+        public_folder: "/images/cards"
+        hint: "Immagine visualizzata nella card in homepage (es. /images/cards/nome.webp)"
+
+
+      - label: "Tags"
+        name: tags
+        widget: list
+        required: false
+        hint: "Lista di tag separati da virgola"
+
+      - label: "Links"
+        name: links
+        widget: list
+        required: false
+        fields:
+          - label: "Label"
+            name: label
+            widget: string
+            required: true
+
+          - label: "URL"
+            name: href
+            widget: string
+            required: true
+
+          - label: "Classe Pulsante"
+            name: btn_class
+            widget: select
+            required: false
+            default: "btn--primary"
+            options:
+              - { label: "Primary (Indigo)", value: "btn--primary" }
+              - { label: "YouTube (Rosso)", value: "btn--yt" }
+              - { label: "Scryfall (Indigo scuro)", value: "btn--scry" }
+              - { label: "EDH (Teal)", value: "btn--edh" }
+              - { label: "Secondary (Magenta)", value: "btn--secondary" }
+              - { label: "Moxfield (Arancione)", value: "btn--mox" }
+              - { label: "Archidekt (Teal scuro)", value: "btn--archi" }
+              - { label: "Accent (Gold)", value: "btn--accent" }
+              - { label: "Disabled (Disabilitato)", value: "btn--disabled1" }
+            hint: "Stile del pulsante/pill"
+
+          - label: "Ordine"
+            name: sort_order
+            widget: number
+            required: false
+            value_type: int
+            hint: "Ordine di visualizzazione"
+
+          - label: "Link Primario"
+            name: primary
+            widget: boolean
+            required: false
+            default: false
+

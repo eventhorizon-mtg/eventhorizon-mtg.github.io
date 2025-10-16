@@ -1,0 +1,16 @@
+id: Video004
+slug: Episodio4
+kind: video
+date: 2025-05-27
+title: NIV MIZZET E IL PATTO DELLE GILDE
+overline: "LA STORIA DI MAGIC - EPISODIO #04"
+desc: Il video precedente su Ravnica finiva con un cliffhanger, dove veniva
+  semplicemente detto che Niv-Mizzet sarebbe diventato il nuovo Patto delle
+  Gilde vivente del piano, ma non veniva data nessun'altra spiegazione. In
+  questo video scopriamo cosa è successo e perché.
+links:
+  - btn_class: btn--yt
+    primary: true
+    label: YouTube
+    href: https://www.youtube.com/watch?v=vpmX9WYmF-Y
+

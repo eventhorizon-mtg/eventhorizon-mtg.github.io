@@ -1,0 +1,118 @@
+{{/* ---------------------------------------
+     Canonical & Open Graph (fallback-safe)
+     Supporta params sia piatti che annidati:
+     - .Site.Params.ogTitle / ogDesc / ogImage / ogLocale
+     - .Site.Params.og.title / .og.description / .og.image / .og.locale
+---------------------------------------- */}}
+{{- $canonical := .Permalink -}}
+{{- with .Params.canonical -}}
+  {{- $canonical = . | safeURL -}}
+{{- end -}}
+
+{{- $siteOG := .Site.Params.og -}}
+{{- $siteOgTitle   := cond (and $siteOG (isset $siteOG "title"))        $siteOG.title       "" -}}
+{{- $siteOgDesc    := cond (and $siteOG (isset $siteOG "description"))  $siteOG.description "" -}}
+{{- $siteOgImage   := cond (and $siteOG (isset $siteOG "image"))        $siteOG.image       "" -}}
+{{- $siteOgLocale  := cond (and $siteOG (isset $siteOG "locale"))       $siteOG.locale      "" -}}
+
+{{- $ogTitle  := or .Params.ogTitle  .Site.Params.ogTitle  $siteOgTitle  .Site.Title -}}
+{{- $ogDesc   := or .Params.ogDesc   .Site.Params.ogDesc   $siteOgDesc   "" -}}
+{{- $ogImage  := or .Params.ogImage  .Site.Params.ogImage  $siteOgImage  "" -}}
+{{- $ogLocale := or .Params.ogLocale .Site.Params.ogLocale $siteOgLocale "it_IT" -}}
+
+{{- $ogImageAbs := cond (hasPrefix (lower $ogImage) "http") $ogImage ($ogImage | absURL) -}}
+
+<!-- Base meta -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{- if $ogDesc }}<meta name="description" content="{{ $ogDesc }}">{{ end }}
+
+<!-- Canonical -->
+<link rel="canonical" href="{{ $canonical }}">
+
+<!-- Manifest PWA -->
+<link rel="manifest" href="{{ partial "versioned-url.html" "site.webmanifest" }}">
+
+<!-- Theme color -->
+<meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
+
+<!-- Favicons (assicurati che i file esistano sotto /static/icons/favicon/ ...) -->
+<link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.ico" }}' sizes="any" type="image/x-icon">
+<link rel="shortcut icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.ico" }}' type="image/x-icon">
+<link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.svg" }}' type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="16x16" href='{{ partial "versioned-url.html" "icons/favicon/favicon-16.png" }}'>
+<link rel="icon" type="image/png" sizes="32x32" href='{{ partial "versioned-url.html" "icons/favicon/favicon-32.png" }}'>
+<link rel="icon" type="image/png" sizes="48x48" href='{{ partial "versioned-url.html" "icons/favicon/favicon-48.png" }}'>
+<link rel="icon" type="image/png" sizes="96x96" href='{{ partial "versioned-url.html" "icons/favicon/favicon-96.png" }}'>
+<link rel="apple-touch-icon" href='{{ partial "versioned-url.html" "icons/favicon/apple-touch-icon.png" }}' sizes="180x180">
+<link rel="icon" type="image/png" sizes="192x192" href='{{ partial "versioned-url.html" "icons/favicon/favicon-192.png" }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ partial "versioned-url.html" "icons/favicon/favicon-512.png" }}'>
+<link rel="icon" type="image/png" sizes="512x512" href='{{ partial "versioned-url.html" "icons/favicon/favicon-512-maskable.png" }}' purpose="any maskable">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ $ogTitle }}">
+{{- if $ogDesc }}<meta property="og:description" content="{{ $ogDesc }}">{{ end -}}
+<meta property="og:url" content="{{ $canonical }}">
+{{- if $ogImageAbs }}<meta property="og:image" content="{{ $ogImageAbs }}">{{ end -}}
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="{{ $ogLocale }}">
+<meta property="og:site_name" content="{{ or .Site.Params.siteName .Site.Title }}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $ogTitle }}">
+{{- if $ogDesc }}<meta name="twitter:description" content="{{ $ogDesc }}">{{ end -}}
+{{- if $ogImageAbs }}<meta name="twitter:image" content="{{ $ogImageAbs }}">{{ end -}}
+
+<!-- Schema.org Structured Data -->
+{{ partial "schema-org.html" . }}
+
+<!-- RSS Feed -->
+{{ with .OutputFormats.Get "rss" -}}
+  {{ printf `<link rel=%q type=%q href=%q title=%q />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+{{ end }}
+
+<!-- Fonts (self-hosted) -->
+{{/* NOTE: font-face rules are loaded via assets/style/01-settings/_fonts.scss included in the main bundle below. */}}
+
+<!-- Preload hero image (opzionale: file sotto /static/assets/...) -->
+{{ with .Site.Params.preloadHero }}
+  {{- $pre := . | absURL -}}
+  {{- $ver := or site.Params.appVer "" -}}
+  {{- if $ver -}}
+    {{- $sep := cond (in $pre "?") "&" "?" -}}
+    <link rel="preload" as="image" href="{{ printf "%s%sv=%s" $pre $sep $ver }}">
+  {{- else -}}
+    <link rel="preload" as="image" href="{{ $pre }}">
+  {{- end -}}
+{{ end }}
+
+{{/* ---------------------------------------
+     CSS bundle via Hugo Pipes (single entrypoint)
+---------------------------------------- */}}
+{{- $sassOpts := dict
+    "targetPath"      "style/bundle.min.css"
+    "outputStyle"     (cond hugo.IsProduction "compressed" "expanded")
+    "enableSourceMap" (not hugo.IsProduction)
+-}}
+{{- with resources.Get "style/main.scss" -}}
+  {{- $mainCss := . | css.Sass $sassOpts | resources.Fingerprint -}}
+  {{- if hugo.IsProduction -}}
+    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
+  {{- else -}}
+    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}">
+  {{- end -}}
+{{- else -}}
+  {{- warnf "style/main.scss non trovato. Verifica il percorso dell'entrypoint SCSS." -}}
+{{- end -}}
+
+<!-- Optional: Preload core WOFF2 fonts (configure in params.fonts.preload) -->
+{{ with site.Params.fonts.preload }}
+  {{ range . }}
+    <link rel="preload" as="font" href="{{ . | absURL }}" type="font/woff2" crossorigin>
+  {{ end }}
+{{ end }}
+
+

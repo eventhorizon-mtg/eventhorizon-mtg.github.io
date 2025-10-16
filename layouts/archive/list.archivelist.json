@@ -1,0 +1,24 @@
+{{- $list := slice -}}
+{{- with .Site.Data.archive.items -}}
+  {{- range $k, $it := . -}}
+    {{- if not $it.draft -}}
+      {{- $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) -}}
+      {{- $tags  := cond (isset $it "tags")  $it.tags (slice) -}}
+      {{- $list = $list | append (dict
+        "id"        $it.id
+        "slug"      $it.slug
+        "kind"      $it.kind
+        "date"      $it.date
+        "title"     $it.title
+        "overline"  $it.overline
+        "desc"      $it.desc
+        "content"   $it.content
+        "thumb"     $it.thumb
+        "tags"      $tags
+        "links"     $links
+      ) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $sorted := sort $list "date" "desc" -}}
+{{- $sorted | jsonify -}}

@@ -1,0 +1,22 @@
+id: Content001
+slug: Benvenuto
+kind: content
+date: 2025-10-14
+title: BENVENUTO SU EVENT HORIZON MTG!
+overline: ARTICOLO N.1
+desc: Questo è il contenuto breve, appare anche su mobile e ha un limite di 400
+  caratteri. Sotto dovresti vedere un tasto oro
+content: <p>Questo è il <strong>contenuto esteso</strong>, dovrebbe apparire
+  sotto la descrizione. <span class="text-color-accent">Testo oro</span> e
+  mettiamo un link di prova con un <a class="btn btn--archi" href="#">BUTTON</a>
+  inline per vedere cosa accade.</p>
+thumb: /images/cards/card_A.webp
+links:
+  - btn_class: btn--primary
+    primary: true
+    label: VAI ALL'ARTICOLO!
+    href: https://eventhorizon-mtg.github.io/articles/benvenuto
+  - btn_class: btn--accent-glass
+    primary: false
+    label: BUTTON DI PROVA
+    href: https://eventhorizon-mtg.github.io/articles/guida-articoli/

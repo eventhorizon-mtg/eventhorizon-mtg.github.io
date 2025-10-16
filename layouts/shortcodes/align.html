@@ -1,0 +1,5 @@
+{{/* Usage: {{< align dir="center|left|right|justify" >}}...{{< /align >}} */}}
+{{ $dir := .Get "dir" | default "left" }}
+<div class="text-{{ $dir }}">
+  {{ .Inner | markdownify }}
+</div>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Manager</title>
+</head>
+<body>
+  <!-- Root element per Decap CMS -->
+  <div id="nc-root"></div>
+
+  <!-- Carica Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    (function ensureDateWidgets(retryCount = 0) {
+      const CMS = window.CMS;
+      const React = window.React;
+
+      if (!CMS || !React || typeof CMS.getWidget !== "function") {
+        if (retryCount > 20) return;
+        return window.setTimeout(() => ensureDateWidgets(retryCount + 1), 150);
+      }
+
+      const existingDateWidget = CMS.getWidget("date");
+      if (existingDateWidget?.control && existingDateWidget?.preview) {
+        return;
+      }
+
+      const datetimeWidget = CMS.getWidget("datetime");
+      const control =
+        datetimeWidget?.control ||
+        datetimeWidget?.controlComponent ||
+        datetimeWidget?.Widget?.().controlComponent;
+      const preview =
+        datetimeWidget?.preview ||
+        datetimeWidget?.previewComponent ||
+        datetimeWidget?.Widget?.().previewComponent;
+
+      if (!control || !preview) {
+        if (retryCount > 20) return;
+        return window.setTimeout(() => ensureDateWidgets(retryCount + 1), 150);
+      }
+
+      const DateControl = (props) => {
+        const field = props.field?.set
+          ? props.field
+              .set("time_format", false)
+              .set("include_time", false)
+          : props.field;
+
+        return React.createElement(control, {
+          ...props,
+          field,
+          includeTime: false,
+        });
+      };
+
+      CMS.registerWidget("date", DateControl, preview);
+    })();
+  </script>
+
+  <script>
+    // OAuth message handler per gestire il token dal worker OAuth
+    window.addEventListener('message', (event) => {
+      if (event.origin === 'https://eventhorizon-oauth.cetriolo-mtg.workers.dev') {
+        if (typeof event.data === 'string' && event.data.startsWith('authorization:github:success:')) {
+          const token = event.data.slice('authorization:github:success:'.length);
+
+          // Valida e salva il token
+          fetch('https://api.github.com/user', {
+            headers: { 'Authorization': `token ${token}` }
+          })
+          .then(r => r.json())
+          .then(user => {
+            const userData = {
+              token: token,
+              login: user.login,
+              name: user.name || user.login,
+              avatar_url: user.avatar_url,
+              backendName: 'github'
+            };
+
+            // Salva in formati multipli per compatibilità Decap/Netlify CMS
+            localStorage.setItem('netlify-cms-user', JSON.stringify(userData));
+            localStorage.setItem('decap-cms-user', JSON.stringify(userData));
+            localStorage.setItem('netlify-cms-auth', JSON.stringify({
+              github: { token: token }
+            }));
+
+            // Ricarica per inizializzare il CMS con il token
+            window.location.reload();
+          })
+          .catch(e => {
+            console.error('Errore validazione token:', e);
+          });
+        }
+      }
+    });
+
+    // Forza autenticazione se token già presente (fix per Decap CMS)
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const savedUser = localStorage.getItem('netlify-cms-user');
+        if (savedUser && window.CMS) {
+          const userData = JSON.parse(savedUser);
+
+          // Salva in tutti i formati necessari
+          localStorage.setItem('decap-cms-user', JSON.stringify(userData));
+          localStorage.setItem('netlify-cms-auth', JSON.stringify({
+            github: { token: userData.token }
+          }));
+
+          // Ricarica una sola volta
+          if (!sessionStorage.getItem('cms-reload-done')) {
+            sessionStorage.setItem('cms-reload-done', 'true');
+            window.location.reload();
+          }
+        }
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

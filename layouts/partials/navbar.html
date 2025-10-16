@@ -1,0 +1,27 @@
+<header class="nav glass-nav" id="site-nav">
+  <div class="nav__inner">
+    <a class="brand" href="{{ "/" | absURL }}" aria-label="Home">
+      <span class="brand__name">{{ .Site.Title }}</span>
+    </a>
+
+    <button class="nav__toggle" aria-label="Apri menu" aria-expanded="false">
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+    </button>
+
+    <!-- Menu: collassato su mobile/tablet, esteso su desktop -->
+    <nav class="nav__menu" aria-label="Navigazione principale">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a class="nav__link" href="{{ "archive/" | absURL }}"{{ if or (eq .Section "archive") (hasPrefix .RelPermalink "/archive/") }} aria-current="page"{{ end }}>Archivio</a>
+        </li>
+      </ul>
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a class="nav__link" href="{{ "/" | absURL }}#contacts">Contatti</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

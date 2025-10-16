@@ -1,0 +1,323 @@
+/* ==========================================
+   CONTACTS SECTION - EventHorizon.mtg 2.0
+   Social links and contact info
+   Best practice: Sezione finale con padding generoso
+   ========================================== */
+
+.contacts {
+  position: relative;
+  /* Footer section: padding più ampio per chiusura armoniosa */
+  padding-block: var(--space-14) var(--space-16);
+  padding-inline: clamp(16px, var(--container-padding), var(--container-padding));
+  background: linear-gradient(
+    180deg,
+    var(--color-surface-glass) 0%,
+    var(--color-surface) 100%
+  );
+  border-top: 1px solid var(--color-border-soft);
+}
+
+/* Mobile: riduci ma mantieni generoso per footer */
+@media (max-width: 47.999rem) {
+  .contacts {
+    padding-block: var(--space-12) var(--space-14);
+  }
+}
+
+/* Desktop large: massimo respiro per sezione conclusiva */
+@media (min-width: 80rem) {
+  .contacts {
+    padding-block: var(--space-16) var(--space-20);
+  }
+}
+
+/* Decorative gradient overlay */
+.contacts::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center bottom,
+    var(--color-primary-soft) 0%,
+    transparent 70%
+  );
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.contacts__inner {
+  position: relative;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: clamp(16px, var(--container-padding), var(--container-padding));
+}
+
+@media (max-width: 47.999rem) {
+  .contacts {
+    padding-inline: 8px;
+  }
+
+  .contacts__inner {
+    padding-inline: 8px;
+  }
+}
+
+@media (min-width: 64rem) {
+  .contacts__inner {
+    padding-inline: 0;
+  }
+}
+
+.contacts__grid {
+  display: grid;
+  gap: var(--space-8); /* Spacing ottimizzato per migliore compattezza */
+  align-items: center;
+}
+
+/* Mobile: gap compatto */
+@media (max-width: 47.999rem) {
+  .contacts__grid {
+    gap: var(--space-6);
+  }
+}
+
+/* Desktop: gap bilanciato */
+@media (min-width: 64rem) {
+  .contacts__grid {
+    gap: var(--space-10);
+  }
+}
+
+.contacts__copy {
+  display: grid;
+  gap: var(--space-3); /* Ridotto per maggiore compattezza */
+}
+
+.contacts__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 4vw, var(--text-3xl));
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+}
+
+.contacts__intro {
+  font-size: clamp(var(--text-base), 2vw, var(--text-lg));
+  color: var(--color-text-soft);
+  line-height: 1.75;
+  max-width: 56ch;
+}
+
+.contacts__sub {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-special);
+  margin-block-start: var(--space-2);
+}
+
+.contacts__actions {
+  --contact-size: clamp(52px, 18vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--contact-size), 1fr));
+  justify-items: center;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Mobile: riduci leggermente i button con icone */
+@media (max-width: 47.999rem) {
+  .contacts__actions {
+    --contact-size: clamp(44px, 15vw, 52px);
+  }
+}
+
+.contacts__list {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contacts__list > li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Social Icon Buttons */
+.contact {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--contact-size, 52px);
+  height: var(--contact-size, 52px);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+
+  /* Focus styles */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+
+  transition: var(--transition-all);
+}
+
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+  opacity: 0;
+  z-index: -1;
+  transition: var(--transition-opacity);
+}
+
+.contact:hover,
+.contact:focus-visible {
+  transform: translateY(-4px) scale(1.05);
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-elevated);
+}
+
+.contact:hover::before,
+.contact:focus-visible::before {
+  opacity: 0.15;
+}
+
+.contact:focus-visible {
+  outline-color: var(--color-primary);
+}
+
+/* Icon mask styling */
+.contact__icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: var(--color-text);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  transition: var(--transition-transform);
+}
+
+/* Mobile: riduci leggermente le icone */
+@media (max-width: 47.999rem) {
+  .contact__icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.contact:hover .contact__icon {
+  transform: scale(1.1);
+}
+
+/* Icon masks */
+.icon-tiktok { mask-image: url("/icons/tiktok.svg"); }
+.icon-instagram { mask-image: url("/icons/instagram.svg"); }
+.icon-youtube { mask-image: url("/icons/youtube.svg"); }
+.icon-telegram { mask-image: url("/icons/telegram.svg"); }
+.icon-discord { mask-image: url("/icons/discord.svg"); }
+.icon-mail { mask-image: url("/icons/mail.svg"); }
+
+/* Email button variant - larger and more prominent */
+.contact--mail {
+  border-width: 2px;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.contact--mail .contact__icon {
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary);
+}
+
+/* Mobile: riduci anche l'icona email */
+@media (max-width: 47.999rem) {
+  .contact--mail .contact__icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.contact--mail:hover {
+  background: var(--color-primary);
+  border-color: var(--color-special);
+  box-shadow: var(--shadow-glow);
+}
+
+.contact--mail:hover .contact__icon {
+  background: var(--color-white);
+}
+
+/* Tablet and up: side-by-side layout */
+@media (min-width: 768px) {
+  .contacts__grid {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-12);
+  }
+
+  .contacts__actions {
+    --contact-size: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* tablet: keep right-aligned; overridden on desktop */
+    gap: var(--space-4);
+  }
+
+  .contacts__list {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .contacts__list > li {
+    display: block;
+  }
+
+  .contact--mail {
+    align-self: center;
+    margin-top: auto;
+  }
+}
+
+/* Desktop: larger spacing */
+@media (min-width: 1024px) {
+  .contacts__actions {
+    align-items: center; /* desktop: center column */
+  }
+
+  .contacts__list {
+    justify-content: center; /* desktop: center icons row */
+  }
+
+  .contact--mail {
+    margin-top: var(--space-3); /* desktop: sit just under the icons */
+  }
+  .contacts__list {
+    gap: var(--space-4);
+  }
+
+  .contact {
+    width: 56px;
+    height: 56px;
+  }
+
+  .contact--mail {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+

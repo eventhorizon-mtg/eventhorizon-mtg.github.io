@@ -1,0 +1,399 @@
+:root {
+  color-scheme: dark;
+
+  /* ==========================================
+     DESIGN SYSTEM EventHorizon.mtg
+     ========================================== */
+
+  /* Layout & Containers */
+  --container-max: 88rem;
+  --container-padding: clamp(1rem, 4vw, 2.5rem);
+  --content-max: 65ch;
+  --sidebar-width: 20rem;
+  
+  /* Border Radius System */
+  --radius-none: 0;
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+
+  /* Breakpoints (for JS consumption) */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+
+  /* Typography Scale - Perfect Fourth (1.333) */
+  --text-xs: clamp(0.75rem, 0.8vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 1vw, 1rem);
+  --text-base: clamp(1rem, 1.2vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.4vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.8vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 2.4vw, 2rem);
+  --text-3xl: clamp(2rem, 3.2vw, 2.625rem);
+  --text-4xl: clamp(2.625rem, 4vw, 3.5rem);
+  --text-5xl: clamp(3.5rem, 5vw, 4.5rem);
+  --text-6xl: clamp(4.5rem, 6vw, 6rem);
+
+  /* Font Families */
+  --font-sans: "Inter", "Lexend", system-ui, -apple-system, sans-serif;
+  --font-display: "LexendGiga", "Inter", system-ui, sans-serif;
+  --font-serif: "Merriweather", "Georgia", serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Spacing Scale - Perfect Fifth (1.5) + Fluid */
+  --space-px: 1px;
+  --space-0: 0;
+  --space-0-5: clamp(0.125rem, 0.5vw, 0.25rem);
+  --space-1: clamp(0.25rem, 1vw, 0.5rem);
+  --space-1-5: clamp(0.375rem, 1.5vw, 0.75rem);
+  --space-2: clamp(0.5rem, 2vw, 1rem);
+  --space-2-5: clamp(0.625rem, 2.5vw, 1.25rem);
+  --space-3: clamp(0.75rem, 3vw, 1.5rem);
+  --space-3-5: clamp(0.875rem, 3.5vw, 1.75rem);
+  --space-4: clamp(1rem, 4vw, 2rem);
+  --space-5: clamp(1.25rem, 5vw, 2.5rem);
+  --space-6: clamp(1.5rem, 6vw, 3rem);
+  --space-7: clamp(1.75rem, 7vw, 3.5rem);
+  --space-8: clamp(2rem, 8vw, 4rem);
+  --space-9: clamp(2.25rem, 9vw, 4.5rem);
+  --space-10: clamp(2.5rem, 10vw, 5rem);
+  --space-11: clamp(2.75rem, 11vw, 5.5rem);
+  --space-12: clamp(3rem, 12vw, 6rem);
+  --space-14: clamp(3.5rem, 14vw, 7rem);
+  --space-16: clamp(4rem, 16vw, 8rem);
+  --space-20: clamp(5rem, 20vw, 10rem);
+  --space-24: clamp(6rem, 24vw, 12rem);
+  --space-28: clamp(7rem, 28vw, 14rem);
+  --space-32: clamp(8rem, 32vw, 16rem);
+
+  /* ==========================================
+     MTG-INSPIRED COLOR PALETTE
+     Base colors & semantic scales
+     ========================================== */
+
+  /* Base Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* Grays - EventHorizon Space Theme */
+  --color-gray-50: #F8F9FB;
+  --color-gray-100: #F1F3F7;
+  --color-gray-200: #E2E6ED;
+  --color-gray-300: #CBD2DC;
+  --color-gray-400: #9BA5B5;
+  --color-gray-500: #6B7585;
+  --color-gray-600: #4A5468;
+  --color-gray-700: #343B4B;
+  --color-gray-800: #252A37;
+  --color-gray-900: #1E2129;
+  --color-gray-950: #191A23;
+
+  /* Primary Palette - Cosmic Violet */
+  --color-primary-50: #EFDDFD;
+  --color-primary-100: #D6B2F2;
+  --color-primary-200: #BD95E7;
+  --color-primary-300: #A478DC;
+  --color-primary-400: #8B5BD1;
+  --color-primary-500: #6B3FA6;
+  --color-primary-600: #4A2C7A;
+  --color-primary-700: #2D1B4E;
+  --color-primary-800: #1A0B2E;
+  --color-primary-900: #140821;
+  --color-primary-950: #0F061A;
+
+  /* Secondary Palette - Cosmic Magenta */
+  --color-secondary-50: #FFDDFD;
+  --color-secondary-100: #FFB2F2;
+  --color-secondary-200: #FF95E7;
+  --color-secondary-300: #FF78DC;
+  --color-secondary-400: #FF5BD1;
+  --color-secondary-500: #E83FA6;
+  --color-secondary-600: #B82C7A;
+  --color-secondary-700: #7A1B4E;
+  --color-secondary-800: #4A0B2E;
+  --color-secondary-900: #3D0821;
+  --color-secondary-950: #2F061A;
+
+  /* Accent Palette - Cosmic Gold */
+  --color-accent-50: #FFF9CC;
+  --color-accent-100: #FFED99;
+  --color-accent-200: #FFDC66;
+  --color-accent-300: #FFCA33;
+  --color-accent-400: #FFB800;
+  --color-accent-500: #E8A000;
+  --color-accent-600: #B86900;
+  --color-accent-700: #7A4500;
+  --color-accent-800: #4A2C00;
+  --color-accent-900: #3D2300;
+  --color-accent-950: #2F1B00;
+
+  /* Special Palette - Cosmic Azure */
+  --color-special-50: #E6F3FF;
+  --color-special-100: #CCE7FF;
+  --color-special-200: #99CFFF;
+  --color-special-300: #66B7FF;
+  --color-special-400: #339FFF;
+  --color-special-500: #0087E6;
+  --color-special-600: #006BB3;
+  --color-special-700: #004F80;
+  --color-special-800: #00334D;
+  --color-special-900: #001A26;
+  --color-special-950: #000D13;
+
+  /* Semantic Colors */
+  --color-success-50: #ECFDF5;
+  --color-success-100: #D1FAE5;
+  --color-success-200: #A7F3D0;
+  --color-success-300: #6EE7B7;
+  --color-success-400: #34D399;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-success-800: #065F46;
+  --color-success-900: #064E3B;
+
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-300: #FCD34D;
+  --color-warning-400: #FBBF24;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+  --color-warning-800: #92400E;
+  --color-warning-900: #78350F;
+
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-200: #FECACA;
+  --color-error-300: #FCA5A5;
+  --color-error-400: #F87171;
+  --color-error-500: #EF4444;
+  --color-error-600: #DC2626;
+  --color-error-700: #B91C1C;
+  --color-error-800: #991B1B;
+  --color-error-900: #7F1D1D;
+
+  --color-info-50: #EFF6FF;
+  --color-info-100: #DBEAFE;
+  --color-info-200: #BFDBFE;
+  --color-info-300: #93C5FD;
+  --color-info-400: #60A5FA;
+  --color-info-500: #3B82F6;
+  --color-info-600: #2563EB;
+  --color-info-700: #1D4ED8;
+  --color-info-800: #1E40AF;
+  --color-info-900: #1E3A8A;
+
+  /* EventHorizon Special Colors */
+  --color-archive: #8B7CF6;
+  --color-navigation: #22D3EE;
+  --color-hero: #FB923C;
+
+  /* ==========================================
+     DARK THEME SYSTEM
+     Surface, border & text tokens (optimized)
+     ========================================== */
+
+  /* Background & Surface */
+  --color-bg: var(--color-gray-950);
+  --color-surface: var(--color-gray-900);
+  --color-surface-variant: var(--color-gray-800);
+  --color-surface-elevated: var(--color-gray-700);
+  --color-surface-hover: rgba(148, 163, 184, 0.08);
+  --color-surface-selected: rgba(59, 130, 246, 0.12);
+  --color-surface-disabled: rgba(148, 163, 184, 0.04);
+  --color-surface-glass: rgba(12, 21, 36, 0.52);
+  --color-overlay: rgba(4, 9, 18, 0.8);
+
+  /* Border System */
+  --color-border: rgba(122, 152, 209, 0.18);
+  --color-border-strong: rgba(170, 205, 255, 0.42);
+  --color-border-soft: rgba(122, 152, 209, 0.12);
+  --color-border-muted: rgba(148, 163, 184, 0.1);
+
+  /* Text System */
+  --color-text: #edf3ff;
+  --color-text-soft: rgba(223, 233, 255, 0.86);
+  --color-text-secondary: var(--color-gray-300);
+  --color-text-muted: rgba(177, 197, 237, 0.62);
+  --color-text-dim: rgba(140, 160, 201, 0.48);
+  --color-text-disabled: var(--color-gray-500);
+  --color-text-invert: #070c16;
+
+  /* Interactive States */
+  --color-primary: var(--color-primary-500);
+  --color-primary-hover: var(--color-primary-400);
+  --color-primary-active: var(--color-primary-600);
+  --color-primary-strong: var(--color-primary-400);
+  --color-primary-soft: rgba(107, 63, 166, 0.18);
+  --color-primary-text: var(--color-white);
+
+  --color-secondary: var(--color-secondary-700);
+  --color-secondary-hover: var(--color-secondary-600);
+  --color-secondary-active: var(--color-secondary-800);
+  --color-secondary-soft: rgba(184, 44, 122, 0.18);
+
+  --color-special: var(--color-special-600);
+  --color-special-hover: var(--color-special-500);
+  --color-special-active: var(--color-special-700);
+  --color-special-soft: rgba(51, 159, 255, 0.18);
+
+  --color-accent: var(--color-accent-500);
+  --color-accent-hover: var(--color-accent-400);
+  --color-accent-active: var(--color-accent-600);
+
+  /* Semantic shortcuts */
+  --color-success: var(--color-success-400);
+  --color-warning: var(--color-warning-400);
+  --color-danger: var(--color-error-400);
+  --color-disabled: rgba(177, 197, 237, 0.32);
+
+  /* ==========================================
+     SHADOWS & EFFECTS
+     ========================================== */
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 26px 48px -28px rgba(7, 14, 31, 0.8);
+  --shadow-elevated: 0 42px 80px -32px rgba(10, 21, 44, 0.82);
+  --shadow-focus: 0 0 0 3px rgba(125, 211, 252, 0.28);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+  --blur-nav: 24px;
+
+  /* ==========================================
+     GRADIENTS
+     ========================================== */
+
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-700) 0%, var(--color-primary-500) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--color-secondary-700) 0%, var(--color-secondary-500) 100%);
+  --gradient-special: linear-gradient(135deg, var(--color-special-800) 0%, var(--color-special-600) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent-600) 0%, var(--color-accent-400) 100%);
+  --gradient-surface: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-variant) 100%);
+
+  /* ==========================================
+     ANIMATION & TRANSITIONS
+     ========================================== */
+
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-smooth: cubic-bezier(0.64, 0, 0.36, 1);
+  --ease-anim: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --dur-anim: 350ms;
+
+  --transition-all: all var(--duration-normal) var(--ease-out);
+  --transition-fastest: 110ms var(--ease-out);
+  --transition-fast: 160ms var(--ease-out);
+  --transition-base: 230ms var(--ease-out);
+  --transition-slow: 420ms var(--ease-smooth);
+  --transition-colors: color var(--duration-fast) var(--ease-out),
+                       background-color var(--duration-fast) var(--ease-out),
+                       border-color var(--duration-fast) var(--ease-out);
+  --transition-transform: transform var(--duration-normal) var(--ease-out);
+  --transition-opacity: opacity var(--duration-fast) var(--ease-out);
+
+  /* ==========================================
+     Z-INDEX SCALE
+     ========================================== */
+
+  --z-behind: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-toast: 700;
+  --z-max: 999;
+
+  /* ==========================================
+     COMPONENT TOKENS
+     ========================================== */
+
+  /* Navigation */
+  --nav-height: 64px;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --nav-total-height: calc(var(--nav-height) + var(--safe-area-top));
+
+  /* Cards Panels */
+  --card-1: #6c5ce7;
+  --card-2: #00c2ff;
+  --card-3: #57c403;
+  --card-4: #ad000d;
+
+  /* Hero Section */
+  --hero-min-height: clamp(484px, 75vh, 944px);
+  --hero-padding-block: clamp(3rem, 12vh, 6rem);
+  --hero-padding-inline: clamp(1.25rem, 5vw, 3rem);
+  --hero-backdrop:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--color-primary-300) 82%, transparent) 0%, transparent 60%),
+    radial-gradient(circle at 78% 14%, color-mix(in srgb, var(--color-special-300) 78%, transparent) 0%, transparent 68%),
+    linear-gradient(205deg,
+      color-mix(in srgb, var(--color-primary-600) 88%, var(--color-gray-900) 12%) 0%,
+      color-mix(in srgb, var(--color-primary-500) 72%, transparent) 52%,
+      color-mix(in srgb, var(--color-special-500) 72%, transparent) 100%);
+  --hero-overlay: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-gray-950) 60%, transparent) 0%,
+    color-mix(in srgb, var(--color-gray-900) 45%, transparent) 55%,
+    color-mix(in srgb, var(--color-gray-950) 65%, transparent) 100%);
+  --hero-bg-url: none;
+
+  /* Archive */
+  --archive-sheet-max: 480px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --nav-height: 72px;
+    --blur-nav: 26px;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --nav-height: 78px;
+    --app-gutter: clamp(1.5rem, calc(1rem + 2vw), 4rem);
+  }
+}
+
+
+
+

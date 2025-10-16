@@ -1,0 +1,31 @@
+# Esempio di item con contenuto esteso per testing
+
+id: eh-test-001
+slug: test-contenuto-esteso
+kind: content
+date: 2025-10-14
+title: "Test Contenuto Descrittivo Esteso"
+overline: "Test · Esempio"
+desc: "Questa è la descrizione breve che appare sempre."
+content: |
+  <p>Questo è il <strong>contenuto esteso</strong> che dovrebbe apparire sia nel pannello espanso che nello sheet mobile.</p>
+  <p>Può contenere:</p>
+  <ul>
+    <li>Liste puntate</li>
+    <li><em>Testo in corsivo</em></li>
+    <li><strong>Testo in grassetto</strong></li>
+    <li>Link: <a href="https://example.com">esempio di link</a></li>
+  </ul>
+  <p>Questo contenuto è utile per spiegazioni dettagliate, analisi approfondite, o informazioni tecniche che non stanno nella descrizione breve.</p>
+thumb: /images/cards/fblthp_placeholder.webp
+tags: ["test", "esempio", "contenuto"]
+links:
+  - label: Link Primario
+    href: "https://example.com/primary"
+    btn_class: btn--primary
+    sort_order: 1
+    primary: true
+  - label: Link Secondario
+    href: "https://example.com/secondary"
+    btn_class: btn--secondary
+    sort_order: 2

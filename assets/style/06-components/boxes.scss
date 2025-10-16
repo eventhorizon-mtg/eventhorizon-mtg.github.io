@@ -1,0 +1,30 @@
+.article-box {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Varianti semantiche con fallback sicuri ai token di tema esistenti */
+.article-box--info {
+  border-left: 3px solid var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.article-box--warning {
+  border-left: 3px solid var(--color-warning, var(--color-special));
+  background: color-mix(in oklab, var(--color-warning, var(--color-special)) 10%, transparent);
+}
+
+.article-box--success {
+  border-left: 3px solid var(--color-success, var(--color-primary));
+  background: color-mix(in oklab, var(--color-success, var(--color-primary)) 10%, transparent);
+}
+
+.article-box--danger {
+  border-left: 3px solid var(--color-danger, var(--color-special));
+  background: color-mix(in oklab, var(--color-danger, var(--color-special)) 10%, transparent);
+}

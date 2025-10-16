@@ -1,0 +1,29 @@
+{{ $variant := .Get "variant" | default "default" }}
+{{ $hasCustom := or (.Get "label1") (.Get "href1") }}
+<div class="article-button-demo">
+  {{ if $hasCustom }}
+    {{ $max := .Get "count" | default 10 }}
+    {{ range $i := seq 1 $max }}
+      {{ $label := $.Get (printf "label%d" $i) }}
+      {{ $href := ( $.Get (printf "href%d" $i) ) | default "#" }}
+      {{ $class := $.Get (printf "class%d" $i) | default (cond (eq $i 1) "btn--primary" "btn--secondary") }}
+      {{ if $label }}
+        <a class="btn {{ $class }}" href="{{ $href | safeURL }}">{{ $label }}</a>
+      {{ end }}
+    {{ end }}
+  {{ else if eq $variant "glass" }}
+    <a class="btn btn--primary-glass" href="#">Primary Glass</a>
+    <a class="btn btn--secondary-glass" href="#">Secondary Glass</a>
+    <a class="btn btn--special-glass" href="#">Special Glass</a>
+    <a class="btn btn--yt-glass" href="#">YouTube Glass</a>
+  {{ else }}
+    <a class="btn btn--primary" href="#">Primary Button</a>
+    <a class="btn btn--secondary" href="#">Secondary</a>
+    <a class="btn btn--special" href="#">Special Action</a>
+    <a class="btn btn--accent" href="#">Accent</a>
+    <a class="btn btn--yt" href="#">Watch on YouTube</a>
+    <a class="btn btn--scry" href="#">Search Scryfall</a>
+    <a class="btn btn--edh" href="#">EDHREC</a>
+    <a class="btn btn--mox" href="#">Moxfield Deck</a>
+  {{ end }}
+</div>

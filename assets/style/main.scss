@@ -1,0 +1,68 @@
+/* ============================================================
+   Event Horizon · 2025 Visual Refresh
+   ------------------------------------------------------------
+   - ITCSS layering retained for maintainability
+   - Design tokens rebuilt from the ground up (dark aurora system)
+   - Components rebuilt with fluid spacing & typography
+   ============================================================ */
+
+/* ========================================
+   01 - SETTINGS
+   Global variables and design tokens
+   ======================================== */
+
+@import "01-settings/tokens";
+@import "01-settings/fonts";
+
+/* ========================================
+   03 - GENERIC
+   Reset and normalize styles
+   ======================================== */
+
+@import "03-generic/reset";
+
+/* ========================================
+   04 - ELEMENTS
+   Base HTML element styles
+   ======================================== */
+
+@import "04-elements/base";
+
+/* ========================================
+   05 - OBJECTS
+   Layout patterns and structural objects
+   ======================================== */
+
+@import "05-objects/container";
+@import "05-objects/grid";
+
+/* ========================================
+   06 - COMPONENTS
+   UI components using BEM methodology
+   ======================================== */
+
+@import "06-components/navbar";
+@import "06-components/hero";
+@import "06-components/cards";
+@import "06-components/modal";
+@import "06-components/contacts";
+@import "06-components/links";
+@import "06-components/buttons";
+@import "06-components/boxes";
+@import "06-components/footer";
+
+/* ========================================
+   07 - PAGES
+   Page-specific styles
+   ======================================== */
+
+@import "07-pages/homepage";
+@import "07-pages/archive";
+@import "07-pages/article";
+
+/* ========================================
+   08 - UTILITIES
+   Atomic utility classes
+   ======================================== */
+
+@import "08-utilities/utilities";

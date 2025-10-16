@@ -1,0 +1,20 @@
+id: Video005
+slug: Episodio5
+kind: video
+date: 2025-06-10
+title: ZENDIKAR E GLI ELDRAZI
+overline: "LA STORIA DI MAGIC - EPISODIO #05"
+desc: >-
+  Associati talvolta agli spaventosi esseri che appaiono nei racconti di
+  Lovecraft, gli Eldrazi sono fra le entità più spaventose e terribili mai
+  apparse nell'universo di Magic e si può affermare senza problemi che il gioco
+  non è stato più lo stesso da quando sono stati introdotti (basti pensare al
+  famoso Eldrazi Winter).
+
+  In questo video scopriamo insieme la loro storia.
+thumb: /images/cards/card5.webp
+links:
+  - btn_class: btn--yt
+    primary: true
+    label: YouTube
+    href: https://www.youtube.com/watch?v=AAtwxY_o4jU

@@ -1,0 +1,99 @@
+/* ==========================================
+   FOOTER - EventHorizon.mtg 2.0
+   Clean, accessible footer with legal info
+   ========================================== */
+
+.site-footer {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-bg) 100%
+  );
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-10) var(--space-8);
+  margin-block-start: var(--space-16);
+  font-family: "Open Sans", var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.01em;
+
+  /* Subtle shadow for depth */
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Decorative top line */
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  max-width: 40%;
+  height: 2px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  opacity: 0.6;
+}
+
+.site-footer__inner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: grid;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.site-footer__disclaimer {
+  display: block;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+  font-size: clamp(0.75rem, 0.7vw, 0.85rem);
+  max-width: 72ch;
+  margin-inline: auto;
+
+  /* Subtle fade effect */
+  opacity: 0.9;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+.site-footer__disclaimer a {
+  position: relative;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 0.1em;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--color-primary-soft);
+  transition: var(--transition-colors);
+}
+
+.site-footer__disclaimer a:hover,
+.site-footer__disclaimer a:focus-visible {
+  color: var(--color-special);
+  text-decoration-color: var(--color-special);
+}
+
+.site-footer__disclaimer .btn {
+  margin-block-start: var(--space-2);
+}
+
+/* Footer-specific sizing and typography for clear button */
+.site-footer .btn--clear {
+  font-family: "Open Sans", var(--font-sans);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+/* Tablet and up: horizontal layout */
+@media (min-width: 48rem) {
+  .site-footer__disclaimer {
+    font-size: clamp(0.75rem, 0.5vw, 0.9rem);
+  }
+}

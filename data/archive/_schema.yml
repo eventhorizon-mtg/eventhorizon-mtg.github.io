@@ -1,0 +1,26 @@
+# Modello dati Archivio (documentazione, non usato a runtime)
+# Ogni item è un file YAML in data/archive/items/*.yml
+
+id:        # number | string univoco (consigliato: string per portabilità)
+slug:      # string breve e unico per l'item (kebab-case)
+kind:      # string: "video" | "content" | "portal" (mappa varianti UI)
+date:      # string ISO: "YYYY-MM-DD"
+title:     # string titolo card
+overline:  # string riga superiore (es. "YouTube – Commander")
+desc:      # string descrizione breve
+thumb:     # string path immagine (relativo a /static) o URL assoluto
+background_image:  # string path immagine di sfondo (opzionale)
+
+tags:      # array di string, es: ["commander","decklist","tutorial"]
+
+links:     # array di oggetti link
+  - label:      # string testo bottone/pill
+    href:       # string URL assoluto
+    btn_class:  # string classe CSS (es. "btn--yt", "btn--teal", ecc.)
+    sort_order: # number per ordinamento crescente
+    primary:    # boolean (true se è il link principale)
+
+# Campi opzionali utili
+# draft:    # boolean (se true l'item non viene incluso nel JSON/pagina)
+# author:   # string
+# updated:  # string ISO per ultimo aggiornamento

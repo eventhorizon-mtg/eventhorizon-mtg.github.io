@@ -1,0 +1,15 @@
+id: Video006
+slug: Episodio6
+kind: video
+date: 2025-07-01
+title: INNISTRAD E LA NASCITA DEI VAMPIRI
+overline: "LA STORIA DI MAGIC - EPISODIO #06"
+desc: "Innistrad, vampiri, arte gotica e dark fantasy. Cosa volere di più?
+  Immergiamoci insieme in questo caratteristico piano di Magic the Gathering e
+  scopriamo uno dei suoi elementi fondamentali. "
+thumb: /images/cards/card6.webp
+links:
+  - btn_class: btn--yt
+    primary: true
+    label: YouTube
+    href: https://www.youtube.com/watch?v=4h0iuyb-mYk
