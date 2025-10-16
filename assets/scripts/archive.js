@@ -992,13 +992,27 @@
       }
     }
 
+    // Helper to escape attribute values for HTML context
+    function escapeAttribute(val) {
+      return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    const safeThumbSrc = escapeAttribute(thumbSrc);
+    const safeTit = escapeAttribute(tit);
+    const safePrimaryUrl = escapeAttribute(primaryUrl);
+
     const thumbHTML = primaryUrl
-      ? `<a class="item-thumb" href="${primaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${tit}">
-           <img src="${thumbSrc}" alt="${tit}" loading="lazy" decoding="async">
+      ? `<a class="item-thumb" href="${safePrimaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${safeTit}">
+           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
            ${thumbButtonHTML}
          </a>`
       : `<figure class="item-thumb">
-           <img src="${thumbSrc}" alt="${tit}" loading="lazy" decoding="async">
+           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
          </figure>`;
 
     const mediaHTML = `<div class="item-media">
