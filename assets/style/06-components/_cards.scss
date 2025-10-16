@@ -929,6 +929,20 @@
   border-color: rgba(255, 255, 255, 0.35);
 }
 
+/* Preserve button variant colors for card__btn combined with pill/btn classes */
+.cards--stack .card__actions .card__btn.pill:hover,
+.cards--stack .card__actions .card__btn.pill:focus-visible,
+.cards--stack .card__actions .card__btn.btn:hover,
+.cards--stack .card__actions .card__btn.btn:focus-visible,
+.cards--stack .card__cta-row .card__cta.pill:hover,
+.cards--stack .card__cta-row .card__cta.pill:focus-visible,
+.cards--stack .card__cta-row .card__cta.btn:hover,
+.cards--stack .card__cta-row .card__cta.btn:focus-visible {
+  color: var(--btn-color);
+  background: var(--btn-bg);
+  border-color: var(--btn-border);
+}
+
 .cards--stack .card__cta-row {
   display: flex;
   justify-content: flex-start;
@@ -1611,10 +1625,18 @@
     #cards.cards--stack.cards--panels .card .card__actions .btn:focus-visible,
     #cards.cards--stack.cards--panels .card .card__actions .pill:hover,
     #cards.cards--stack.cards--panels .card .card__actions .pill:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__actions .card__btn.pill:hover,
+    #cards.cards--stack.cards--panels .card .card__actions .card__btn.pill:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__actions .card__btn.btn:hover,
+    #cards.cards--stack.cards--panels .card .card__actions .card__btn.btn:focus-visible,
     #cards.cards--stack.cards--panels .card .card__cta-row .btn:hover,
     #cards.cards--stack.cards--panels .card .card__cta-row .btn:focus-visible,
     #cards.cards--stack.cards--panels .card .card__cta-row .pill:hover,
-    #cards.cards--stack.cards--panels .card .card__cta-row .pill:focus-visible {
+    #cards.cards--stack.cards--panels .card .card__cta-row .pill:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:hover,
+    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:focus-visible,
+    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:hover,
+    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:focus-visible {
       color: var(--btn-color);
     }
 
