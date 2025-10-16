@@ -750,6 +750,17 @@
   const qs  = (sel, root = document) => root.querySelector(sel);
   /** @param {*} v - Valore da convertire @returns {string} */
   const text = (v) => (v == null ? '' : String(v));
+  /** Escapes a string for safe HTML display */
+  const escapeHTML = (str) => text(str).replace(/[&<>"'`]/g, (c) => {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '`': '&#96;'
+    })[c];
+  });
   /** @param {*} v - Valore da convertire in lowercase @returns {string} */
   const lower = (v) => text(v).toLowerCase();
   /** @param {*} v - Valore da trimmare @returns {string} */
@@ -1141,7 +1152,7 @@
       p.setAttribute('role', 'status');
       p.setAttribute('aria-live', 'polite');
       const qVal = trim(getParam('q') || '');
-      p.innerHTML = `Nessun risultato per <em>${qVal}</em>.`;
+      p.innerHTML = `Nessun risultato per <em>${escapeHTML(qVal)}</em>.`;
       listOl.replaceWith(p);
       return;
     } else {
