@@ -1491,27 +1491,31 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* ==========================================
    IMAGE ROTATION - Archive Items
-   Le immagini ruotate si comportano ESATTAMENTE come quelle normali:
-   - object-fit: cover (già presente globalmente)
-   - Riempiono completamente il thumbnail
-   - Stesso hover effect
-   Container: 140px × 88px = ratio 1.59:1
+   COMPORTAMENTO IDENTICO alle immagini pre-ruotate a monte:
+   Container 140×88 = ratio 1.59:1
    ========================================== */
 
-.item-thumb img[data-rotation="90"] {
-  /* Container 1.59:1, object-fit: cover fa parte del lavoro
-     Scale base: 1.59 (ratio del container) */
-  transform: rotate(90deg) scale(1.59);
+.item-thumb img[data-rotation="90"],
+.item-thumb img[data-rotation="270"] {
+  /* Forziamo dimensioni maggiori per garantire copertura dopo rotazione */
+  min-width: 159%; /* 100% * 1.59 per compensare inversione */
+  min-height: 159%;
+  width: auto;
+  height: auto;
   transform-origin: center center;
+}
+
+.item-thumb img[data-rotation="90"] {
+  transform: rotate(90deg);
 }
 
 .item-thumb img[data-rotation="180"] {
   transform: rotate(180deg);
+  transform-origin: center center;
 }
 
 .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.59);
-  transform-origin: center center;
+  transform: rotate(270deg);
 }
 
 /* Transizione - IDENTICA alle immagini non ruotate */
@@ -1519,13 +1523,13 @@ body.is-sheet-open .archive-item.is-sheet-open {
   transition: transform var(--transition-slow);
 }
 
-/* Hover - IDENTICO alle immagini non ruotate (scale 1.05) */
+/* Hover - IDENTICO alle immagini non ruotate */
 .archive-item:hover .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.67); /* 1.59 * 1.05 */
+  transform: rotate(90deg) scale(1.05);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.67);
+  transform: rotate(270deg) scale(1.05);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="180"] {
