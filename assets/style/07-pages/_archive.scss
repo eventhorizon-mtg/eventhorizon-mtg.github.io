@@ -431,8 +431,13 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  transition: none;
+  transition: transform var(--transition-slow); /* ✅ Come homepage */
   border-radius: 0; /* Rimuove border-radius globale, gestito dal contenitore .item-thumb */
+}
+
+/* Hover effect come homepage */
+.archive-item:hover .item-thumb img {
+  transform: scale(1.05);
 }
 
 /* Primary button overlay on thumbnail */
@@ -1508,5 +1513,18 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* Transizione smooth per rotazione */
 .item-thumb img[data-rotation] {
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-slow); /* ✅ Come homepage */
+}
+
+/* Hover su immagini ruotate - mantiene la proporzione corretta */
+.archive-item:hover .item-thumb img[data-rotation="90"] {
+  transform: rotate(90deg) scale(1.68); /* 1.6 * 1.05 */
+}
+
+.archive-item:hover .item-thumb img[data-rotation="270"] {
+  transform: rotate(270deg) scale(1.68); /* 1.6 * 1.05 */
+}
+
+.archive-item:hover .item-thumb img[data-rotation="180"] {
+  transform: rotate(180deg) scale(1.05);
 }
