@@ -1492,21 +1492,15 @@ body.is-sheet-open .archive-item.is-sheet-open {
 /* ==========================================
    IMAGE ROTATION - Archive Items
    COMPORTAMENTO IDENTICO alle immagini pre-ruotate a monte:
-   Container 140×88 = ratio 1.59:1
+   Immagine originale: 672×936 (0.72:1 verticale)
+   Ruotata 90°: 936×672 (1.39:1 orizzontale)
+   Container: 140×88 (1.59:1)
+   Scale necessario: 1.59 / 1.39 = 1.14
    ========================================== */
 
-.item-thumb img[data-rotation="90"],
-.item-thumb img[data-rotation="270"] {
-  /* Forziamo dimensioni maggiori per garantire copertura dopo rotazione */
-  min-width: 159%; /* 100% * 1.59 per compensare inversione */
-  min-height: 159%;
-  width: auto;
-  height: auto;
-  transform-origin: center center;
-}
-
 .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(1.14);
+  transform-origin: center center;
 }
 
 .item-thumb img[data-rotation="180"] {
@@ -1515,7 +1509,8 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg);
+  transform: rotate(270deg) scale(1.14);
+  transform-origin: center center;
 }
 
 /* Transizione - IDENTICA alle immagini non ruotate */
@@ -1523,13 +1518,13 @@ body.is-sheet-open .archive-item.is-sheet-open {
   transition: transform var(--transition-slow);
 }
 
-/* Hover - IDENTICO alle immagini non ruotate */
+/* Hover - scale base + 1.05 */
 .archive-item:hover .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.05);
+  transform: rotate(90deg) scale(1.20); /* 1.14 * 1.05 */
 }
 
 .archive-item:hover .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.05);
+  transform: rotate(270deg) scale(1.20);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="180"] {
