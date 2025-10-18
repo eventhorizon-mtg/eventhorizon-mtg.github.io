@@ -1726,7 +1726,8 @@
    ========================================== */
 
 .card__img[data-rotation="90"] {
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(1.78); /* 16:9 ratio compensation */
+  transform-origin: center center;
 }
 
 .card__img[data-rotation="180"] {
@@ -1734,7 +1735,22 @@
 }
 
 .card__img[data-rotation="270"] {
-  transform: rotate(270deg);
+  transform: rotate(270deg) scale(1.78); /* 16:9 ratio compensation */
+  transform-origin: center center;
+}
+
+/* Hover su immagini ruotate */
+.card:hover .card__img[data-rotation="90"],
+.card:hover .card__img[data-rotation="270"] {
+  transform: rotate(90deg) scale(1.87); /* 1.78 * 1.05 hover scale */
+}
+
+.card:hover .card__img[data-rotation="270"] {
+  transform: rotate(270deg) scale(1.87);
+}
+
+.card:hover .card__img[data-rotation="180"] {
+  transform: rotate(180deg) scale(1.05);
 }
 
 /* Transizione smooth per rotazione */
