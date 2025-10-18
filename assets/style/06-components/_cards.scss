@@ -1727,8 +1727,10 @@
    ========================================== */
 
 .card__img[data-rotation="90"] {
-  /* Ruota e scala per riempire container 16:9 */
-  transform: rotate(90deg) scale(1.78);
+  /* Ruota e scala per riempire container 16:9 
+     Immagine 16:9 ruotata diventa 9:16 (0.56:1)
+     Scale: 16/9 ÷ 9/16 = 16/9 × 16/9 ≈ 3.16 */
+  transform: rotate(90deg) scale(3.2);
   transform-origin: center center;
 }
 
@@ -1738,17 +1740,17 @@
 
 .card__img[data-rotation="270"] {
   /* Ruota e scala per riempire container 16:9 */
-  transform: rotate(270deg) scale(1.78);
+  transform: rotate(270deg) scale(3.2);
   transform-origin: center center;
 }
 
 /* Hover su immagini ruotate - mantiene la proporzione corretta */
 .card:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.87); /* 1.78 * 1.05 */
+  transform: rotate(90deg) scale(3.36); /* 3.2 * 1.05 */
 }
 
 .card:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.87); /* 1.78 * 1.05 */
+  transform: rotate(270deg) scale(3.36); /* 3.2 * 1.05 */
 }
 
 .card:hover .card__img[data-rotation="180"] {
