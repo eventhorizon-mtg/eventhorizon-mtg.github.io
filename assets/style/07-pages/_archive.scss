@@ -1491,24 +1491,18 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* ==========================================
    IMAGE ROTATION - Archive Items
-   CSS transform per ruotare thumbnail archivio
-   Container: 140px × 88px (ratio ~1.59:1)
-   APPROCCIO: Adattamento dinamico senza scale fisso
+   Le immagini ruotate si comportano ESATTAMENTE come quelle normali:
+   - object-fit: cover (già presente globalmente)
+   - Riempiono completamente il thumbnail
+   - Stesso hover effect
+   Container: 140px × 88px = ratio 1.59:1
    ========================================== */
 
-/* Immagini ruotate 90/270: adattamento dinamico */
-.item-thumb img[data-rotation="90"],
-.item-thumb img[data-rotation="270"] {
-  object-fit: contain; /* Si adatta al container senza ritagliare */
-  width: auto;
-  height: auto;
-  min-width: 100%;
-  min-height: 100%;
-  transform-origin: center center;
-}
-
 .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg);
+  /* Container archivio 1.59:1, immagine 16:9 ruotata → 9:16 (0.56:1)
+     Scale necessario: 1.59 / 0.56 ≈ 2.84 */
+  transform: rotate(90deg) scale(2.84);
+  transform-origin: center center;
 }
 
 .item-thumb img[data-rotation="180"] {
@@ -1516,21 +1510,22 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg);
+  transform: rotate(270deg) scale(2.84);
+  transform-origin: center center;
 }
 
-/* Transizione smooth per rotazione */
+/* Transizione - IDENTICA alle immagini non ruotate */
 .item-thumb img[data-rotation] {
-  transition: transform var(--transition-slow); /* ✅ Come homepage */
+  transition: transform var(--transition-slow);
 }
 
-/* Hover su immagini ruotate - mantiene la proporzione corretta */
+/* Hover - IDENTICO alle immagini non ruotate (scale 1.05) */
 .archive-item:hover .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.05);
+  transform: rotate(90deg) scale(2.98); /* 2.84 * 1.05 */
 }
 
 .archive-item:hover .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.05);
+  transform: rotate(270deg) scale(2.98);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="180"] {

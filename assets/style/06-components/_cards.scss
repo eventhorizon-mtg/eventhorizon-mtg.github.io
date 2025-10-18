@@ -1722,24 +1722,18 @@
 
 /* ==========================================
    IMAGE ROTATION - Homepage Cards
-   CSS transform per ruotare immagini card
-   Container: aspect-ratio 16/9 (1.78:1)
-   APPROCCIO: Adattamento dinamico senza scale fisso
+   Le immagini ruotate si comportano ESATTAMENTE come quelle normali:
+   - object-fit: cover (già presente globalmente)
+   - Riempiono completamente il container
+   - Stesso hover effect
+   Solo la rotazione cambia, con scale compensato per 90°/270°
    ========================================== */
 
-/* Immagini ruotate 90/270: adattamento dinamico */
-.card__img[data-rotation="90"],
-.card__img[data-rotation="270"] {
-  object-fit: contain; /* Si adatta al container senza ritagliare */
-  max-width: 100vh; /* Permette di crescere verticalmente */
-  max-height: 100vw; /* Permette di crescere orizzontalmente */
-  width: auto;
-  height: auto;
-  transform-origin: center center;
-}
-
 .card__img[data-rotation="90"] {
-  transform: rotate(90deg);
+  /* Immagine 16:9 ruotata → diventa 9:16 verticale
+     Per riempire container 16:9 orizzontale serve scale ≈ (16/9)² ≈ 3.16 */
+  transform: rotate(90deg) scale(3.16);
+  transform-origin: center center;
 }
 
 .card__img[data-rotation="180"] {
@@ -1747,29 +1741,30 @@
 }
 
 .card__img[data-rotation="270"] {
-  transform: rotate(270deg);
+  transform: rotate(270deg) scale(3.16);
+  transform-origin: center center;
 }
 
-/* Hover su immagini ruotate */
+/* Hover - IDENTICO alle immagini non ruotate (scale 1.05) */
 .card:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.05);
+  transform: rotate(90deg) scale(3.32); /* 3.16 * 1.05 */
 }
 
 .card:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.05);
+  transform: rotate(270deg) scale(3.32);
 }
 
 .card:hover .card__img[data-rotation="180"] {
   transform: rotate(180deg) scale(1.05);
 }
 
-/* Stato espanso - stesso comportamento */
+/* Card espansa - stesso comportamento */
 .card.is-expanded .card__img[data-rotation="90"] {
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(3.16);
 }
 
 .card.is-expanded .card__img[data-rotation="270"] {
-  transform: rotate(270deg);
+  transform: rotate(270deg) scale(3.16);
 }
 
 .card.is-expanded .card__img[data-rotation="180"] {
@@ -1778,20 +1773,20 @@
 
 /* Hover su card espansa */
 .card.is-expanded:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.05);
+  transform: rotate(90deg) scale(3.32);
 }
 
 .card.is-expanded:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.05);
+  transform: rotate(270deg) scale(3.32);
 }
 
 .card.is-expanded:hover .card__img[data-rotation="180"] {
   transform: rotate(180deg) scale(1.05);
 }
 
-/* Transizione smooth */
+/* Transizione - IDENTICA alle immagini non ruotate */
 .card__img[data-rotation] {
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-slow);
 }
 
 
