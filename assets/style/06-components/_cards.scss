@@ -1730,9 +1730,10 @@
    ========================================== */
 
 .card__img[data-rotation="90"] {
-  /* Immagine 16:9 ruotata → diventa 9:16 verticale
-     Per riempire container 16:9 orizzontale serve scale ≈ (16/9)² ≈ 3.16 */
-  transform: rotate(90deg) scale(3.16);
+  /* Container 16:9, immagine 16:9 ruotata → 9:16
+     object-fit: cover fa già parte del lavoro
+     Scale minimo: 16/9 = 1.78 */
+  transform: rotate(90deg) scale(1.78);
   transform-origin: center center;
 }
 
@@ -1741,30 +1742,30 @@
 }
 
 .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.16);
+  transform: rotate(270deg) scale(1.78);
   transform-origin: center center;
 }
 
 /* Hover - IDENTICO alle immagini non ruotate (scale 1.05) */
 .card:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.32); /* 3.16 * 1.05 */
+  transform: rotate(90deg) scale(1.87); /* 1.78 * 1.05 */
 }
 
 .card:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.32);
+  transform: rotate(270deg) scale(1.87);
 }
 
 .card:hover .card__img[data-rotation="180"] {
   transform: rotate(180deg) scale(1.05);
 }
 
-/* Card espansa - stesso comportamento */
+/* Card espansa - scale leggermente maggiore per riempire meglio */
 .card.is-expanded .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.16);
+  transform: rotate(90deg) scale(2.0);
 }
 
 .card.is-expanded .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.16);
+  transform: rotate(270deg) scale(2.0);
 }
 
 .card.is-expanded .card__img[data-rotation="180"] {
@@ -1773,11 +1774,11 @@
 
 /* Hover su card espansa */
 .card.is-expanded:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.32);
+  transform: rotate(90deg) scale(2.1); /* 2.0 * 1.05 */
 }
 
 .card.is-expanded:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.32);
+  transform: rotate(270deg) scale(2.1);
 }
 
 .card.is-expanded:hover .card__img[data-rotation="180"] {

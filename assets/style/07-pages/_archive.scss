@@ -1499,9 +1499,9 @@ body.is-sheet-open .archive-item.is-sheet-open {
    ========================================== */
 
 .item-thumb img[data-rotation="90"] {
-  /* Container archivio 1.59:1, immagine 16:9 ruotata → 9:16 (0.56:1)
-     Scale necessario: 1.59 / 0.56 ≈ 2.84 */
-  transform: rotate(90deg) scale(2.84);
+  /* Container 1.59:1, object-fit: cover fa parte del lavoro
+     Scale base: 1.59 (ratio del container) */
+  transform: rotate(90deg) scale(1.59);
   transform-origin: center center;
 }
 
@@ -1510,7 +1510,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(2.84);
+  transform: rotate(270deg) scale(1.59);
   transform-origin: center center;
 }
 
@@ -1521,11 +1521,11 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* Hover - IDENTICO alle immagini non ruotate (scale 1.05) */
 .archive-item:hover .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(2.98); /* 2.84 * 1.05 */
+  transform: rotate(90deg) scale(1.67); /* 1.59 * 1.05 */
 }
 
 .archive-item:hover .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(2.98);
+  transform: rotate(270deg) scale(1.67);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="180"] {
