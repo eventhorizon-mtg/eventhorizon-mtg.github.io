@@ -1725,8 +1725,15 @@
    CSS transform per ruotare immagini card
    ========================================== */
 
+/* Immagini ruotate usano object-fit: contain per adattarsi */
+.card__img[data-rotation] {
+  object-fit: contain; /* Si adatta senza ritagliare */
+  background: var(--color-surface-elevated); /* Riempie spazi vuoti */
+  transition: transform 0.3s ease;
+}
+
 .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.78); /* 16:9 ratio compensation */
+  transform: rotate(90deg);
   transform-origin: center center;
 }
 
@@ -1735,27 +1742,21 @@
 }
 
 .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.78); /* 16:9 ratio compensation */
+  transform: rotate(270deg);
   transform-origin: center center;
 }
 
-/* Hover su immagini ruotate */
-.card:hover .card__img[data-rotation="90"],
-.card:hover .card__img[data-rotation="270"] {
-  transform: rotate(90deg) scale(1.87); /* 1.78 * 1.05 hover scale */
+/* Hover su immagini ruotate - rimuove lo scale per evitare distorsioni */
+.card:hover .card__img[data-rotation="90"] {
+  transform: rotate(90deg) scale(1.05);
 }
 
 .card:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.87);
+  transform: rotate(270deg) scale(1.05);
 }
 
 .card:hover .card__img[data-rotation="180"] {
   transform: rotate(180deg) scale(1.05);
-}
-
-/* Transizione smooth per rotazione */
-.card__img[data-rotation] {
-  transition: transform 0.3s ease;
 }
 
 

@@ -1489,8 +1489,15 @@ body.is-sheet-open .archive-item.is-sheet-open {
    CSS transform per ruotare thumbnail archivio
    ========================================== */
 
+/* Immagini ruotate usano object-fit: contain per adattarsi */
+.item-thumb img[data-rotation] {
+  object-fit: contain; /* Si adatta senza ritagliare */
+  background: var(--color-surface-elevated); /* Riempie spazi vuoti */
+  transition: transform 0.3s ease;
+}
+
 .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.78); /* 16:9 ratio compensation */
+  transform: rotate(90deg);
   transform-origin: center center;
 }
 
@@ -1499,11 +1506,6 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.78); /* 16:9 ratio compensation */
+  transform: rotate(270deg);
   transform-origin: center center;
-}
-
-/* Transizione smooth per rotazione */
-.item-thumb img[data-rotation] {
-  transition: transform 0.3s ease;
 }
