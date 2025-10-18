@@ -1757,6 +1757,32 @@
   transform: rotate(180deg) scale(1.05);
 }
 
+/* Stato espanso - stesso comportamento */
+.card.is-expanded .card__img[data-rotation="90"] {
+  transform: rotate(90deg) scale(3.2);
+}
+
+.card.is-expanded .card__img[data-rotation="270"] {
+  transform: rotate(270deg) scale(3.2);
+}
+
+.card.is-expanded .card__img[data-rotation="180"] {
+  transform: rotate(180deg);
+}
+
+/* Hover su card espansa */
+.card.is-expanded:hover .card__img[data-rotation="90"] {
+  transform: rotate(90deg) scale(3.36);
+}
+
+.card.is-expanded:hover .card__img[data-rotation="270"] {
+  transform: rotate(270deg) scale(3.36);
+}
+
+.card.is-expanded:hover .card__img[data-rotation="180"] {
+  transform: rotate(180deg) scale(1.05);
+}
+
 /* Transizione smooth */
 .card__img[data-rotation] {
   transition: transform 0.3s ease;
