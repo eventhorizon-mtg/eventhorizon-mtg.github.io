@@ -81,7 +81,7 @@ collections:
     create: true
     format: yaml
     extension: yml
-    slug: "{{slug}}"
+    slug: "{{fields.slug}}"
     fields:
       - label: "ID"
         name: id
