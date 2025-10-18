@@ -10,7 +10,7 @@ content: <p>Questo è il <strong>contenuto esteso</strong>, dovrebbe apparire
   sotto la descrizione. <span class="text-color-accent">Testo oro</span> e
   mettiamo un link di prova con un <a class="btn btn--archi" href="#">BUTTON</a>
   inline per vedere cosa accade.</p>
-thumb: /images/cards/card_A.webp
+thumb: /images/cards/amkm-21-niv-mizzet-guildpact.jpg
 links:
   - btn_class: btn--primary
     primary: true
