@@ -49,7 +49,7 @@ content: >-
   </ul>
 
   <p>Questo contenuto è utile per spiegazioni dettagliate, analisi approfondite, o informazioni tecniche che non stanno nella descrizione breve.</p>
-thumb: /images/cards/card_A.webp
+thumb: ""
 tags:
   - test
   - esempio
