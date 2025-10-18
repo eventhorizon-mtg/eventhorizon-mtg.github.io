@@ -445,8 +445,9 @@
 /* Primary button overlay on thumbnail */
 .item-thumb-button {
   position: absolute;
-  inset: auto auto 50% 50%;
-  transform: translate(-50%, 50%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centrato perfettamente */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -470,7 +471,7 @@
 /* Default hover - senza translateY */
 .item-thumb-button:hover,
 .item-thumb-button:focus-visible {
-  transform: translate(-50%, 50%) scale(1.05);
+  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
 }
 
 /* VIDEO: Icona play SVG YouTube - Semitrasparente */
@@ -540,7 +541,7 @@
     color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
   border-color: var(--color-primary);
-  transform: translate(-50%, 50%) scale(1.05);
+  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
   opacity: 0.95;
 }
 
