@@ -1724,14 +1724,22 @@
    IMAGE ROTATION - Homepage Cards
    CSS transform per ruotare immagini card
    Container: aspect-ratio 16/9 (1.78:1)
+   APPROCCIO: Adattamento dinamico senza scale fisso
    ========================================== */
 
-.card__img[data-rotation="90"] {
-  /* Ruota e scala per riempire container 16:9 
-     Immagine 16:9 ruotata diventa 9:16 (0.56:1)
-     Scale: 16/9 ÷ 9/16 = 16/9 × 16/9 ≈ 3.16 */
-  transform: rotate(90deg) scale(3.2);
+/* Immagini ruotate 90/270: adattamento dinamico */
+.card__img[data-rotation="90"],
+.card__img[data-rotation="270"] {
+  object-fit: contain; /* Si adatta al container senza ritagliare */
+  max-width: 100vh; /* Permette di crescere verticalmente */
+  max-height: 100vw; /* Permette di crescere orizzontalmente */
+  width: auto;
+  height: auto;
   transform-origin: center center;
+}
+
+.card__img[data-rotation="90"] {
+  transform: rotate(90deg);
 }
 
 .card__img[data-rotation="180"] {
@@ -1739,18 +1747,16 @@
 }
 
 .card__img[data-rotation="270"] {
-  /* Ruota e scala per riempire container 16:9 */
-  transform: rotate(270deg) scale(3.2);
-  transform-origin: center center;
+  transform: rotate(270deg);
 }
 
-/* Hover su immagini ruotate - mantiene la proporzione corretta */
+/* Hover su immagini ruotate */
 .card:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.36); /* 3.2 * 1.05 */
+  transform: rotate(90deg) scale(1.05);
 }
 
 .card:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.36); /* 3.2 * 1.05 */
+  transform: rotate(270deg) scale(1.05);
 }
 
 .card:hover .card__img[data-rotation="180"] {
@@ -1759,11 +1765,11 @@
 
 /* Stato espanso - stesso comportamento */
 .card.is-expanded .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.2);
+  transform: rotate(90deg);
 }
 
 .card.is-expanded .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.2);
+  transform: rotate(270deg);
 }
 
 .card.is-expanded .card__img[data-rotation="180"] {
@@ -1772,11 +1778,11 @@
 
 /* Hover su card espansa */
 .card.is-expanded:hover .card__img[data-rotation="90"] {
-  transform: rotate(90deg) scale(3.36);
+  transform: rotate(90deg) scale(1.05);
 }
 
 .card.is-expanded:hover .card__img[data-rotation="270"] {
-  transform: rotate(270deg) scale(3.36);
+  transform: rotate(270deg) scale(1.05);
 }
 
 .card.is-expanded:hover .card__img[data-rotation="180"] {

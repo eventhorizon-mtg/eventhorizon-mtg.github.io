@@ -1493,12 +1493,22 @@ body.is-sheet-open .archive-item.is-sheet-open {
    IMAGE ROTATION - Archive Items
    CSS transform per ruotare thumbnail archivio
    Container: 140px × 88px (ratio ~1.59:1)
+   APPROCCIO: Adattamento dinamico senza scale fisso
    ========================================== */
 
-.item-thumb img[data-rotation="90"] {
-  /* Ruota e scala per riempire container orizzontale */
-  transform: rotate(90deg) scale(1.6);
+/* Immagini ruotate 90/270: adattamento dinamico */
+.item-thumb img[data-rotation="90"],
+.item-thumb img[data-rotation="270"] {
+  object-fit: contain; /* Si adatta al container senza ritagliare */
+  width: auto;
+  height: auto;
+  min-width: 100%;
+  min-height: 100%;
   transform-origin: center center;
+}
+
+.item-thumb img[data-rotation="90"] {
+  transform: rotate(90deg);
 }
 
 .item-thumb img[data-rotation="180"] {
@@ -1506,9 +1516,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 .item-thumb img[data-rotation="270"] {
-  /* Ruota e scala per riempire container orizzontale */
-  transform: rotate(270deg) scale(1.6);
-  transform-origin: center center;
+  transform: rotate(270deg);
 }
 
 /* Transizione smooth per rotazione */
@@ -1518,11 +1526,11 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* Hover su immagini ruotate - mantiene la proporzione corretta */
 .archive-item:hover .item-thumb img[data-rotation="90"] {
-  transform: rotate(90deg) scale(1.68); /* 1.6 * 1.05 */
+  transform: rotate(90deg) scale(1.05);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="270"] {
-  transform: rotate(270deg) scale(1.68); /* 1.6 * 1.05 */
+  transform: rotate(270deg) scale(1.05);
 }
 
 .archive-item:hover .item-thumb img[data-rotation="180"] {
