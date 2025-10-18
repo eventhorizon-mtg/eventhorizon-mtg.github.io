@@ -409,8 +409,8 @@
 .item-media {
   position: relative;
   flex-shrink: 0;
-  width: 140px;
-  height: 88px; /* Stessa altezza della riga */
+  width: 180px; /* Aumentato per migliorare qualità su desktop */
+  height: 113px; /* Mantiene aspect ratio 16:10 */
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
@@ -433,6 +433,8 @@
   object-position: center;
   transition: transform var(--transition-slow); /* ✅ Come homepage */
   border-radius: 0; /* Rimuove border-radius globale, gestito dal contenitore .item-thumb */
+  image-rendering: -webkit-optimize-contrast; /* Safari/Chrome: migliora la nitidezza */
+  image-rendering: crisp-edges; /* Standard: mantiene i bordi nitidi */
 }
 
 /* Hover effect come homepage */
