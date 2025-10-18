@@ -132,7 +132,6 @@
                 <img
                   class="card__img"
                   src="{{ $thumbURL }}"
-                  {{ with $it.thumb_rotation }}{{ if ne . "0" }}data-rotation="{{ . }}"{{ end }}{{ end }}
                   width="720" height="1280"
                   alt="{{ if $it.title }}{{ $it.title }}{{ else }}Immagine contenuto{{ end }}"
                   loading="{{ if eq $i 0 }}eager{{ else }}lazy{{ end }}"
