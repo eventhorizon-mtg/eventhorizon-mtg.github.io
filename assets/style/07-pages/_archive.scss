@@ -409,8 +409,8 @@
 .item-media {
   position: relative;
   flex-shrink: 0;
-  width: 180px; /* Aumentato per migliorare qualità su desktop */
-  height: 113px; /* Mantiene aspect ratio 16:10 */
+  width: 140px;
+  height: 88px; /* Stessa altezza della riga */
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
@@ -484,10 +484,10 @@
 }
 
 .archive-item.is-video .item-thumb-button-icon {
-  width: clamp(2.75rem, 12vw, 3.5rem); /* Aumentato per thumbnail più grandi: min 44px, max 56px */
+  width: clamp(2.25rem, 12vw, 3rem); /* Ridotto ulteriormente: min 36px, max 48px */
   height: auto;
   display: block;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45)); /* Shadow più marcata per thumbnail più grandi */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)); /* Shadow più marcata per contrasto */
 }
 
 /* Forma YouTube rossa - SEMITRASPARENTE */
@@ -522,9 +522,9 @@
     color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
   border: 1px solid color-mix(in srgb, var(--color-primary-500) 55%, transparent);
   color: var(--color-text);
-  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.85rem, 2.5vw, 1rem); /* Leggermente più grande per proporzioni */
+  padding: clamp(0.35rem, 1.5vw, 0.45rem) clamp(0.75rem, 2.5vw, 0.9rem); /* Più piccolo e responsive */
   font-family: var(--font-display);
-  font-size: clamp(0.7rem, 1.5vw, 0.75rem); /* Leggermente più grande per leggibilità */
+  font-size: clamp(0.65rem, 1.5vw, 0.7rem); /* Più piccolo e responsive */
   font-weight: 600;
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
