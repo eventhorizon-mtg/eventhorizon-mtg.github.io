@@ -1483,3 +1483,25 @@ body.is-sheet-open .archive-item.is-sheet-open {
     max-height: 620px;
   }
 }
+
+/* ==========================================
+   IMAGE ROTATION - Archive Items
+   CSS transform per ruotare thumbnail archivio
+   ========================================== */
+
+.item-thumb img[data-rotation="90"] {
+  transform: rotate(90deg);
+}
+
+.item-thumb img[data-rotation="180"] {
+  transform: rotate(180deg);
+}
+
+.item-thumb img[data-rotation="270"] {
+  transform: rotate(270deg);
+}
+
+/* Transizione smooth per rotazione */
+.item-thumb img[data-rotation] {
+  transition: transform 0.3s ease;
+}

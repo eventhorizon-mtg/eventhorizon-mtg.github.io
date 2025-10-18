@@ -929,6 +929,8 @@
     // Thumbnail for Archive items: reuse 'thumb' field (fallback to placeholder)
     let thumbWeb = trim(it.thumb || '');
     const thumbSrc = bustIfLocal(thumbWeb || 'images/cards/fblthp_placeholder.webp', appVer);
+    // Image rotation (0, 90, 180, 270)
+    const thumbRotation = trim(it.thumb_rotation || '0');
 
     // Links ordinati e detection robusta del "primary"
     const links = Array.isArray(it.links)
@@ -1025,14 +1027,15 @@
     const safeThumbSrc = escapeAttribute(thumbSrc);
     const safeTit = escapeAttribute(tit);
     const safePrimaryUrl = escapeAttribute(primaryUrl);
+    const rotationAttr = (thumbRotation && thumbRotation !== '0') ? ` data-rotation="${escapeAttribute(thumbRotation)}"` : '';
 
     const thumbHTML = primaryUrl
       ? `<a class="item-thumb" href="${safePrimaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${safeTit}">
-           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
+           <img src="${safeThumbSrc}" alt="${safeTit}"${rotationAttr} loading="lazy" decoding="async">
            ${thumbButtonHTML}
          </a>`
       : `<figure class="item-thumb">
-           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
+           <img src="${safeThumbSrc}" alt="${safeTit}"${rotationAttr} loading="lazy" decoding="async">
          </figure>`;
 
     const mediaHTML = `<div class="item-media">

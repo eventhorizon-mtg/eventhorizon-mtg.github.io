@@ -14,6 +14,7 @@
         "desc"      $it.desc
         "content"   $it.content
         "thumb"     $it.thumb
+        "thumb_rotation" (cond (isset $it "thumb_rotation") $it.thumb_rotation "0")
         "tags"      $tags
         "links"     $links
       ) -}}

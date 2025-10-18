@@ -1720,6 +1720,28 @@
   }
 }
 
+/* ==========================================
+   IMAGE ROTATION - Homepage Cards
+   CSS transform per ruotare immagini card
+   ========================================== */
+
+.card__img[data-rotation="90"] {
+  transform: rotate(90deg);
+}
+
+.card__img[data-rotation="180"] {
+  transform: rotate(180deg);
+}
+
+.card__img[data-rotation="270"] {
+  transform: rotate(270deg);
+}
+
+/* Transizione smooth per rotazione */
+.card__img[data-rotation] {
+  transition: transform 0.3s ease;
+}
+
 
 
 
