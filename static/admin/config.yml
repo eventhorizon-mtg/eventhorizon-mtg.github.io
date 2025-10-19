@@ -325,6 +325,7 @@ collections:
           - { label: "Telegram", value: "icon-telegram" }
           - { label: "Discord", value: "icon-discord" }
           - { label: "Threads", value: "icon-threads" }
+          - { label: "Link", value: "icon-link" }
           - { label: "Email", value: "icon-mail" }
         hint: "Scegli l'icona tra quelle disponibili"
 
