@@ -122,6 +122,10 @@
               {{ $bg := . }}
               {{ if hasPrefix $bg "http" }}{{ $bgImageURL = $bg }}{{ else }}{{ $bgImageURL = ($bg | absURL) }}{{ end }}
             {{ end }}
+            {{/* Fallback: se non c'è background_image usa la thumb come sfondo */}}
+            {{ if eq $bgImageURL "" }}
+              {{ $bgImageURL = $thumbURL }}
+            {{ end }}
             <article class="card card--stack-item card--{{ $kind }} {{ if $isVideo }}is-video{{ else }}is-content{{ end }}{{ if $bgImageURL }} has-bg-image{{ end }}" {{ if $bgImageURL }}data-bg-url="{{ $bgImageURL }}"{{ end }}>
               <header class="card__header">
                 <span class="card__overline">{{ with $it.overline }}{{ . }}{{ else }}&nbsp;{{ end }}</span>
