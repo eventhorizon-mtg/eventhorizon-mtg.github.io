@@ -378,6 +378,46 @@
 
   /* Archive */
   --archive-sheet-max: 480px;
+
+  /* ==========================================
+     BRAND COLORS (Third-Party Platforms)
+     Task 2.2: Centralized brand color tokens
+     ========================================== */
+
+  /* YouTube Brand Colors */
+  --brand-youtube-red: #b90025;
+  --brand-youtube-red-hover: #ff0033;
+  --brand-youtube-border: #212121;
+
+  /* Scryfall Brand Colors */
+  --brand-scryfall-purple-1: #786076;
+  --brand-scryfall-purple-2: #947a92;
+  --brand-scryfall-purple-3: #ae7f9c;
+  --brand-scryfall-pink: #bc979d;
+  --brand-scryfall-gray: #d2d2d2;
+
+  /* Moxfield Brand Colors */
+  --brand-moxfield-bg: #2a2a2a;
+  --brand-moxfield-yellow: #fde500;
+  --brand-moxfield-border: #161616;
+  --brand-moxfield-black: #000000;
+
+  /* EDHREC Brand Colors */
+  --brand-edhrec-purple: #3c2161;
+  --brand-edhrec-pink: #d44071;
+  --brand-edhrec-pink-light: #f25e8f;
+
+  /* Archidekt Brand Colors */
+  --brand-archidekt-gray-1: #d9d9d9;
+  --brand-archidekt-gray-2: #cbcbcb;
+  --brand-archidekt-orange-1: #ffa90a;
+  --brand-archidekt-orange-2: #f79c00;
+  --brand-archidekt-gray-dark-1: #333333;
+  --brand-archidekt-gray-dark-2: #292929;
+
+  /* Universal Colors (used across brands) */
+  --brand-white: #ffffff;
+  --brand-black: #000000;
 }
 
 @media (min-width: 48rem) {
