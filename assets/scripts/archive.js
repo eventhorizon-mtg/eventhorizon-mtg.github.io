@@ -12,6 +12,9 @@
   // GATE: esegui solo nella pagina Archivio
   if (!document.querySelector('section.archive')) return;
 
+  // DEBUG flag: enable console logs only on localhost or with ?debug=1
+  const DEBUG = location.hostname === 'localhost' || location.search.includes('debug=1');
+
   /* ==========================
    * Config & helpers (UI)
    * ========================== */
@@ -1028,11 +1031,11 @@
 
     const thumbHTML = primaryUrl
       ? `<a class="item-thumb" href="${safePrimaryUrl}" target="_blank" rel="noopener" aria-label="Apri: ${safeTit}">
-           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
+           <img src="${safeThumbSrc}" alt="${safeTit}" width="720" height="1280" loading="lazy" decoding="async">
            ${thumbButtonHTML}
          </a>`
       : `<figure class="item-thumb">
-           <img src="${safeThumbSrc}" alt="${safeTit}" loading="lazy" decoding="async">
+           <img src="${safeThumbSrc}" alt="${safeTit}" width="720" height="1280" loading="lazy" decoding="async">
          </figure>`;
 
     const mediaHTML = `<div class="item-media">
@@ -1213,7 +1216,7 @@
   // Validazione schema item archivio (robusta)
   const validateArchiveData = (data) => {
     if (!Array.isArray(data)) {
-      console.warn('[archive] Data is not an array, expected array of items');
+      if (DEBUG) console.warn('[archive] Data is not an array, expected array of items');
       return [];
     }
     return data.filter((item, idx) => {
@@ -1223,7 +1226,7 @@
       const hasKind = item && (typeof item.kind === 'string');
 
       if (!hasId || !hasTitle) {
-        console.warn(`[archive] Item at index ${idx} missing required fields (id, title):`, item);
+        if (DEBUG) console.warn(`[archive] Item at index ${idx} missing required fields (id, title):`, item);
         return false; // Scarta item invalido
       }
 
@@ -1258,7 +1261,7 @@
       // Se è un errore server (5xx) e ci sono retry disponibili, riprova
       if (retries > 0) {
         const delay = FETCH_INITIAL_DELAY_MS * Math.pow(FETCH_BACKOFF_MULTIPLIER, FETCH_MAX_RETRIES - retries);
-        console.warn(`[archive] HTTP ${response.status}, retry in ${delay}ms (${retries} attempts left)`);
+        if (DEBUG) console.warn(`[archive] HTTP ${response.status}, retry in ${delay}ms (${retries} attempts left)`);
         await new Promise(resolve => setTimeout(resolve, delay));
         return fetchWithRetry(url, options, retries - 1);
       }
@@ -1268,7 +1271,7 @@
       // Network error o timeout - retry se disponibili
       if (retries > 0 && error.name !== 'AbortError') {
         const delay = FETCH_INITIAL_DELAY_MS * Math.pow(FETCH_BACKOFF_MULTIPLIER, FETCH_MAX_RETRIES - retries);
-        console.warn(`[archive] Network error, retry in ${delay}ms (${retries} attempts left):`, error.message);
+        if (DEBUG) console.warn(`[archive] Network error, retry in ${delay}ms (${retries} attempts left):`, error.message);
         await new Promise(resolve => setTimeout(resolve, delay));
         return fetchWithRetry(url, options, retries - 1);
       }
@@ -1294,7 +1297,7 @@
       try {
         rawData = await res.json();
       } catch (parseError) {
-        console.error('[archive] JSON parse error:', parseError);
+        if (DEBUG) console.error('[archive] JSON parse error:', parseError);
         throw new Error('Dati archivio malformati');
       }
 
@@ -1332,10 +1335,8 @@
       `;
       container.appendChild(errorMsg);
 
-      // Log solo in development (se presente flag data-debug)
-      if (document.documentElement.hasAttribute('data-debug')) {
-        console.error('[archive] dataset error:', err);
-      }
+      // Log solo in development
+      if (DEBUG) console.error('[archive] dataset error:', err);
     }
   };
 

@@ -43,7 +43,10 @@
 
 @import "06-components/navbar";
 @import "06-components/hero";
-@import "06-components/cards";
+/* Task 1.2: Modularized cards component (split from monolithic _cards.scss) */
+@import "06-components/cards-base";      /* Section container, grid, slider carousel */
+@import "06-components/cards-variants";  /* Media, play button, body, panels variant */
+@import "06-components/cards-stack";     /* Stack variant (homepage 4x1 panels) */
 @import "06-components/modal";
 @import "06-components/contacts";
 @import "06-components/links";

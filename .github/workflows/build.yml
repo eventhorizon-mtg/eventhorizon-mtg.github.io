@@ -40,6 +40,18 @@ jobs:
       - name: Build site (publishDir=public)
         run: hugo --minify
 
+      - name: Report bundle sizes (Task 1.6 optimization tracking)
+        run: |
+          echo "📦 Bundle Sizes:"
+          echo "CSS bundles:"
+          find public/style -name "*.css" -type f -exec ls -lh {} + | awk '{print "  " $9 ": " $5}'
+          echo "JS bundles:"
+          find public/script -name "*.js" -type f -exec ls -lh {} + | awk '{print "  " $9 ": " $5}'
+          echo ""
+          echo "Total sizes:"
+          echo -n "  CSS total: " && find public/style -name "*.css" -type f -exec cat {} + | wc -c | awk '{printf "%.2f KB\n", $1/1024}'
+          echo -n "  JS total: " && find public/script -name "*.js" -type f -exec cat {} + | wc -c | awk '{printf "%.2f KB\n", $1/1024}'
+
       - name: Verify cache-busting markers
         run: |
           set -e

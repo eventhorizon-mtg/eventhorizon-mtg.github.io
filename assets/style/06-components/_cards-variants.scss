@@ -1,0 +1,447 @@
+/* ==========================================
+   CARDS VARIANTS - Media, Play Button, Body, Panels
+   Task 1.2: Split from monolithic _cards.scss (righe 261-701)
+   Contiene: .card__media, .card__play, .card__body, .cards--panels variant
+   ========================================== */
+
+.card__media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface-elevated);
+}
+
+.card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.card:hover .card__img {
+  transform: scale(1.05);
+}
+
+.card__media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 14, 26, 0) 35%, rgba(7, 14, 26, 0.9) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.card:hover .card__media-overlay,
+.card.is-video .card__media-overlay {
+  opacity: 1;
+}
+
+.card__play {
+  position: absolute;
+  inset: auto auto var(--space-4) var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.35rem, 2vw, 0.6rem);
+  border-radius: var(--radius-full);
+  background: transparent;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35);
+  z-index: 4;
+  pointer-events: auto;
+  transform-origin: center;
+  visibility: visible;
+  opacity: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    filter var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+/* When used as a real button (btn variant), re-apply button visuals */
+.card__play.btn {
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  padding: var(--space-2) var(--space-4);
+}
+
+/* Make the overlay CTA larger on content cards */
+#cards.cards--stack.cards--panels .card.is-content .card__play.btn {
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  padding: clamp(0.6rem, 1.5vw, 0.9rem) clamp(1.1rem, 2.4vw, 1.5rem);
+  border-radius: var(--radius-full);
+}
+
+/* Variant used for primary CTA on content cards positioned like the play button */
+.card__play--cta {
+  background: var(--color-surface-glass);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.card__play--cta:hover,
+.card__play--cta:focus-visible {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border);
+}
+
+.card__play:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.65);
+  outline-offset: 4px;
+}
+
+.card__play:hover,
+.card__play:focus-visible {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.45);
+  filter: brightness(1.05);
+}
+
+.card__play-icon {
+  width: clamp(3.5rem, 18vw, 4.5rem);
+  height: auto;
+  display: block;
+}
+
+.card__play-shape {
+  fill: #ff1f1f;
+}
+
+.card__play-symbol {
+  fill: var(--color-white);
+}
+
+.card__play:hover .card__play-shape,
+.card__play:focus-visible .card__play-shape {
+  fill: #ff4d4d;
+}
+
+@media (max-width: 1023px) {
+  #cards.cards--stack.cards--panels .card__play {
+    /* Center the play/CTA button on mobile/tablet */
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    padding: clamp(0.4rem, 2.5vw, 0.6rem);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: none;
+    box-sizing: border-box;
+  }
+
+  #cards.cards--stack.cards--panels .card__play:focus-visible {
+    outline-width: 2px;
+    outline-offset: 6px;
+  }
+
+  #cards.cards--stack.cards--panels .card__play:hover {
+    /* No hover effects on mobile/tablet */
+    transform: translate(-50%, -50%);
+    box-shadow: none;
+    filter: none;
+  }
+
+  #cards.cards--stack.cards--panels .card__play:focus-visible {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: none;
+    filter: brightness(1.05);
+  }
+
+  #cards.cards--stack.cards--panels .card.is-video .card__media { cursor: default; }
+}
+
+@media (min-width: 1024px) {
+  #cards.cards--stack.cards--panels .card__play {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    padding: clamp(0.5rem, 1.5vw, 0.75rem);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+  }
+
+  #cards.cards--stack.cards--panels .card__play:hover,
+  #cards.cards--stack.cards--panels .card__play:focus-visible {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__play {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.card__body {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.card__overline {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-special);
+}
+
+.card__title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  color: var(--color-text);
+}
+
+.card__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+/* Desktop-only: do not show pointer in non-action areas; allow pointer only on real controls */
+@media (min-width: 1024px) {
+  /* Remove hand cursor from the whole card by default in panels layout */
+  #cards.cards--stack.cards--panels .card {
+    cursor: default;
+  }
+
+  #cards.cards--stack.cards--panels .card__body,
+  #cards.cards--stack.cards--panels .card__desc,
+  #cards.cards--stack.cards--panels .card__content,
+  #cards.cards--stack.cards--panels .card__media,
+  #cards.cards--stack.cards--panels .card__header,
+  #cards.cards--stack.cards--panels .card__title,
+  #cards.cards--stack.cards--panels .card__overline {
+    cursor: default;
+  }
+
+  #cards.cards--stack.cards--panels .card__body a,
+  #cards.cards--stack.cards--panels .card__body button,
+  #cards.cards--stack.cards--panels .card__content a,
+  #cards.cards--stack.cards--panels .card__content button,
+  #cards.cards--stack.cards--panels .card__cta,
+  #cards.cards--stack.cards--panels .card__btn,
+  #cards.cards--stack.cards--panels .card__play {
+    cursor: pointer;
+  }
+
+  /* When a card is collapsed (not expanded), show pointer to indicate it is clickable */
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) {
+    cursor: pointer;
+  }
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__media,
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__header,
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__title,
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__overline {
+    cursor: pointer;
+  }
+}
+
+/* Desktop: make description tighter to free space for extended content */
+@media (min-width: 1024px) {
+  #cards.cards--stack.cards--panels .card__body {
+    gap: var(--space-2);
+  }
+
+  #cards.cards--stack.cards--panels .card__desc {
+    margin: 0;
+    line-height: 1.55;
+    min-height: auto;
+    flex: 0 0 auto; /* do not stretch: height equals text content */
+  }
+  #cards.cards--stack.cards--panels .card__desc > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card__desc--primary {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.card__desc--accent {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.card__desc--centered {
+  text-align: center;
+}
+
+.card__actions {
+  margin-top: auto;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.card--featured {
+  grid-column: 1 / -1;
+  display: grid;
+}
+
+.card--featured .card__media {
+  aspect-ratio: 20 / 9;
+}
+
+/* Normalize featured variant inside slider */
+.cards--slider .card--featured {
+  display: block;
+}
+.cards--slider .card--featured .card__media {
+  aspect-ratio: 16 / 9;
+}
+
+/* ==========================================================
+   PANELS VARIANT – expanding columns with overlay preview
+   ========================================================== */
+
+.cards--slider.cards--panels .cards__track {
+  align-items: stretch;
+}
+
+.cards--slider.cards--panels .cards__track > .slide {
+  /* collapsed column width */
+  flex: 0 0 clamp(10rem, 22vw, 14rem);
+  opacity: 0.95;
+  transform: none;
+}
+
+.cards--slider.cards--panels .cards__track > .slide.is-active {
+  opacity: 1;
+}
+
+.cards--slider.cards--panels .cards__track > .slide.is-expanded {
+  /* expanded fills the viewport width */
+  flex: 1 0 100%;
+}
+
+.cards--panels .card {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Hide gradient overlay ::before on panels cards, EXCEPT when expanded with background image */
+.cards--panels .card:not(.is-expanded[data-bg-url])::before,
+.cards--panels .card:not(.is-expanded[data-bg-url]):hover::before,
+.cards--panels .card:not(.is-expanded[data-bg-url]):focus-within::before {
+  display: none;
+}
+
+.cards--panels .card:hover,
+.cards--panels .card:focus-within {
+  transform: none;
+  box-shadow: none;
+}
+
+.cards--panels .card__media {
+  aspect-ratio: 3 / 4;
+}
+
+.cards--panels .slide.is-expanded .card__media,
+.cards--panels .card.is-expanded .card__media {
+  aspect-ratio: 16 / 9;
+}
+
+/* Tablet: rimosso il layout intermedio problematico -
+   il comportamento carousel mobile si estende fino a 1024px
+   per mantenere aspect-ratio 16/9 corretto */
+
+/* overlay readability in collapsed state */
+.cards--panels .card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--transition-base);
+}
+
+.cards--panels .slide.is-expanded .card__media::after,
+.cards--panels .card.is-expanded .card__media::after {
+  opacity: 0.35;
+}
+
+/* body as overlay in collapsed; structured in expanded */
+.cards--panels .card__body {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.cards--panels .slide.is-expanded .card__body,
+.cards--panels .card.is-expanded .card__body {
+  position: static;
+  padding: var(--space-5);
+  background: var(--color-surface-glass);
+  border-top: 1px solid var(--color-border-soft);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.cards--panels .card__desc,
+.cards--panels .card__actions {
+  display: none;
+}
+
+.cards--panels .slide.is-expanded .card__desc,
+.cards--panels .card.is-expanded .card__desc {
+  display: block;
+}
+
+.cards--panels .slide.is-expanded .card__actions,
+.cards--panels .card.is-expanded .card__actions {
+  display: flex;
+}
+/* Ensure actions remain visible in collapsed state when placed inside the body */
+.cards--panels .card__body .card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cards--panels .card__title {
+  color: var(--color-white);
+  text-shadow: var(--shadow-sm);
+}
+
+.cards--panels .slide.is-expanded .card__title,
+.cards--panels .card.is-expanded .card__title {
+  color: var(--color-text);
+  text-shadow: none;
+}
+
+.cards--panels .card__overline {
+  color: var(--color-special);
+}
+
+.card--empty {
+  align-items: center;
+  text-align: center;
+  padding-block: var(--space-6);
+}
+
+@media (min-width: 64rem) {
+  .card--featured {
+    grid-template-columns: 1.6fr 1fr;
+  }
+
+  .card--featured .card__body {
+    padding: var(--space-5);
+  }
+}

@@ -11,11 +11,14 @@
     </div>
     {{ with .Params.cover }}
       <figure class="article-cover" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
-        <img 
-          src="{{ . | absURL }}" 
-          alt="Cover: {{ $.Title }}" 
-          loading="eager" 
+        <img
+          src="{{ . | absURL }}"
+          alt="Cover: {{ $.Title }}"
+          width="1920"
+          height="1080"
+          loading="eager"
           fetchpriority="high"
+          decoding="async"
           itemprop="url">
       </figure>
     {{ end }}

@@ -61,3 +61,27 @@ permalinkable  = true
 
 relativeURLs = true
 
+# Build optimization (Task 1.6)
+[build]
+  writeStats = false  # Disable build stats for faster builds
+  useResourceCacheWhen = "fallback"
+
+# Minification settings for production output
+[minify]
+  minifyOutput = true
+  [minify.tdewolff.html]
+    keepWhitespace = false
+    keepEndTags = true
+  [minify.tdewolff.css]
+    precision = 2
+    keepCSS2 = false
+  [minify.tdewolff.js]
+    keepVarNames = false
+    precision = 2
+
+# Image processing optimization
+[imaging]
+  resampleFilter = "lanczos"  # High-quality downscaling
+  quality = 85                # Balance between quality and file size
+  anchor = "smart"            # Smart crop detection
+
