@@ -1332,9 +1332,17 @@
       background-position: center;
       background-repeat: no-repeat;
     }
+    /* Make media area transparent so the card background shows through */
+    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__media {
+      background: transparent;
+    }
     #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__img {
-      /* Keep layout for media area and overlay/CTA, but hide the actual img */
-      opacity: 0;
+      /* Keep layout (figure uses aspect-ratio), hide the inline image */
+      display: none;
+    }
+    /* Avoid double gradient overlay from media-only overlay */
+    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__media-overlay {
+      display: none;
     }
   }
 
