@@ -1323,6 +1323,12 @@
     /* Paint the full-card background via ::before so it sits under all content
        without altering layout of header/body/media. */
     #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image[data-bg-url]::before {
+      content: "";
+      display: block; /* override panels rule that hides ::before */
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0; /* keep below media/header/body that use z-index 1..4 */
       opacity: 1;
       background-image:
         linear-gradient(180deg,
