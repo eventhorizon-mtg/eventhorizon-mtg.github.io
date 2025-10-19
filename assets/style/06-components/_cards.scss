@@ -1316,13 +1316,12 @@
     box-shadow: 0 0 40px rgba(10, 18, 36, 0.45);
   }
 
-  /* Desktop: when a panel card is expanded and has a bg image,
-     make the image fill the entire article as background.
-     Add a dark gradient on top for readability and hide the inline <img>. */
+  /* Desktop: when a panel card is expanded, use the card image as full background
+     while keeping the entire layout (media box, play button, header, body) unchanged */
   @media (min-width: 1024px) {
     /* Paint the full-card background via ::before so it sits under all content
        without altering layout of header/body/media. */
-    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image[data-bg-url]::before {
+    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url]::before {
       content: "";
       display: block; /* override panels rule that hides ::before */
       position: absolute;
@@ -1341,29 +1340,19 @@
       background-position: center;
       background-repeat: no-repeat;
     }
-    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image[data-bg-url] {
-      background-image:
-        linear-gradient(180deg,
-          rgba(7, 14, 26, 0.25) 0%,
-          rgba(7, 14, 26, 0.80) 60%,
-          rgba(7, 14, 26, 0.92) 100%
-        ),
-        var(--card-bg-image);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    /* Make media area transparent so the card background shows through */
-    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__media {
+    /* Make media area transparent so the card background shows through,
+       but keep its layout dimensions and structure intact */
+    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__media {
       background: transparent;
     }
-    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__img {
-      /* Keep layout (figure uses aspect-ratio), hide the inline image */
-      display: none;
+    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__img {
+      /* Keep layout (figure uses aspect-ratio), hide the inline image to avoid duplication */
+      opacity: 0;
+      visibility: hidden;
     }
-    /* Avoid double gradient overlay from media-only overlay */
-    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__media-overlay {
-      display: none;
+    /* Keep the media overlay visible for play button contrast */
+    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__media-overlay {
+      opacity: 0.4;
     }
   }
 
