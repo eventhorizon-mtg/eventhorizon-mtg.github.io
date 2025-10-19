@@ -1106,7 +1106,8 @@
       max-height: none;
       aspect-ratio: 16 / 9;
     }
-    #cards.cards--stack.cards--panels .card.is-expanded .card__img {
+    /* Only apply to cards WITHOUT background image - otherwise image is used as full card background */
+    #cards.cards--stack.cards--panels .card.is-expanded:not([data-bg-url]) .card__img {
       width: 100%;
       height: auto;
       object-fit: cover;
@@ -1346,9 +1347,8 @@
       background: transparent;
     }
     #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__img {
-      /* Keep layout (figure uses aspect-ratio), hide the inline image to avoid duplication */
-      opacity: 0;
-      visibility: hidden;
+      /* Hide the inline image completely to avoid duplication with background */
+      display: none !important;
     }
     /* Keep the media overlay visible for play button contrast */
     #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__media-overlay {
