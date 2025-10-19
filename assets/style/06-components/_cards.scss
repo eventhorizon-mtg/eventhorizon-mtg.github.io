@@ -1310,9 +1310,32 @@
   .card.is-expanded {
     flex-basis: 70%;
     filter: none;
-    background: rgba(5, 9, 16, 0.88);
+    /* Use background-color instead of shorthand to preserve any background-image set on the card */
+    background-color: rgba(5, 9, 16, 0.88);
     border-color: rgba(20, 32, 54, 0.95);
     box-shadow: 0 0 40px rgba(10, 18, 36, 0.45);
+  }
+
+  /* Desktop: when a panel card is expanded and has a bg image,
+     make the image fill the entire article as background.
+     Add a dark gradient on top for readability and hide the inline <img>. */
+  @media (min-width: 1024px) {
+    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image[data-bg-url] {
+      background-image:
+        linear-gradient(180deg,
+          rgba(7, 14, 26, 0.25) 0%,
+          rgba(7, 14, 26, 0.80) 60%,
+          rgba(7, 14, 26, 0.92) 100%
+        ),
+        var(--card-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    #cards.cards--stack.cards--panels .card.is-expanded.has-bg-image .card__img {
+      /* Keep layout for media area and overlay/CTA, but hide the actual img */
+      opacity: 0;
+    }
   }
 
   .card.is-expanded .card__media {
