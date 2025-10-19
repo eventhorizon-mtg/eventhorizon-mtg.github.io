@@ -1,0 +1,5 @@
+name: "YouTube"
+url: "https://www.youtube.com/@EventHorizonMtG"
+icon_class: "icon-youtube"
+is_special: false
+sort_order: 3

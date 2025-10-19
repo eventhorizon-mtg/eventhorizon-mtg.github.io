@@ -1,0 +1,5 @@
+name: "Instagram"
+url: "https://www.instagram.com/eventhorizon.mtg"
+icon_class: "icon-instagram"
+is_special: false
+sort_order: 2

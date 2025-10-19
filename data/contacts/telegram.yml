@@ -1,0 +1,5 @@
+name: "Telegram"
+url: "https://t.me/eventhorizonmtg"
+icon_class: "icon-telegram"
+is_special: false
+sort_order: 4

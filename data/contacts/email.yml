@@ -1,0 +1,5 @@
+name: "Email"
+url: "mailto:eventhorizon@growupnetwork.it"
+icon_class: "icon-mail"
+is_special: true
+sort_order: 6

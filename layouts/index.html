@@ -291,36 +291,35 @@
       </div>
 
       <div class="contacts__actions">
+        {{/* Carica tutti i contatti da data/contacts/*.yml e ordina per sort_order */}}
+        {{ $contacts := slice }}
+        {{ with .Site.Data.contacts }}
+          {{ range $k, $v := . }}
+            {{ $contacts = $contacts | append $v }}
+          {{ end }}
+        {{ end }}
+        {{ $contacts = sort $contacts "sort_order" "asc" }}
+
+        {{/* Separa contatti normali da quelli speciali (email) */}}
+        {{ $normalContacts := where $contacts "is_special" "!=" true }}
+        {{ $specialContacts := where $contacts "is_special" true }}
+
         <ul class="contacts__list" role="list">
-          <li>
-            <a class="contact" href="https://www.tiktok.com/@eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
-              <span class="contact__icon icon-tiktok" aria-hidden="true"></span>
-            </a>
-          </li>
-          <li>
-            <a class="contact" href="https://www.instagram.com/eventhorizon.mtg" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
-              <span class="contact__icon icon-instagram" aria-hidden="true"></span>
-            </a>
-          </li>
-          <li>
-            <a class="contact" href="https://www.youtube.com/@EventHorizonMtG" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
-              <span class="contact__icon icon-youtube" aria-hidden="true"></span>
-            </a>
-          </li>
-          <li>
-            <a class="contact" href="https://t.me/eventhorizonmtg" target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
-              <span class="contact__icon icon-telegram" aria-hidden="true"></span>
-            </a>
-          </li>
-          <li>
-            <a class="contact" href="https://discord.com/invite/tQrbzhUa4k" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
-              <span class="contact__icon icon-discord" aria-hidden="true"></span>
-            </a>
-          </li>
+          {{ range $normalContacts }}
+            {{ $isExternal := hasPrefix .url "http" }}
+            <li>
+              <a class="contact" href="{{ .url }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }} aria-label="{{ .name }}" title="{{ .name }}">
+                <span class="contact__icon {{ .icon_class }}" aria-hidden="true"></span>
+              </a>
+            </li>
+          {{ end }}
         </ul>
-        <a class="contact contact--mail" href="mailto:eventhorizon@growupnetwork.it" aria-label="Email" title="Email">
-          <span class="contact__icon icon-mail" aria-hidden="true"></span>
-        </a>
+        {{ range $specialContacts }}
+          {{ $isExternal := hasPrefix .url "http" }}
+          <a class="contact contact--mail" href="{{ .url }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }} aria-label="{{ .name }}" title="{{ .name }}">
+            <span class="contact__icon {{ .icon_class }}" aria-hidden="true"></span>
+          </a>
+        {{ end }}
       </div>
     </div>
   </div>

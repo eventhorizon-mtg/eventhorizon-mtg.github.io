@@ -1,0 +1,5 @@
+name: "TikTok"
+url: "https://www.tiktok.com/@eventhorizonmtg"
+icon_class: "icon-tiktok"
+is_special: false
+sort_order: 1

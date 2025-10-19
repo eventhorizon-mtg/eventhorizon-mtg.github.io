@@ -271,7 +271,7 @@ collections:
           - { label: "Friends", value: "friends" }
           - { label: "LGS", value: "lgs" }
           - { label: "Artist", value: "artist" }
-          - { label: "Content", value: "content" }
+          - { label: "Partner", value: "partner" }
         hint: "Categoria del link"
 
       - label: "Descrizione"
@@ -286,6 +286,54 @@ collections:
         required: false
         default: false
         hint: "Se attivo, mostra solo il logo senza nome e descrizione (stile eBay)"
+
+      - label: "Ordine"
+        name: sort_order
+        widget: number
+        required: true
+        value_type: int
+        hint: "Ordine di visualizzazione (1, 2, 3...)"
+
+  - name: contacts
+    label: "Contatti Social"
+    folder: data/contacts
+    create: true
+    format: yaml
+    extension: yml
+    slug: "{{slug}}"
+    fields:
+      - label: "Nome"
+        name: name
+        widget: string
+        required: true
+        hint: "Nome della piattaforma (es. 'TikTok', 'Instagram', 'Email')"
+
+      - label: "URL"
+        name: url
+        widget: string
+        required: true
+        hint: "Link completo (es. https://www.tiktok.com/@eventhorizonmtg o mailto:email@domain.com)"
+
+      - label: "Icona"
+        name: icon_class
+        widget: select
+        required: true
+        options:
+          - { label: "TikTok", value: "icon-tiktok" }
+          - { label: "Instagram", value: "icon-instagram" }
+          - { label: "YouTube", value: "icon-youtube" }
+          - { label: "Telegram", value: "icon-telegram" }
+          - { label: "Discord", value: "icon-discord" }
+          - { label: "Threads", value: "icon-threads" }
+          - { label: "Email", value: "icon-mail" }
+        hint: "Scegli l'icona tra quelle disponibili"
+
+      - label: "Contatto Speciale"
+        name: is_special
+        widget: boolean
+        required: false
+        default: false
+        hint: "Attiva solo per il contatto Email (applica stile speciale)"
 
       - label: "Ordine"
         name: sort_order
