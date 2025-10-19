@@ -241,61 +241,36 @@
 
       <div class="links__carousel">
         <ul class="links__track" role="list">
-          <li class="link-card link-card--logo-only" data-category="tool">
-            <a class="link-card__link" href="https://www.ebay.it/" target="_blank" rel="noopener noreferrer" aria-label="eBay">
-              <img class="link-card__logo" src="{{ "images/links/ebay_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="eBay" width="160" height="56" loading="lazy" decoding="async">
-            </a>
-          </li>
+          {{/* Carica tutti i link da data/links/*.yml e ordina per sort_order */}}
+          {{ $links := slice }}
+          {{ with .Site.Data.links }}
+            {{ range $k, $v := . }}
+              {{ $links = $links | append $v }}
+            {{ end }}
+          {{ end }}
+          {{ $links = sort $links "sort_order" "asc" }}
 
-          <li class="link-card" data-category="friends">
-            <a class="link-card__link" href="https://linktr.ee/boosemtg" target="_blank" rel="noopener noreferrer">
-              <img class="link-card__logo" src="{{ "images/links/boose_logo.webp" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="B&#216;&#216;SE MTG" width="64" height="64" loading="lazy" decoding="async">
-              <div class="link-card__meta">
-                <span class="link-card__name">B&#216;&#216;SE MTG</span>
-                <span class="link-card__copy">Friends &amp; Games</span>
-              </div>
-            </a>
-          </li>
+          {{ range $links }}
+            {{ $logoURL := .logo }}
+            {{ if not (hasPrefix $logoURL "http") }}
+              {{ $logoURL = ($logoURL | absURL) }}
+            {{ end }}
+            {{ $isLogoOnly := cond (isset . "logo_only") .logo_only false }}
 
-          <li class="link-card" data-category="lgs">
-            <a class="link-card__link" href="https://www.facebook.com/Multiverseofgames/" target="_blank" rel="noopener noreferrer">
-              <img class="link-card__logo" src="{{ "images/links/multiverse_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="Multiverse of Games" width="64" height="64" loading="lazy" decoding="async">
-              <div class="link-card__meta">
-                <span class="link-card__name">Multiverse of Games</span>
-                <span class="link-card__copy">Friendly LGS</span>
-              </div>
-            </a>
-          </li>
-
-          <li class="link-card" data-category="artist">
-            <a class="link-card__link" href="https://www.domenicocava.com/" target="_blank" rel="noopener noreferrer">
-              <img class="link-card__logo" src="{{ "images/links/cava_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="Domenico Cava" width="64" height="64" loading="lazy" decoding="async">
-              <div class="link-card__meta">
-                <span class="link-card__name">Domenico Cava</span>
-                <span class="link-card__copy">Illustrator for MtG</span>
-              </div>
-            </a>
-          </li>
-
-          <li class="link-card" data-category="content">
-            <a class="link-card__link" href="https://archidekt.com/search/decks?ownerUsername=Mtg.derrick" target="_blank" rel="noopener noreferrer">
-              <img class="link-card__logo" src="{{ "images/links/derrick_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="mtg.Derrick" width="64" height="64" loading="lazy" decoding="async">
-              <div class="link-card__meta">
-                <span class="link-card__name">MtG Derrick</span>
-                <span class="link-card__copy">Liste Commander</span>
-              </div>
-            </a>
-          </li>
-
-          <li class="link-card" data-category="content">
-            <a class="link-card__link" href="https://magicthegathering.fandom.com/it/wiki/Magic:_the_Gathering_Wiki" target="_blank" rel="noopener noreferrer">
-              <img class="link-card__logo" src="{{ "images/links/mtgwiki_logo.png" | absURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="mtg.Derrick" width="64" height="64" loading="lazy" decoding="async">
-              <div class="link-card__meta">
-                <span class="link-card__name">MTG Wiki Italia</span>
-                <span class="link-card__copy">Scopri tutto di tutto</span>
-              </div>
-            </a>
-          </li>
+            <li class="link-card{{ if $isLogoOnly }} link-card--logo-only{{ end }}" data-category="{{ .category }}">
+              <a class="link-card__link" href="{{ .url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .name }}">
+                {{ if $isLogoOnly }}
+                  <img class="link-card__logo" src="{{ $logoURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="{{ .name }}" width="160" height="56" loading="lazy" decoding="async">
+                {{ else }}
+                  <img class="link-card__logo" src="{{ $logoURL }}?v={{ with site.Params.appVer }}{{ . }}{{ end }}" alt="{{ .name }}" width="64" height="64" loading="lazy" decoding="async">
+                  <div class="link-card__meta">
+                    <span class="link-card__name">{{ .name }}</span>
+                    {{ with .description }}<span class="link-card__copy">{{ . }}</span>{{ end }}
+                  </div>
+                {{ end }}
+              </a>
+            </li>
+          {{ end }}
 
         </ul>
       </div>

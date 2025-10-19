@@ -233,3 +233,63 @@ collections:
             widget: boolean
             required: false
             default: false
+
+  - name: links
+    label: "Links"
+    folder: data/links
+    create: true
+    format: yaml
+    extension: yml
+    slug: "{{slug}}"
+    fields:
+      - label: "Nome"
+        name: name
+        widget: string
+        required: true
+        hint: "Nome visualizzato (es. 'eBay', 'BØØSE MTG')"
+
+      - label: "Logo"
+        name: logo
+        widget: image
+        required: true
+        media_folder: "/static/images/links"
+        public_folder: "/images/links"
+        hint: "Logo del link (caricato in /images/links/)"
+
+      - label: "URL"
+        name: url
+        widget: string
+        required: true
+        hint: "URL completo (es. https://www.ebay.it/)"
+
+      - label: "Categoria"
+        name: category
+        widget: select
+        required: true
+        options:
+          - { label: "Tool", value: "tool" }
+          - { label: "Friends", value: "friends" }
+          - { label: "LGS", value: "lgs" }
+          - { label: "Artist", value: "artist" }
+          - { label: "Content", value: "content" }
+        hint: "Categoria del link"
+
+      - label: "Descrizione"
+        name: description
+        widget: string
+        required: false
+        hint: "Breve descrizione (es. 'Friends & Games', 'Friendly LGS')"
+
+      - label: "Solo Logo"
+        name: logo_only
+        widget: boolean
+        required: false
+        default: false
+        hint: "Se attivo, mostra solo il logo senza nome e descrizione (stile eBay)"
+
+      - label: "Ordine"
+        name: sort_order
+        widget: number
+        required: true
+        value_type: int
+        hint: "Ordine di visualizzazione (1, 2, 3...)"

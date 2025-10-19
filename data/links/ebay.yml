@@ -1,0 +1,7 @@
+name: "eBay"
+logo: "/images/links/ebay_logo.png"
+url: "https://www.ebay.it/"
+category: "tool"
+description: ""
+logo_only: true
+sort_order: 1
