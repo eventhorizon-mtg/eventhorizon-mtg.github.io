@@ -148,26 +148,26 @@
   --btn-shadow: var(--shadow-md);
 }
 
-// Button EDH (Moxfield colors) //
+// Button EDH (EDHREC colors) //
 .btn--edh {
-  --btn-bg: var(--brand-moxfield-bg);
+  --btn-bg: var(--brand-edhrec-bg);
   --btn-color: var(--brand-white);
-  --btn-border: var(--brand-moxfield-border);
+  --btn-border: var(--brand-edhrec-border);
   --btn-shadow: var(--shadow-md);
 }
 
 .btn--edh:hover,
 .btn--edh:focus-visible {
-  --btn-bg: var(--brand-moxfield-black);
-  --btn-border: var(--brand-moxfield-yellow);
+  --btn-bg: var(--brand-edhrec-black);
+  --btn-border: var(--brand-edhrec-yellow);
   --btn-shadow: var(--shadow-md);
 }
 
-// Button Moxfield (EDHREC colors) //
+// Button Moxfield //
 .btn--mox {
-  --btn-bg: linear-gradient(90deg, var(--brand-edhrec-purple) 60%, var(--brand-edhrec-pink) 100%);
+  --btn-bg: linear-gradient(90deg, var(--brand-moxfield-purple) 60%, var(--brand-moxfield-pink) 100%);
   --btn-color: var(--brand-white);
-  --btn-border: var(--brand-edhrec-pink);
+  --btn-border: var(--brand-moxfield-pink);
   --btn-shadow: var(--shadow-md);
 }
 
@@ -175,10 +175,10 @@
 .btn--mox:focus-visible {
   --btn-bg: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--brand-edhrec-purple) 70%, #111 30%) 60%,
-    color-mix(in srgb, var(--brand-edhrec-pink) 70%, #111 30%) 100%
+    color-mix(in srgb, var(--brand-moxfield-purple) 70%, #111 30%) 60%,
+    color-mix(in srgb, var(--brand-moxfield-pink) 70%, #111 30%) 100%
   );
-  --btn-border: var(--brand-edhrec-pink-light);
+  --btn-border: var(--brand-moxfield-pink-light);
   --btn-shadow: var(--shadow-md);
 }
 
@@ -341,9 +341,9 @@
 }
 
 .btn--edh-glass {
-  --btn-bg: color-mix(in srgb, var(--brand-moxfield-bg) 30%, transparent);
+  --btn-bg: color-mix(in srgb, var(--brand-edhrec-bg) 30%, transparent);
   --btn-color: var(--brand-white);
-  --btn-border: color-mix(in srgb, var(--brand-moxfield-yellow) 55%, transparent);
+  --btn-border: color-mix(in srgb, var(--brand-edhrec-yellow) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -351,18 +351,18 @@
 
 .btn--edh-glass:hover,
 .btn--edh-glass:focus-visible {
-  --btn-bg: color-mix(in srgb, var(--brand-moxfield-black) 45%, transparent);
-  --btn-border: var(--brand-moxfield-yellow);
+  --btn-bg: color-mix(in srgb, var(--brand-edhrec-black) 45%, transparent);
+  --btn-border: var(--brand-edhrec-yellow);
 }
 
 .btn--mox-glass {
   --btn-bg: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--brand-edhrec-purple) 30%, transparent) 60%,
-    color-mix(in srgb, var(--brand-edhrec-pink) 30%, transparent) 100%
+    color-mix(in srgb, var(--brand-moxfield-purple) 30%, transparent) 60%,
+    color-mix(in srgb, var(--brand-moxfield-pink) 30%, transparent) 100%
   );
   --btn-color: var(--brand-white);
-  --btn-border: color-mix(in srgb, var(--brand-edhrec-pink) 55%, transparent);
+  --btn-border: color-mix(in srgb, var(--brand-moxfield-pink) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -372,10 +372,10 @@
 .btn--mox-glass:focus-visible {
   --btn-bg: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--brand-edhrec-purple) 50%, transparent) 60%,
-    color-mix(in srgb, var(--brand-edhrec-pink) 50%, transparent) 100%
+    color-mix(in srgb, var(--brand-moxfield-purple) 50%, transparent) 60%,
+    color-mix(in srgb, var(--brand-moxfield-pink) 50%, transparent) 100%
   );
-  --btn-border: var(--brand-edhrec-pink-light);
+  --btn-border: var(--brand-moxfield-pink-light);
 }
 
 .btn--archi-glass {
