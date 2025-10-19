@@ -17,7 +17,9 @@
       "Bash(findstr:*)",
       "Bash(node:*)",
       "Bash(git log:*)",
-      "Bash(find public/style -name \"*.css\" -newer assets/style/06-components/_cards.scss -exec ls -lh {} ;)"
+      "Bash(find public/style -name \"*.css\" -newer assets/style/06-components/_cards.scss -exec ls -lh {} ;)",
+      "Bash(tr '}' '\\n}')",
+      "Read(//c//**)"
     ],
     "deny": [],
     "ask": []

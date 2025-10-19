@@ -1101,14 +1101,14 @@
 
   /* Desktop override: when expanded, make media span full card width */
   @media (min-width: 1024px) {
-    #cards.cards--stack.cards--panels .card.is-expanded .card__media {
+    .card.is-expanded .card__media {
       width: 100%;
       height: auto;
       max-height: none;
       aspect-ratio: 16 / 9;
     }
     /* Only apply to cards WITHOUT background image - otherwise image is used as full card background */
-    #cards.cards--stack.cards--panels .card.is-expanded:not([data-bg-url]) .card__img {
+    .card.is-expanded:not([data-bg-url]) .card__img {
       width: 100%;
       height: auto;
       object-fit: cover;
@@ -1323,7 +1323,7 @@
   @media (min-width: 1024px) {
     /* Paint the full-card background via ::before so it sits under all content
        without altering layout of header/body/media. */
-    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url]::before {
+    .card.is-expanded[data-bg-url]::before {
       content: "";
       display: block; /* override panels rule that hides ::before */
       position: absolute;
@@ -1344,15 +1344,15 @@
     }
     /* Make media area transparent so the card background shows through,
        but keep its layout dimensions and structure intact */
-    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__media {
+    .card.is-expanded[data-bg-url] .card__media {
       background: transparent;
     }
-    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__img {
+    .card.is-expanded[data-bg-url] .card__img {
       /* Hide the inline image completely to avoid duplication with background */
       display: none !important;
     }
     /* Keep the media overlay visible for play button contrast */
-    #cards.cards--stack.cards--panels .card.is-expanded[data-bg-url] .card__media-overlay {
+    .card.is-expanded[data-bg-url] .card__media-overlay {
       opacity: 0.4;
     }
   }
