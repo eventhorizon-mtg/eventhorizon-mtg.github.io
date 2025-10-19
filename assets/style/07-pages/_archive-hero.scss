@@ -1,0 +1,313 @@
+/* ==========================================
+   Archive Hero & Search Bar
+   Task 2.3: Split from monolithic _archive.scss
+   ========================================== */
+
+/* Archive hero */
+.archive-hero {
+  position: relative;
+  padding-block: var(--space-8);
+  background-image:
+    var(--archive-hero-bg-mobile, none),
+    linear-gradient(200deg,
+      var(--color-surface) 0%,
+      color-mix(in srgb, var(--color-primary-900) 20%, var(--color-surface)) 50%,
+      var(--color-surface) 100%);
+  background-size: cover, 100% 100%;
+  /* posizione separata per i due layer (img, gradiente) */
+  background-position:
+    center var(--archive-hero-bg-pos-y, 50%),
+    center;
+  color: var(--color-text);
+  border-bottom: none;
+  overflow: hidden;
+}
+
+.archive-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-surface-glass) 80%, transparent) 0%,
+    var(--color-overlay) 100%);
+  pointer-events: none;
+}
+
+.archive-hero .container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.archive-hero .page-title {
+  font-size: clamp(2.4rem, calc(1.6rem + 2vw), 3.1rem);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  background: linear-gradient(135deg,
+    var(--color-special-300) 0%,
+    var(--color-primary-300) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+.archive-hero .filter-note {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-wide);
+}
+
+.archive-hero .filter-note strong {
+  color: var(--color-special-300);
+  font-weight: 700;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-special-400) 40%, transparent);
+}
+
+@media (min-width: 48rem) {
+  .archive-hero {
+    background-image:
+      var(--archive-hero-bg-tablet, var(--archive-hero-bg-mobile, none)),
+      linear-gradient(210deg, var(--color-surface) 0%, var(--color-surface-glass) 65%, var(--color-surface) 100%);
+    background-position:
+      center var(--archive-hero-bg-pos-y, 50%),
+      center;
+  }
+}
+
+@media (min-width: 64rem) {
+  .archive-hero {
+    padding-block: var(--space-9);
+    background-image:
+      var(--archive-hero-bg-desktop, var(--archive-hero-bg-tablet, var(--archive-hero-bg-mobile, none))),
+      linear-gradient(210deg, var(--color-surface) 0%, var(--color-surface-glass) 55%, var(--color-overlay) 100%);
+    background-position:
+      center var(--archive-hero-bg-pos-y, 50%),
+      center;
+  }
+}
+
+/* Search bar */
+.archive-search {
+  position: relative;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-surface) 95%, var(--color-primary-900)) 0%,
+    var(--color-surface) 100%);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.archive-search__form {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.archive-search__fields {
+  display: contents;
+}
+
+.archive-search__input,
+.archive-search__select {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-variant);
+  color: var(--color-text);
+  transition: var(--transition-colors);
+  min-height: 40px;
+}
+
+.archive-search__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.archive-search__input:focus,
+.archive-search__select:focus {
+  border-color: var(--color-border-strong);
+  outline: none;
+  background: var(--color-surface-elevated);
+}
+
+.archive-search__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23b3c7ff' viewBox='0 0 24 24'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-size: 16px;
+  background-position: calc(100% - 14px) center;
+  padding-right: 2.75rem;
+}
+
+.archive-search__actions {
+  display: flex;
+  gap: var(--space-2);
+  position: relative;
+}
+
+/* Stili comuni per tutti i bottoni della barra */
+.archive-search__btn,
+.archive-search__filter-toggle,
+.archive-search__reset {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-colors);
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-variant);
+  color: var(--color-text);
+}
+
+.archive-search__btn img,
+.archive-search__filter-toggle img,
+.archive-search__reset img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+/* Hover per tutti i bottoni */
+.archive-search__btn:hover,
+.archive-search__btn:focus-visible,
+.archive-search__filter-toggle:hover,
+.archive-search__filter-toggle:focus-visible,
+.archive-search__reset:hover,
+.archive-search__reset:focus-visible {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-elevated);
+  outline: none;
+}
+
+/* Filtro attivo - default (video = azzurro) */
+.archive-search__filter-toggle.is-active,
+.archive-search__filter-toggle[aria-pressed="true"] {
+  border-color: var(--color-special);
+  background: var(--color-special-soft);
+}
+
+/* Filtro attivo su VIDEO - azzurro (stesso del default) */
+.archive-search__filter-toggle.is-active--video {
+  border-color: var(--color-special);
+  background: var(--color-special-soft);
+}
+
+/* Filtro attivo su CONTENT - viola */
+.archive-search__filter-toggle.is-active--content {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+@media (min-width: 48rem) {
+  .archive-search__form {
+    grid-template-columns: 1fr minmax(9rem, 12rem) auto auto;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .archive-search__actions {
+    gap: var(--space-1-5);
+  }
+
+  /* Desktop: campi più compatti */
+  .archive-search__input,
+  .archive-search__select {
+    min-height: 36px;
+    padding: var(--space-1-5) var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  /* Desktop: bottoni grandi coerenti con i campi */
+  .archive-search__btn,
+  .archive-search__reset {
+    width: 42px;
+    height: 42px;
+  }
+
+  .archive-search__btn img,
+  .archive-search__reset img {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Nascondi bottone filtro su desktop (c'è già il select nativo) */
+  .archive-search__filter-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .archive-search__form {
+    /* Mobile: tutto su una riga */
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: var(--space-1-5);
+  }
+
+  .archive-search__actions {
+    display: contents;
+  }
+
+  .archive-search__input {
+    min-width: 0;
+  }
+
+  /* Nascondi select su mobile (si usa il popover dal bottone filtro) */
+  .archive-search__select {
+    display: none;
+  }
+}
+
+/* Filter popover */
+.filter-popover {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: var(--z-popover);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-0-5);
+  color: var(--color-text);
+  backdrop-filter: blur(var(--blur-nav));
+  min-width: 130px;
+}
+
+.filter-popover__list {
+  display: grid;
+  gap: var(--space-0-5);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.filter-popover__item {
+  width: 100%;
+  border-radius: var(--radius-md);
+  padding: var(--space-1-5) var(--space-2-5);
+  text-align: left;
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: var(--transition-colors);
+  font-size: var(--text-sm);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.filter-popover__item[aria-checked="true"],
+.filter-popover__item:hover,
+.filter-popover__item:focus-visible {
+  background: var(--color-surface-selected);
+  color: var(--color-text);
+  outline: none;
+}
