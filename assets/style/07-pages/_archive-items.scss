@@ -1,0 +1,770 @@
+/* ==========================================
+   Archive Items Layout
+   Task 2.3: Split from monolithic _archive.scss
+   ========================================== */
+
+/* Archive list */
+.archive {
+  padding-block: var(--space-7);
+}
+
+.archive .container {
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* Archive cards - Unified layout across all viewports */
+.archive-timeline {
+  display: grid;
+  gap: var(--space-2);
+  /* Padding laterale ridotto */
+  padding-inline: 0;
+}
+
+.archive-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0;
+  align-items: start;
+  --item-number: 0; /* default, verrà sovrascritto da JS */
+  /* Imposta il contatore sull'elemento, così ogni riga ha il proprio valore */
+  counter-reset: item-num var(--item-number);
+}
+
+/* External number (left of card) - stile playlist */
+/* Usa la custom property --item-number impostata da JS per numerazione discendente */
+.archive-item::before {
+  content: counter(item-num, decimal-leading-zero);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 2vw, var(--text-base)); /* Responsive */
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-inline: var(--space-1);
+  min-width: 3rem;
+  text-align: center;
+}
+
+/* Colori uniformi per tipo */
+.archive-item.is-video::before {
+  color: var(--color-special); /* Azzurro */
+}
+
+.archive-item.is-content::before {
+  color: var(--color-primary); /* Viola */
+}
+
+/* Horizontal card layout (compact playlist style) - UNIFORM HEIGHT */
+.archive-item article.item {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  height: 88px; /* Altezza uniforme su tutti i viewport */
+  min-height: 88px;
+  max-height: 88px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  box-shadow: none;
+  overflow: hidden;
+  transition: border-color var(--transition-fast),
+              background var(--transition-fast);
+  cursor: pointer;
+}
+
+/* Hover effect */
+.archive-item article.item:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface-glass);
+}
+
+/* Open state (mantieni altezza fissa) - DEFAULT (content = viola) */
+.archive-item.is-sheet-open article.item,
+.archive-item article.item.is-open {
+  border-color: var(--color-primary);
+  background: var(--color-surface-elevated);
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
+}
+
+/* VIDEO: quando aperto bordo BLU invece di viola */
+.archive-item.is-video.is-sheet-open article.item,
+.archive-item.is-video article.item.is-open {
+  border-color: var(--color-special);
+}
+
+/* Media/Thumbnail section (left side) - UNIFORM SIZE */
+.item-media {
+  position: relative;
+  flex-shrink: 0;
+  width: 140px;
+  height: 88px; /* Stessa altezza della riga */
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.item-thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-md) 0 0 var(--radius-md); /* Solo lato sinistro arrotondato */
+}
+
+/* Immagine uniforme su tutti i viewport */
+.item-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--transition-slow); /* ✅ Come homepage */
+  border-radius: 0; /* Rimuove border-radius globale, gestito dal contenitore .item-thumb */
+  image-rendering: -webkit-optimize-contrast; /* Safari/Chrome: migliora la nitidezza */
+  image-rendering: crisp-edges; /* Standard: mantiene i bordi nitidi */
+  position: relative; /* Assicura che l'immagine non influenzi il posizionamento assoluto */
+}
+
+/* Hover effect come homepage */
+.archive-item:hover .item-thumb img {
+  transform: scale(1.05);
+}
+
+/* Primary button overlay on thumbnail */
+.item-thumb-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centrato perfettamente */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: transparent;
+  z-index: 4;
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    filter var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.item-thumb-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.65);
+  outline-offset: 4px;
+}
+
+/* Default hover - senza translateY */
+.item-thumb-button:hover,
+.item-thumb-button:focus-visible {
+  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
+}
+
+/* VIDEO: Icona play SVG YouTube - Semitrasparente */
+.archive-item.is-video .item-thumb-button {
+  padding: 0 !important; /* NO padding */
+  background: transparent !important; /* NO background */
+  border: none !important; /* NO border */
+  filter: none !important; /* NO filter */
+}
+
+.archive-item.is-video .item-thumb-button-icon {
+  width: clamp(2.25rem, 12vw, 3rem); /* Ridotto ulteriormente: min 36px, max 48px */
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)); /* Shadow più marcata per contrasto */
+}
+
+/* Forma YouTube rossa - SEMITRASPARENTE */
+.archive-item.is-video .item-thumb-button-shape {
+  fill: #ff0000; /* Rosso YouTube */
+  opacity: 0.75; /* Semitrasparente */
+  transition: opacity 0.2s ease;
+}
+
+/* Simbolo play bianco */
+.archive-item.is-video .item-thumb-button-symbol {
+  fill: #ffffff;
+}
+
+/* Hover: leggermente più opaco */
+.archive-item.is-video .item-thumb-button:hover .item-thumb-button-shape,
+.archive-item.is-video .item-thumb-button:focus-visible .item-thumb-button-shape {
+  opacity: 0.9;
+}
+
+/* Override hover generale - NO effetti extra */
+.archive-item.is-video .item-thumb-button:hover,
+.archive-item.is-video .item-thumb-button:focus-visible {
+  background: transparent !important;
+  filter: none !important;
+}
+
+/* CONTENT: Pill button con testo - Stile Primary Glass (più piccolo) */
+.archive-item.is-content .item-thumb-button {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-primary-500) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
+  border: 1px solid color-mix(in srgb, var(--color-primary-500) 55%, transparent);
+  color: var(--color-text);
+  padding: clamp(0.35rem, 1.5vw, 0.45rem) clamp(0.75rem, 2.5vw, 0.9rem); /* Più piccolo e responsive */
+  font-family: var(--font-display);
+  font-size: clamp(0.65rem, 1.5vw, 0.7rem); /* Più piccolo e responsive */
+  font-weight: 600;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  text-decoration: none;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              opacity var(--transition-fast);
+}
+
+.archive-item.is-content .item-thumb-button:hover,
+.archive-item.is-content .item-thumb-button:focus-visible {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
+  border-color: var(--color-primary);
+  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
+  opacity: 0.95;
+}
+
+/* Content section (right side) - UNIFORM HEIGHT */
+.item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2-5) var(--space-4);
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  height: 88px; /* Altezza uniforme uguale alla riga */
+  justify-content: center; /* Centra verticalmente il contenuto */
+  overflow: hidden; /* Nascondi overflow quando chiuso */
+}
+
+.item-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: 0;
+}
+
+.item-overline {
+  font-family: var(--font-display);
+  font-size: clamp(0.65rem, 1.8vw, var(--text-xs)); /* Responsive */
+  line-height: 1.2;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0; /* Non comprimere */
+}
+
+/* Overline colored by type */
+.archive-item.is-video .item-overline {
+  color: var(--color-special); /* Azzurro */
+}
+
+.archive-item.is-content .item-overline {
+  color: var(--color-primary); /* Viola */
+}
+
+/* Hide badge (redundant with colored overline) */
+.item-badge {
+  display: none;
+}
+
+.item-title {
+  font-size: clamp(0.85rem, 2.2vw, var(--text-base)); /* Responsive */
+  line-height: 1.35;
+  color: var(--color-text);
+  font-weight: 600;
+  margin: 0;
+  flex-shrink: 0; /* Non comprimere */
+  /* Permetti al massimo 2 righe */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Description preview: nascosta quando chiuso, visibile quando espanso */
+.item-desc-preview {
+  font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  display: none; /* Nascosto di default */
+  margin-top: var(--space-2);
+}
+
+/* Expand button - Full responsive con dimensioni fluide */
+.item-actions-summary {
+  position: absolute;
+  top: 50%;
+  right: clamp(0.75rem, 2vw, 1rem);
+  transform: translateY(-50%);
+  width: clamp(28px, 5vw, 36px);
+  height: clamp(28px, 5vw, 36px);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  transition: border-color 0.2s ease,
+              background 0.2s ease,
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+  cursor: pointer;
+  /* Touch optimization */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  /* Accessibility */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icon lines - dimensioni proporzionali */
+.item-actions-summary::before,
+.item-actions-summary::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(12px, 3vw, 16px);
+  height: 2px;
+  background: var(--color-text-soft);
+  border-radius: var(--radius-full);
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.2s ease,
+              opacity 0.2s ease;
+}
+
+/* Linea verticale per il "+" */
+.item-actions-summary::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* Hover/Focus states */
+.item-actions-summary:hover,
+.item-actions-summary:focus-visible {
+  border-color: var(--color-border);
+  background: var(--color-surface-glass);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.item-actions-summary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.item-actions-summary:hover::before,
+.item-actions-summary:hover::after,
+.item-actions-summary:focus-visible::before,
+.item-actions-summary:focus-visible::after {
+  background: var(--color-text);
+}
+
+/* Active/Press state */
+.item-actions-summary:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Quando aperto: rotazione a X per chiudere - DEFAULT (content = viola) */
+.item.is-open .item-actions-summary {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.item.is-open .item-actions-summary::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.item.is-open .item-actions-summary::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Hover su stato aperto - DEFAULT (content = viola+blu) */
+.item.is-open .item-actions-summary:hover,
+.item.is-open .item-actions-summary:focus-visible {
+  border-color: var(--color-special);
+  background: var(--color-special-soft);
+}
+
+.item.is-open .item-actions-summary:hover::before,
+.item.is-open .item-actions-summary:hover::after,
+.item.is-open .item-actions-summary:focus-visible::before,
+.item.is-open .item-actions-summary:focus-visible::after {
+  background: var(--color-special);
+}
+
+/* VIDEO: quando aperto usa colori BLU invece di viola */
+.archive-item.is-video .item.is-open .item-actions-summary {
+  border-color: var(--color-special);
+  background: var(--color-special-soft);
+}
+
+.archive-item.is-video .item.is-open .item-actions-summary:hover,
+.archive-item.is-video .item.is-open .item-actions-summary:focus-visible {
+  border-color: var(--color-special);
+  background: var(--color-special-soft);
+}
+
+.archive-item.is-video .item.is-open .item-actions-summary:hover::before,
+.archive-item.is-video .item.is-open .item-actions-summary:hover::after,
+.archive-item.is-video .item.is-open .item-actions-summary:focus-visible::before,
+.archive-item.is-video .item.is-open .item-actions-summary:focus-visible::after {
+  background: var(--color-special);
+}
+
+/* Stato disabilitato (se necessario) */
+.item-actions-summary:disabled,
+.item-actions-summary[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Indicatore visivo per screen reader only text */
+.item-actions-summary .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Expanded panel - Sistema "unlock scroll" con gradient overlay */
+.item-panel {
+  grid-column: 2; /* Allineato con article, sotto nella colonna destra */
+  padding: var(--space-2) clamp(1rem, 3vw, 1.5rem) var(--space-3); /* Padding ulteriormente ridotto */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5); /* Ulteriormente ridotto per compattare */
+  opacity: 1;
+  max-height: 320px; /* Altezza ottimale iniziale - più compatto */
+  overflow: hidden;  /* Nascosto di default, no scroll visibile */
+  position: relative; /* Per posizionare gradient e button */
+  scroll-behavior: smooth;
+  transition: opacity 0.3s ease,
+              padding 0.3s ease,
+              max-height 0.3s ease;
+  border-top: 1px solid var(--color-border-soft);
+  background: var(--color-surface-glass);
+  width: 100%; /* Occupa tutta la larghezza disponibile */
+  box-sizing: border-box; /* Include padding nella larghezza */
+}
+
+.item-panel[hidden] {
+  display: none; /* Completamente nascosto */
+}
+
+/* Gradient overlay al bottom - NASCOSTO di default, visibile solo con .has-overflow */
+.item-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px; /* Più alto per area cliccabile */
+  background: linear-gradient(to top,
+    var(--color-surface-glass) 0%,
+    color-mix(in srgb, var(--color-surface-glass) 98%, transparent) 50%,
+    transparent 100%);
+  pointer-events: none; /* Disabilitato di default */
+  opacity: 0; /* Nascosto di default */
+  transition: opacity 0.3s ease;
+  z-index: 5;
+  cursor: default;
+}
+
+/* Indicatore visivo minimalista - NASCOSTO di default */
+.item-panel::before {
+  content: "⋯";
+  position: absolute;
+  bottom: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  opacity: 0; /* Nascosto di default */
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+/* MOSTRA gradient e puntini SOLO quando c'è overflow (classe aggiunta da JS) */
+.item-panel.has-overflow::after {
+  opacity: 1;
+  pointer-events: auto; /* Cliccabile */
+  cursor: pointer; /* Indica che è cliccabile */
+}
+
+.item-panel.has-overflow::before {
+  opacity: 0.6;
+}
+
+/* Hover sul gradient overlay - feedback visivo leggero */
+.item-panel.has-overflow::after:hover {
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--color-surface-glass) 100%, var(--color-primary) 5%) 0%,
+    color-mix(in srgb, var(--color-surface-glass) 98%, transparent) 50%,
+    transparent 100%);
+}
+
+/* Hover su gradient - evidenzia i puntini */
+.item-panel.has-overflow:hover::before {
+  opacity: 1;
+  color: var(--color-text-soft);
+}
+
+/* Stato scrollable - scroll attivato */
+.item-panel.is-scrollable {
+  max-height: 600px; /* Altezza massima quando scrollabile */
+  overflow-y: auto;  /* Attiva scroll verticale */
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* Nascondi gradient e indicatore quando scrollabile (non servono più) */
+.item-panel.is-scrollable::after,
+.item-panel.is-scrollable::before {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Mobile: nascondi sempre gradient e indicatore (non serve unlock su mobile) */
+@media (max-width: 767.98px) {
+  .item-panel::after,
+  .item-panel::before {
+    display: none;
+  }
+
+  /* Mobile: pannello sempre scrollabile, no max-height limit */
+  .item-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* Scrollbar styling per Webkit (Chrome, Safari, Edge) - solo quando scrollable */
+.item-panel.is-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.item-panel.is-scrollable::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+.item-panel.is-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+.item-panel.is-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Summary (description) in expanded panel */
+.item-summary {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
+  color: var(--color-text-muted);
+  line-height: 1.6; /* Ridotto leggermente per compattare */
+  margin: 0;
+  width: 100%; /* Occupa tutta la larghezza del pannello */
+  max-width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Separator between sections in expanded panel */
+.item-separator {
+  border: none;
+  border-top: 1px solid var(--color-border-soft);
+  margin: var(--space-0-5) 0; /* Ulteriormente ridotto per spazi minimi */
+  opacity: 0.6;
+}
+
+/* Extended content field (from YAML content) - Testo descrittivo esteso */
+.item-content-extended {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
+  color: var(--color-text); /* Più visibile */
+  line-height: 1.6; /* Ridotto leggermente per compattare */
+  padding: 0; /* Rimosso padding verticale */
+  width: 100%; /* Occupa tutta la larghezza del pannello */
+  max-width: 100%; /* Non eccedere la larghezza del pannello */
+  box-sizing: border-box;
+  word-wrap: break-word; /* Spezza parole lunghe */
+  overflow-wrap: break-word; /* Moderna alternativa a word-wrap */
+}
+
+.item-content-extended p {
+  margin-block: var(--space-0-5); /* Ulteriormente ridotto per compattare */
+  width: 100%;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.item-content-extended p:first-child {
+  margin-block-start: 0;
+}
+
+.item-content-extended p:last-child {
+  margin-block-end: 0;
+}
+
+/* Liste nel contenuto esteso */
+.item-content-extended ul,
+.item-content-extended ol {
+  margin: var(--space-0-5) 0; /* Ulteriormente ridotto per compattare */
+  padding-left: var(--space-4);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.item-content-extended li {
+  margin-block: var(--space-0-5); /* Ridotto da space-1 */
+  word-wrap: break-word;
+}
+
+/* Link nel contenuto esteso */
+.item-content-extended a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary-soft);
+  text-underline-offset: 0.15em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  font-weight: 500;
+}
+
+.item-content-extended a:hover,
+.item-content-extended a:focus-visible {
+  color: var(--color-special);
+  text-decoration-color: var(--color-special);
+}
+
+/* Enfasi nel contenuto esteso */
+.item-content-extended strong,
+.item-content-extended b {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.item-content-extended em,
+.item-content-extended i {
+  color: var(--color-primary-300);
+  font-style: italic;
+}
+
+.item-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1-5); /* Ridotto da space-2 */
+  margin-top: 0; /* Rimosso margin-top per compattare */
+}
+
+/* Ensure buttons in archive always use small variant */
+.item-ctas .btn,
+.item-ctas .pill,
+.item-content-extended .btn,
+.item-content-extended .pill,
+.item-panel .btn,
+.item-panel .pill {
+  text-decoration: none;
+  color: var(--btn-color); /* Usa il colore definito dalla variante button */
+  /* Usa sempre stile small - dimensioni uniformi */
+  font-size: clamp(0.7rem, 1.5vw, 0.75rem);
+  padding: var(--space-1-5) var(--space-3);
+  gap: var(--space-1);
+  letter-spacing: var(--tracking-wide);
+  /* Mantieni colori e background originali dei modificatori */
+}
+
+/* Hover uniforme - mantiene colori del modificatore */
+.item-ctas .btn:hover,
+.item-ctas .btn:focus-visible,
+.item-ctas .pill:hover,
+.item-ctas .pill:focus-visible,
+.item-content-extended .btn:hover,
+.item-content-extended .btn:focus-visible,
+.item-content-extended .pill:hover,
+.item-content-extended .pill:focus-visible,
+.item-panel .btn:hover,
+.item-panel .btn:focus-visible,
+.item-panel .pill:hover,
+.item-panel .pill:focus-visible {
+  color: var(--btn-color);
+}
+
+.archive-timeline .empty,
+.archive-error {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border);
+  background: var(--color-surface-glass);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Pager */
+.archive-pager {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Centra il contenuto interno */
+  gap: var(--space-2); /* Ridotto da space-3 */
+  margin-top: var(--space-2);
+  margin-inline: auto; /* Centra orizzontalmente il pager */
+  font-family: var(--font-display);
+  font-size: var(--text-xs); /* Più piccolo e coerente */
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
+
+.archive-pager a,
+.archive-pager span {
+  padding: var(--space-1-5) var(--space-3); /* Ridotto: coerente con i bottoni small */
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-soft);
+  transition: var(--transition-transform), var(--transition-colors);
+}
+
+.archive-pager a:hover,
+.archive-pager a:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.archive-pager a.disabled,
+.archive-pager a[aria-disabled="true"] {
+  opacity: 0.4;
+  pointer-events: none;
+}

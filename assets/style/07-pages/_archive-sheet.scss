@@ -1,0 +1,423 @@
+/* ==========================================
+   Archive Bottom-Sheet & Panel
+   Task 2.3: Split from monolithic _archive.scss
+   ========================================== */
+
+/* Bottom sheet (mobile) - Draggable optimized */
+.archive-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  will-change: opacity;
+  touch-action: none; /* Blocca tutti i touch event sul backdrop */
+}
+
+.archive-sheet-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto; /* BLOCCA TUTTE LE INTERAZIONI con la pagina sottostante */
+  cursor: default; /* Cursore normale invece di pointer */
+}
+
+.archive-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: calc(var(--z-modal) + 1); /* Deve stare SOPRA il backdrop */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: grid;
+  gap: var(--space-1-5); /* Ridotto ulteriormente */
+  background: var(--color-surface);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  border: 1px solid var(--color-border);
+  padding: var(--space-1-5) var(--space-2-5) var(--space-3); /* Ridotto ulteriormente */
+  max-height: 85vh;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Ottimizzazioni per drag smooth */
+  will-change: transform;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y; /* Permetti solo scroll verticale */
+  pointer-events: auto; /* Assicura che lo sheet sia interattivo */
+}
+
+.archive-sheet.is-open {
+  transform: translateY(0);
+}
+
+.archive-sheet[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* Durante il drag: nessuna transizione */
+.archive-sheet.is-dragging {
+  transition: none;
+}
+
+/* Drag handle - più visibile e interattivo */
+.archive-sheet__handle {
+  width: 48px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  margin-inline: auto;
+  margin-bottom: var(--space-1); /* Ridotto da space-2 */
+  cursor: grab;
+  position: relative;
+  /* Area touch più grande per facilità */
+  padding-block: var(--space-2);
+  margin-block: calc(var(--space-2) * -1) var(--space-1); /* Ridotto */
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.archive-sheet__handle::before {
+  content: "";
+  position: absolute;
+  inset: -12px -16px; /* Area touch invisibile più grande */
+  cursor: grab;
+}
+
+.archive-sheet__handle:hover {
+  background: var(--color-text-soft);
+  transform: scaleX(1.1);
+}
+
+.archive-sheet__handle:active {
+  cursor: grabbing;
+  background: var(--color-primary);
+  transform: scaleX(0.95);
+}
+
+/* Indicatore visivo durante il drag - DEFAULT (content = viola) */
+.archive-sheet.is-dragging .archive-sheet__handle {
+  cursor: grabbing;
+  background: var(--color-primary);
+}
+
+/* VIDEO: Handle blu quando trascinato */
+.archive-sheet.is-kind-video.is-dragging .archive-sheet__handle,
+.archive-sheet.is-kind-video .archive-sheet__handle:active {
+  background: var(--color-special);
+}
+
+.archive-sheet__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.archive-sheet__close:hover,
+.archive-sheet__close:focus-visible {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.archive-sheet__title {
+  font-size: clamp(0.95rem, 2.5vw, var(--text-lg)); /* Responsive */
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  margin-top: 0;
+  padding-right: var(--space-12); /* Aumentato per evitare overlap con il bottone X (36px + spacing) */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color 0.2s ease;
+}
+
+.archive-sheet__title:active {
+  cursor: grabbing;
+}
+
+/* Titolo cambia colore durante drag - DEFAULT (content = viola) */
+.archive-sheet.is-dragging .archive-sheet__title {
+  cursor: grabbing;
+  color: var(--color-primary);
+}
+
+/* VIDEO: Titolo blu quando trascinato */
+.archive-sheet.is-kind-video.is-dragging .archive-sheet__title {
+  color: var(--color-special);
+}
+
+.archive-sheet__content {
+  display: grid;
+  gap: var(--space-1-5); /* Ridotto ulteriormente */
+  color: var(--color-text); /* Più visibile */
+  line-height: 1.7;
+  padding-bottom: var(--space-0-5); /* Ridotto ulteriormente */
+  padding-inline: 0; /* Rimosso padding laterale per massimizzare spazio */
+  /* Scroll indicator gradient */
+  position: relative;
+}
+
+/* Stili per il contenuto esteso anche nello sheet */
+.archive-sheet__content .item-summary {
+  font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.archive-sheet__content .item-content-extended {
+  font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.archive-sheet__content .item-separator {
+  border: none;
+  border-top: 1px solid var(--color-border-soft);
+  margin: var(--space-1-5) 0; /* Ridotto ulteriormente */
+  opacity: 0.5;
+}
+
+/* Gradient overlay quando c'è scroll */
+.archive-sheet__content::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(to top, var(--color-surface) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.archive-sheet.has-scroll .archive-sheet__content::after {
+  opacity: 1;
+}
+
+.archive-sheet__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1); /* Ridotto ulteriormente */
+}
+
+/* Ensure buttons in sheet use small variant styling */
+.archive-sheet__ctas .btn,
+.archive-sheet__ctas .pill {
+  text-decoration: none;
+  color: var(--btn-color); /* Usa il colore definito dalla variante button */
+  /* Usa sempre la variante small - dimensioni uniformi */
+  font-size: clamp(0.7rem, 1.5vw, 0.75rem);
+  padding: var(--space-1-5) var(--space-3);
+  gap: var(--space-1);
+  letter-spacing: var(--tracking-wide);
+  /* Mantieni colori e background originali dei modificatori */
+}
+
+/* Hover uniforme - mantiene colori del modificatore */
+.archive-sheet__ctas .btn:hover,
+.archive-sheet__ctas .btn:focus-visible,
+.archive-sheet__ctas .pill:hover,
+.archive-sheet__ctas .pill:focus-visible {
+  color: var(--btn-color);
+}
+
+body.is-sheet-open {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+/* BLOCCO TOTALE: Quando lo sheet è aperto, impedisci qualsiasi interazione con TUTTO il contenuto sottostante */
+body.is-sheet-open > *:not(.archive-sheet):not(.archive-sheet-backdrop) {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  touch-action: none !important;
+}
+
+/* Feedback visivo: il contenuto diventa meno visibile quando lo sheet è aperto */
+body.is-sheet-open .archive-timeline {
+  opacity: 0.5;
+  filter: blur(2px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* L'item attualmente aperto rimane leggermente più visibile */
+body.is-sheet-open .archive-item.is-sheet-open {
+  opacity: 0.7;
+  filter: blur(1px);
+}
+
+@media (min-width: 768px) {
+  .archive-sheet {
+    display: none;
+  }
+
+  .archive-sheet-backdrop {
+    display: none;
+  }
+}
+
+/* Media queries: solo per gestire il comportamento di apertura diverso su mobile */
+@media (max-width: 767.98px) {
+  /* NASCONDE numerazione su mobile */
+  .archive-item::before {
+    display: none;
+  }
+
+  /* Layout senza colonna numerazione */
+  .archive-item {
+    grid-template-columns: 1fr;
+  }
+
+  /* Pannello espanso occupa tutta la larghezza */
+  .item-panel {
+    grid-column: 1;
+  }
+
+  /* Mobile: thumbnail più piccola per spazio ottimizzato */
+  .item-media {
+    width: 110px;
+  }
+
+  /* Padding simmetrico su mobile */
+  .item-content {
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer; /* Rende chiaro che l'area è cliccabile */
+  }
+
+  /* Testi responsive su mobile - già gestiti dal clamp principale */
+  /* Gli override non sono più necessari grazie al clamp responsive */
+
+  /* NASCONDE il bottone espandi su mobile - si clicca sull'area content */
+  .item-actions-summary {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Desktop/Tablet: numero più visibile */
+  .archive-item::before {
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+
+  /* Bottone espandi su desktop: più discreto con animazioni smooth */
+  .item-actions-summary {
+    opacity: 0.7;
+    transition: opacity 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease,
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Mostra completamente solo su hover della riga */
+  .archive-item:hover .item-actions-summary,
+  .item.is-open .item-actions-summary {
+    opacity: 1;
+  }
+
+  /* Animazione più fluida su desktop */
+  .item-actions-summary:hover {
+    transform: translateY(-50%) scale(1.08) rotate(5deg);
+  }
+
+  .item-actions-summary:active {
+    transform: translateY(-50%) scale(0.92);
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop large: bottone ancora più discreto */
+  .item-actions-summary {
+    opacity: 0.5;
+  }
+
+  .archive-item:hover .item-actions-summary {
+    opacity: 0.9;
+  }
+
+  .item-actions-summary:hover {
+    opacity: 1;
+  }
+}
+
+/* Touch devices: sempre visibile e area touch ottimale */
+@media (hover: none) and (pointer: coarse) {
+  .item-actions-summary {
+    opacity: 1;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Feedback visivo immediato su touch */
+  .item-actions-summary:active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    transform: translateY(-50%) scale(0.9);
+  }
+
+  /* Nessuna rotazione su touch (può confondere) */
+  .item-actions-summary:hover {
+    transform: translateY(-50%);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .item-actions-summary {
+    border-width: 2px;
+  }
+
+  .item-actions-summary::before,
+  .item-actions-summary::after {
+    height: 3px;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .archive-item,
+  .archive-item article.item,
+  .item-actions-summary,
+  .item-panel,
+  .item-thumb,
+  .item-title,
+  .item-number,
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Mantieni solo le transizioni essenziali senza movimento */
+  .item-actions-summary {
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  .item-actions-summary::before,
+  .item-actions-summary::after {
+    transition: transform 0.2s ease, background 0.15s ease !important;
+  }
+}
+
+@media (min-height: 850px) {
+  .archive-sheet {
+    max-height: 620px;
+  }
+}
