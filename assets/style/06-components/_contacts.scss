@@ -262,17 +262,17 @@
 }
 
 /* Tablet and up: side-by-side layout */
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
   .contacts__grid {
     grid-template-columns: 1fr auto;
-    gap: var(--space-12);
+    gap: clamp(var(--space-8), 4vw, var(--space-12));
   }
 
   .contacts__actions {
-    --contact-size: 52px;
+    --contact-size: clamp(48px, 5vw, 56px);
     display: flex;
     flex-direction: column;
-    align-items: flex-end; /* tablet: keep right-aligned; overridden on desktop */
+    align-items: flex-end;
     gap: var(--space-4);
   }
 
@@ -280,42 +280,44 @@
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: var(--space-3);
+    gap: clamp(var(--space-2), 1.5vw, var(--space-3));
   }
 
   .contacts__list > li {
     display: block;
   }
 
+  .contact {
+    width: var(--contact-size);
+    height: var(--contact-size);
+  }
+
   .contact--mail {
     align-self: center;
     margin-top: auto;
+    width: clamp(56px, 6vw, 68px);
+    height: clamp(56px, 6vw, 68px);
   }
 }
 
-/* Desktop: larger spacing */
-@media (min-width: 1024px) {
+/* Desktop: larger spacing and centered layout */
+@media (min-width: 64rem) {
+  .contacts__grid {
+    gap: var(--space-12);
+  }
+
   .contacts__actions {
-    align-items: center; /* desktop: center column */
+    --contact-size: 56px;
+    align-items: center;
   }
 
   .contacts__list {
-    justify-content: center; /* desktop: center icons row */
-  }
-
-  .contact--mail {
-    margin-top: var(--space-3); /* desktop: sit just under the icons */
-  }
-  .contacts__list {
+    justify-content: center;
     gap: var(--space-4);
   }
 
-  .contact {
-    width: 56px;
-    height: 56px;
-  }
-
   .contact--mail {
+    margin-top: var(--space-3);
     width: 68px;
     height: 68px;
   }
