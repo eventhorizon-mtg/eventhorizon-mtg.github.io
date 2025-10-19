@@ -50,14 +50,14 @@
 }
 
 /* Mobile: riduci padding mantenendo proporzioni */
-@media (max-width: 47.999rem) {
+@include bp-down(sm) {
   .links {
     padding-block: var(--space-5) var(--space-12);
   }
 }
 
 /* Desktop large: aumenta respiro per sezione visivamente ricca */
-@media (min-width: 80rem) {
+@include bp(lg) {
   .links {
     padding-block: var(--space-7) var(--space-16);
   }
@@ -87,7 +87,7 @@
 }
 
 /* Mobile: padding inline ridotto */
-@media (max-width: 47.999rem) {
+@include bp-down(sm) {
   .links__inner {
     padding-inline: 8px;
     gap: var(--space-5);
@@ -95,7 +95,7 @@
 }
 
 /* Desktop: rimuovi padding (già gestito dal container) */
-@media (min-width: 64rem) {
+@include bp(md) {
   .links__inner {
     padding-inline: 0;
   }
@@ -134,21 +134,21 @@
 }
 
 /* Mobile very small: singola colonna */
-@media (max-width: 374px) {
+@include bp-down(xs) {
   .links__track {
     grid-template-columns: 1fr;
   }
 }
 
 /* Mobile standard: 2 colonne */
-@media (min-width: 375px) and (max-width: 639px) {
+@include bp-between(xs, sm) {
   .links__track {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 /* Tablet: 2-3 colonne */
-@media (min-width: 640px) and (max-width: 1023px) {
+@include bp-between(sm, md) {
   .links__track {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
@@ -159,7 +159,7 @@
 }
 
 /* Desktop: Carousel attivo con loop infinito */
-@media (min-width: 1024px) {
+@include bp(md) {
   .links__track {
     display: flex;
     flex-wrap: nowrap;
@@ -203,7 +203,7 @@
 }
 
 /* Mobile: griglia stretta (320px+) */
-@media (max-width: 639px) {
+@include bp-down(sm) {
   .link-card {
     min-width: 0;
     max-width: 100%;
@@ -211,7 +211,7 @@
 }
 
 /* Tablet: griglia più ampia (640px - 1023px) */
-@media (min-width: 640px) and (max-width: 1023px) {
+@include bp-between(sm, md) {
   .link-card {
     width: 100%;
     max-width: 100%;
@@ -219,7 +219,7 @@
 }
 
 /* Desktop: Carousel layout */
-@media (min-width: 1024px) {
+@include bp(md) {
   .link-card {
     width: 260px;
     max-width: 260px;
@@ -279,7 +279,7 @@
 }
 
 /* Desktop: dimensioni fisse ottimali */
-@media (min-width: 1024px) {
+@include bp(md) {
   .link-card__logo {
     width: 52px;
     height: 52px;
@@ -316,7 +316,7 @@
 }
 
 /* Desktop: restore font originale */
-@media (min-width: 1024px) {
+@include bp(md) {
   .link-card__name {
     font-size: var(--text-sm);
     line-height: 1.25;
@@ -338,7 +338,7 @@
 }
 
 /* Mobile very small: nascondi copy per più spazio */
-@media (max-width: 374px) {
+@include bp-down(xs) {
   .link-card__copy {
     display: none;
   }
@@ -350,7 +350,7 @@
 }
 
 /* Tablet: mostra copy */
-@media (min-width: 640px) {
+@include bp(sm) {
   .link-card__copy {
     display: -webkit-box;
   }
@@ -374,7 +374,7 @@
 }
 
 /* Desktop: dimensioni fisse per logo-only */
-@media (min-width: 1024px) {
+@include bp(md) {
   .link-card--logo-only .link-card__link {
     padding: 1rem;
     min-height: 80px;
@@ -391,7 +391,7 @@
 }
 
 /* Edge fade (Desktop carousel) */
-@media (min-width: 1024px) {
+@include bp(md) {
   @supports ((-webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0), #000)) or
              (mask-image: linear-gradient(to right, rgba(0,0,0,0), #000))) {
     .links__carousel {
@@ -420,7 +420,7 @@
     transition: none;
   }
 
-  @media (min-width: 1024px) {
+  @include bp(md) {
     .links__track.is-ready {
       transition: none;
     }

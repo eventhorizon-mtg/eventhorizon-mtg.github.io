@@ -1,0 +1,56 @@
+/* ==========================================
+   SCSS MIXINS
+   Task 2.3: Breakpoint mixins for standardization
+   ========================================== */
+
+/* Breakpoint Mixins
+   Usage:
+   @include bp(sm) { ... }     // min-width: 768px
+   @include bp-down(sm) { ... } // max-width: 767.98px
+*/
+
+// Breakpoint values (must match _tokens.scss)
+$breakpoints: (
+  xs: 30rem,    // 480px
+  sm: 48rem,    // 768px
+  md: 64rem,    // 1024px
+  lg: 80rem,    // 1280px
+  xl: 90rem,    // 1440px
+);
+
+// Min-width breakpoint (mobile-first)
+@mixin bp($size) {
+  @if map-has-key($breakpoints, $size) {
+    @media (min-width: map-get($breakpoints, $size)) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint '#{$size}' not found in $breakpoints map.";
+  }
+}
+
+// Max-width breakpoint (desktop-first)
+@mixin bp-down($size) {
+  @if map-has-key($breakpoints, $size) {
+    $bp-value: map-get($breakpoints, $size);
+    // Subtract 0.0625rem (1px) for precision
+    @media (max-width: calc(#{$bp-value} - 0.0625rem)) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint '#{$size}' not found in $breakpoints map.";
+  }
+}
+
+// Between two breakpoints
+@mixin bp-between($min, $max) {
+  @if map-has-key($breakpoints, $min) and map-has-key($breakpoints, $max) {
+    $min-value: map-get($breakpoints, $min);
+    $max-value: map-get($breakpoints, $max);
+    @media (min-width: $min-value) and (max-width: calc(#{$max-value} - 0.0625rem)) {
+      @content;
+    }
+  } @else {
+    @warn "One or both breakpoints not found in $breakpoints map.";
+  }
+}
