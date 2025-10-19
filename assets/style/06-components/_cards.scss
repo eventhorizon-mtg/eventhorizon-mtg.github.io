@@ -1099,18 +1099,19 @@
     border-radius: 0 !important;
   }
 
-  /* Desktop override: when expanded, make media span full card width */
+  /* Desktop override: when expanded, media fills 1/3 of card height with 16:9 ratio */
   @media (min-width: 1024px) {
     .card.is-expanded .card__media {
       width: 100%;
-      height: auto;
-      max-height: none;
+      height: 33.333%;
+      max-height: 33.333%;
+      flex: 0 0 33.333%;
       aspect-ratio: 16 / 9;
     }
     /* Only apply to cards WITHOUT background image - otherwise image is used as full card background */
     .card.is-expanded:not([data-bg-url]) .card__img {
       width: 100%;
-      height: auto;
+      height: 100%;
       object-fit: cover;
     }
   }
