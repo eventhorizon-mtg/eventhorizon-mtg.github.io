@@ -33,9 +33,18 @@ export const FETCH_BACKOFF_MULTIPLIER = 2;    // moltiplicatore per exponential 
 // Helper functions
 export const qs = (sel, root = document) => root.querySelector(sel);
 export const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-export const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+export const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts);
 export const off = (el, ev, fn) => el && el.removeEventListener(ev, fn);
+export const set = (el, name, val) => el && el.setAttribute(name, String(val));
 export const trim = (str) => (str || '').trim();
 export const lower = (str) => (str || '').toLowerCase();
 export const text = (val) => String(val ?? '');
 export const LIKE = (haystack, needle) => lower(haystack).includes(lower(needle));
+
+// Media Query Listeners
+export const mqSheet = window.matchMedia ? window.matchMedia(MQ_SHEET) : { matches: true, addEventListener(){} };
+export const mqPhone = window.matchMedia ? window.matchMedia(MQ_PHONE) : { matches: false, addEventListener(){} };
+
+// URL Utilities
+export const getURL = () => new URL(window.location.href);
+export const getParam = (name) => getURL().searchParams.get(name);
