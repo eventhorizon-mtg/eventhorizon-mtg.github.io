@@ -588,9 +588,10 @@
   box-shadow: none;
 }
 
-.cards--panels .card::before,
-.cards--panels .card:hover::before,
-.cards--panels .card:focus-within::before {
+/* Hide gradient overlay ::before on panels cards, EXCEPT when expanded with background image */
+.cards--panels .card:not(.is-expanded[data-bg-url])::before,
+.cards--panels .card:not(.is-expanded[data-bg-url]):hover::before,
+.cards--panels .card:not(.is-expanded[data-bg-url]):focus-within::before {
   display: none;
 }
 
