@@ -264,7 +264,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
   filter: blur(1px);
 }
 
-@media (min-width: 768px) {
+@include bp(sm) {
   .archive-sheet {
     display: none;
   }
@@ -275,7 +275,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
 }
 
 /* Media queries: solo per gestire il comportamento di apertura diverso su mobile */
-@media (max-width: 767.98px) {
+@include bp-down(sm) {
   /* NASCONDE numerazione su mobile */
   .archive-item::before {
     display: none;
@@ -311,7 +311,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
   }
 }
 
-@media (min-width: 768px) {
+@include bp(sm) {
   /* Desktop/Tablet: numero più visibile */
   .archive-item::before {
     font-size: var(--text-lg);
@@ -343,7 +343,7 @@ body.is-sheet-open .archive-item.is-sheet-open {
   }
 }
 
-@media (min-width: 1024px) {
+@include bp(md) {
   /* Desktop large: bottone ancora più discreto */
   .item-actions-summary {
     opacity: 0.5;
