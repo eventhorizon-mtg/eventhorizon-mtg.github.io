@@ -15,9 +15,7 @@
 
 {{- /* Rendi immagine assoluta */ -}}
 {{- if $image -}}
-  {{- if not (hasPrefix $image "http") -}}
-    {{- $image = printf "%s/%s" $baseURL (strings.TrimPrefix "/" $image) -}}
-  {{- end -}}
+  {{- $image = partial "url-to-abs.html" $image -}}
 {{- end -}}
 
 <script type="application/ld+json">

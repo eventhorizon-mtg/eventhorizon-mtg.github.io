@@ -74,11 +74,11 @@
             {{ $thumbURL := ("images/cards/fblthp_placeholder.webp" | absURL) }}
             {{ with $it.card }}
               {{ $c := . }}
-              {{ if hasPrefix $c "http" }}{{ $thumbURL = $c }}{{ else }}{{ $thumbURL = ($c | absURL) }}{{ end }}
+              {{ $thumbURL = partial "url-to-abs.html" $c }}
             {{ else }}
               {{ with $it.thumb }}
                 {{ $t := . }}
-                {{ if hasPrefix $t "http" }}{{ $thumbURL = $t }}{{ else }}{{ $thumbURL = ($t | absURL) }}{{ end }}
+                {{ $thumbURL = partial "url-to-abs.html" $t }}
               {{ end }}
             {{ end }}
             {{ $links := cond (isset $it "links") (sort $it.links "sort_order" "asc") (slice) }}
@@ -120,7 +120,7 @@
             {{ $bgImageURL := "" }}
             {{ with $it.background_image }}
               {{ $bg := . }}
-              {{ if hasPrefix $bg "http" }}{{ $bgImageURL = $bg }}{{ else }}{{ $bgImageURL = ($bg | absURL) }}{{ end }}
+              {{ $bgImageURL = partial "url-to-abs.html" $bg }}
             {{ end }}
             {{/* Fallback: se non c'è background_image usa la thumb come sfondo */}}
             {{ if eq $bgImageURL "" }}

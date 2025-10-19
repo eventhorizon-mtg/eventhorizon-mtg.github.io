@@ -23,7 +23,7 @@
   {{- warnf "versioned-url: path non fornito (input=%v)" $input -}}
   {{- return "" -}}
 {{- end -}}
-{{- $abs := cond (hasPrefix (lower (printf "%v" $path)) "http") (printf "%v" $path) ((printf "%v" $path) | absURL) -}}
+{{- $abs := partial "url-to-abs.html" (printf "%v" $path) -}}
 {{- if $ver -}}
   {{- $join := cond (in $abs "?") "&" "?" -}}
   {{- printf "%s%sv=%s" $abs $join $ver -}}

@@ -1,0 +1,17 @@
+{{/*
+  url-to-abs.html
+  Task 2.1: Reusable partial for URL normalization (relative → absolute)
+
+  Usage:
+    {{ partial "url-to-abs.html" $myURL }}
+    {{ $absURL := partial "url-to-abs.html" .Params.image }}
+
+  Input: URL string (relative or absolute)
+  Output: Absolute URL
+*/}}
+{{- $url := . -}}
+{{- if hasPrefix (lower $url) "http" -}}
+  {{- $url -}}
+{{- else -}}
+  {{- $url | absURL -}}
+{{- end -}}

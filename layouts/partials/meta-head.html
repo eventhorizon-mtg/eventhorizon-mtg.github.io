@@ -20,7 +20,7 @@
 {{- $ogImage  := or .Params.ogImage  .Site.Params.ogImage  $siteOgImage  "" -}}
 {{- $ogLocale := or .Params.ogLocale .Site.Params.ogLocale $siteOgLocale "it_IT" -}}
 
-{{- $ogImageAbs := cond (hasPrefix (lower $ogImage) "http") $ogImage ($ogImage | absURL) -}}
+{{- $ogImageAbs := partial "url-to-abs.html" $ogImage -}}
 
 <!-- Base meta -->
 <meta charset="utf-8">
