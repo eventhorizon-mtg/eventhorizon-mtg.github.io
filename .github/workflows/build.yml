@@ -149,9 +149,30 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+  # Check if frontend files were modified (CSS, JS, templates, config)
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for frontend file changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'assets/**'
+              - 'layouts/**'
+              - 'hugo.toml'
+
   # Task 3.5: Lighthouse CI - Automated performance audits
+  # Runs only when frontend files are modified (CSS, JS, templates, config)
   lighthouse:
-    needs: deploy
+    needs: [deploy, check-changes]
+    if: needs.check-changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
