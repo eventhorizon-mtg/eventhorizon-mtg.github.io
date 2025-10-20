@@ -23,3 +23,6 @@ axe-reports/
 !static/npm/
 !static/npm/**/
 !static/npm/**/*.js
+
+# Claude Code local settings
+.claude/settings.local.json
