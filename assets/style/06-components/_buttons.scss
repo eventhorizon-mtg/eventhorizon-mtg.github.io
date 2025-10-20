@@ -42,18 +42,61 @@
   box-shadow: none;
 }
 
+/* ============================================
+   MIXINS - Button Variants
+   Task 2.5: Eliminano duplicazione per hover states e glass effects
+   ============================================ */
+
+/**
+ * Mixin: btn-hover
+ * Genera hover e focus-visible states con gradient lightening
+ *
+ * @param {Color} $color-500 - Colore base scuro
+ * @param {Color} $color-400 - Colore base chiaro per gradient
+ */
+@mixin btn-hover($color-500, $color-400) {
+  &:hover,
+  &:focus-visible {
+    --btn-bg: linear-gradient(135deg, #{$color-500} 0%, #{$color-400} 100%);
+  }
+}
+
+/**
+ * Mixin: btn-glass
+ * Glass effect con backdrop-filter e trasparenza
+ *
+ * @param {Color} $color-500 - Colore base scuro
+ * @param {Color} $color-300 - Colore base chiaro per gradient
+ */
+@mixin btn-glass($color-500, $color-300) {
+  --btn-bg: linear-gradient(135deg,
+    color-mix(in srgb, #{$color-500} 35%, transparent) 0%,
+    color-mix(in srgb, #{$color-300} 35%, transparent) 100%);
+  --btn-border: color-mix(in srgb, #{$color-500} 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); /* Safari */
+
+  &:hover,
+  &:focus-visible {
+    --btn-bg: linear-gradient(135deg,
+      color-mix(in srgb, #{$color-500} 55%, transparent) 0%,
+      color-mix(in srgb, #{$color-300} 55%, transparent) 100%);
+    --btn-border: #{$color-500};
+  }
+}
+
+/* ============================================
+   BUTTON VARIANTS
+   ============================================ */
+
 // Button Primary //
 .btn--primary, .btn--base {
   --btn-bg: var(--gradient-primary);
   --btn-color: var(--color-text);
   --btn-border: var(--color-primary);
   --btn-shadow: var(--shadow-md);
-}
-.btn--primary:hover,
-.btn--primary:focus-visible {
-  --btn-bg: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-400) 100%);
-  --btn-border: var(--color-primary);
-  --btn-shadow: var(--shadow-md);
+
+  @include btn-hover(var(--color-primary-500), var(--color-primary-400));
 }
 
 // Button Secondary //
@@ -62,13 +105,8 @@
   --btn-color: var(--color-text);
   --btn-border: var(--color-secondary);
   --btn-shadow: var(--shadow-md);
-}
 
-.btn--secondary:hover,
-.btn--secondary:focus-visible {
-  --btn-bg: linear-gradient(135deg, var(--color-secondary-500) 0%, var(--color-secondary-400) 100%);
-  --btn-border: var(--color-secondary);
-  --btn-shadow: var(--shadow-md);
+  @include btn-hover(var(--color-secondary-500), var(--color-secondary-400));
 }
 
 // Button Special //
@@ -77,13 +115,8 @@
   --btn-color: var(--color-text);
   --btn-border: var(--color-special);
   --btn-shadow: var(--shadow-md);
-}
 
-.btn--special:hover,
-.btn--special:focus-visible {
-  --btn-bg: linear-gradient(135deg, var(--color-special-500) 0%, var(--color-special-400) 100%);
-  --btn-border: var(--color-special);
-  --btn-shadow: var(--shadow-md);
+  @include btn-hover(var(--color-special-500), var(--color-special-400));
 }
 
 // Button Accent //
@@ -92,13 +125,8 @@
   --btn-color: var(--color-text-invert);
   --btn-border: var(--color-accent);
   --btn-shadow: var(--shadow-md);
-}
 
-.btn--accent:hover,
-.btn--accent:focus-visible {
-  --btn-bg: linear-gradient(135deg, var(--color-accent-500) 0%, var(--color-accent-300) 100%);
-  --btn-border: var(--color-accent);
-  --btn-shadow: var(--shadow-md);
+  @include btn-hover(var(--color-accent-500), var(--color-accent-300));
 }
 
 // Button YouTube //
@@ -216,81 +244,36 @@
 }
 
 /* Glass Variants */
+// Glass Variants - Standard Colors
 .btn--primary-glass {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-primary-500) 35%, transparent) 0%,
-    color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
   --btn-color: var(--color-text);
-  --btn-border: color-mix(in srgb, var(--color-primary-500) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
 
-.btn--primary-glass:hover,
-.btn--primary-glass:focus-visible {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
-    color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
-  --btn-border: var(--color-primary);
+  @include btn-glass(var(--color-primary-500), var(--color-primary-300));
 }
 
 .btn--secondary-glass {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-secondary-500) 35%, transparent) 0%,
-    color-mix(in srgb, var(--color-secondary-300) 35%, transparent) 100%);
   --btn-color: var(--color-text);
-  --btn-border: color-mix(in srgb, var(--color-secondary-500) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
 
-.btn--secondary-glass:hover,
-.btn--secondary-glass:focus-visible {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-secondary-500) 55%, transparent) 0%,
-    color-mix(in srgb, var(--color-secondary-300) 55%, transparent) 100%);
-  --btn-border: var(--color-secondary);
+  @include btn-glass(var(--color-secondary-500), var(--color-secondary-300));
 }
 
 .btn--special-glass {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-special-500) 35%, transparent) 0%,
-    color-mix(in srgb, var(--color-special-300) 35%, transparent) 100%);
   --btn-color: var(--color-text);
-  --btn-border: color-mix(in srgb, var(--color-special-500) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
 
-.btn--special-glass:hover,
-.btn--special-glass:focus-visible {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-special-500) 55%, transparent) 0%,
-    color-mix(in srgb, var(--color-special-300) 55%, transparent) 100%);
-  --btn-border: var(--color-special);
+  @include btn-glass(var(--color-special-500), var(--color-special-300));
 }
 
 .btn--accent-glass {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-accent-500) 35%, transparent) 0%,
-    color-mix(in srgb, var(--color-accent-300) 35%, transparent) 100%);
   --btn-color: var(--color-text-invert);
-  --btn-border: color-mix(in srgb, var(--color-accent-500) 55%, transparent);
   --btn-shadow: var(--shadow-sm);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+
+  @include btn-glass(var(--color-accent-500), var(--color-accent-300));
 }
 
-.btn--accent-glass:hover,
-.btn--accent-glass:focus-visible {
-  --btn-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-accent-500) 55%, transparent) 0%,
-    color-mix(in srgb, var(--color-accent-300) 55%, transparent) 100%);
-  --btn-border: var(--color-accent);
-}
+// Glass Variants - Brand Colors (custom gradients, kept separate)
 
 .btn--yt-glass {
   --btn-bg: linear-gradient(135deg,
