@@ -13,7 +13,7 @@
         ">
   <div class="container">
     <h1 class="page-title">Archivio</h1>
-    <p class="filter-note">
+    <p class="filter-note" role="status">
       Cerca tra video e contenuti. Totale risultati:
       <strong aria-live="polite">0</strong>
     </p>
@@ -53,15 +53,15 @@
   </div>
 </section>
 
-<!-- Elenco archivio -->
-<section class="archive" aria-label="Risultati">
+<!-- Elenco archivio - Task 3.3: ARIA live region for dynamic results -->
+<section class="archive" aria-label="Risultati" role="region" aria-live="polite">
   <div class="container">
 
     <!-- La lista è popolata da assets/scripts/archive.js -->
     <ol class="archive-timeline"></ol>
 
     <!-- Pager (pilotato dal JS) -->
-    <nav class="archive-pager" aria-label="Paginazione risultati">
+    <nav class="archive-pager" aria-label="Paginazione risultati" role="navigation">
       <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina precedente" rel="prev">« Prec</a>
       <span class="curr" aria-current="page">Pag. 1 / 1</span>
       <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina successiva" rel="next">Succ »</a>
