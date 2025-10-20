@@ -15,6 +15,12 @@ node_modules/
 dist/
 axe-reports/
 
+# Hugo ephemeral lock file
+.hugo_build.lock
+
+# Local AI/tooling metadata
+.claude/
+
 # OS / temp
 *.log
 *.tmp
