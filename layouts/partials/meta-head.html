@@ -41,8 +41,27 @@
 <link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon-32.png" }}' sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href='{{ partial "versioned-url.html" "icons/favicon/apple-touch-icon.png" }}' sizes="180x180">
 
-<!-- Open Graph -->
+<!-- Open Graph - Task 3.1: Dynamic og:type based on content section -->
+{{- if eq .Section "article" -}}
+<meta property="og:type" content="article">
+{{- with .PublishDate -}}
+<meta property="article:published_time" content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end -}}
+{{- with .Lastmod -}}
+<meta property="article:modified_time" content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end -}}
+{{- with .Params.author -}}
+<meta property="article:author" content="{{ . }}">
+{{- end -}}
+{{- range .Params.tags -}}
+<meta property="article:tag" content="{{ . }}">
+{{- end -}}
+{{- with .Params.category -}}
+<meta property="article:section" content="{{ . }}">
+{{- end -}}
+{{- else -}}
 <meta property="og:type" content="website">
+{{- end -}}
 <meta property="og:title" content="{{ $ogTitle }}">
 {{- if $ogDesc }}<meta property="og:description" content="{{ $ogDesc }}">{{ end -}}
 <meta property="og:url" content="{{ $canonical }}">
