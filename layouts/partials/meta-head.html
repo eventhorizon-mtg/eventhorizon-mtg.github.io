@@ -36,18 +36,10 @@
 <!-- Theme color -->
 <meta name="theme-color" content="{{ or .Site.Params.themeColor "#0E0F1A" }}">
 
-<!-- Favicons (assicurati che i file esistano sotto /static/icons/favicon/ ...) -->
-<link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.ico" }}' sizes="any" type="image/x-icon">
-<link rel="shortcut icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.ico" }}' type="image/x-icon">
+<!-- Favicons - Task 2.6: Consolidated to SVG + minimal fallback -->
 <link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon.svg" }}' type="image/svg+xml">
-<link rel="icon" type="image/png" sizes="16x16" href='{{ partial "versioned-url.html" "icons/favicon/favicon-16.png" }}'>
-<link rel="icon" type="image/png" sizes="32x32" href='{{ partial "versioned-url.html" "icons/favicon/favicon-32.png" }}'>
-<link rel="icon" type="image/png" sizes="48x48" href='{{ partial "versioned-url.html" "icons/favicon/favicon-48.png" }}'>
-<link rel="icon" type="image/png" sizes="96x96" href='{{ partial "versioned-url.html" "icons/favicon/favicon-96.png" }}'>
+<link rel="icon" href='{{ partial "versioned-url.html" "icons/favicon/favicon-32.png" }}' sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href='{{ partial "versioned-url.html" "icons/favicon/apple-touch-icon.png" }}' sizes="180x180">
-<link rel="icon" type="image/png" sizes="192x192" href='{{ partial "versioned-url.html" "icons/favicon/favicon-192.png" }}'>
-<link rel="icon" type="image/png" sizes="512x512" href='{{ partial "versioned-url.html" "icons/favicon/favicon-512.png" }}'>
-<link rel="icon" type="image/png" sizes="512x512" href='{{ partial "versioned-url.html" "icons/favicon/favicon-512-maskable.png" }}' purpose="any maskable">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
