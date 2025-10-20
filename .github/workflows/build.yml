@@ -163,5 +163,4 @@ jobs:
           urls: |
             https://eventhorizon-mtg.github.io/
             https://eventhorizon-mtg.github.io/archive/
-          uploadArtifacts: true
           temporaryPublicStorage: true
