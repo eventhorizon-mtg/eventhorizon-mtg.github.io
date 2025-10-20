@@ -1,0 +1,44 @@
+/* ============================================================
+   Event Horizon - Critical CSS
+   ------------------------------------------------------------
+   Minimal above-the-fold styles for optimal First Contentful Paint
+   ============================================================ */
+
+/* ========================================
+   01 - SETTINGS
+   Core variables and mixins needed for critical path
+   ======================================== */
+
+@import "01-settings/tokens";
+@import "01-settings/fonts";
+@import "01-settings/mixins";
+
+/* ========================================
+   03 - GENERIC
+   Reset styles
+   ======================================== */
+
+@import "03-generic/reset";
+
+/* ========================================
+   04 - ELEMENTS
+   Base HTML element styles
+   ======================================== */
+
+@import "04-elements/base";
+
+/* ========================================
+   05 - OBJECTS
+   Layout patterns
+   ======================================== */
+
+@import "05-objects/container";
+
+/* ========================================
+   06 - COMPONENTS
+   Above-the-fold UI components
+   ======================================== */
+
+@import "06-components/navbar";
+@import "06-components/hero";
+@import "06-components/buttons";

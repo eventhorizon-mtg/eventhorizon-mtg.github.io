@@ -101,7 +101,22 @@
 {{ end }}
 
 {{/* ---------------------------------------
-     CSS bundle via Hugo Pipes (single entrypoint)
+     Task 3.4: Critical CSS (inlined for optimal FCP)
+---------------------------------------- */}}
+{{- $criticalOpts := dict
+    "targetPath"      "style/critical.min.css"
+    "outputStyle"     "compressed"
+    "enableSourceMap" false
+-}}
+{{- with resources.Get "style/critical.scss" -}}
+  {{- $criticalCss := . | css.Sass $criticalOpts | resources.Minify -}}
+  <style>{{ $criticalCss.Content | safeCSS }}</style>
+{{- else -}}
+  {{- warnf "style/critical.scss non trovato. Verifica il percorso del critical CSS." -}}
+{{- end -}}
+
+{{/* ---------------------------------------
+     Main CSS bundle (deferred for non-blocking load)
 ---------------------------------------- */}}
 {{- $sassOpts := dict
     "targetPath"      "style/bundle.min.css"
@@ -111,9 +126,11 @@
 {{- with resources.Get "style/main.scss" -}}
   {{- $mainCss := . | css.Sass $sassOpts | resources.Fingerprint -}}
   {{- if hugo.IsProduction -}}
-    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
+    <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
+    <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous"></noscript>
   {{- else -}}
-    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}">
+    <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}"></noscript>
   {{- end -}}
 {{- else -}}
   {{- warnf "style/main.scss non trovato. Verifica il percorso dell'entrypoint SCSS." -}}
