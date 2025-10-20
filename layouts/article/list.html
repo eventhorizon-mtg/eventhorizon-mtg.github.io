@@ -11,7 +11,7 @@
           {{ $img := cond (and $cover (ne (lower (substr $cover 0 4)) "http")) ($cover | relURL) $cover }}
           <article class="card is-content">
             <div class="card__media">
-              <img class="card__img" src="{{ cond $img $img ( "images/cards/fblthp_placeholder.webp" | relURL ) }}" alt="{{ .Title }}" loading="lazy" decoding="async">
+              <img class="card__img" src="{{ cond $img $img ( "images/cards/fblthp_placeholder.webp" | relURL ) }}" alt="{{ .Title }}" width="672" height="408" loading="lazy" decoding="async">
               <span class="card__media-overlay"></span>
             </div>
             <div class="card__body">
