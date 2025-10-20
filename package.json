@@ -1,0 +1,27 @@
+{
+  "name": "eventhorizon-mtg",
+  "version": "1.0.0",
+  "description": "EventHorizon.mtg - Hugo static site with ITCSS architecture",
+  "private": true,
+  "scripts": {
+    "test:a11y": "axe http://localhost:1313 --exit",
+    "test:a11y:archive": "axe http://localhost:1313/archive/ --exit",
+    "test:a11y:ci": "npm run test:a11y && npm run test:a11y:archive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eventhorizon-mtg/eventhorizon-mtg.github.io"
+  },
+  "keywords": [
+    "hugo",
+    "static-site",
+    "mtg",
+    "magic-the-gathering",
+    "itcss"
+  ],
+  "author": "EventHorizon.mtg",
+  "license": "MIT",
+  "devDependencies": {
+    "@axe-core/cli": "^4.10.2"
+  }
+}

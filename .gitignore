@@ -10,9 +10,10 @@ Thumbs.db
 .vscode/
 /.idea/
 
-# Node / tooling (se in futuro userai tool JS)
+# Node / tooling
 node_modules/
 dist/
+axe-reports/
 
 # OS / temp
 *.log

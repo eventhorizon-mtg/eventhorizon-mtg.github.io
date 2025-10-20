@@ -1,26 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git commit:*)",
-      "Bash(curl:*)",
-      "Bash(cat:*)",
-      "Bash(git add:*)",
-      "Bash(git push:*)",
-      "Bash(ren:*)",
-      "Bash(rm:*)",
-      "Bash(mv:*)",
-      "Bash(hugo:*)",
-      "Bash(test:*)",
-      "Bash(git ls-tree:*)",
-      "Bash(awk:*)",
-      "Bash(dir:*)",
-      "Bash(findstr:*)",
-      "Bash(node:*)",
-      "Bash(git log:*)",
-      "Bash(find public/style -name \"*.css\" -newer assets/style/06-components/_cards.scss -exec ls -lh {} ;)",
-      "Bash(tr '}' '\\n}')",
-      "Bash(git checkout 973c00b -- assets/scripts/archive.js)",
-      "Bash(git reset HEAD .claude/settings.local.json)"
+      "Bash(npm install)",
+      "Bash(npm run test:a11y:ci)",
+      "Bash(pkill -f \"hugo server\")",
+      "Bash(taskkill //F //IM hugo.exe)"
     ],
     "deny": [],
     "ask": []
