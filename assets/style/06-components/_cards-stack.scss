@@ -125,7 +125,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 0 !important;
+  border-radius: 0; /* Specificity 0,2,0 sufficient - no conflicting rule found */
 }
 
 .cards--stack .card__body {
@@ -230,6 +230,7 @@
 }
 
 /* Preserve button variant colors for card__btn combined with pill/btn classes */
+/* Specificity 0,5,1 wins over base .pill:hover (0,2,0) naturally */
 .cards--stack .card__actions .card__btn.pill:hover,
 .cards--stack .card__actions .card__btn.pill:focus-visible,
 .cards--stack .card__actions .card__btn.btn:hover,
@@ -238,9 +239,9 @@
 .cards--stack .card__cta-row .card__cta.pill:focus-visible,
 .cards--stack .card__cta-row .card__cta.btn:hover,
 .cards--stack .card__cta-row .card__cta.btn:focus-visible {
-  color: var(--btn-color) !important;
-  background: var(--btn-bg) !important;
-  border-color: var(--btn-border) !important;
+  color: var(--btn-color);
+  background: var(--btn-bg);
+  border-color: var(--btn-border);
 }
 
 .cards--stack .card__cta-row {
@@ -395,7 +396,7 @@
   .card__img {
     object-fit: cover;
     display: block;
-    border-radius: 0 !important;
+    border-radius: 0; /* Within panels context, specificity 0,2,0 sufficient */
   }
 
   /* Desktop override: when expanded, media fills 1/3 of card height with 16:9 ratio */
