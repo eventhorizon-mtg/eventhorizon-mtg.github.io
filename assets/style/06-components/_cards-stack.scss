@@ -801,9 +801,9 @@
       object-position: center;
     }
 
-    /* Specificity 1,4,0 via parent #cards prefix wins over desktop 0,3,0 */
-    #cards.cards--stack.cards--panels .card .card__header,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__header {
+    /* Specificity 1,5,0 matches desktop, cascade order wins (mobile rules come after) */
+    #cards.cards--stack.cards--panels .card:not(.is-collapsed) .card__header,
+    #cards.cards--stack.cards--panels .card.is-active .card__header {
       /* Header cresce solo quanto necessario per il contenuto */
       flex: 0 0 auto;
       width: 100%;
@@ -826,9 +826,9 @@
       box-shadow: none;
     }
 
-    /* Specificity 1,4,0 wins over desktop rules */
-    #cards.cards--stack.cards--panels .card .card__overline,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__overline {
+    /* Specificity 1,5,0 matches desktop, cascade order wins */
+    #cards.cards--stack.cards--panels .card:not(.is-collapsed) .card__overline,
+    #cards.cards--stack.cards--panels .card.is-active .card__overline {
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
@@ -841,9 +841,9 @@
       overflow: visible;
     }
 
-    /* Specificity 1,4,0 wins over desktop rules */
-    #cards.cards--stack.cards--panels .card .card__title,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__title {
+    /* Specificity 1,5,0 matches desktop, cascade order wins */
+    #cards.cards--stack.cards--panels .card:not(.is-collapsed) .card__title,
+    #cards.cards--stack.cards--panels .card.is-active .card__title {
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
