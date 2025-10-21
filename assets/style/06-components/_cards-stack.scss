@@ -984,7 +984,9 @@
     .card .card__cta-row .card__cta.pill:focus-visible,
     .card .card__cta-row .card__cta.btn:hover,
     .card .card__cta-row .card__cta.btn:focus-visible {
-      color: var(--btn-color); /* Specificity via parent block sufficient */
+      color: var(--btn-color);
+      background: var(--btn-bg);
+      border-color: var(--btn-border);
     }
 
     /* Ensure stacking order: media below, body above, play within media */
