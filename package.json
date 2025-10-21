@@ -6,7 +6,12 @@
   "scripts": {
     "test:a11y": "axe http://localhost:1313 --exit",
     "test:a11y:archive": "axe http://localhost:1313/archive/ --exit",
-    "test:a11y:ci": "npm run test:a11y && npm run test:a11y:archive"
+    "test:a11y:ci": "npm run test:a11y && npm run test:a11y:archive",
+    "lint": "eslint assets/scripts/**/*.js",
+    "lint:fix": "eslint assets/scripts/**/*.js --fix",
+    "format": "prettier --write \"assets/scripts/**/*.js\"",
+    "format:check": "prettier --check \"assets/scripts/**/*.js\"",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -22,6 +27,21 @@
   "author": "EventHorizon.mtg",
   "license": "MIT",
   "devDependencies": {
-    "@axe-core/cli": "^4.10.2"
+    "@axe-core/cli": "^4.10.2",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.5",
+    "prettier": "^3.6.2"
+  },
+  "lint-staged": {
+    "assets/scripts/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

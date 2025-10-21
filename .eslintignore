@@ -1,0 +1,6 @@
+node_modules/
+public/
+resources/
+dist/
+*.min.js
+static/npm/
