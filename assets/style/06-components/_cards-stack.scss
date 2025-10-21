@@ -801,8 +801,9 @@
       object-position: center;
     }
 
-    .card .card__header,
-    .card:not(.is-expanded) .card__header {
+    /* Specificity 1,4,0 via parent #cards prefix wins over desktop 0,3,0 */
+    #cards.cards--stack.cards--panels .card .card__header,
+    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__header {
       /* Header cresce solo quanto necessario per il contenuto */
       flex: 0 0 auto;
       width: 100%;
@@ -812,8 +813,8 @@
       inset: auto;
       transform: none;
       padding: var(--card-mobile-block) var(--card-mobile-inline) calc(var(--card-mobile-block) / 2);
-      writing-mode: horizontal-tb !important;
-      text-orientation: mixed !important;
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
       text-align: left;
       align-items: flex-start;
       justify-content: flex-start;
@@ -825,31 +826,33 @@
       box-shadow: none;
     }
 
-    .card .card__overline,
-    .card:not(.is-expanded) .card__overline {
-      writing-mode: horizontal-tb !important;
-      text-orientation: mixed !important;
-      text-align: left !important;
-      transform: none !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      font-size: 0.7rem !important;
-      text-shadow: none !important;
-      white-space: normal !important;
-      overflow: visible !important;
+    /* Specificity 1,4,0 wins over desktop rules */
+    #cards.cards--stack.cards--panels .card .card__overline,
+    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__overline {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      text-align: left;
+      transform: none;
+      width: 100%;
+      max-width: 100%;
+      font-size: 0.7rem;
+      text-shadow: none;
+      white-space: normal;
+      overflow: visible;
     }
 
-    .card .card__title,
-    .card:not(.is-expanded) .card__title {
-      writing-mode: horizontal-tb !important;
-      text-orientation: mixed !important;
-      text-align: left !important;
-      transform: none !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      font-size: inherit !important;
-      text-shadow: none !important;
-      white-space: normal !important;
+    /* Specificity 1,4,0 wins over desktop rules */
+    #cards.cards--stack.cards--panels .card .card__title,
+    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__title {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      text-align: left;
+      transform: none;
+      width: 100%;
+      max-width: 100%;
+      font-size: inherit;
+      text-shadow: none;
+      white-space: normal;
       /* Uniforma altezza titolo su mobile con clamp */
       --card-title-lines: 2;
       --card-title-lh: 1.3;
@@ -859,7 +862,7 @@
       -webkit-line-clamp: var(--card-title-lines);
       line-clamp: var(--card-title-lines);
       min-block-size: calc(var(--card-title-lines) * var(--card-title-lh) * 1em);
-      overflow: hidden !important;
+      overflow: hidden;
     }
 
     .card .card__body,
@@ -900,8 +903,9 @@
       max-height: calc(var(--card-desc-lines) * var(--card-desc-lh) * 1em);
     }
 
-    .card .card__content {
-      display: none !important;
+    /* Specificity 1,4,0 wins over desktop .card.is-expanded .card__content (0,3,0) */
+    #cards.cards--stack.cards--panels .card .card__content {
+      display: none;
     }
 
     #cards.cards--stack.cards--panels .card .card__actions {
@@ -980,7 +984,7 @@
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:focus-visible,
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:hover,
     #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:focus-visible {
-      color: var(--btn-color) !important;
+      color: var(--btn-color); /* Specificity 1,7,1 sufficient */
     }
 
     /* Ensure stacking order: media below, body above, play within media */
@@ -989,9 +993,10 @@
     .card .card__body { z-index: 3; }
     .card .card__play { z-index: 4; }
 
-    .card.is-expanded,
-    .card.is-collapsed {
-      flex-basis: 100% !important;
+    /* Specificity 1,4,0 wins over desktop .card.is-expanded (0,2,0) */
+    #cards.cards--stack.cards--panels .card.is-expanded,
+    #cards.cards--stack.cards--panels .card.is-collapsed {
+      flex-basis: 100%;
       filter: none;
     }
 
