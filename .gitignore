@@ -25,6 +25,17 @@ axe-reports/
 *.log
 *.tmp
 
+# Backup files
+*.backup
+*.bak
+*.old
+*.OLD
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
 # Allow vendored npm assets mirrored for SRI validation
 !static/npm/
 !static/npm/**/
