@@ -801,9 +801,9 @@
       object-position: center;
     }
 
-    /* Specificity 1,4,0 via parent #cards prefix wins over desktop 0,3,0 */
-    #cards.cards--stack.cards--panels .card .card__header,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__header {
+    /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
+    .card:not(.is-collapsed) .card__header,
+    .card.is-active .card__header {
       /* Header cresce solo quanto necessario per il contenuto */
       flex: 0 0 auto;
       width: 100%;
@@ -826,9 +826,9 @@
       box-shadow: none;
     }
 
-    /* Specificity 1,4,0 wins over desktop rules */
-    #cards.cards--stack.cards--panels .card .card__overline,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__overline {
+    /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
+    .card:not(.is-collapsed) .card__overline,
+    .card.is-active .card__overline {
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
@@ -841,9 +841,9 @@
       overflow: visible;
     }
 
-    /* Specificity 1,4,0 wins over desktop rules */
-    #cards.cards--stack.cards--panels .card .card__title,
-    #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__title {
+    /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
+    .card:not(.is-collapsed) .card__title,
+    .card.is-active .card__title {
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
@@ -903,12 +903,12 @@
       max-height: calc(var(--card-desc-lines) * var(--card-desc-lh) * 1em);
     }
 
-    /* Specificity 1,4,0 wins over desktop .card.is-expanded .card__content (0,3,0) */
-    #cards.cards--stack.cards--panels .card .card__content {
+    /* Specificity 1,3,0 wins over desktop .card.is-expanded .card__content (1,3,0) via cascade */
+    .card .card__content {
       display: none;
     }
 
-    #cards.cards--stack.cards--panels .card .card__actions {
+    .card .card__actions {
       opacity: 1;
       pointer-events: auto;
       /* MOBILE: Forza button in linea (max 2) */
@@ -926,7 +926,7 @@
     }
 
     /* Nascondi scrollbar Webkit */
-    #cards.cards--stack.cards--panels .card .card__actions::-webkit-scrollbar {
+    .card .card__actions::-webkit-scrollbar {
       display: none;
     }
 
@@ -968,23 +968,23 @@
     }
 
     /* Preserve button color on hover for standard btn/pill classes on mobile */
-    #cards.cards--stack.cards--panels .card .card__actions .btn:hover,
-    #cards.cards--stack.cards--panels .card .card__actions .btn:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__actions .pill:hover,
-    #cards.cards--stack.cards--panels .card .card__actions .pill:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__actions .card__btn.pill:hover,
-    #cards.cards--stack.cards--panels .card .card__actions .card__btn.pill:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__actions .card__btn.btn:hover,
-    #cards.cards--stack.cards--panels .card .card__actions .card__btn.btn:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__cta-row .btn:hover,
-    #cards.cards--stack.cards--panels .card .card__cta-row .btn:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__cta-row .pill:hover,
-    #cards.cards--stack.cards--panels .card .card__cta-row .pill:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:hover,
-    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.pill:focus-visible,
-    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:hover,
-    #cards.cards--stack.cards--panels .card .card__cta-row .card__cta.btn:focus-visible {
-      color: var(--btn-color); /* Specificity 1,7,1 sufficient */
+    .card .card__actions .btn:hover,
+    .card .card__actions .btn:focus-visible,
+    .card .card__actions .pill:hover,
+    .card .card__actions .pill:focus-visible,
+    .card .card__actions .card__btn.pill:hover,
+    .card .card__actions .card__btn.pill:focus-visible,
+    .card .card__actions .card__btn.btn:hover,
+    .card .card__actions .card__btn.btn:focus-visible,
+    .card .card__cta-row .btn:hover,
+    .card .card__cta-row .btn:focus-visible,
+    .card .card__cta-row .pill:hover,
+    .card .card__cta-row .pill:focus-visible,
+    .card .card__cta-row .card__cta.pill:hover,
+    .card .card__cta-row .card__cta.pill:focus-visible,
+    .card .card__cta-row .card__cta.btn:hover,
+    .card .card__cta-row .card__cta.btn:focus-visible {
+      color: var(--btn-color); /* Specificity via parent block sufficient */
     }
 
     /* Ensure stacking order: media below, body above, play within media */
@@ -993,9 +993,9 @@
     .card .card__body { z-index: 3; }
     .card .card__play { z-index: 4; }
 
-    /* Specificity 1,4,0 wins over desktop .card.is-expanded (0,2,0) */
-    #cards.cards--stack.cards--panels .card.is-expanded,
-    #cards.cards--stack.cards--panels .card.is-collapsed {
+    /* Specificity 1,4,0 wins over desktop .card.is-expanded (1,2,0) via cascade */
+    .card.is-expanded,
+    .card.is-collapsed {
       flex-basis: 100%;
       filter: none;
     }
