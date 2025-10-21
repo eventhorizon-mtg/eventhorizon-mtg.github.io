@@ -171,11 +171,12 @@
 }
 
 /* VIDEO: Icona play SVG YouTube - Semitrasparente */
-.archive-item.is-video .item-thumb-button {
-  padding: 0 !important; /* NO padding */
-  background: transparent !important; /* NO background */
-  border: none !important; /* NO border */
-  filter: none !important; /* NO filter */
+/* Specificity: 0,3,0 (vince su base 0,2,0 senza !important) */
+.archive-item.is-video .item-thumb .item-thumb-button {
+  padding: 0; /* NO padding */
+  background: transparent; /* NO background */
+  border: none; /* NO border */
+  filter: none; /* NO filter */
 }
 
 .archive-item.is-video .item-thumb-button-icon {
@@ -204,10 +205,11 @@
 }
 
 /* Override hover generale - NO effetti extra */
-.archive-item.is-video .item-thumb-button:hover,
-.archive-item.is-video .item-thumb-button:focus-visible {
-  background: transparent !important;
-  filter: none !important;
+/* Specificity: 0,4,0 (vince su hover base 0,2,0 senza !important) */
+.archive-item.is-video .item-thumb .item-thumb-button:hover,
+.archive-item.is-video .item-thumb .item-thumb-button:focus-visible {
+  background: transparent;
+  filter: none;
 }
 
 /* CONTENT: Pill button con testo - Stile Primary Glass (più piccolo) */
