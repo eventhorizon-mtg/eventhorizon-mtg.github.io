@@ -45,40 +45,14 @@
   </div>
 </section>
 
-<!-- Elenco archivio - SSR Timeline + Progressive Enhancement -->
+<!-- Elenco archivio - Task 3.3: ARIA live region for dynamic results -->
 <section class="archive" aria-label="Risultati" role="region" aria-live="polite">
   <div class="container">
 
-    {{- /* SSR: Renderizza timeline completa da data/archive/items */ -}}
-    {{- $items := slice -}}
-    {{- with .Site.Data.archive.items -}}
-      {{- range $k, $it := . -}}
-        {{- if not $it.draft -}}
-          {{- $items = $items | append $it -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
+    <!-- La lista è popolata da assets/scripts/archive.js -->
+    <ol class="archive-timeline"></ol>
 
-    {{- /* Sort by date desc */ -}}
-    {{- $sortedItems := sort $items "date" "desc" -}}
-    {{- $totalItems := len $sortedItems -}}
-
-    {{- /* Update hero count with actual total */ -}}
-    <script>
-      (function() {
-        var countEl = document.querySelector('.filter-note strong');
-        if (countEl) countEl.textContent = '{{ $totalItems }}';
-      })();
-    </script>
-
-    {{- /* Render timeline with SSR marker */ -}}
-    <ol class="archive-timeline" data-ssr="true" data-total="{{ $totalItems }}">
-      {{- range $index, $item := $sortedItems -}}
-        {{- partial "archive-item.html" (dict "item" $item "index" $index "total" $totalItems) -}}
-      {{- end -}}
-    </ol>
-
-    <!-- Pager (pilotato dal JS per gestire filtri e pagination dinamica) -->
+    <!-- Pager (pilotato dal JS) -->
     <nav class="archive-pager" aria-label="Paginazione risultati" role="navigation">
       <a href="#" class="disabled" aria-disabled="true" aria-label="Pagina precedente" rel="prev">« Prec</a>
       <span class="curr" aria-current="page">Pag. 1 / 1</span>
