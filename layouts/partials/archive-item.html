@@ -31,7 +31,7 @@
 {{- $kindLabel := cond (eq $item.kind "video") "Video" "Contenuto" -}}
 {{- $kindClass := lower $item.kind -}}
 
-<li class="timeline-item" data-item-id="{{ $item.id }}" data-kind="{{ $kindClass }}">
+<li class="timeline-item is-{{ $kindClass }}" data-item-id="{{ $item.id }}" data-kind="{{ $kindClass }}">
   <article class="item" role="button" tabindex="0" aria-label="Apri dettagli: {{ $item.title }}">
 
     {{- /* Media container with fixed size */ -}}

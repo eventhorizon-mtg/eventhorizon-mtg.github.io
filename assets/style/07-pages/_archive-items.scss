@@ -139,7 +139,7 @@
 }
 
 /* Primary button overlay on thumbnail */
-.item-thumb-button {
+.item-thumb__button {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -159,27 +159,27 @@
     opacity var(--transition-fast);
 }
 
-.item-thumb-button:focus-visible {
+.item-thumb__button:focus-visible {
   outline: 3px solid rgba(255, 255, 255, 0.65);
   outline-offset: 4px;
 }
 
 /* Default hover - senza translateY */
-.item-thumb-button:hover,
-.item-thumb-button:focus-visible {
+.item-thumb__button:hover,
+.item-thumb__button:focus-visible {
   transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
 }
 
 /* VIDEO: Icona play SVG YouTube - Semitrasparente */
 /* Specificity: 0,3,0 (vince su base 0,2,0 senza !important) */
-.timeline-item.is-video .item-thumb .item-thumb-button {
+.timeline-item.is-video .item-thumb .item-thumb__button {
   padding: 0; /* NO padding */
   background: transparent; /* NO background */
   border: none; /* NO border */
   filter: none; /* NO filter */
 }
 
-.timeline-item.is-video .item-thumb-button-icon {
+.timeline-item.is-video .item-thumb__button-icon {
   width: clamp(2.25rem, 12vw, 3rem); /* Ridotto ulteriormente: min 36px, max 48px */
   height: auto;
   display: block;
@@ -187,33 +187,33 @@
 }
 
 /* Forma YouTube rossa - SEMITRASPARENTE */
-.timeline-item.is-video .item-thumb-button-shape {
+.timeline-item.is-video .item-thumb__button-shape {
   fill: #ff0000; /* Rosso YouTube */
   opacity: 0.75; /* Semitrasparente */
   transition: opacity 0.2s ease;
 }
 
 /* Simbolo play bianco */
-.timeline-item.is-video .item-thumb-button-symbol {
+.timeline-item.is-video .item-thumb__button-symbol {
   fill: #ffffff;
 }
 
 /* Hover: leggermente più opaco */
-.timeline-item.is-video .item-thumb-button:hover .item-thumb-button-shape,
-.timeline-item.is-video .item-thumb-button:focus-visible .item-thumb-button-shape {
+.timeline-item.is-video .item-thumb__button:hover .item-thumb__button-shape,
+.timeline-item.is-video .item-thumb__button:focus-visible .item-thumb__button-shape {
   opacity: 0.9;
 }
 
 /* Override hover generale - NO effetti extra */
 /* Specificity: 0,4,0 (vince su hover base 0,2,0 senza !important) */
-.timeline-item.is-video .item-thumb .item-thumb-button:hover,
-.timeline-item.is-video .item-thumb .item-thumb-button:focus-visible {
+.timeline-item.is-video .item-thumb .item-thumb__button:hover,
+.timeline-item.is-video .item-thumb .item-thumb__button:focus-visible {
   background: transparent;
   filter: none;
 }
 
 /* CONTENT: Pill button con testo - Stile Primary Glass (più piccolo) */
-.timeline-item.is-content .item-thumb-button {
+.timeline-item.is-content .item-thumb__button {
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--color-primary-500) 35%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
@@ -233,8 +233,8 @@
               opacity var(--transition-fast);
 }
 
-.timeline-item.is-content .item-thumb-button:hover,
-.timeline-item.is-content .item-thumb-button:focus-visible {
+.timeline-item.is-content .item-thumb__button:hover,
+.timeline-item.is-content .item-thumb__button:focus-visible {
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
@@ -567,6 +567,11 @@
   .item-panel {
     max-height: none;
     overflow-y: visible;
+  }
+
+  /* Hide item numbers on mobile */
+  .timeline-item::before {
+    display: none;
   }
 }
 
