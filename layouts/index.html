@@ -138,8 +138,8 @@
                   src="{{ $thumbURL }}"
                   width="720" height="1280"
                   alt="{{ if $it.title }}{{ $it.title }}{{ else }}Immagine contenuto{{ end }}"
-                  loading="{{ if eq $i 0 }}eager{{ else }}lazy{{ end }}"
-                  fetchpriority="{{ if eq $i 0 }}high{{ else }}low{{ end }}"
+                  loading="{{ if lt $i 2 }}eager{{ else }}lazy{{ end }}"
+                  fetchpriority="{{ if eq $i 0 }}high{{ else if eq $i 1 }}high{{ else }}low{{ end }}"
                   decoding="async" />
                 {{ if $playHref }}
                   <span class="card__media-overlay" aria-hidden="true"></span>
