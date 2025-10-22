@@ -130,8 +130,8 @@
     <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous"></noscript>
   {{- else -}}
-    {{/* Development: load CSS synchronously to avoid FOUC */}}
-    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}">
+    <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}"></noscript>
   {{- end -}}
 {{- else -}}
   {{- warnf "style/main.scss non trovato. Verifica il percorso dell'entrypoint SCSS." -}}

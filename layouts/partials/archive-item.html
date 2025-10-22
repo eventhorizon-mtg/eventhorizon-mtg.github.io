@@ -31,11 +31,9 @@
 {{- $kindLabel := cond (eq $item.kind "video") "Video" "Contenuto" -}}
 {{- $kindClass := lower $item.kind -}}
 
-<li class="timeline-item is-{{ $kindClass }}" data-item-id="{{ $item.id }}" data-kind="{{ $kindClass }}">
+<li class="timeline-item" data-item-id="{{ $item.id }}" data-kind="{{ $kindClass }}">
   <article class="item" role="button" tabindex="0" aria-label="Apri dettagli: {{ $item.title }}">
 
-    {{- /* Media container with fixed size */ -}}
-    <div class="item-media">
     {{- /* Thumbnail con play/open button */ -}}
     {{- if $primaryLink -}}
     <a class="item-thumb" href="{{ $primaryLink }}" target="_blank" rel="noopener" aria-label="Apri: {{ $item.title }}">
@@ -78,7 +76,6 @@
       {{- end -}}
     </figure>
     {{- end -}}
-    </div>
 
     {{- /* Content: overline, badge, title, desc, dropdown button */ -}}
     <div class="item-content">
