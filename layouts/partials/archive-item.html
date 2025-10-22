@@ -1,0 +1,117 @@
+{{- /*
+  Partial: archive-item.html
+  Render singolo item archivio (SSR)
+
+  Context:
+    .item   - Item data (dict con id, kind, title, desc, etc.)
+    .index  - Index nell'array (0-based)
+    .total  - Total items count
+*/ -}}
+
+{{- $item := .item -}}
+{{- $index := .index -}}
+{{- $total := .total -}}
+{{- $itemNumber := sub $total $index -}}
+
+{{- /* Determina loading strategy: eager primi 3, lazy resto */ -}}
+{{- $loading := cond (lt $index 3) "eager" "lazy" -}}
+
+{{- /* Estrai primo link primario (per thumb clickable) */ -}}
+{{- $primaryLink := "" -}}
+{{- range $item.links -}}
+  {{- if .primary -}}
+    {{- $primaryLink = .href -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (not $primaryLink) (gt (len $item.links) 0) -}}
+  {{- $primaryLink = (index $item.links 0).href -}}
+{{- end -}}
+
+{{- /* Kind label e badge class */ -}}
+{{- $kindLabel := cond (eq $item.kind "video") "Video" "Contenuto" -}}
+{{- $kindClass := lower $item.kind -}}
+
+<li class="timeline-item" data-item-id="{{ $item.id }}" data-kind="{{ $kindClass }}">
+  <article class="item" role="button" tabindex="0" aria-label="Apri dettagli: {{ $item.title }}">
+
+    {{- /* Thumbnail con play/open button */ -}}
+    {{- if $primaryLink -}}
+    <a class="item-thumb" href="{{ $primaryLink }}" target="_blank" rel="noopener" aria-label="Apri: {{ $item.title }}">
+      {{- if $item.thumb -}}
+      <img
+        src="{{ $item.thumb }}"
+        alt="{{ $item.title }}"
+        width="720"
+        height="1280"
+        loading="{{ $loading }}"
+        decoding="async"
+      >
+      {{- end -}}
+      {{- /* Play/Open button overlay */ -}}
+      <span class="item-thumb__button" aria-hidden="true">
+        {{- if eq $item.kind "video" -}}
+          <svg class="icon icon--play" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        {{- else -}}
+          <svg class="icon icon--open" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        {{- end -}}
+      </span>
+    </a>
+    {{- else -}}
+    <figure class="item-thumb">
+      {{- if $item.thumb -}}
+      <img
+        src="{{ $item.thumb }}"
+        alt="{{ $item.title }}"
+        width="720"
+        height="1280"
+        loading="{{ $loading }}"
+        decoding="async"
+      >
+      {{- end -}}
+    </figure>
+    {{- end -}}
+
+    {{- /* Content: overline, badge, title, desc, dropdown button */ -}}
+    <div class="item-content">
+      <div class="item-header">
+        <div class="item-overline">
+          {{- with $item.overline -}}{{ . }}{{- end -}}
+          <span class="item-badge">{{ $kindLabel }}</span>
+        </div>
+        <h2 class="item-title">{{ $item.title }}</h2>
+      </div>
+      {{- with $item.desc -}}
+        <p class="item-desc-preview">{{ . }}</p>
+      {{- end -}}
+
+      {{- /* Dropdown button (se ci sono link multipli o content esteso) */ -}}
+      {{- $hasDropdown := or (gt (len $item.links) 1) $item.content -}}
+      {{- if $hasDropdown -}}
+      <button
+        class="item-actions-summary"
+        type="button"
+        aria-controls="panel-{{ $item.id }}"
+        aria-expanded="false"
+      >
+        <span class="sr-only">Vedi dettagli</span>
+        <svg class="icon icon--chevron" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      {{- end -}}
+    </div>
+  </article>
+
+  {{- /* Panel (hidden, sarà popolato da JS on-demand) */ -}}
+  {{- if $hasDropdown -}}
+  <div class="item-panel" id="panel-{{ $item.id }}" hidden data-ssr-placeholder="true">
+    {{- /* Placeholder vuoto - JS lo popolerà con content + links */ -}}
+  </div>
+  {{- end -}}
+</li>
