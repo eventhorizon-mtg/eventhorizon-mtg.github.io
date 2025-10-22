@@ -21,7 +21,7 @@
   padding-inline: 0;
 }
 
-.archive-item {
+.timeline-item {
   position: relative;
   display: grid;
   grid-template-columns: 3rem 1fr;
@@ -34,7 +34,7 @@
 
 /* External number (left of card) - stile playlist */
 /* Usa la custom property --item-number impostata da JS per numerazione discendente */
-.archive-item::before {
+.timeline-item::before {
   content: counter(item-num, decimal-leading-zero);
   display: flex;
   align-items: center;
@@ -50,16 +50,16 @@
 }
 
 /* Colori uniformi per tipo */
-.archive-item.is-video::before {
+.timeline-item.is-video::before {
   color: var(--color-special); /* Azzurro */
 }
 
-.archive-item.is-content::before {
+.timeline-item.is-content::before {
   color: var(--color-primary); /* Viola */
 }
 
 /* Horizontal card layout (compact playlist style) - UNIFORM HEIGHT */
-.archive-item article.item {
+.timeline-item article.item {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -79,14 +79,14 @@
 }
 
 /* Hover effect */
-.archive-item article.item:hover {
+.timeline-item article.item:hover {
   border-color: var(--color-border);
   background: var(--color-surface-glass);
 }
 
 /* Open state (mantieni altezza fissa) - DEFAULT (content = viola) */
-.archive-item.is-sheet-open article.item,
-.archive-item article.item.is-open {
+.timeline-item.is-sheet-open article.item,
+.timeline-item article.item.is-open {
   border-color: var(--color-primary);
   background: var(--color-surface-elevated);
   height: 88px;
@@ -95,8 +95,8 @@
 }
 
 /* VIDEO: quando aperto bordo BLU invece di viola */
-.archive-item.is-video.is-sheet-open article.item,
-.archive-item.is-video article.item.is-open {
+.timeline-item.is-video.is-sheet-open article.item,
+.timeline-item.is-video article.item.is-open {
   border-color: var(--color-special);
 }
 
@@ -134,7 +134,7 @@
 }
 
 /* Hover effect come homepage */
-.archive-item:hover .item-thumb img {
+.timeline-item:hover .item-thumb img {
   transform: scale(1.05);
 }
 
@@ -172,14 +172,14 @@
 
 /* VIDEO: Icona play SVG YouTube - Semitrasparente */
 /* Specificity: 0,3,0 (vince su base 0,2,0 senza !important) */
-.archive-item.is-video .item-thumb .item-thumb-button {
+.timeline-item.is-video .item-thumb .item-thumb-button {
   padding: 0; /* NO padding */
   background: transparent; /* NO background */
   border: none; /* NO border */
   filter: none; /* NO filter */
 }
 
-.archive-item.is-video .item-thumb-button-icon {
+.timeline-item.is-video .item-thumb-button-icon {
   width: clamp(2.25rem, 12vw, 3rem); /* Ridotto ulteriormente: min 36px, max 48px */
   height: auto;
   display: block;
@@ -187,33 +187,33 @@
 }
 
 /* Forma YouTube rossa - SEMITRASPARENTE */
-.archive-item.is-video .item-thumb-button-shape {
+.timeline-item.is-video .item-thumb-button-shape {
   fill: #ff0000; /* Rosso YouTube */
   opacity: 0.75; /* Semitrasparente */
   transition: opacity 0.2s ease;
 }
 
 /* Simbolo play bianco */
-.archive-item.is-video .item-thumb-button-symbol {
+.timeline-item.is-video .item-thumb-button-symbol {
   fill: #ffffff;
 }
 
 /* Hover: leggermente più opaco */
-.archive-item.is-video .item-thumb-button:hover .item-thumb-button-shape,
-.archive-item.is-video .item-thumb-button:focus-visible .item-thumb-button-shape {
+.timeline-item.is-video .item-thumb-button:hover .item-thumb-button-shape,
+.timeline-item.is-video .item-thumb-button:focus-visible .item-thumb-button-shape {
   opacity: 0.9;
 }
 
 /* Override hover generale - NO effetti extra */
 /* Specificity: 0,4,0 (vince su hover base 0,2,0 senza !important) */
-.archive-item.is-video .item-thumb .item-thumb-button:hover,
-.archive-item.is-video .item-thumb .item-thumb-button:focus-visible {
+.timeline-item.is-video .item-thumb .item-thumb-button:hover,
+.timeline-item.is-video .item-thumb .item-thumb-button:focus-visible {
   background: transparent;
   filter: none;
 }
 
 /* CONTENT: Pill button con testo - Stile Primary Glass (più piccolo) */
-.archive-item.is-content .item-thumb-button {
+.timeline-item.is-content .item-thumb-button {
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--color-primary-500) 35%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
@@ -233,8 +233,8 @@
               opacity var(--transition-fast);
 }
 
-.archive-item.is-content .item-thumb-button:hover,
-.archive-item.is-content .item-thumb-button:focus-visible {
+.timeline-item.is-content .item-thumb-button:hover,
+.timeline-item.is-content .item-thumb-button:focus-visible {
   background: linear-gradient(135deg,
     color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
@@ -278,11 +278,11 @@
 }
 
 /* Overline colored by type */
-.archive-item.is-video .item-overline {
+.timeline-item.is-video .item-overline {
   color: var(--color-special); /* Azzurro */
 }
 
-.archive-item.is-content .item-overline {
+.timeline-item.is-content .item-overline {
   color: var(--color-primary); /* Viola */
 }
 
@@ -417,21 +417,21 @@
 }
 
 /* VIDEO: quando aperto usa colori BLU invece di viola */
-.archive-item.is-video .item.is-open .item-actions-summary {
+.timeline-item.is-video .item.is-open .item-actions-summary {
   border-color: var(--color-special);
   background: var(--color-special-soft);
 }
 
-.archive-item.is-video .item.is-open .item-actions-summary:hover,
-.archive-item.is-video .item.is-open .item-actions-summary:focus-visible {
+.timeline-item.is-video .item.is-open .item-actions-summary:hover,
+.timeline-item.is-video .item.is-open .item-actions-summary:focus-visible {
   border-color: var(--color-special);
   background: var(--color-special-soft);
 }
 
-.archive-item.is-video .item.is-open .item-actions-summary:hover::before,
-.archive-item.is-video .item.is-open .item-actions-summary:hover::after,
-.archive-item.is-video .item.is-open .item-actions-summary:focus-visible::before,
-.archive-item.is-video .item.is-open .item-actions-summary:focus-visible::after {
+.timeline-item.is-video .item.is-open .item-actions-summary:hover::before,
+.timeline-item.is-video .item.is-open .item-actions-summary:hover::after,
+.timeline-item.is-video .item.is-open .item-actions-summary:focus-visible::before,
+.timeline-item.is-video .item.is-open .item-actions-summary:focus-visible::after {
   background: var(--color-special);
 }
 
