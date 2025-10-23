@@ -1,4 +1,4 @@
-Ôªø+++
++++
 draft = false
 slug = "guida-articoli"
 title = "Guida: creare un articolo"
@@ -15,8 +15,8 @@ aliases = ["/articles/test-2/"]
 - Cover consigliata: `static/images/articles/<slug>/cover.webp` e nel front matter `cover = "images/articles/<slug>/cover.webp"`.
 - Immagini nel corpo: usa path assoluti sotto `/images/...` oppure percorsi relativi a `static/`.
 - Link: usa sempre la forma Markdown `[testo](https://...)` (niente URL nude) per evitare problemi di wrapping e lint.
-- Tabelle e codice: sono gi√† gestiti in modo responsive (scroll orizzontale solo quando serve).
-- Bozza: mantieni `draft = true` finch√© non vuoi pubblicare.
+- Tabelle e codice: sono gi‡ gestiti in modo responsive (scroll orizzontale solo quando serve).
+- Bozza: mantieni `draft = true` finchÈ non vuoi pubblicare.
 - Crea un nuovo articolo:
 
 ```bash
@@ -27,11 +27,11 @@ hugo new article/il-tuo-slug.md
 
 Questo articolo include tutti gli elementi tipici per testare (e mostrare) la resa responsive su vari viewport.
 
-> Nota: questo articolo ‚îú¬ø un catalogo ESEMPIO COMPLETO di tutte le personalizzazioni che puoi usare nei testi.
+> Nota: questo articolo +ø un catalogo ESEMPIO COMPLETO di tutte le personalizzazioni che puoi usare nei testi.
 
 ### Test 1: Testo Lungo e Word Breaking
 
-Questo √® un paragrafo con una parola estremamente lunga per testare il word breaking: supercalifragilisticexpialidociousantidisestablishmentarianismthisisaverylongwordthatshouldbreakonmobiledevices
+Questo Ë un paragrafo con una parola estremamente lunga per testare il word breaking: supercalifragilisticexpialidociousantidisestablishmentarianismthisisaverylongwordthatshouldbreakonmobiledevices
 
 URL lungo per testare link: <https://www.esempio-di-url-molto-lungo-per-testare-overflow.com/questa/path/molto/lunga/che/dovrebbe/andare/a/capo>
 
@@ -50,20 +50,20 @@ Ecco un esempio di codice inline: `const veryLongVariableNameThatShouldBreakProp
 ### Test 4: Blocco di Codice Lungo
 
 ```javascript
-// Questo ‚îú¬ø un blocco di codice molto lungo che dovrebbe essere scrollabile orizzontalmente su mobile
+// Questo +ø un blocco di codice molto lungo che dovrebbe essere scrollabile orizzontalmente su mobile
 function esempioFunzioneConParametriMoltiEUnNomeEstremamenteLungoPerTestareLoScrollOrizzontale(parametro1, parametro2, parametro3, parametro4) {
-  const variabileMoltoLungaPerTestareLoScrollOrizzontale = "Questo ‚îú¬ø un valore molto lungo";
-  console.log("Questa riga √® estremamente lunga e dovrebbe richiedere scroll orizzontale su dispositivi mobili ma non dovrebbe rompere il layout della pagina");
+  const variabileMoltoLungaPerTestareLoScrollOrizzontale = "Questo +ø un valore molto lungo";
+  console.log("Questa riga Ë estremamente lunga e dovrebbe richiedere scroll orizzontale su dispositivi mobili ma non dovrebbe rompere il layout della pagina");
   return variabileMoltoLungaPerTestareLoScrollOrizzontale.split('').map(char => char.toUpperCase()).join('');
 }
 ```
 
 ### Test 5: Lista con Elementi Lunghi
 
-- Questo ‚îú¬ø un elemento di lista molto lungo che contiene una descrizione dettagliata per testare come il testo va a capo su dispositivi mobili e se mantiene la corretta indentazione e spaziatura
+- Questo +ø un elemento di lista molto lungo che contiene una descrizione dettagliata per testare come il testo va a capo su dispositivi mobili e se mantiene la corretta indentazione e spaziatura
 - URL in lista: <https://www.esempio-url-lunghissimo-nella-lista.com/path/molto/lungo/da/testare>
 - Elemento con parola lunga: supercalifragilisticexpialidocious
-- **Elemento enfatizzato**: Testo con formattazione **grassetto** e *corsivo* mescolati insieme con un link [questo √® un link molto lungo che dovrebbe andare a capo](https://esempio.com)
+- **Elemento enfatizzato**: Testo con formattazione **grassetto** e *corsivo* mescolati insieme con un link [questo Ë un link molto lungo che dovrebbe andare a capo](https://esempio.com)
 
 ### Test 6: Lista Numerata
 
@@ -73,7 +73,7 @@ function esempioFunzioneConParametriMoltiEUnNomeEstremamenteLungoPerTestareLoScr
 
 ### Test 7: Blockquote
 
-> Questo ‚îú¬ø un blockquote molto lungo che serve per testare come il testo viene gestito all'interno delle citazioni su diversi viewport. Il blockquote dovrebbe mantenere una buona leggibilit‚îú√° anche su dispositivi mobili piccoli e il testo dovrebbe andare a capo correttamente senza causare overflow orizzontale. Questo ‚îú¬ø particolarmente importante per citazioni che contengono URL lunghi come <https://www.esempio-url-lungo-in-blockquote.com/path/molto/lunga> o parole tecniche lunghe.
+> Questo +ø un blockquote molto lungo che serve per testare come il testo viene gestito all'interno delle citazioni su diversi viewport. Il blockquote dovrebbe mantenere una buona leggibilit+· anche su dispositivi mobili piccoli e il testo dovrebbe andare a capo correttamente senza causare overflow orizzontale. Questo +ø particolarmente importante per citazioni che contengono URL lunghi come <https://www.esempio-url-lungo-in-blockquote.com/path/molto/lunga> o parole tecniche lunghe.
 
 ### Test 8: Pulsanti
 
@@ -115,7 +115,7 @@ Immagine allineata al centro usando attribute list:
 # Python code con righe molto lunghe
 def funzione_con_nome_estremamente_lungo_per_testare_overflow(parametro_uno, parametro_due, parametro_tre):
     """
-    Questa √® una docstring molto lunga che serve per testare come viene gestito
+    Questa Ë una docstring molto lunga che serve per testare come viene gestito
     il testo all'interno dei blocchi di codice su dispositivi mobili.
     """
     dizionario_di_esempio = {
@@ -129,7 +129,7 @@ Esempio di allineamenti del testo:
 
 Paragrafo centrato con attribute list {.text-center}:
 
-Questo testo √® centrato
+Questo testo Ë centrato
 {.text-center}
 
 Paragrafo giustificato con shortcode align:
@@ -141,7 +141,7 @@ Questo paragrafo dimostra l'uso dello shortcode di allineamento per giustificare
 ### Test 12: HTML Inline
 
 {{< article-box style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;" >}}
-**Contenitore HTML personalizzato:** Questo testo ‚îú¬ø all'interno di un div con stili inline per testare la gestione di HTML custom all'interno degli articoli.
+**Contenitore HTML personalizzato:** Questo testo +ø all'interno di un div con stili inline per testare la gestione di HTML custom all'interno degli articoli.
 
 - Elemento lista dentro HTML
 - Altro elemento con `codice inline`
@@ -150,7 +150,7 @@ Questo paragrafo dimostra l'uso dello shortcode di allineamento per giustificare
 Varianti di box (info/avviso/successo/pericolo):
 
 {{< article-box class="article-box article-box--info" >}}
-Questa √® una nota informativa.
+Questa Ë una nota informativa.
 {{< /article-box >}}
 
 {{< article-box class="article-box article-box--warning" >}}
@@ -167,11 +167,11 @@ Errore critico: controlla i log.
 
 ### Test 13: Link Multipli
 
-Ecco alcuni link uno dopo l'altro: [Link 1](https://esempio1.com) ‚î¨√Ä [Link 2 con testo lungo](https://esempio2.com) ‚î¨√Ä [Link 3](https://esempio3.com) ‚î¨√Ä [Link 4 con descrizione estesa](https://esempio4.com)
+Ecco alcuni link uno dopo l'altro: [Link 1](https://esempio1.com) -¿ [Link 2 con testo lungo](https://esempio2.com) -¿ [Link 3](https://esempio3.com) -¿ [Link 4 con descrizione estesa](https://esempio4.com)
 
 Link esterno con testo lungo allineato a destra:
 
-[Questo ‚îú¬ø un link molto lungo verso una risorsa esterna che dovrebbe andare a capo correttamente senza rompere il layout](https://www.example.com/path/molto/lungo/di/test/che/si/prolunga/ancora/di/piu)
+[Questo +ø un link molto lungo verso una risorsa esterna che dovrebbe andare a capo correttamente senza rompere il layout](https://www.example.com/path/molto/lungo/di/test/che/si/prolunga/ancora/di/piu)
 {.text-right}
 
 ### Test 14: Nested Lists
@@ -179,7 +179,7 @@ Link esterno con testo lungo allineato a destra:
 - Primo livello
   - Secondo livello item 1
   - Secondo livello item 2 con testo molto lungo per testare l'indentazione su dispositivi mobili
-    - Terzo livello con testo ancora pi‚îú‚ï£ lungo per verificare la gestione delle liste annidate profonde
+    - Terzo livello con testo ancora pi+¶ lungo per verificare la gestione delle liste annidate profonde
   - Ritorno al secondo livello
 - Primo livello item 2
   - Altro elemento secondo livello con `codice inline molto_lungo_per_testare`
@@ -220,12 +220,12 @@ Di seguito una raccolta veloce e copiabile delle personalizzazioni disponibili n
 
 Paragrafo centrato:
 
-Questo paragrafo ‚îú¬ø centrato
+Questo paragrafo +ø centrato
 {.text-center}
 
 Paragrafo allineato a destra:
 
-Questo paragrafo ‚îú¬ø allineato a destra
+Questo paragrafo +ø allineato a destra
 {.text-right}
 
 Immagine centrata (stessa sintassi):
@@ -251,7 +251,7 @@ Testo centrato usando lo shortcode.
 
 ### Pulsanti: dimensioni
 
-Di default i pulsanti negli articoli sono **piccoli** per integrarsi meglio con il testo. Per usare pulsanti pi‚îú‚ï£ grandi e prominenti, aggiungi la classe `.btn-lg` o `.btn--large`:
+Di default i pulsanti negli articoli sono **piccoli** per integrarsi meglio con il testo. Per usare pulsanti pi+¶ grandi e prominenti, aggiungi la classe `.btn-lg` o `.btn--large`:
 
 **Pulsanti piccoli (default):**
 
@@ -345,23 +345,25 @@ Varianti "glass" circolari:
 </button>
 ```
 
-### Pulsanti rounded
+### Pulsanti rotondi (icone)
 
-I pulsanti con bordo arrotondato (pill) funzionano con tutte le colorazioni, incluse le varianti brand ‚Äúglass‚Äù.
+I pulsanti con bordo arrotondato (pill) funzionano con tutte le colorazioni, incluse le varianti brand ìglassî.
 
 Esempio live:
 
 <p class="round-buttons-demo">
-  <a href="#" class="btn btn--rounded btn--primary">Primary</a>
-  <a href="#" class="btn btn--rounded btn--secondary">Secondary</a>
-  <a href="#" class="btn btn--rounded btn--special">Special</a>
-  <a href="#" class="btn btn--rounded btn--accent">Accent</a>
-  <a href="#" class="btn btn--rounded btn--yt-glass" aria-label="YouTube"><span class="contact__icon icon-youtube" aria-hidden="true"></span></a>
-  <a href="#" class="btn btn--rounded btn--mox-glass">Mox</a>
-  <a href="#" class="btn btn--rounded btn--scry-glass">Scry</a>
-  <a href="#" class="btn btn--rounded btn--edh-glass">EDH</a>
-  <a href="#" class="btn btn--rounded btn--archi-glass">Archi</a>
-  
+  <button class="btn btn--circle btn--icon-sm btn--secondary" aria-label="Link">
+    <span class="contact__icon icon-link" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--circle btn--icon-md btn--yt-glass" aria-label="YouTube">
+    <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--circle btn--icon-lg btn--special-glass" aria-label="Discord">
+    <span class="contact__icon icon-discord" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--circle btn--icon-md btn--accent" aria-label="Email">
+    <span class="contact__icon icon-mail" aria-hidden="true"></span>
+  </button>
 </p>
 
 Snippet HTML:
@@ -375,21 +377,21 @@ Snippet HTML:
 
 ### Pulsanti solo icona
 
-I ‚Äúicon-only‚Äù sono bottoni circolari che contengono solo un‚Äôicona. Taglie disponibili: `btn--icon-sm`, `btn--icon-md` (default), `btn--icon-lg`.
+I ìicon-onlyî sono bottoni circolari che contengono solo uníicona. Taglie disponibili: `btn--icon-sm`, `btn--icon-md` (default), `btn--icon-lg`.
 
 Esempio live:
 
 <p class="round-buttons-demo">
-  <button class="btn btn--icon-only btn--icon-sm btn--secondary" aria-label="Apri link">
+  <button class="btn btn--circle btn--icon-sm btn--secondary" aria-label="Link">
     <span class="contact__icon icon-link" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--icon-only btn--icon-md btn--yt-glass" aria-label="YouTube">
+  <button class="btn btn--circle btn--icon-md btn--yt-glass" aria-label="YouTube">
     <span class="contact__icon icon-youtube" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--icon-only btn--icon-lg btn--special-glass" aria-label="Discord">
+  <button class="btn btn--circle btn--icon-lg btn--special-glass" aria-label="Discord">
     <span class="contact__icon icon-discord" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--icon-only btn--icon-md btn--accent" aria-label="Email">
+  <button class="btn btn--circle btn--icon-md btn--accent" aria-label="Email">
     <span class="contact__icon icon-mail" aria-hidden="true"></span>
   </button>
 </p>
