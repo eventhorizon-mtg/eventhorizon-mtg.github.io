@@ -444,4 +444,3 @@ Immagine centrata:
 const msg = "Hello, EventHorizon";
 console.log(msg);
 ```
-
