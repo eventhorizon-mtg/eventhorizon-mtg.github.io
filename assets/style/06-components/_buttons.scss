@@ -85,9 +85,38 @@
   }
 }
 
+
 /* ============================================
-   BUTTON VARIANTS
+   BUTTON MODIFIERS
+   Rounded: works with all color variants (primary, secondary, special, accent and brand glass variants)
    ============================================ */
+
+/* Pill/rounded shape modifier */
+.btn--rounded,
+.btn.rounded,
+.pill.rounded {
+  border-radius: var(--radius-full);
+  line-height: 1.15;
+}
+
+/* Enlarge icons inside rounded buttons */
+.btn--rounded > svg,
+.btn--rounded > img,
+.btn--rounded > .icon,
+.btn--rounded > .contact__icon,
+.btn.rounded > svg,
+.btn.rounded > img,
+.btn.rounded > .icon,
+.btn.rounded > .contact__icon,
+.pill.rounded > svg,
+.pill.rounded > img,
+.pill.rounded > .icon,
+.pill.rounded > .contact__icon {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+
 
 // Button Primary //
 .btn--primary, .btn--base {
