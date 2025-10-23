@@ -16,7 +16,14 @@
   height: var(--btn-size);
   padding: 0; /* content centered by grid */
   border-radius: 50%;
-  line-height: 1;`n  flex: 0 0 auto;`n  overflow: hidden;`n  white-space: nowrap;`n  font-size: 0;`n  user-select: none;`n  -webkit-tap-highlight-color: transparent;`n  touch-action: manipulation;
+  line-height: 1;
+  flex: 0 0 auto;
+  overflow: hidden; /* text will not affect shape */
+  white-space: nowrap;
+  font-size: 0; /* hide accidental text, use aria-label for a11y */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 
   /* Visuals (work standalone or with .btn) */
   background: var(--btn-bg);
@@ -34,7 +41,8 @@
 /* Icon sizing helpers (works for svg/img or .icon utility) */
 .btn--circle > svg,
 .btn--circle > img,
-.btn--circle > .icon {
+.btn--circle > .icon,
+.btn--circle > .contact__icon {
   width: calc(var(--btn-size) * 0.62);
   height: calc(var(--btn-size) * 0.62);
 }
@@ -120,8 +128,8 @@
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Aliases: keep legacy classes circular */
-.btn--rounded, .btn.rounded, .pill.rounded {
+/* Aliases: keep legacy classes circular (no .pill here) */
+.btn--rounded, .btn.rounded {
   display: inline-grid;
   place-items: center;
   width: var(--btn-size, 44px);
