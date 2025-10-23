@@ -1,9 +1,9 @@
-��+++
+﻿+++
 draft = false
 slug = "guida-articoli"
-title = "guida articoli"
-date = "2025-10-23T19:26:00.000+02:00"
-description = "Questa è la guida a come creare articoli"
+title = "Guida: creare un articolo"
+date = "2025-10-15T17:16:00+02:00"
+description = "Esempio completo di articolo: front matter, slug/alias, cover, immagini, link, tabelle, codice e componenti."
 tags = ["guida", "hugo", "articoli", "responsive"]
 cover = ""
 aliases = ["/articles/test-2/"]
@@ -345,6 +345,63 @@ Varianti "glass" circolari:
 </button>
 ```
 
+### Pulsanti rounded
+
+I pulsanti con bordo arrotondato (pill) funzionano con tutte le colorazioni, incluse le varianti brand “glass”.
+
+Esempio live:
+
+<p class="round-buttons-demo">
+  <a href="#" class="btn btn--rounded btn--primary">Primary</a>
+  <a href="#" class="btn btn--rounded btn--secondary">Secondary</a>
+  <a href="#" class="btn btn--rounded btn--special">Special</a>
+  <a href="#" class="btn btn--rounded btn--accent">Accent</a>
+  <a href="#" class="btn btn--rounded btn--yt-glass" aria-label="YouTube"><span class="contact__icon icon-youtube" aria-hidden="true"></span></a>
+  <a href="#" class="btn btn--rounded btn--mox-glass">Mox</a>
+  <a href="#" class="btn btn--rounded btn--scry-glass">Scry</a>
+  <a href="#" class="btn btn--rounded btn--edh-glass">EDH</a>
+  <a href="#" class="btn btn--rounded btn--archi-glass">Archi</a>
+  
+</p>
+
+Snippet HTML:
+
+```html
+<a class="btn btn--rounded btn--yt-glass" aria-label="YouTube">
+  <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+</a>
+<a class="btn btn--rounded btn--mox-glass">Mox</a>
+```
+
+### Pulsanti solo icona
+
+I “icon-only” sono bottoni circolari che contengono solo un’icona. Taglie disponibili: `btn--icon-sm`, `btn--icon-md` (default), `btn--icon-lg`.
+
+Esempio live:
+
+<p class="round-buttons-demo">
+  <button class="btn btn--icon-only btn--icon-sm btn--secondary" aria-label="Apri link">
+    <span class="contact__icon icon-link" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--icon-only btn--icon-md btn--yt-glass" aria-label="YouTube">
+    <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--icon-only btn--icon-lg btn--special-glass" aria-label="Discord">
+    <span class="contact__icon icon-discord" aria-hidden="true"></span>
+  </button>
+  <button class="btn btn--icon-only btn--icon-md btn--accent" aria-label="Email">
+    <span class="contact__icon icon-mail" aria-hidden="true"></span>
+  </button>
+</p>
+
+Snippet HTML:
+
+```html
+<button class="btn btn--icon-only btn--icon-md btn--yt-glass" aria-label="YouTube">
+  <span class="contact__icon icon-youtube" aria-hidden="true"></span>
+</button>
+```
+
 ### Box / Callout
 
 {{< article-box class="article-box article-box--info" >}}
@@ -387,3 +444,4 @@ Immagine centrata:
 const msg = "Hello, EventHorizon";
 console.log(msg);
 ```
+
