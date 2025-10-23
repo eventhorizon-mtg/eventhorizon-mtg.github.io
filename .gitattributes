@@ -5,3 +5,7 @@
 docs/style/*.css -text
 docs/style/**/*.css -text
 docs/script/*.js  -text
+
+# Ensure Git hooks use LF to avoid /usr/bin/env errors on Windows
+.husky/* text eol=lf
+
