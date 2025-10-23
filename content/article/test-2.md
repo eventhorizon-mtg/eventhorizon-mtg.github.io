@@ -283,127 +283,45 @@ Con lo shortcode `article-buttons`, aggiungi `btn-lg` o `btn--large` alla classe
   label2="Pulsante Piccolo" href2="#" class2="btn--secondary" >}}
 <!-- markdownlint-enable MD034 -->
 
-### Pulsanti tondi
+### Pulsanti rotondi (icon-only)
 
-Shortcode equivalente:
+I pulsanti rotondi sono bottoni circolari che contengono solo un’icona. La forma è sempre un cerchio perfetto; la dimensione si controlla con la variabile CSS --btn-size (default 44px). Le varianti di colore si ottengono aggiungendo le classi già esistenti (primary/secondary/special/accent e brand glass).
 
-{{< round-buttons >}}
-
-Shortcode con parametri:
-
-```go-html-template
-{{< round-buttons size="lg" items="link:primary,mail:secondary,discord:special-glass,youtube:accent-glass,i:circle-outline" >}}
-```
-
-I pulsanti tondi riusano le colorazioni esistenti e sono ideali per azioni solo-icona.
-
-Esempio live:
-
-<div class="round-buttons-demo">
-  <button class="btn btn--circle btn--primary btn--circle-md" aria-label="Apri link">
-    <span class="contact__icon icon-link" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--secondary btn--circle-sm" aria-label="Email">
-    <span class="contact__icon icon-mail" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--special-glass btn--circle-lg" aria-label="Special action">
-    <span class="contact__icon icon-discord" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--accent-glass btn--circle-md" aria-label="YouTube">
-    <span class="contact__icon icon-youtube" aria-hidden="true"></span>
-  </button>
-  <button class="btn--circle btn--circle-primary btn--circle-md" aria-label="Info">i</button>
-  <button class="btn--circle btn--circle-outline btn--circle-md" aria-label="Vuoto">&bull;</button>
-</div>
-
-Snippet HTML base (con `.btn`):
-
-```html
-<button class="btn btn--circle btn--primary btn--circle-md" aria-label="Azione">
-  <span class="contact__icon icon-link" aria-hidden="true"></span>
-  <!-- In alternativa, una lettera/simbolo: es. i, &bull; -->
-</button>
-```
-
-Varianti standalone (senza `.btn`) e taglie:
-
-```html
-<!-- Colori: primary | secondary | special | accent | success | warning | error | info -->
-<button class="btn--circle btn--circle-primary btn--circle-sm" aria-label="Azione">i</button>
-<button class="btn--circle btn--circle-secondary btn--circle-md" aria-label="Azione">&bull;</button>
-<button class="btn--circle btn--circle-accent btn--circle-lg" aria-label="Azione">+</button>
-
-<!-- Outline neutro -->
-<button class="btn--circle btn--circle-outline btn--circle-md" aria-label="Azione">&bull;</button>
-```
-
-Varianti "glass" circolari:
-
-```html
-<button class="btn btn--circle btn--circle-primary-glass" aria-label="Azione">
-  <span class="contact__icon icon-link" aria-hidden="true"></span>
-</button>
-```
-
-### Pulsanti rotondi (icone)
-
-I pulsanti con bordo arrotondato (pill) funzionano con tutte le colorazioni, incluse le varianti brand “glass”.
-
-Esempio live:
+Esempi live:
 
 <p class="round-buttons-demo">
-  <button class="btn btn--circle btn--icon-sm btn--secondary" aria-label="Link">
+  <button class="rounded btn--secondary" style="--btn-size:36px" aria-label="Link">
     <span class="contact__icon icon-link" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--circle btn--icon-md btn--yt-glass" aria-label="YouTube">
+  <button class="rounded btn--yt-glass" style="--btn-size:44px" aria-label="YouTube">
     <span class="contact__icon icon-youtube" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--circle btn--icon-lg btn--special-glass" aria-label="Discord">
+  <button class="rounded btn--special-glass" style="--btn-size:56px" aria-label="Discord">
     <span class="contact__icon icon-discord" aria-hidden="true"></span>
   </button>
-  <button class="btn btn--circle btn--icon-md btn--accent" aria-label="Email">
+  <button class="rounded btn--accent" style="--btn-size:44px" aria-label="Email">
     <span class="contact__icon icon-mail" aria-hidden="true"></span>
+  </button>
+  <button class="rounded btn--mox-glass" style="--btn-size:44px" aria-label="Moxfield">
+    <span class="contact__icon icon-link" aria-hidden="true"></span>
+  </button>
+  <button class="rounded btn--scry-glass" style="--btn-size:44px" aria-label="Scryfall">
+    <span class="contact__icon icon-link" aria-hidden="true"></span>
   </button>
 </p>
 
-Snippet HTML:
+Snippet base:
 
-```html
-<a class="btn btn--rounded btn--yt-glass" aria-label="YouTube">
-  <span class="contact__icon icon-youtube" aria-hidden="true"></span>
-</a>
-<a class="btn btn--rounded btn--mox-glass">Mox</a>
-```
-
-### Pulsanti solo icona
-
-I “icon-only” sono bottoni circolari che contengono solo un’icona. Taglie disponibili: `btn--icon-sm`, `btn--icon-md` (default), `btn--icon-lg`.
-
-Esempio live:
-
-<p class="round-buttons-demo">
-  <button class="btn btn--circle btn--icon-sm btn--secondary" aria-label="Link">
-    <span class="contact__icon icon-link" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--icon-md btn--yt-glass" aria-label="YouTube">
-    <span class="contact__icon icon-youtube" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--icon-lg btn--special-glass" aria-label="Discord">
-    <span class="contact__icon icon-discord" aria-hidden="true"></span>
-  </button>
-  <button class="btn btn--circle btn--icon-md btn--accent" aria-label="Email">
-    <span class="contact__icon icon-mail" aria-hidden="true"></span>
-  </button>
-</p>
-
-Snippet HTML:
-
-```html
-<button class="btn btn--icon-only btn--icon-md btn--yt-glass" aria-label="YouTube">
+`html
+<button class="rounded btn--yt-glass" aria-label="YouTube" style="--btn-size:56px">
   <span class="contact__icon icon-youtube" aria-hidden="true"></span>
 </button>
-```
+`
 
+Note:
+- Usare sempre ria-label descrittivo (non c’è testo visibile nel bottone).
+- Personalizza la dimensione con --btn-size per coerenza visiva.
+- Le varianti colore non modificano la forma.
 ### Box / Callout
 
 {{< article-box class="article-box article-box--info" >}}
@@ -446,3 +364,4 @@ Immagine centrata:
 const msg = "Hello, EventHorizon";
 console.log(msg);
 ```
+
