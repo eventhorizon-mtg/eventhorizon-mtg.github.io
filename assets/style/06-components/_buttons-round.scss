@@ -1,0 +1,122 @@
+/* ==========================================
+   BUTTONS - CIRCULAR VARIANTS
+   Reuse existing .btn color variants (primary, secondary, special, accent, glass)
+   Usage: <button class="btn btn--circle btn--primary">...</button>
+   ========================================== */
+
+/* Base circular shape */
+.btn--circle {
+  /* Size token (override via size modifiers below) */
+  --btn-size: 44px;
+
+  /* Shape and layout */
+  display: inline-grid;
+  place-items: center;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  padding: 0; /* content centered by grid */
+  border-radius: var(--radius-full);
+  line-height: 1;
+
+  /* Visuals (work standalone or with .btn) */
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  transition: var(--transition-colors);
+}
+
+/* Sizes */
+.btn--circle-sm { --btn-size: 36px; }
+.btn--circle-md { --btn-size: 44px; }
+.btn--circle-lg { --btn-size: 56px; }
+
+/* Icon sizing helpers (works for svg/img or .icon utility) */
+.btn--circle > svg,
+.btn--circle > img,
+.btn--circle > .icon {
+  width: calc(var(--btn-size) * 0.5);
+  height: calc(var(--btn-size) * 0.5);
+}
+
+/* Hover/focus polish - rely on existing .btn transitions and variants */
+.btn--circle:hover,
+.btn--circle:focus-visible {
+  /* no transform to keep circle steady */
+}
+
+/* Disabled state */
+.btn--circle[disabled],
+.btn--circle.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Optional: outline style for neutral circular buttons */
+.btn--circle-outline {
+  --btn-bg: transparent;
+  --btn-color: var(--color-text);
+  --btn-border: var(--color-border);
+  --btn-shadow: none;
+}
+
+/* Color variants shortcut - map to existing .btn gradients when used standalone
+   (Still recommended to pair with .btn for consistent typography and spacing tokens) */
+.btn--circle-primary   { --btn-bg: var(--gradient-primary);   --btn-color: var(--color-text);         --btn-border: var(--color-primary); }
+.btn--circle-secondary { --btn-bg: var(--gradient-secondary); --btn-color: var(--color-text);         --btn-border: var(--color-secondary); }
+.btn--circle-special   { --btn-bg: var(--gradient-special);   --btn-color: var(--color-text);         --btn-border: var(--color-special); }
+.btn--circle-accent    { --btn-bg: var(--gradient-accent);    --btn-color: var(--color-text-invert);  --btn-border: var(--color-accent); }
+
+/* Semantic colors (optional) */
+.btn--circle-success { --btn-bg: linear-gradient(135deg, var(--color-success-700) 0%, var(--color-success-500) 100%); --btn-color: var(--color-text); --btn-border: var(--color-success-500); }
+.btn--circle-warning { --btn-bg: linear-gradient(135deg, var(--color-warning-700) 0%, var(--color-warning-500) 100%); --btn-color: var(--color-text); --btn-border: var(--color-warning-500); }
+.btn--circle-error   { --btn-bg: linear-gradient(135deg, var(--color-error-700)   0%, var(--color-error-500)   100%); --btn-color: var(--color-text); --btn-border: var(--color-error-500); }
+.btn--circle-info    { --btn-bg: linear-gradient(135deg, var(--color-info-700)    0%, var(--color-info-500)    100%); --btn-color: var(--color-text); --btn-border: var(--color-info-500); }
+
+/* Glass variants for circular buttons (match existing glass look & feel) */
+.btn--circle-primary-glass {
+  --btn-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-primary-500) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary-300) 35%, transparent) 100%);
+  --btn-color: var(--color-text);
+  --btn-border: color-mix(in srgb, var(--color-primary-500) 55%, transparent);
+  --btn-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.btn--circle-secondary-glass {
+  --btn-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-secondary-500) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-secondary-300) 35%, transparent) 100%);
+  --btn-color: var(--color-text);
+  --btn-border: color-mix(in srgb, var(--color-secondary-500) 55%, transparent);
+  --btn-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.btn--circle-special-glass {
+  --btn-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-special-600) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-special-400) 35%, transparent) 100%);
+  --btn-color: var(--color-text);
+  --btn-border: color-mix(in srgb, var(--color-special-600) 55%, transparent);
+  --btn-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.btn--circle-accent-glass {
+  --btn-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-accent-600) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-400) 35%, transparent) 100%);
+  --btn-color: var(--color-text-invert);
+  --btn-border: color-mix(in srgb, var(--color-accent-600) 55%, transparent);
+  --btn-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+

@@ -1,0 +1,45 @@
+{{/*
+  Shortcode: round-buttons
+  Scopo: mostra un set riusabile di pulsanti tondi con varianti colore esistenti.
+
+  Parametri opzionali:
+    - size: sm | md | lg (default: md)
+    - items: CSV di coppie icon:variant
+      Esempio: "link:primary,mail:secondary,discord:special-glass,youtube:accent-glass,i:circle-primary,&bull;:circle-outline"
+
+  Note:
+    - Per variant standard usa .btn: primary, secondary, special, accent, primary-glass, ...
+    - Per variant standalone circolare usa prefisso circle- (es. circle-primary, circle-outline)
+    - Icone supportate: link, mail, youtube, instagram, tiktok, telegram, discord, threads
+    - Se l'"icona" non è tra quelle note, verrà resa come testo.
+*/}}
+
+{{- $size := .Get "size" | default "md" -}}
+{{- $items := .Get "items" | default "link:primary,mail:secondary,discord:special-glass,youtube:accent-glass,i:circle-primary,&bull;:circle-outline" -}}
+{{- $known := slice "link" "mail" "youtube" "instagram" "tiktok" "telegram" "discord" "threads" -}}
+
+<p class="round-buttons-demo">
+{{- range $raw := (split $items ",") -}}
+  {{- $pair := split (trim $raw " ") ":" -}}
+  {{- $icon := index $pair 0 -}}
+  {{- $variant := (index $pair 1 | default "primary") -}}
+  {{- $useBaseBtn := not (hasPrefix $variant "circle-") -}}
+  {{- $classes := slice "btn--circle" (printf "btn--circle-%s" $size) -}}
+  {{- if $useBaseBtn -}}
+    {{- $classes = $classes | append "btn" (printf "btn--%s" $variant) -}}
+  {{- else -}}
+    {{- $suffix := replace $variant "circle-" "" -}}
+    {{- $classes = $classes | append (printf "btn--circle-%s" $suffix) -}}
+  {{- end -}}
+
+  <button type="button" class="{{ delimit $classes " " }}" aria-label="{{ $icon | title }}">
+    {{- if in $known $icon -}}
+      <span class="contact__icon icon-{{ $icon }}" aria-hidden="true"></span>
+    {{- else -}}
+      {{ $icon }}
+    {{- end -}}
+  </button>
+{{- end -}}
+</p>
+
+
