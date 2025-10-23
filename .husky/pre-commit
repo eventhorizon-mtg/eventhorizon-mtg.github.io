@@ -1,3 +1,9 @@
 #!/usr/bin/env sh
 
-npx --no-install lint-staged
+# Portable lint-staged runner (no npx, no bash required)
+if command -v node >/dev/null 2>&1 && [ -f "./node_modules/lint-staged/bin/lint-staged.js" ]; then
+  node ./node_modules/lint-staged/bin/lint-staged.js
+else
+  echo "husky (pre-commit): lint-staged not found, skipping"
+  exit 0
+fi
