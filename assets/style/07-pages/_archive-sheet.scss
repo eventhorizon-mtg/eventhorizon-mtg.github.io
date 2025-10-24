@@ -328,19 +328,26 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* Override: sfuma l'immagine header (piena -> trasparente) con CSS mask */
 .archive-sheet::before {
-  background-image: var(--sheet-bg) !important;
+  /* Tint uniforme (35% surface) sopra l'immagine */
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface) 35%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface) 35%, transparent) 100%
+    ),
+    var(--sheet-bg) !important;
   /* Transizione: inizia a --sheet-fade-start e dura --sheet-fade-length (molto più ampia) */
   -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
     rgba(0,0,0,1) var(--sheet-fade-start, 85%),
-    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 15%))
+    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 25%))
   );
   mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
     rgba(0,0,0,1) var(--sheet-fade-start, 85%),
-    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 15%))
+    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 25%))
   );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
