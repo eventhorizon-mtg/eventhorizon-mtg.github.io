@@ -83,7 +83,7 @@
   );
   pointer-events: none;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-  z-index: 1; /* sopra l'immagine, sotto titoli/handle/close */
+  z-index: 0; /* appena sopra l'immagine, sotto ogni contenuto dell'header */
 }
 
 .archive-sheet.is-open {
