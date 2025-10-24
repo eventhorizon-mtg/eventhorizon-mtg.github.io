@@ -107,6 +107,12 @@
     // Imposta il numero come data attribute per il CSS counter
     li.style.setProperty('--item-number', String(itemNumber))
     li.setAttribute('data-item-number', String(itemNumber))
+    // Imposta immagine di sfondo riga (leggera): riusa il thumbnail
+    if (thumbSrc) {
+      try {
+        li.style.setProperty('--item-bg', `url("${thumbSrc}")`)
+      } catch (e) {}
+    }
 
     // Media section with thumbnail and primary button overlay
     let thumbButtonHTML = ''
