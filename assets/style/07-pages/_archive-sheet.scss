@@ -191,8 +191,6 @@
 .archive-sheet__ctas {
   position: relative;
   z-index: 2;
-  /* Elimina lo spazio tra overlay inferiore e i bottoni */
-  margin-top: calc(var(--space-1-5) * -1);
 }
 
 .archive-sheet__title:active {
@@ -321,6 +319,13 @@ body.is-sheet-open .archive-item.is-sheet-open {
 
 /* Overlay header layering fixes */
 .archive-sheet__handle { position: relative; z-index: 2; }
+
+/* Disattiva gli overlay dello sheet (immagine e gradiente) */
+.archive-sheet::before,
+.archive-sheet::after {
+  content: none !important;
+  background: none !important;
+}
 
 @include bp(sm) {
   .archive-sheet {
