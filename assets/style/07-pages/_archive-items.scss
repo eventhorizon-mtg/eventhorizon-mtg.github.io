@@ -802,23 +802,29 @@
   .archive-item::after {
     left: 3rem;
   }
-  /* Stato base: vetro leggero con blur */
+  /* Stato base: vetro leggero con blur (desktop override già fornito in regole globali) */
   .archive-item article.item {
-    background: rgba(5, 9, 16, 0.35);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     position: relative; /* assicurati stia sopra allo sfondo */
     z-index: 1;
   }
 
-  /* Hover: leggermente più visibile mantenendo il blur */
-  .archive-item article.item:hover {
-    background: rgba(5, 9, 16, 0.42);
-  }
+  /* Hover e stato aperto gestiti anche globalmente */
+}
 
-  /* Stato aperto: mantieni effetto vetro più marcato */
-  .archive-item.is-sheet-open article.item,
-  .archive-item article.item.is-open {
-    background: rgba(5, 9, 16, 0.50);
-  }
+/* Effetto vetro riga: applica anche su mobile */
+.archive-item article.item {
+  background: rgba(5, 9, 16, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Hover: leggermente più visibile mantenendo il blur */
+.archive-item article.item:hover {
+  background: rgba(5, 9, 16, 0.42);
+}
+
+/* Stato aperto: mantieni effetto vetro più marcato */
+.archive-item.is-sheet-open article.item,
+.archive-item article.item.is-open {
+  background: rgba(5, 9, 16, 0.50);
 }
