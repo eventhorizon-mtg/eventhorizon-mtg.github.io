@@ -57,7 +57,15 @@
   left: 0;
   right: 0;
   height: clamp(120px, 28vh, 220px);
-  background-image: var(--sheet-bg);
+  /* Sfumatura dall'alto (piena) verso il basso (trasparente), sopra l'immagine header */
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface) 95%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface) 70%, transparent) 35%,
+      transparent 100%
+    ),
+    var(--sheet-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -246,20 +254,12 @@
 
 /* Gradient overlay quando c'è scroll */
 .archive-sheet__content::after {
-  content: "";
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 48px;
-  background: linear-gradient(to top, var(--color-surface) 0%, transparent 100%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  content: none;
+  display: none;
 }
 
 .archive-sheet.has-scroll .archive-sheet__content::after {
-  opacity: 1;
+  opacity: 0;
 }
 
 .archive-sheet__ctas {
@@ -320,8 +320,10 @@ body.is-sheet-open .archive-item.is-sheet-open {
 /* Overlay header layering fixes */
 .archive-sheet__handle { position: relative; z-index: 2; }
 
-/* Disattiva gli overlay dello sheet (immagine e gradiente) */
-.archive-sheet::before,
+/* Forza opacità piena del layer header (gestita dalla sfumatura) */
+.archive-sheet::before { opacity: 1 !important; }
+
+/* Disattiva gli overlay extra dello sheet: solo il gradiente secondario */
 .archive-sheet::after {
   content: none !important;
   background: none !important;
