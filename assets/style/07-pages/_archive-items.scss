@@ -770,3 +770,28 @@
   opacity: 0.4;
   pointer-events: none;
 }
+
+/* =============================
+   Desktop "glass" effect for rows
+   Replica il vetro dell'header card (stack panels)
+   Solo stile: nessun cambiamento a markup/JS
+   ============================= */
+@media (min-width: 768px) {
+  /* Stato base: vetro leggero con blur */
+  .archive-item article.item {
+    background: rgba(5, 9, 16, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Hover: leggermente più visibile mantenendo il blur */
+  .archive-item article.item:hover {
+    background: rgba(5, 9, 16, 0.42);
+  }
+
+  /* Stato aperto: mantieni effetto vetro più marcato */
+  .archive-item.is-sheet-open article.item,
+  .archive-item article.item.is-open {
+    background: rgba(5, 9, 16, 0.50);
+  }
+}
