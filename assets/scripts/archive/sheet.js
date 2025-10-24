@@ -93,6 +93,18 @@
       if (src) sheet.style.setProperty('--sheet-bg', `url("${src}")`)
     } catch (_) {}
 
+    // Calcola in percentuale il punto di inizio fade sotto al contenitore del titolo
+    const computeFadeStart = () => {
+      try {
+        const sheetRect = sheet.getBoundingClientRect()
+        const titleRect = titleEl.getBoundingClientRect()
+        const headerPx = Math.min(Math.max(window.innerHeight * 0.28, 120), 220) // clamp(120px, 28vh, 220px)
+        const offset = Math.max(0, Math.min(headerPx, titleRect.bottom - sheetRect.top + 8)) // +8px padding
+        const pct = Math.max(0, Math.min(100, (offset / headerPx) * 100))
+        sheet.style.setProperty('--sheet-fade-start', pct.toFixed(2) + '%')
+      } catch (_) {}
+    }
+
     sheet.setAttribute('aria-hidden', 'false')
     backdrop.setAttribute('aria-hidden', 'false')
     sheet.classList.add('is-open')
@@ -113,6 +125,9 @@
       } else {
         sheet.classList.remove('has-scroll')
       }
+      try {
+        computeFadeStart()
+      } catch (_) {}
     }, 100)
 
     sheet.addEventListener('keydown', trapFocus)

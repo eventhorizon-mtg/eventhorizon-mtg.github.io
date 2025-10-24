@@ -34,6 +34,7 @@
   gap: var(--space-1-5); /* Ridotto ulteriormente */
   grid-template-rows: auto auto 1fr auto; /* handle, title, content scroll, ctas */
   background: transparent; /* testo scorre sopra, sfondo sheet trasparente */
+  --sheet-header-height: clamp(120px, 28vh, 220px);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   border: 1px solid var(--color-border);
   padding: var(--space-1-5) var(--space-2-5) var(--space-3); /* Ridotto ulteriormente */
@@ -56,7 +57,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: clamp(120px, 28vh, 220px);
+  height: var(--sheet-header-height);
   /* Sfumatura dall'alto (piena) verso il basso (trasparente), sopra l'immagine header */
   background-image:
     linear-gradient(
@@ -326,9 +327,9 @@ body.is-sheet-open .archive-item.is-sheet-open {
 /* Override: sfuma l'immagine header (piena -> trasparente) con CSS mask */
 .archive-sheet::before {
   background-image: var(--sheet-bg) !important;
-  /* Inizia la transizione alla fine dell'header: opaco fino a ~85%, poi svanisce */
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
+  /* Transizione controllata via variabile --sheet-fade-start (percentuale) */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) var(--sheet-fade-start, 85%), rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) var(--sheet-fade-start, 85%), rgba(0,0,0,0) 100%);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
