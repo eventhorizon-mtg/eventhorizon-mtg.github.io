@@ -323,6 +323,17 @@ body.is-sheet-open .archive-item.is-sheet-open {
 /* Forza opacità piena del layer header (gestita dalla sfumatura) */
 .archive-sheet::before { opacity: 1 !important; }
 
+/* Override: sfuma l'immagine header (piena -> trasparente) con CSS mask */
+.archive-sheet::before {
+  background-image: var(--sheet-bg) !important;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
 /* Disattiva gli overlay extra dello sheet: solo il gradiente secondario */
 .archive-sheet::after {
   content: none !important;
