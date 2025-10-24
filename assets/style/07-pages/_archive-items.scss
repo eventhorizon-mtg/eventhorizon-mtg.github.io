@@ -404,18 +404,18 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-/* Hover su stato aperto - DEFAULT (content = viola+blu) */
+/* Hover su stato aperto */
 .item.is-open .item-actions-summary:hover,
 .item.is-open .item-actions-summary:focus-visible {
-  border-color: var(--color-secondary);
-  background: var(--color-secondary-soft);
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
 .item.is-open .item-actions-summary:hover::before,
 .item.is-open .item-actions-summary:hover::after,
 .item.is-open .item-actions-summary:focus-visible::before,
 .item.is-open .item-actions-summary:focus-visible::after {
-  background: var(--color-special);
+  background: var(--color-primary);
 }
 
 /* VIDEO: quando aperto usa colori BLU invece di viola */
