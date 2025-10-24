@@ -36,7 +36,7 @@
   background: transparent; /* testo scorre sopra, sfondo sheet trasparente */
   --sheet-header-height: clamp(120px, 28vh, 220px);
   /* Lunghezza fade dell'immagine header (percentuale dell'altezza header) */
-  --sheet-fade-length: 25%;
+  --sheet-fade-length: 15%;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   border: 1px solid var(--color-border);
   padding: var(--space-1-5) var(--space-2-5) var(--space-3); /* Ridotto ulteriormente */
@@ -334,13 +334,13 @@ body.is-sheet-open .archive-item.is-sheet-open {
     to bottom,
     rgba(0,0,0,1) 0%,
     rgba(0,0,0,1) var(--sheet-fade-start, 85%),
-    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 25%))
+    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 15%))
   );
   mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
     rgba(0,0,0,1) var(--sheet-fade-start, 85%),
-    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 25%))
+    rgba(0,0,0,0) calc(var(--sheet-fade-start, 85%) + var(--sheet-fade-length, 15%))
   );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
