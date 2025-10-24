@@ -66,6 +66,25 @@
   z-index: 0;
 }
 
+/* Overlay scuro (sheet color) dal basso verso l'alto sopra l'immagine header */
+.archive-sheet::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(120px, 28vh, 220px);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-surface) 65%, transparent) 35%,
+    transparent 100%
+  );
+  pointer-events: none;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  z-index: 1; /* sopra l'immagine, sotto titoli/handle/close */
+}
+
 .archive-sheet.is-open {
   transform: translateY(0);
 }
@@ -163,7 +182,7 @@
   -webkit-user-select: none;
   transition: color 0.2s ease;
   position: relative;
-  z-index: 1; /* sopra lo sfondo header */
+  z-index: 2; /* sopra overlay header */
 }
 
 .archive-sheet__title:active {
@@ -285,6 +304,9 @@ body.is-sheet-open .archive-item.is-sheet-open {
   opacity: 0.7;
   filter: blur(1px);
 }
+
+/* Overlay header layering fixes */
+.archive-sheet__handle { position: relative; z-index: 2; }
 
 @include bp(sm) {
   .archive-sheet {
