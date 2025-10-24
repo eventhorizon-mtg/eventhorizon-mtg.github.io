@@ -50,7 +50,7 @@
   position: fixed; /* ensure positioning context for header bg */
 }
 
-/* Header visual background (thumbnail) — leggero e limitato alla zona header */
+/* Header visual background (thumbnail) — leggero e limitato alla zona header 
 .archive-sheet::before {
   content: "";
   position: absolute;
@@ -58,7 +58,7 @@
   left: 0;
   right: 0;
   height: var(--sheet-header-height);
-  /* Sfumatura dall'alto (piena) verso il basso (trasparente), sopra l'immagine header */
+  /* Sfumatura dall'alto (piena) verso il basso (trasparente), sopra l'immagine header 
   background-image:
     linear-gradient(
       to bottom,
@@ -70,9 +70,9 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.22; /* tenue per leggibilità  */
+  opacity: 0.22; /* tenue per leggibilità  
   pointer-events: none;
-  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; /* allinea radius header */
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; /* allinea radius header 
   z-index: 0;
 }
 
