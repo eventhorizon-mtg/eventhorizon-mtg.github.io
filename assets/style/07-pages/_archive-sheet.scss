@@ -280,7 +280,7 @@
   color: var(--btn-color); /* Usa il colore definito dalla variante button */
   /* Usa sempre la variante small - dimensioni uniformi */
   font-size: clamp(0.7rem, 1.5vw, 0.75rem);
-  padding: var(--space-1-5) var(--space-3);
+  padding: var(--space-3) var(--space-3);
   gap: var(--space-1);
   letter-spacing: var(--tracking-wide);
   /* Mantieni colori e background originali dei modificatori */
