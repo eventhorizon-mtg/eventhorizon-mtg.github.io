@@ -10,7 +10,7 @@ content: <p>Questo è il <strong>contenuto esteso</strong>, dovrebbe apparire
   sotto la descrizione. <span class="text-color-accent">Testo oro</span> e
   mettiamo un link di prova con un <a class="btn btn--archi" href="#">BUTTON</a>
   inline per vedere cosa accade.</p>
-thumb: /images/cards/card_A.webp
+thumb: https://cards.scryfall.io/art_crop/front/5/f/5f7346d8-1aef-4618-88e6-74bd8865e0f3.jpg?1562054241
 links:
   - btn_class: btn--primary
     primary: true
