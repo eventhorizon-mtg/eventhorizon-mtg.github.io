@@ -11,7 +11,7 @@
   if (!document.querySelector('section.archive')) return
 
   // Import dependencies from global namespaces
-  const { qs, qsa, on, set } = window.ArchiveShared
+  const { qs, qsa, on } = window.ArchiveShared
   const {
     mqSheet,
     DRAG_CLOSE_THRESHOLD_PX,

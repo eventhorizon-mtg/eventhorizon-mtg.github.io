@@ -94,13 +94,7 @@
       </div>`
     }
 
-    // Background image support (currently unused but kept for future)
-    const bgImage = trim(it.background_image || '')
-    let bgImageStyle = ''
-    if (bgImage) {
-      const bgImageSrc = bustIfLocal(bgImage, appVer)
-      bgImageStyle = ` style="background-image: url('${bgImageSrc}'); background-size: cover; background-position: center;"`
-    }
+    // Background image per-item via CSS var handled elsewhere
 
     const li = document.createElement('li')
     li.className = `archive-item is-${kindClass}`

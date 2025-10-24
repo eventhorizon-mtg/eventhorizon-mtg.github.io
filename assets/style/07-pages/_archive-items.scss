@@ -191,7 +191,7 @@
 /* Forma YouTube rossa - SEMITRASPARENTE */
 .archive-item.is-video .item-thumb-button-shape {
   fill: #ff0000; /* Rosso YouTube */
-  opacity: 0.75; /* Semitrasparente */
+  opacity: 0.65; /* Semitrasparente */
   transition: opacity 0.2s ease;
 }
 
@@ -407,8 +407,8 @@
 /* Hover su stato aperto - DEFAULT (content = viola+blu) */
 .item.is-open .item-actions-summary:hover,
 .item.is-open .item-actions-summary:focus-visible {
-  border-color: var(--color-special);
-  background: var(--color-special-soft);
+  border-color: var(--color-secondary);
+  background: var(--color-secondary-soft);
 }
 
 .item.is-open .item-actions-summary:hover::before,
