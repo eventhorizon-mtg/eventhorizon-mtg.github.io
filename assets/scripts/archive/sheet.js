@@ -107,7 +107,8 @@
 
     // Rileva se il contenuto è scrollabile
     setTimeout(() => {
-      if (sheet.scrollHeight > sheet.clientHeight) {
+      const sc = content
+      if (sc && sc.scrollHeight > sc.clientHeight) {
         sheet.classList.add('has-scroll')
       } else {
         sheet.classList.remove('has-scroll')
@@ -183,7 +184,7 @@
     currentY = startY
 
     // Verifica se il contenuto è scrollato in alto
-    const isAtTop = sheet.scrollTop <= 0
+    const isAtTop = content ? content.scrollTop <= 0 : true
 
     // Permetti drag solo se siamo in cima allo scroll
     if (isContent && !isAtTop) return
