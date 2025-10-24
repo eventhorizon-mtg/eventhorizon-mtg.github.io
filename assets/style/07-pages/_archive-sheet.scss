@@ -41,7 +41,7 @@
   border: 1px solid var(--color-border);
   padding: var(--space-1-5) var(--space-2-5) var(--space-3); /* Ridotto ulteriormente */
   max-height: 85vh;
-  min-height: 85vh; /* Apri sempre "tutto" anche con poco contenuto */
+  min-height: 45vh; /* Apri sempre a metà con poco contenuto */
   box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
   overflow: hidden; /* i testi scorrono sopra lo sheet */
   overscroll-behavior: contain;
@@ -241,7 +241,7 @@
   color: var(--color-text-muted);
   line-height: 1.65;
   margin: 0;
-  padding-top: var(--space-2); /* Più aria sopra al testo desc */
+  padding-top: var(--space-3); /* Più aria sopra al testo desc */
 }
 
 .archive-sheet__content .item-content-extended {
