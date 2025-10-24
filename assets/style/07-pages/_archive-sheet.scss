@@ -60,8 +60,8 @@
   /* Sfumatura dall'alto (piena) verso il basso (trasparente), sopra l'immagine header */
   background-image:
     linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-surface) 95%, transparent) 0%,
+      to top,
+      color-mix(in srgb, var(--color-surface) 100%, transparent) 0%,
       color-mix(in srgb, var(--color-surface) 70%, transparent) 35%,
       transparent 100%
     ),
