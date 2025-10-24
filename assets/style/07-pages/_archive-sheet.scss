@@ -45,6 +45,25 @@
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y; /* Permetti solo scroll verticale */
   pointer-events: auto; /* Assicura che lo sheet sia interattivo */
+  position: fixed; /* ensure positioning context for header bg */
+}
+
+/* Header visual background (thumbnail) — leggero e limitato alla zona header */
+.archive-sheet::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(120px, 28vh, 220px);
+  background-image: var(--sheet-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.22; /* tenue per leggibilitÃ  */
+  pointer-events: none;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; /* allinea radius header */
+  z-index: 0;
 }
 
 .archive-sheet.is-open {
@@ -142,6 +161,8 @@
   user-select: none;
   -webkit-user-select: none;
   transition: color 0.2s ease;
+  position: relative;
+  z-index: 1; /* sopra lo sfondo header */
 }
 
 .archive-sheet__title:active {

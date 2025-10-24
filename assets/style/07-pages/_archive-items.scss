@@ -778,25 +778,30 @@
    Replica il vetro dell'header card (stack panels)
    Solo stile: nessun cambiamento a markup/JS
    ============================= */
-@media (min-width: 768px) {
-  /* Immagine di sfondo per ogni riga: usa la custom property --item-bg impostata da JS
-     Per evitare overhead, lo sfondo è applicato sul <li> e l'articolo applica il vetro sopra */
-  .archive-item::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 3rem; /* escludi colonna numeri */
-    background-image: var(--item-bg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.25; /* leggero per non disturbare il contenuto */
-    pointer-events: none;
-    z-index: -1; /* dietro ai contenuti della riga */
-  }
+/* Immagine di sfondo per ogni riga: usa la custom property --item-bg impostata da JS
+   Mobile-first: copre tutta la riga; su desktop esclude la colonna numeri */
+.archive-item::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; /* mobile: nessuna colonna numeri */
+  background-image: var(--item-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.25; /* leggero per non disturbare il contenuto */
+  pointer-events: none;
+  z-index: -1; /* dietro ai contenuti della riga */
+  border-radius: var(--radius-md); /* stesso raggio della card */
+}
 
+@media (min-width: 768px) {
+  /* Desktop: lascia libera la colonna numeri a sinistra */
+  .archive-item::after {
+    left: 3rem;
+  }
   /* Stato base: vetro leggero con blur */
   .archive-item article.item {
     background: rgba(5, 9, 16, 0.35);

@@ -86,6 +86,13 @@
     sheet.classList.remove('is-kind-video', 'is-kind-content') // Rimuovi vecchie classi
     sheet.classList.add(`is-kind-${kind}`) // Aggiungi nuova classe
 
+    // Imposta background dell'header dello sheet riusando il thumbnail dell'item
+    try {
+      const img = fromItem && fromItem.querySelector('.item-thumb img')
+      const src = img && (img.currentSrc || img.src || img.getAttribute('src'))
+      if (src) sheet.style.setProperty('--sheet-bg', `url("${src}")`)
+    } catch (_) {}
+
     sheet.setAttribute('aria-hidden', 'false')
     backdrop.setAttribute('aria-hidden', 'false')
     sheet.classList.add('is-open')
@@ -125,6 +132,9 @@
     sheet.style.transition = ''
     sheet.style.transform = ''
     backdrop.style.opacity = ''
+    try {
+      sheet.style.removeProperty('--sheet-bg')
+    } catch (_) {}
 
     // Rimuovi classi del tipo (kind)
     sheet.classList.remove('is-kind-video', 'is-kind-content')
