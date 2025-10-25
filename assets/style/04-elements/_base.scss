@@ -47,6 +47,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Remove default mobile tap highlight (keep custom hover/active/focus styles) */
+a,
+button,
+input,
+select,
+textarea,
+summary,
+[role="button"],
+[tabindex]:not([tabindex="-1"]),
+.btn,
+.pill {
+  -webkit-tap-highlight-color: transparent;
+}
+
 main {
   position: relative;
   flex: 1 0 auto;
