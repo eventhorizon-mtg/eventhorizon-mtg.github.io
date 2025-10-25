@@ -944,3 +944,10 @@
   /* Ensure media and kebab stay interactive above overlay */
   .item-media { z-index: 3; position: relative; }
 }
+/* Desktop defaults: hide kebab and row overlay; show thumbnail overlay */
+.item-kebab, .item-row-link { display: none; }
+
+@include bp-down(sm) {
+  /* Hide desktop-only overlays on mobile */
+  .item-thumb-button { display: none; }
+}
