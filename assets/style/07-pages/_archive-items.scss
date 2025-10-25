@@ -5,9 +5,9 @@
 
 /* Archive list */
 .archive {
-  padding-block: var(--space-7);
-  /* Reserve space for first page of results to avoid CLS on JS hydration */
-  min-height: calc((88px + var(--space-2)) * 12 + var(--space-10));
+  /* Mantieni spazio sopra, riduci sotto per evitare gap prima del footer */
+  padding-block-start: var(--space-7);
+  padding-block-end: var(--space-4);
 }
 
 .archive .container {
