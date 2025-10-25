@@ -148,8 +148,9 @@
 .item-media {
   position: relative;
   flex-shrink: 0;
-  width: 140px;
-  height: 88px; /* Stessa altezza della riga */
+  /* Thumbnail quadrato anche su desktop: usa l'altezza riga */
+  width: 88px;
+  height: 88px;
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
