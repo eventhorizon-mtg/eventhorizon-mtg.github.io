@@ -909,7 +909,7 @@
     -webkit-line-clamp: 1;
     line-clamp: 1;
     /* Mobile: titolo più compatto */
-    font-size: clamp(0.82rem, 4vw, 1rem);
+    font-size: clamp(1rem, 3.8vw, 1.125rem);
     line-height: 1.25;
   }
 
