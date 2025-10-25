@@ -908,6 +908,14 @@
   .item-title {
     -webkit-line-clamp: 1;
     line-clamp: 1;
+    /* Mobile: titolo più compatto */
+    font-size: clamp(0.82rem, 4vw, 1rem);
+    line-height: 1.25;
+  }
+
+  /* Mobile: overline più piccola */
+  .item-overline {
+    font-size: clamp(0.58rem, 3.4vw, 0.7rem);
   }
 
   /* Kebab button at right */
