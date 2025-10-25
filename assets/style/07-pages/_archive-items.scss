@@ -943,6 +943,15 @@
 
   /* Ensure media and kebab stay interactive above overlay */
   .item-media { z-index: 3; position: relative; }
+
+  /* Remove default blue tap highlight on mobile */
+  .archive a,
+  .archive button,
+  .item-row-link,
+  .item-kebab,
+  .item-thumb a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 /* Desktop defaults: hide kebab and row overlay; show thumbnail overlay */
 .item-kebab, .item-row-link { display: none; }
