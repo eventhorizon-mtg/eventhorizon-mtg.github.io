@@ -108,22 +108,8 @@
       } catch (e) {}
     }
 
-    // Media section with thumbnail and primary button overlay
-    let thumbButtonHTML = ''
-    if (primaryUrl) {
-      if (kindClass === 'video') {
-        // Video: SVG play button YouTube
-        thumbButtonHTML = `<span class="item-thumb-button" aria-hidden="true">
-          <svg class="item-thumb-button-icon" viewBox="0 0 68 48" xmlns="http://www.w3.org/2000/svg">
-            <path class="item-thumb-button-shape" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z"></path>
-            <path class="item-thumb-button-symbol" d="M 45,24 27,14 27,34"></path>
-          </svg>
-        </span>`
-      } else {
-        // Content: pill button con testo
-        thumbButtonHTML = `<span class="item-thumb-button" aria-hidden="true">Apri</span>`
-      }
-    }
+    // Mobile UX: niente overlay play/CTA; intera riga cliccabile sul primary
+    const thumbButtonHTML = ''
 
     // Helper to escape attribute values for HTML context
     function escapeAttribute(val) {
@@ -163,14 +149,16 @@
         <h2 class="item-title">${tit}</h2>
       </div>
       ${desc ? `<p class="item-desc-preview">${desc}</p>` : ''}
-      ${
-        hasDropdown
-          ? `<button class="item-actions-summary" type="button" aria-controls="${linksId}" aria-expanded="false">
-        <span class="sr-only">${summaryLabel}</span>
-      </button>`
-          : ''
-      }
     </div>`
+
+    // Kebab trigger (mobile: apre sheet). Resta presente ma lo possiamo nascondere su desktop via CSS
+    const kebabHTML = hasDropdown
+      ? `<button class="item-kebab" type="button" aria-controls="${linksId}" aria-label="Dettagli e link" title="Dettagli">
+           <svg class="item-kebab__icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+             <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+           </svg>
+         </button>`
+      : ''
 
     // Costruzione aria-label descrittivo e accessibile
     const ariaLabel = `Apri ${kindLabel.toLowerCase()}: ${tit}${over ? ' - ' + over : ''}${desc ? '. ' + desc.substring(0, ARIA_DESCRIPTION_MAX_CHARS) + (desc.length > ARIA_DESCRIPTION_MAX_CHARS ? '...' : '') : ''}`
@@ -179,6 +167,7 @@
       <article class="item" data-item-id="${idStr}" data-kind="${kindClass}" role="button" tabindex="0" aria-label="${ariaLabel.replace(/"/g, '&quot;')}" ${desc ? `aria-describedby="${linksId}-desc"` : ''}>
         ${mediaHTML}
         ${contentHTML}
+        ${kebabHTML}
       </article>
       ${
         hasDropdown
@@ -188,6 +177,18 @@
           : ''
       }
     `
+
+    // Intera riga cliccabile sul primary URL (mobile); overlay link con z-index basso rispetto al kebab
+    if (primaryUrl) {
+      const rowLink = document.createElement('a')
+      rowLink.className = 'item-row-link'
+      rowLink.href = safePrimaryUrl
+      rowLink.target = '_blank'
+      rowLink.rel = 'noopener'
+      rowLink.setAttribute('aria-hidden', 'true')
+      rowLink.tabIndex = -1
+      li.querySelector('article.item')?.appendChild(rowLink)
+    }
     return li
   }
 

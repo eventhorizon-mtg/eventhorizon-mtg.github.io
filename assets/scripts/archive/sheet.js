@@ -301,7 +301,7 @@
   document.addEventListener('pointerdown', blockInteractions, { capture: true, passive: false })
   document.addEventListener('mousedown', blockInteractions, { capture: true, passive: false })
 
-  // Apertura (mobile) - click sull'area content (non thumbnail)
+  // Apertura (mobile) - click sul kebab button a destra
   document.addEventListener('click', ev => {
     if (!mqSheet.matches) return // Solo su mobile
 
@@ -317,20 +317,11 @@
       return
     }
 
-    // Ignora se clicca su un link dentro item-content
-    const clickedLink = ev.target && ev.target.closest('a')
-    if (clickedLink) return
+    // Solo se clicca sul kebab
+    const kebab = ev.target && ev.target.closest('.item-kebab')
+    if (!kebab) return
 
-    // Ignora se clicca sulla thumbnail o suoi bottoni
-    const clickedThumb =
-      ev.target && ev.target.closest('.item-media, .item-thumb, .item-thumb-button')
-    if (clickedThumb) return
-
-    // Verifica se ha cliccato nell'area content
-    const itemContent = ev.target && ev.target.closest('.item-content')
-    if (!itemContent) return
-
-    const article = itemContent.closest('.item')
+    const article = kebab.closest('.item')
     const li = article && article.closest('.archive-item')
     if (!li) return
 
@@ -340,7 +331,6 @@
     const ctaEls = panel ? qsa('.item-ctas a', panel) : []
     const title = article.querySelector('.item-title')?.textContent || ''
 
-    // Estrai il tipo (kind) dall'article
     const kind = article.getAttribute('data-kind') || 'content'
 
     const links = ctaEls.map(a => ({
@@ -349,8 +339,6 @@
       cls: a.className
     }))
 
-    // Build sheet content with separators (stesso formato del pannello)
-    // Build sheet content as DOM nodes to avoid text escaping issues
     const sheetFragment = document.createDocumentFragment()
     if (desc) {
       const p = document.createElement('p')
@@ -366,11 +354,9 @@
       }
       const extContainer = document.createElement('div')
       extContainer.className = 'item-content-extended'
-      // Assume contentExt.innerHTML is safe/trusted; if not, sanitize it here
       extContainer.innerHTML = contentExt.innerHTML
       sheetFragment.appendChild(extContainer)
     }
-    // Add separator before links if sheetFragment is not empty and there are links
     if (links.length > 0 && sheetFragment.childNodes.length > 0) {
       const hr = document.createElement('hr')
       hr.className = 'item-separator'
@@ -380,9 +366,9 @@
     openSheet(
       {
         title,
-        descHtml: sheetFragment, // Now passing DOM Fragment, not string
+        descHtml: sheetFragment,
         links,
-        kind // Passa il tipo allo sheet
+        kind
       },
       article
     )
