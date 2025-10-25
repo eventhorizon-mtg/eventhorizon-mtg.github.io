@@ -950,4 +950,12 @@
 @include bp-down(sm) {
   /* Hide desktop-only overlays on mobile */
   .item-thumb-button { display: none; }
+  /* Show mobile-only controls */
+  .item-kebab { display: inline-flex !important; }
+  .item-row-link { display: block !important; }
+  .item-actions-summary { display: none !important; }
+  /* Tap feedback */
+  .item-row-link:active { background: color-mix(in srgb, var(--color-primary) 14%, transparent); }
+  .item-kebab:active { background: var(--color-surface-elevated); border-radius: var(--radius-md); }
 }
+

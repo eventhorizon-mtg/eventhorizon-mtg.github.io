@@ -363,6 +363,11 @@
       sheetFragment.appendChild(hr)
     }
 
+    ;(function () {
+      try {
+        if (navigator.vibrate) navigator.vibrate(HAPTIC_FEEDBACK_SNAP_MS)
+      } catch (e) {}
+    })()
     openSheet(
       {
         title,
