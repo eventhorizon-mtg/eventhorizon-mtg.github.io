@@ -110,18 +110,9 @@
       const paged = paginate(sorted, curPage, pageSize)
 
       updateHeroCount(paged.total)
-      // If SSR and first page with no filters, keep server HTML to avoid layout shifts
-      const qEmpty = !q
-      const kEmpty = !k
-      const isFirstPage = curPage <= 1
-      if (hasSSR && qEmpty && kEmpty && isFirstPage) {
-        updatePager(paged)
-      } else {
-        renderList(paged.slice)
-        updatePager(paged)
-      }
+      renderList(paged.slice)
+      updatePager(paged)
     } catch (err) {
-      // Gestione errore: mostra messaggio user-friendly
       const sectionArchive = document.querySelector('section.archive')
       if (!sectionArchive) return
       const container = sectionArchive.querySelector('.container') || sectionArchive

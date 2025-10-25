@@ -282,6 +282,32 @@
       return
     }
 
+    // If SSR placeholders are present (have .archive-item but lack dynamic controls), replace them in-place
+    const ssrPlaceholders = Array.from(
+      listOl.querySelectorAll('li.archive-item:not(.skeleton)')
+    ).filter(li => !li.querySelector('.item-panel') && !li.querySelector('.item-actions-summary'))
+    if (ssrPlaceholders.length && arr.length) {
+      const total = arr.length
+      const count = Math.min(ssrPlaceholders.length, arr.length)
+      for (let i = 0; i < count; i++) {
+        const real = renderItem(arr[i], i, total)
+        try {
+          listOl.replaceChild(real, ssrPlaceholders[i])
+        } catch (_) {
+          listOl.appendChild(real)
+        }
+      }
+      for (let i = count; i < ssrPlaceholders.length; i++) {
+        ssrPlaceholders[i]?.remove()
+      }
+      if (arr.length > count) {
+        const fragExtra = document.createDocumentFragment()
+        for (let i = count; i < arr.length; i++) fragExtra.appendChild(renderItem(arr[i], i, total))
+        if (fragExtra.childNodes.length) listOl.appendChild(fragExtra)
+      }
+      return
+    }
+
     // otherwise: clear and render
     listOl.innerHTML = ''
     if (!arr.length) {
