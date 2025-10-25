@@ -131,8 +131,11 @@
   background: var(--color-surface-variant);
   color: var(--color-text);
   transition: var(--transition-colors);
-  height: 40px; /* fissa l'altezza per evitare ricalcoli su swap font */
-  line-height: 1.2;
+  /* Mantieni altezza minima, lascia line-height nativa per evitare tagli su desktop */
+  min-height: 40px;
+  line-height: normal;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .archive-search__input::placeholder {
@@ -234,8 +237,9 @@
   /* Desktop: campi più compatti */
   .archive-search__input,
   .archive-search__select {
-    min-height: 36px;
+    min-height: 38px; /* leggermente maggiore per metrica dei font su desktop */
     padding: var(--space-1-5) var(--space-3);
+    line-height: normal; /* assicura nessun clipping testo */
     font-size: var(--text-sm);
   }
 
