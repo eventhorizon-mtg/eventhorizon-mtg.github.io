@@ -148,9 +148,11 @@
 .item-media {
   position: relative;
   flex-shrink: 0;
-  /* Thumbnail quadrato anche su desktop: usa l'altezza riga */
+  /* Thumbnail quadrato anche su desktop */
   width: 88px;
   height: 88px;
+  flex: 0 0 88px;
+  aspect-ratio: 1 / 1;
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
@@ -884,6 +886,8 @@
   .item-media {
     width: 56px;
     height: 56px;
+    flex: 0 0 56px;
+    aspect-ratio: 1 / 1;
     align-self: center;
     margin-left: var(--space-2);
     border-radius: var(--radius-md);
