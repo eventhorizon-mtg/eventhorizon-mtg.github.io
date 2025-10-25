@@ -860,7 +860,13 @@
     background: rgba(5, 9, 16, 0.62);
     border-color: var(--color-border-strong);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+    .item-media {
+    width: 140px;
+    height: 88px; /* resta l'altezza riga */
+    flex: 0 0 140px;
+    aspect-ratio: auto; /* consenti proporzione rettangolare */
   }
+}
 }
 
 /* Effetto vetro riga: applica anche su mobile */
@@ -987,4 +993,5 @@
   .item-row-link:active { background: color-mix(in srgb, var(--color-primary) 14%, transparent); }
   .item-kebab:active { background: var(--color-surface-elevated); border-radius: var(--radius-md); }
 }
+
 
