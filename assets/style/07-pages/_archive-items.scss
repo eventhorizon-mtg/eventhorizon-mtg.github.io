@@ -909,13 +909,13 @@
     -webkit-line-clamp: 1;
     line-clamp: 1;
     /* Mobile: titolo più compatto */
-    font-size: clamp(0.82rem, 3.8vw, 1rem);
+    font-size: clamp(0.7rem, 3.8vw, 1rem);
     line-height: 1.25;
   }
 
   /* Mobile: overline più piccola */
   .item-overline {
-    font-size: clamp(0.58rem, 3vw, 0.7rem);
+    font-size: clamp(0.4rem, 3vw, 0.7rem);
   }
 
   /* Kebab button at right */
