@@ -20,7 +20,8 @@
   font-family: "LexendGiga";
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  /* Evita layout shift dei titoli: non effettuare swap se il font arriva tardi */
+  font-display: optional;
   src: url("/fonts/LexendGiga-Regular.woff2") format("woff2"),
        url("/fonts/LexendGiga-Regular.woff") format("woff");
 }

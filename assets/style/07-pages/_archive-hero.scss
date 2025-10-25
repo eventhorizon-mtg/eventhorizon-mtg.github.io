@@ -71,6 +71,10 @@
   color: var(--color-special-300);
   font-weight: 700;
   text-shadow: 0 0 12px color-mix(in srgb, var(--color-special-400) 40%, transparent);
+  /* Stabilizza la larghezza quando cambia il numero risultati */
+  font-variant-numeric: tabular-nums lining-nums;
+  display: inline-block;
+  min-width: 4ch;
 }
 
 @include bp(sm) {
@@ -104,6 +108,8 @@
     var(--color-surface) 100%);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-soft);
+  /* Evita shift dovuti a swap dei webfont */
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
 .archive-search__form {
@@ -125,7 +131,8 @@
   background: var(--color-surface-variant);
   color: var(--color-text);
   transition: var(--transition-colors);
-  min-height: 40px;
+  height: 40px; /* fissa l'altezza per evitare ricalcoli su swap font */
+  line-height: 1.2;
 }
 
 .archive-search__input::placeholder {

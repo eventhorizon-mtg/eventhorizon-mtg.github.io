@@ -553,20 +553,23 @@
 
 /* Images and Figures */
 .article-body img,
-.article-body figure img {
-  width: 100%;
-  height: auto;
-  border-radius: 0;
-  border: none;
-  border-block: 1px solid var(--color-border);
-  margin-block: var(--space-3);
-  margin-inline: 0;
-  box-shadow: none;
-  /* Previene overflow */
-  max-width: 100%;
-  display: block;
-  object-fit: contain;
-}
+  .article-body figure img {
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    border: none;
+    border-block: 1px solid var(--color-border);
+    margin-block: var(--space-3);
+    margin-inline: 0;
+    box-shadow: none;
+    /* Previene overflow */
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+    /* CLS guard: reserve intrinsic size for offscreen lazy images */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 480px;
+  }
 
 @include bp(sm) {
   .article-body img,

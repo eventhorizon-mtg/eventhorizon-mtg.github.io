@@ -24,6 +24,36 @@
   } = window.ArchiveData
   const { renderList, updatePager, updateHeroCount } = window.ArchiveRenderer
 
+  // Insert skeleton placeholders to reserve space and avoid CLS
+  const insertSkeleton = count => {
+    try {
+      const sectionArchive = document.querySelector('section.archive')
+      if (!sectionArchive) return
+      const container = sectionArchive.querySelector('.container') || sectionArchive
+      let listOl = container.querySelector('ol.archive-timeline')
+      if (!listOl) {
+        listOl = document.createElement('ol')
+        listOl.className = 'archive-timeline'
+        container.appendChild(listOl)
+      }
+      // If already populated, skip
+      if (listOl.children.length > 0) return
+      const frag = document.createDocumentFragment()
+      for (let i = 0; i < count; i++) {
+        const li = document.createElement('li')
+        li.className = 'archive-item skeleton'
+        li.innerHTML = `
+          <article class="item" aria-hidden="true">
+            <div class="item-media"></div>
+            <div class="item-content"></div>
+          </article>
+        `
+        frag.appendChild(li)
+      }
+      listOl.appendChild(frag)
+    } catch (_) {}
+  }
+
   // DEBUG flag: enable console logs only on localhost or with ?debug=1
   const DEBUG = location.hostname === 'localhost' || location.search.includes('debug=1')
 
@@ -36,6 +66,14 @@
    */
   const bootstrap = async () => {
     try {
+      // Detect SSR pre-render (no skeletons and some items present)
+      const sectionArchive = document.querySelector('section.archive')
+      const container = sectionArchive?.querySelector('.container') || sectionArchive
+      const listOl = container?.querySelector('ol.archive-timeline')
+      const hasSSR = !!(listOl && listOl.children.length && !listOl.querySelector('.skeleton'))
+      // If not SSR, pre-reserve space with skeletons to minimize CLS
+      if (!hasSSR) insertSkeleton(getPageSize())
+
       const appVer = trim(document.documentElement.getAttribute('data-app-ver') || '')
       // Preferisci una versione specifica dei dati (data-archive-ver) per il cache-busting dell'endpoint JSON
       const archiveVer =
@@ -72,8 +110,16 @@
       const paged = paginate(sorted, curPage, pageSize)
 
       updateHeroCount(paged.total)
-      renderList(paged.slice)
-      updatePager(paged)
+      // If SSR and first page with no filters, keep server HTML to avoid layout shifts
+      const qEmpty = !q
+      const kEmpty = !k
+      const isFirstPage = curPage <= 1
+      if (hasSSR && qEmpty && kEmpty && isFirstPage) {
+        updatePager(paged)
+      } else {
+        renderList(paged.slice)
+        updatePager(paged)
+      }
     } catch (err) {
       // Gestione errore: mostra messaggio user-friendly
       const sectionArchive = document.querySelector('section.archive')

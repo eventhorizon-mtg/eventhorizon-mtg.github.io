@@ -126,12 +126,11 @@
 -}}
 {{- with resources.Get "style/main.scss" -}}
   {{- $mainCss := . | css.Sass $sassOpts | resources.Fingerprint -}}
+  {{- /* Carica CSS come stylesheet per evitare FOUC/CLS importanti */ -}}
   {{- if hugo.IsProduction -}}
-    <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
-    <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous"></noscript>
+    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}" integrity="{{ $mainCss.Data.Integrity }}" crossorigin="anonymous">
   {{- else -}}
-    <link rel="preload" href="{{ $mainCss.RelPermalink }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ $mainCss.RelPermalink }}"></noscript>
+    <link rel="stylesheet" href="{{ $mainCss.RelPermalink }}">
   {{- end -}}
 {{- else -}}
   {{- warnf "style/main.scss non trovato. Verifica il percorso dell'entrypoint SCSS." -}}

@@ -6,6 +6,8 @@
 /* Archive list */
 .archive {
   padding-block: var(--space-7);
+  /* Reserve space for first page of results to avoid CLS on JS hydration */
+  min-height: calc((88px + var(--space-2)) * 12 + var(--space-10));
 }
 
 .archive .container {
@@ -32,6 +34,46 @@
   counter-reset: item-num var(--item-number);
   /* Crea stacking context per posizionare uno sfondo dietro all'articolo */
   z-index: 0;
+}
+
+/* Skeleton placeholders to reserve space before JS render (CLS guard) */
+.archive-item.skeleton::before {
+  content: ""; /* niente numero durante skeleton */
+}
+
+.archive-item.skeleton article.item {
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
+  border-color: var(--color-border-soft);
+  background: var(--color-surface);
+}
+
+.archive-item.skeleton .item-media { background: var(--color-surface-elevated); }
+.archive-item.skeleton .item-content { position: relative; }
+.archive-item.skeleton .item-content::before,
+.archive-item.skeleton .item-content::after {
+  content: "";
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-6);
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-border-soft) 35%, transparent) 0%,
+    color-mix(in srgb, var(--color-border-soft) 55%, transparent) 50%,
+    color-mix(in srgb, var(--color-border-soft) 35%, transparent) 100%);
+  background-size: 200% 100%;
+  animation: archive-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.archive-item.skeleton .item-content::before { top: 28px; }
+.archive-item.skeleton .item-content::after { top: 48px; right: 40%; }
+
+@keyframes archive-skeleton-shimmer {
+  0% { background-position: 200% 0; opacity: .6; }
+  50% { background-position: 0 0; opacity: .9; }
+  100% { background-position: -200% 0; opacity: .6; }
 }
 
 /* External number (left of card) - stile playlist */

@@ -14,6 +14,9 @@ Thumbs.db
 node_modules/
 dist/
 axe-reports/
+docs/lhci/
+.lhci-tmp/
+.lighthouseci/
 
 # Hugo ephemeral lock file
 .hugo_build.lock

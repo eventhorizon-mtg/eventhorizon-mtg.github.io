@@ -1,0 +1,82 @@
+{{/*
+  Custom image render hook to reduce CLS by setting width/height.
+  - Tries to read intrinsic dimensions for local images under /static or page dir
+  - If not found, falls back to WxH pattern in URL (e.g. 1200x675)
+  - Respects author-provided width/height attributes when present
+  - Adds lazy loading, async decoding, and preserves extra attributes (class, id, title)
+*/}}
+{{- $src := .Destination | safeURL -}}
+{{- $alt := (cond (ne .Text "") .Text (.Title | default "")) -}}
+{{- $title := .Title -}}
+{{- $class := .Attributes.class -}}
+{{- $id := .Attributes.id -}}
+{{- $attrW := 0 -}}
+{{- $attrH := 0 -}}
+{{- with .Attributes.width -}}{{- $attrW = (int .) -}}{{- end -}}
+{{- with .Attributes.height -}}{{- $attrH = (int .) -}}{{- end -}}
+
+{{/* Helpers: try to resolve width/height from local file (static or page relative).
+     Use imageConfig only for common formats to avoid build errors (e.g., WebP unsupported by imageConfig in some envs).
+*/}}
+{{- $w := 0 -}}
+{{- $h := 0 -}}
+
+{{- $isRemote := or (strings.HasPrefix (lower $src) "http://") (strings.HasPrefix (lower $src) "https://") -}}
+{{- if not $isRemote -}}
+  {{/* Try absolute from site root under /static */}}
+  {{- $try1 := printf "static/%s" (strings.TrimPrefix "/" $src) -}}
+  {{- if (fileExists $try1) -}}
+    {{- $ext := lower (path.Ext $try1) -}}
+    {{- if in (slice ".jpg" ".jpeg" ".png" ".gif") $ext -}}
+      {{- with imageConfig $try1 -}}
+        {{- $w = .Width -}}
+        {{- $h = .Height -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{/* Fallback: path relative to current page folder under /static */}}
+  {{- if and (eq $w 0) (.Page) -}}
+    {{- with .Page.File -}}
+      {{- $pageDir := (printf "%s" .Dir) -}}
+      {{- $try2 := printf "static/%s%s" (strings.TrimPrefix "/" $pageDir) (strings.TrimPrefix "/" $src) -}}
+      {{- if (fileExists $try2) -}}
+        {{- $ext2 := lower (path.Ext $try2) -}}
+        {{- if in (slice ".jpg" ".jpeg" ".png" ".gif") $ext2 -}}
+          {{- with imageConfig $try2 -}}
+            {{- $w = .Width -}}
+            {{- $h = .Height -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Heuristic fallback: extract WxH pattern from URL or filename (e.g., 1200x600) */}}
+{{- if and (eq $w 0) (eq $h 0) -}}
+  {{- $m := findRE "([0-9]{2,5})x([0-9]{2,5})" $src -}}
+  {{- with index $m 0 -}}
+    {{- $parts := findRE "[0-9]+" . -}}
+    {{- if ge (len $parts) 2 -}}
+      {{- $w = (index $parts 0) | int -}}
+      {{- $h = (index $parts 1) | int -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Honor author-provided width/height if still missing */}}
+{{- if and (eq $w 0) (gt $attrW 0) -}}{{- $w = $attrW -}}{{- end -}}
+{{- if and (eq $h 0) (gt $attrH 0) -}}{{- $h = $attrH -}}{{- end -}}
+
+{{/* Build attribute string safely */}}
+<img
+  src="{{ $src }}"
+  alt="{{ $alt }}"
+  {{- if $title }} title="{{ $title }}"{{ end -}}
+  {{- if $id }} id="{{ $id }}"{{ end -}}
+  {{- if $class }} class="{{ $class }}"{{ end -}}
+  {{- if gt $w 0 }} width="{{ $w }}"{{ end -}}
+  {{- if gt $h 0 }} height="{{ $h }}"{{ end -}}
+  loading="lazy"
+  decoding="async"
+  >

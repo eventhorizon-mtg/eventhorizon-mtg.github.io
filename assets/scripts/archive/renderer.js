@@ -257,7 +257,32 @@
       container.appendChild(listOl)
     }
 
-    // svuota e renderizza
+    // If skeletons are present, replace in-place to avoid CLS
+    const skeletons = Array.from(listOl.querySelectorAll('li.archive-item.skeleton'))
+    if (skeletons.length && arr.length) {
+      const fragExtra = document.createDocumentFragment()
+      const total = arr.length
+      const count = Math.min(skeletons.length, arr.length)
+      for (let i = 0; i < count; i++) {
+        const real = renderItem(arr[i], i, total)
+        try {
+          listOl.replaceChild(real, skeletons[i])
+        } catch (_) {
+          listOl.appendChild(real)
+        }
+      }
+      for (let i = count; i < arr.length; i++) {
+        fragExtra.appendChild(renderItem(arr[i], i, total))
+      }
+      if (fragExtra.childNodes.length) listOl.appendChild(fragExtra)
+      // remove leftover skeletons
+      for (let i = count; i < skeletons.length; i++) {
+        skeletons[i]?.remove()
+      }
+      return
+    }
+
+    // otherwise: clear and render
     listOl.innerHTML = ''
     if (!arr.length) {
       // mostra messaggio e rimuovi l'OL
