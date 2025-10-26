@@ -122,10 +122,9 @@
   cursor: pointer;
 }
 
-/* Hover effect */
+/* Hover effect: keep border coherent; background handled in glass block below */
 .archive-item article.item:hover {
-  border-color: var(--color-border);
-  background: var(--color-surface-glass);
+  border-color: var(--color-border-strong);
 }
 
 /* Open state (mantieni altezza fissa) - DEFAULT (content = viola) */
@@ -857,34 +856,38 @@
   /* Desktop: rimuovi movimento immagine e incrementa highlight */
   .archive-item:hover .item-thumb img { transform: none; }
   .archive-item article.item:hover {
-    background: rgba(5, 9, 16, 0.62);
+    background: color-mix(in srgb, var(--color-surface-glass) 90%, var(--color-overlay) 10%);
     border-color: var(--color-border-strong);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
-    .item-media {
-    width: 140px;
-    height: 88px; /* resta l'altezza riga */
-    flex: 0 0 140px;
-    aspect-ratio: auto; /* consenti proporzione rettangolare */
   }
 }
+
+/* Desktop: thumbnail permanently wider (not only on hover) */
+@media (min-width: 768px) {
+  .item-media {
+    width: 140px;
+    height: 88px; /* match row height */
+    flex: 0 0 140px;
+    aspect-ratio: auto; /* allow rectangular proportion */
+  }
 }
 
-/* Effetto vetro riga: applica anche su mobile */
+/* Effetto vetro riga: applica anche su mobile (coerente con i token tema) */
 .archive-item article.item {
-  background: rgba(5, 9, 16, 0.35);
+  background: var(--color-surface-glass);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 /* Hover: leggermente più visibile mantenendo il blur */
 .archive-item article.item:hover {
-  background: rgba(5, 9, 16, 0.42);
+  background: color-mix(in srgb, var(--color-surface-glass) 90%, var(--color-overlay) 10%);
 }
 
 /* Stato aperto: mantieni effetto vetro più marcato */
 .archive-item.is-sheet-open article.item,
 .archive-item article.item.is-open {
-  background: rgba(5, 9, 16, 0.50);
+  background: color-mix(in srgb, var(--color-surface-glass) 80%, var(--color-overlay) 20%);
 }
 
 /* Mobile playlist aesthetics */
@@ -919,7 +922,8 @@
 
   .item-content {
     height: 64px;
-    padding: 0 var(--space-3);
+    /* Extra spazio a destra per evitare collisione con il kebab */
+    padding: 0 calc(var(--space-3) + 48px) 0 var(--space-3);
     justify-content: center;
   }
 
