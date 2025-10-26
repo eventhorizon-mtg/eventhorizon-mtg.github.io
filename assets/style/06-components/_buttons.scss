@@ -145,7 +145,7 @@
   --btn-border: var(--color-special);
   --btn-shadow: var(--shadow-md);
 
-  @include btn-hover(var(--color-special-500), var(--color-special-400));
+  @include btn-hover(var(--color-special-600), var(--color-special-500));
 }
 
 // Button Accent //
