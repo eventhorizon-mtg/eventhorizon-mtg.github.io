@@ -154,6 +154,16 @@
   border-color: var(--color-primary); /* Viola per content */
 }
 
+/* CONTENT: hover quando aperto - mantieni viola */
+.archive-item.is-content article.item.is-open:hover {
+  border-color: var(--color-primary); /* Forza viola anche in hover */
+}
+
+/* VIDEO: hover quando aperto - mantieni azzurro */
+.archive-item.is-video article.item.is-open:hover {
+  border-color: var(--color-special); /* Forza azzurro anche in hover */
+}
+
 /* Media/Thumbnail section (left side) - UNIFORM SIZE */
 .item-media {
   position: relative;
