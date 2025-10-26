@@ -122,9 +122,14 @@
   cursor: pointer;
 }
 
-/* Hover effect: keep border coherent; background handled in glass block below */
+/* Hover effect: show type color hint - DEFAULT (content = viola) */
 .archive-item article.item:hover {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-primary); /* Viola per content */
+}
+
+/* VIDEO: hover con colore azzurro */
+.archive-item.is-video article.item:hover {
+  border-color: var(--color-special); /* Azzurro per video */
 }
 
 /* Open state (mantieni altezza fissa) - DEFAULT (content = viola) */
@@ -141,6 +146,12 @@
 .archive-item.is-video.is-sheet-open article.item,
 .archive-item.is-video article.item.is-open {
   border-color: var(--color-special);
+}
+
+/* CONTENT: quando aperto mantieni viola (già definito sopra, questo è esplicito per coerenza) */
+.archive-item.is-content.is-sheet-open article.item,
+.archive-item.is-content article.item.is-open {
+  border-color: var(--color-primary); /* Viola per content */
 }
 
 /* Media/Thumbnail section (left side) - UNIFORM SIZE */
@@ -447,17 +458,17 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-/* Hover su stato aperto */
-.item.is-open .item-actions-summary:hover,
-.item.is-open .item-actions-summary:focus-visible {
+/* CONTENT: hover su stato aperto (viola) - esplicito per coerenza */
+.archive-item.is-content .item.is-open .item-actions-summary:hover,
+.archive-item.is-content .item.is-open .item-actions-summary:focus-visible {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
 }
 
-.item.is-open .item-actions-summary:hover::before,
-.item.is-open .item-actions-summary:hover::after,
-.item.is-open .item-actions-summary:focus-visible::before,
-.item.is-open .item-actions-summary:focus-visible::after {
+.archive-item.is-content .item.is-open .item-actions-summary:hover::before,
+.archive-item.is-content .item.is-open .item-actions-summary:hover::after,
+.archive-item.is-content .item.is-open .item-actions-summary:focus-visible::before,
+.archive-item.is-content .item.is-open .item-actions-summary:focus-visible::after {
   background: var(--color-primary);
 }
 
@@ -854,9 +865,10 @@
   /* Hover e stato aperto gestiti anche globalmente */
   /* Desktop: rimuovi movimento immagine e incrementa highlight */
   .archive-item:hover .item-thumb img { transform: none; }
+
+  /* Desktop hover: background e shadow uniformi (border color già gestito sopra per tipo) */
   .archive-item article.item:hover {
     background: color-mix(in srgb, var(--color-surface-glass) 90%, var(--color-overlay) 10%);
-    border-color: var(--color-border-strong);
     box-shadow: var(--shadow-archive-card);
   }
 }
