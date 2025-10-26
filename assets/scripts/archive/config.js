@@ -34,8 +34,23 @@
     FETCH_INITIAL_DELAY_MS: 1000, // delay iniziale prima del primo retry (ms)
     FETCH_BACKOFF_MULTIPLIER: 2, // moltiplicatore per exponential backoff
 
-    // Desktop panel configuration
-    MAX_HEIGHT_COMPRESSED: 320, // Max height iniziale del pannello (deve matchare il CSS)
+    // Archive Dimensions - Critical sizing (sync with CSS tokens)
+    THUMB_SIZE_MOBILE: 56, // mobile thumbnail size (px)
+    THUMB_SIZE_DESKTOP: 140, // desktop thumbnail width (px)
+    THUMB_SIZE_DESKTOP_HEIGHT: 88, // desktop thumbnail height (px)
+    ROW_HEIGHT_MOBILE: 64, // mobile row height (px)
+    ROW_HEIGHT_DESKTOP: 88, // desktop row height (px)
+    PANEL_COMPRESSED: 320, // panel compressed max-height (px)
+    PANEL_EXPANDED: 600, // panel expanded max-height (px)
+    PANEL_GRADIENT_HEIGHT: 120, // panel gradient overlay height (px)
+
+    // Legacy alias for backward compatibility
+    MAX_HEIGHT_COMPRESSED: 320, // @deprecated use PANEL_COMPRESSED instead
+
+    // Archive Opacities (sync with CSS tokens)
+    OPACITY_SUBTLE: 0.5,
+    OPACITY_MODERATE: 0.7,
+    OPACITY_STRONG: 0.9,
 
     // Media Query objects (with polyfill fallback)
     get mqSheet() {

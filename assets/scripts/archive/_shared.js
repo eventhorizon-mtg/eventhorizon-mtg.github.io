@@ -7,8 +7,25 @@
 ;(() => {
   'use strict'
 
+  // Debug mode detection (enabled in development)
+  const DEBUG =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.search.includes('debug=true')
+
   // Expose shared utilities via global namespace (compatible with resources.Concat)
   window.ArchiveShared = {
+    // Debug utilities
+    DEBUG,
+    debugLog: (context, message, error) => {
+      if (!DEBUG) return
+      const prefix = `[Archive${context ? `:${context}` : ''}]`
+      if (error) {
+        console.warn(prefix, message, error)
+      } else {
+        console.log(prefix, message)
+      }
+    },
     // DOM utilities
     qs: (sel, root = document) => root.querySelector(sel),
     qsa: (sel, root = document) => Array.from(root.querySelectorAll(sel)),
@@ -33,6 +50,58 @@
           '`': '&#96;'
         }[c]
       })
+    },
+
+    // Alias for backward compatibility
+    escapeAttribute: str => window.ArchiveShared.escapeHTML(str),
+
+    // Sanitize HTML content for innerHTML (prevents XSS)
+    sanitizeHTML: html => {
+      if (!html) return ''
+
+      // Create temporary element for parsing
+      const temp = document.createElement('div')
+      temp.innerHTML = html
+
+      // Remove dangerous tags completely
+      const dangerousTags = ['script', 'iframe', 'object', 'embed', 'link', 'style', 'meta']
+      dangerousTags.forEach(tag => {
+        const elements = temp.querySelectorAll(tag)
+        elements.forEach(el => el.remove())
+      })
+
+      // Remove dangerous attributes
+      const dangerousAttrs = [
+        'onclick',
+        'onload',
+        'onerror',
+        'onmouseover',
+        'onfocus',
+        'onblur',
+        'onchange',
+        'onsubmit'
+      ]
+      const allElements = temp.querySelectorAll('*')
+      allElements.forEach(el => {
+        // Remove event handlers
+        dangerousAttrs.forEach(attr => {
+          if (el.hasAttribute(attr)) {
+            el.removeAttribute(attr)
+          }
+        })
+
+        // Sanitize href and src to prevent javascript:
+        ;['href', 'src'].forEach(attr => {
+          if (el.hasAttribute(attr)) {
+            const value = el.getAttribute(attr)
+            if (value && value.trim().toLowerCase().startsWith('javascript:')) {
+              el.removeAttribute(attr)
+            }
+          }
+        })
+      })
+
+      return temp.innerHTML
     },
 
     // URL utilities

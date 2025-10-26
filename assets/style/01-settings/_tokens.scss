@@ -376,8 +376,71 @@
     color-mix(in srgb, var(--color-gray-950) 65%, transparent) 100%);
   --hero-bg-url: none;
 
-  /* Archive */
+  /* ==========================================
+     ARCHIVE COMPONENT TOKENS
+     Dimensions, opacities, and specific values
+     ========================================== */
+
+  /* Archive Dimensions - Critical sizing */
+  --archive-thumb-mobile: 56px;
+  --archive-thumb-desktop: 140px;
+  --archive-thumb-desktop-height: 88px;
+  --archive-row-mobile: 64px;
+  --archive-row-desktop: 88px;
+  --archive-panel-compressed: 320px;
+  --archive-panel-expanded: 600px;
+  --archive-panel-gradient-height: 120px;
   --archive-sheet-max: 480px;
+  --archive-sheet-min-height: 45vh;
+  --archive-sheet-max-height: 85vh;
+  --archive-sheet-header-height: clamp(120px, 28vh, 220px);
+
+  /* Archive Opacities */
+  --archive-opacity-subtle: 0.5;
+  --archive-opacity-moderate: 0.7;
+  --archive-opacity-strong: 0.9;
+  --archive-opacity-thumbnail-bg: 0.22;
+  --archive-opacity-sheet-blur: 0.5;
+
+  /* Archive Transform Scales */
+  --archive-scale-hover: 1.05;
+  --archive-scale-active: 0.95;
+  --archive-scale-button-hover: 1.05;
+  --archive-scale-button-active: 0.92;
+
+  /* Archive Shadows */
+  --shadow-archive-card: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-archive-sheet: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  --shadow-archive-thumb: 0 2px 6px rgba(0, 0, 0, 0.4);
+
+  /* Archive Line Heights (specialized) */
+  --archive-lh-label: 1.2;
+  --archive-lh-title: 1.35;
+  --archive-lh-body: 1.6;
+
+  /* Archive Z-Index Layers (relative to base z-index system) */
+  --z-archive-bg: -1;
+  --z-archive-base: 0;
+  --z-archive-content: 1;
+  --z-archive-media: 2;
+  --z-archive-controls: 3;
+  --z-archive-overlay: 4;
+  --z-archive-modal: 5;
+  --z-archive-sheet-handle: 2;
+
+  /* Archive Gap Spacing (consistent across items/panels/sheet) */
+  --archive-gap-timeline: var(--space-2);
+  --archive-gap-panel: var(--space-1-5);
+  --archive-gap-ctas: var(--space-1-5);
+  --archive-gap-sheet: var(--space-1);
+
+  /* Archive Transitions (specialized timing) */
+  --transition-archive-card: transform 0.3s var(--ease-in-out);
+  --transition-archive-fade: opacity 0.3s ease;
+  --transition-archive-button: background var(--duration-fast) var(--ease-out),
+                                border-color var(--duration-fast) var(--ease-out);
+  --transition-archive-sheet: transform 0.3s var(--ease-in-out);
+  --transition-archive-sheet-instant: none;
 
   /* ==========================================
      BRAND COLORS (Third-Party Platforms)

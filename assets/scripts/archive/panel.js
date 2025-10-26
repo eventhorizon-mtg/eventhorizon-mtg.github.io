@@ -12,7 +12,7 @@
 
   // Import dependencies from global namespaces
   const { qs, set } = window.ArchiveShared
-  const { TRUE, FALSE, MAX_HEIGHT_COMPRESSED } = window.ArchiveConfig
+  const { TRUE, FALSE, PANEL_COMPRESSED } = window.ArchiveConfig
 
   const mqSheet2 = window.matchMedia
     ? window.matchMedia('(max-width: 767.98px)')
@@ -108,7 +108,7 @@
     if (panel.classList.contains('is-scrollable')) return false
 
     // Verifica se il contenuto supera l'altezza massima compressa
-    const hasOverflow = panel.scrollHeight > MAX_HEIGHT_COMPRESSED
+    const hasOverflow = panel.scrollHeight > PANEL_COMPRESSED
 
     // Aggiungi/rimuovi classe has-overflow
     panel.classList.toggle('has-overflow', hasOverflow)

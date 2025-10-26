@@ -11,7 +11,7 @@
   if (!document.querySelector('section.archive')) return
 
   // Import dependencies from global namespaces
-  const { qs, qsa, on } = window.ArchiveShared
+  const { qs, qsa, on, sanitizeHTML, debugLog } = window.ArchiveShared
   const {
     mqSheet,
     DRAG_CLOSE_THRESHOLD_PX,
@@ -66,7 +66,8 @@
       if (payload.descHtml instanceof Node) {
         content.appendChild(payload.descHtml)
       } else {
-        content.innerHTML = payload.descHtml // Fallback for string type, if necessary
+        // Sanitize HTML to prevent XSS
+        content.innerHTML = sanitizeHTML(payload.descHtml)
       }
     }
     ctas.innerHTML = ''
@@ -354,7 +355,8 @@
       }
       const extContainer = document.createElement('div')
       extContainer.className = 'item-content-extended'
-      extContainer.innerHTML = contentExt.innerHTML
+      // Sanitize HTML content to prevent XSS
+      extContainer.innerHTML = sanitizeHTML(contentExt.innerHTML)
       sheetFragment.appendChild(extContainer)
     }
     if (links.length > 0 && sheetFragment.childNodes.length > 0) {

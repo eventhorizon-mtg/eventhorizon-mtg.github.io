@@ -18,7 +18,7 @@
 /* Archive cards - Unified layout across all viewports */
 .archive-timeline {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--archive-gap-timeline);
   /* Padding laterale ridotto */
   padding-inline: 0;
 }
@@ -33,7 +33,7 @@
   /* Imposta il contatore sull'elemento, così ogni riga ha il proprio valore */
   counter-reset: item-num var(--item-number);
   /* Crea stacking context per posizionare uno sfondo dietro all'articolo */
-  z-index: 0;
+  z-index: var(--z-archive-base);
 }
 
 /* Skeleton placeholders to reserve space before JS render (CLS guard) */
@@ -109,9 +109,9 @@
   flex-direction: row;
   align-items: stretch;
   gap: 0;
-  height: 88px; /* Altezza uniforme su tutti i viewport */
-  min-height: 88px;
-  max-height: 88px;
+  height: var(--archive-row-desktop); /* Altezza uniforme su tutti i viewport */
+  min-height: var(--archive-row-desktop);
+  max-height: var(--archive-row-desktop);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-soft);
   background: var(--color-surface);
@@ -132,9 +132,9 @@
 .archive-item article.item.is-open {
   border-color: var(--color-primary);
   background: var(--color-surface-elevated);
-  height: 88px;
-  min-height: 88px;
-  max-height: 88px;
+  height: var(--archive-row-desktop);
+  min-height: var(--archive-row-desktop);
+  max-height: var(--archive-row-desktop);
 }
 
 /* VIDEO: quando aperto bordo BLU invece di viola */
@@ -148,9 +148,9 @@
   position: relative;
   flex-shrink: 0;
   /* Thumbnail quadrato anche su desktop */
-  width: 88px;
-  height: 88px;
-  flex: 0 0 88px;
+  width: var(--archive-row-desktop);
+  height: var(--archive-row-desktop);
+  flex: 0 0 var(--archive-row-desktop);
   aspect-ratio: 1 / 1;
   background: var(--color-surface-elevated);
   overflow: hidden;
@@ -181,7 +181,7 @@
 
 /* Hover effect come homepage */
 .archive-item:hover .item-thumb img {
-  transform: scale(1.05);
+  transform: scale(var(--archive-scale-hover));
 }
 
 /* Primary button overlay on thumbnail */
@@ -195,7 +195,7 @@
   justify-content: center;
   border-radius: var(--radius-full);
   background: transparent;
-  z-index: 4;
+  z-index: var(--z-archive-overlay);
   pointer-events: auto;
   visibility: visible;
   opacity: 1;
@@ -213,7 +213,7 @@
 /* Default hover - senza translateY */
 .item-thumb-button:hover,
 .item-thumb-button:focus-visible {
-  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
+  transform: translate(-50%, -50%) scale(var(--archive-scale-button-hover)); /* Mantiene centramento */
 }
 
 /* VIDEO: Icona play SVG YouTube - Semitrasparente */
@@ -236,7 +236,7 @@
 .archive-item.is-video .item-thumb-button-shape {
   fill: #ff0000; /* Rosso YouTube */
   opacity: 0.65; /* Semitrasparente */
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-fast) ease;
 }
 
 /* Simbolo play bianco */
@@ -247,7 +247,7 @@
 /* Hover: leggermente più opaco */
 .archive-item.is-video .item-thumb-button:hover .item-thumb-button-shape,
 .archive-item.is-video .item-thumb-button:focus-visible .item-thumb-button-shape {
-  opacity: 0.9;
+  opacity: var(--archive-opacity-strong);
 }
 
 /* Override hover generale - NO effetti extra */
@@ -285,8 +285,8 @@
     color-mix(in srgb, var(--color-primary-500) 55%, transparent) 0%,
     color-mix(in srgb, var(--color-primary-300) 55%, transparent) 100%);
   border-color: var(--color-primary);
-  transform: translate(-50%, -50%) scale(1.05); /* Mantiene centramento */
-  opacity: 0.95;
+  transform: translate(-50%, -50%) scale(var(--archive-scale-button-hover)); /* Mantiene centramento */
+  opacity: var(--archive-opacity-strong);
 }
 
 /* Content section (right side) - UNIFORM HEIGHT */
@@ -296,9 +296,9 @@
   flex-direction: column;
   padding: var(--space-2-5) var(--space-4);
   position: relative;
-  z-index: 2;
+  z-index: var(--z-archive-content);
   min-width: 0;
-  height: 88px; /* Altezza uniforme uguale alla riga */
+  height: var(--archive-row-desktop); /* Altezza uniforme uguale alla riga */
   justify-content: center; /* Centra verticalmente il contenuto */
   overflow: hidden; /* Nascondi overflow quando chiuso */
 }
@@ -313,7 +313,7 @@
 .item-overline {
   font-family: var(--font-display);
   font-size: clamp(0.65rem, 1.8vw, var(--text-xs)); /* Responsive */
-  line-height: 1.2;
+  line-height: var(--archive-lh-label);
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
   color: var(--color-text-muted);
@@ -339,7 +339,7 @@
 
 .item-title {
   font-size: clamp(0.85rem, 2.2vw, var(--text-base)); /* Responsive */
-  line-height: 1.35;
+  line-height: var(--archive-lh-title);
   color: var(--color-text);
   font-weight: 600;
   margin: 0;
@@ -357,7 +357,7 @@
 .item-desc-preview {
   font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
   color: var(--color-text-muted);
-  line-height: 1.6;
+  line-height: var(--archive-lh-body);
   display: none; /* Nascosto di default */
   margin-top: var(--space-2);
 }
@@ -373,10 +373,9 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-soft);
   background: var(--color-surface);
-  transition: border-color 0.2s ease,
-              background 0.2s ease,
-              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 3;
+  transition: var(--transition-archive-button),
+              transform var(--transition-archive-card);
+  z-index: var(--z-archive-controls);
   cursor: pointer;
   /* Touch optimization */
   -webkit-tap-highlight-color: transparent;
@@ -399,9 +398,9 @@
   background: var(--color-text-soft);
   border-radius: var(--radius-full);
   transform: translate(-50%, -50%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              background 0.2s ease,
-              opacity 0.2s ease;
+  transition: transform var(--transition-archive-card),
+              background var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
 }
 
 /* Linea verticale per il "+" */
@@ -414,7 +413,7 @@
 .item-actions-summary:focus-visible {
   border-color: var(--color-border);
   background: var(--color-surface-glass);
-  transform: translateY(-50%) scale(1.05);
+  transform: translateY(-50%) scale(var(--archive-scale-button-hover));
 }
 
 .item-actions-summary:focus-visible {
@@ -431,7 +430,7 @@
 
 /* Active/Press state */
 .item-actions-summary:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(var(--archive-scale-active));
 }
 
 /* Quando aperto: rotazione a X per chiudere - DEFAULT (content = viola) */
@@ -484,7 +483,7 @@
 /* Stato disabilitato (se necessario) */
 .item-actions-summary:disabled,
 .item-actions-summary[aria-disabled="true"] {
-  opacity: 0.4;
+  opacity: 0.4; /* Opacità molto ridotta per disabled, mantieni valore specifico */
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -508,15 +507,15 @@
   padding: var(--space-2) clamp(1rem, 3vw, 1.5rem) var(--space-3); /* Padding ulteriormente ridotto */
   display: flex;
   flex-direction: column;
-  gap: var(--space-1-5); /* Ulteriormente ridotto per compattare */
+  gap: var(--archive-gap-panel); /* Ulteriormente ridotto per compattare */
   opacity: 1;
-  max-height: 320px; /* Altezza ottimale iniziale - più compatto */
+  max-height: var(--archive-panel-compressed); /* Altezza ottimale iniziale - più compatto */
   overflow: hidden;  /* Nascosto di default, no scroll visibile */
   position: relative; /* Per posizionare gradient e button */
   scroll-behavior: smooth;
-  transition: opacity 0.3s ease,
-              padding 0.3s ease,
-              max-height 0.3s ease;
+  transition: opacity var(--duration-slow) ease,
+              padding var(--duration-slow) ease,
+              max-height var(--duration-slow) ease;
   border-top: 1px solid var(--color-border-soft);
   background: var(--color-surface-glass);
   width: 100%; /* Occupa tutta la larghezza disponibile */
@@ -534,15 +533,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 120px; /* Più alto per area cliccabile */
+  height: var(--archive-panel-gradient-height); /* Più alto per area cliccabile */
   background: linear-gradient(to top,
     var(--color-surface-glass) 0%,
     color-mix(in srgb, var(--color-surface-glass) 98%, transparent) 50%,
     transparent 100%);
   pointer-events: none; /* Disabilitato di default */
   opacity: 0; /* Nascosto di default */
-  transition: opacity 0.3s ease;
-  z-index: 5;
+  transition: opacity var(--duration-slow) ease;
+  z-index: var(--z-archive-overlay);
   cursor: default;
 }
 
@@ -553,12 +552,12 @@
   bottom: var(--space-2);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 6;
+  z-index: calc(var(--z-archive-overlay) + 1);
   font-size: var(--text-lg);
   color: var(--color-text-muted);
   pointer-events: none;
   opacity: 0; /* Nascosto di default */
-  transition: opacity 0.2s ease, color 0.2s ease;
+  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 /* MOSTRA gradient e puntini SOLO quando c'è overflow (classe aggiunta da JS) */
@@ -582,13 +581,13 @@
 
 /* Hover su gradient - evidenzia i puntini */
 .item-panel.has-overflow:hover::before {
-  opacity: 1;
+  opacity: 1; /* Full opacity on hover */
   color: var(--color-text-soft);
 }
 
 /* Stato scrollable - scroll attivato */
 .item-panel.is-scrollable {
-  max-height: 600px; /* Altezza massima quando scrollabile */
+  max-height: var(--archive-panel-expanded); /* Altezza massima quando scrollabile */
   overflow-y: auto;  /* Attiva scroll verticale */
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -624,7 +623,7 @@
 .item-panel.is-scrollable::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: var(--radius-full);
-  transition: background var(--transition-fast);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .item-panel.is-scrollable::-webkit-scrollbar-thumb:hover {
@@ -640,7 +639,7 @@
   font-family: var(--font-sans);
   font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
   color: var(--color-text-muted);
-  line-height: 1.6; /* Ridotto leggermente per compattare */
+  line-height: var(--archive-lh-body); /* Ridotto leggermente per compattare */
   margin: 0;
   width: 100%; /* Occupa tutta la larghezza del pannello */
   max-width: 100%;
@@ -662,7 +661,7 @@
   font-family: var(--font-sans);
   font-size: clamp(0.75rem, 1.8vw, var(--text-sm)); /* Responsive */
   color: var(--color-text); /* Più visibile */
-  line-height: 1.6; /* Ridotto leggermente per compattare */
+  line-height: var(--archive-lh-body); /* Ridotto leggermente per compattare */
   padding: 0; /* Rimosso padding verticale */
   width: 100%; /* Occupa tutta la larghezza del pannello */
   max-width: 100%; /* Non eccedere la larghezza del pannello */
@@ -707,7 +706,7 @@
   text-decoration: underline;
   text-decoration-color: var(--color-primary-soft);
   text-underline-offset: 0.15em;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition: color var(--duration-fast) ease, text-decoration-color var(--duration-fast) ease;
   font-weight: 500;
 }
 
@@ -733,7 +732,7 @@
 .item-ctas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1-5); /* Ridotto da space-2 */
+  gap: var(--archive-gap-ctas); /* Ridotto da space-2 */
   margin-top: 0; /* Rimosso margin-top per compattare */
 }
 
@@ -837,7 +836,7 @@
   background-repeat: no-repeat;
   opacity: 0.25; /* leggero per non disturbare il contenuto */
   pointer-events: none;
-  z-index: -1; /* dietro ai contenuti della riga */
+  z-index: var(--z-archive-bg); /* dietro ai contenuti della riga */
   border-radius: var(--radius-md); /* stesso raggio della card */
 }
 
@@ -849,7 +848,7 @@
   /* Stato base: vetro leggero con blur (desktop override già fornito in regole globali) */
   .archive-item article.item {
     position: relative; /* assicurati stia sopra allo sfondo */
-    z-index: 1;
+    z-index: var(--z-archive-content);
   }
 
   /* Hover e stato aperto gestiti anche globalmente */
@@ -858,16 +857,16 @@
   .archive-item article.item:hover {
     background: color-mix(in srgb, var(--color-surface-glass) 90%, var(--color-overlay) 10%);
     border-color: var(--color-border-strong);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-archive-card);
   }
 }
 
 /* Desktop: thumbnail permanently wider (not only on hover) */
 @media (min-width: 768px) {
   .item-media {
-    width: 140px;
-    height: 88px; /* match row height */
-    flex: 0 0 140px;
+    width: var(--archive-thumb-desktop);
+    height: var(--archive-thumb-desktop-height); /* match row height */
+    flex: 0 0 var(--archive-thumb-desktop);
     aspect-ratio: auto; /* allow rectangular proportion */
   }
 }
@@ -893,16 +892,16 @@
 /* Mobile playlist aesthetics */
 @include bp-down(sm) {
   .archive-item article.item {
-    height: 64px;
-    min-height: 64px;
-    max-height: 64px;
+    height: var(--archive-row-mobile);
+    min-height: var(--archive-row-mobile);
+    max-height: var(--archive-row-mobile);
     border-radius: var(--radius-md);
   }
 
   .item-media {
-    width: 56px;
-    height: 56px;
-    flex: 0 0 56px;
+    width: var(--archive-thumb-mobile);
+    height: var(--archive-thumb-mobile);
+    flex: 0 0 var(--archive-thumb-mobile);
     aspect-ratio: 1 / 1;
     align-self: center;
     margin-left: var(--space-2);
@@ -921,7 +920,7 @@
   }
 
   .item-content {
-    height: 64px;
+    height: var(--archive-row-mobile);
     /* Extra spazio a destra per evitare collisione con il kebab */
     padding: 0 calc(var(--space-3) + 48px) 0 var(--space-3);
     justify-content: center;
@@ -953,7 +952,7 @@
     color: var(--color-text-muted);
     background: transparent;
     border: none;
-    z-index: 4; /* above row link */
+    z-index: var(--z-archive-overlay); /* above row link */
     cursor: pointer;
   }
 
@@ -965,14 +964,14 @@
   .item-row-link {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: var(--z-archive-sheet-handle);
     display: block;
     text-indent: -9999px;
     overflow: hidden;
   }
 
   /* Ensure media and kebab stay interactive above overlay */
-  .item-media { z-index: 3; position: relative; }
+  .item-media { z-index: var(--z-archive-controls); position: relative; }
 
   /* Remove default blue tap highlight on mobile */
   .archive a,

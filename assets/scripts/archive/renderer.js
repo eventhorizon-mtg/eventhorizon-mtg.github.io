@@ -11,7 +11,19 @@
   if (!document.querySelector('section.archive')) return
 
   // Import dependencies from global namespaces
-  const { text, trim, lower, escapeHTML, qs, bustIfLocal, getParam, getURL } = window.ArchiveShared
+  const {
+    text,
+    trim,
+    lower,
+    escapeHTML,
+    escapeAttribute,
+    sanitizeHTML,
+    qs,
+    bustIfLocal,
+    getParam,
+    getURL,
+    debugLog
+  } = window.ArchiveShared
   const { ARIA_DESCRIPTION_MAX_CHARS } = window.ArchiveConfig
   const { pillClassFrom, pillLabel } = window.ArchiveData
 
@@ -77,14 +89,14 @@
     const hasDropdown = !!desc || !!content || otherCount > 0
     const summaryLabel = otherCount > 0 ? `Dettagli e link (${otherCount})` : 'Dettagli'
 
-    // Build expanded panel content with separators
+    // Build expanded panel content with separators (sanitize HTML to prevent XSS)
     let panelContent = ''
     if (desc) {
-      panelContent += `<p class="item-summary">${desc}</p>`
+      panelContent += `<p class="item-summary">${sanitizeHTML(desc)}</p>`
     }
     if (content) {
       if (panelContent) panelContent += `<hr class="item-separator">`
-      panelContent += `<div class="item-content-extended">${content}</div>`
+      panelContent += `<div class="item-content-extended">${sanitizeHTML(content)}</div>`
     }
     if (otherCount > 0) {
       if (panelContent) panelContent += `<hr class="item-separator">`
@@ -105,7 +117,9 @@
     if (thumbSrc) {
       try {
         li.style.setProperty('--item-bg', `url("${thumbSrc}")`)
-      } catch (e) {}
+      } catch (e) {
+        debugLog('Renderer', 'Failed to set item background image', e)
+      }
     }
 
     // Overlay on thumbnail (desktop). Hidden on mobile via CSS.
@@ -123,16 +137,7 @@
       }
     }
 
-    // Helper to escape attribute values for HTML context
-    function escapeAttribute(val) {
-      return String(val)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-    }
-
+    // Use shared escapeAttribute for HTML attributes
     const safeThumbSrc = escapeAttribute(thumbSrc)
     const safeTit = escapeAttribute(tit)
     const safePrimaryUrl = escapeAttribute(primaryUrl)
