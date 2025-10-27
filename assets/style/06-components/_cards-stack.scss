@@ -719,7 +719,7 @@
       position: relative;
       display: block;
       overflow: hidden;
-      min-height: clamp(420px, 68vh, 560px);
+      min-height: clamp(420px, 62vh, 540px);
       touch-action: pan-y;
       scroll-snap-type: none;
       -webkit-overflow-scrolling: auto;
@@ -732,9 +732,9 @@
       flex-direction: column;
       flex: 1 1 auto;
       min-width: 100%;
-      /* MOBILE/TABLET: Altezza adattiva basata su viewport */
-      min-height: clamp(480px, 70vh, 640px);
-      max-height: clamp(520px, 75vh, 680px);
+      /* MOBILE/TABLET: Altezza adattiva basata su viewport (ridotta per card più compatta) */
+      min-height: clamp(420px, 62vh, 540px);
+      max-height: clamp(460px, 68vh, 600px);
       border-radius: var(--card-radius);
       background: rgba(5, 9, 16, 0.72);
       justify-content: flex-start;
@@ -783,8 +783,8 @@
     .card:not(.is-expanded) .card__media {
       position: relative;
       inset: auto;
-      /* L'immagine cresce proporzionalmente basandosi sul 40% dell'altezza della card */
-      flex: 0 0 40%;
+      /* L'immagine cresce proporzionalmente basandosi sul 33% dell'altezza della card */
+      flex: 0 0 33%;
       width: 100%;
       /* Mantiene aspect ratio 16/9 ma può crescere con la card */
       aspect-ratio: 16 / 9;
@@ -1002,18 +1002,18 @@
       filter: none;
     }
 
-    /* Tablet (viewport >600px): altezze maggiorate per sfruttare meglio lo spazio */
+    /* Tablet (viewport >600px): altezze ridotte per card più compatta */
     @media (min-width: 600px) {
       .card {
-        /* Su tablet, aumentiamo le altezze per una visualizzazione migliore */
-        min-height: clamp(540px, 72vh, 720px);
-        max-height: clamp(580px, 78vh, 780px);
+        /* Su tablet, card più compatta mantenendo proporzioni */
+        min-height: clamp(480px, 65vh, 620px);
+        max-height: clamp(520px, 70vh, 660px);
       }
 
       .card .card__media,
       .card:not(.is-expanded) .card__media {
-        /* Su tablet l'immagine occupa il 43% dell'altezza */
-        flex: 0 0 43%;
+        /* Su tablet l'immagine occupa il 35% dell'altezza */
+        flex: 0 0 35%;
       }
 
       .card .card__body,
