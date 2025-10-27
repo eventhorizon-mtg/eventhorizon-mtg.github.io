@@ -988,13 +988,14 @@
     height: var(--archive-row-mobile);
     /* Padding calcolato dal container del kebab (right + width) */
     /* Kebab: right=var(--space-1), width=40px → padding = space-1 + 40px */
-    padding: 0 calc(var(--space-2-5) + 40px) 0 var(--space-2-5);
+    padding: 0 calc(var(--space-1) + 40px) 0 var(--space-2-5);
     justify-content: center;
   }
 
   /* Mobile: gap compatto tra overline e title (best practices playlist) */
   .item-header {
     gap: 2px; /* Spaziatura stretta stile Spotify */
+    margin-right: var(--space-2); /* Distanza dal kebab per evitare sovrapposizione (~8-16px) */
   }
 
   .item-title {
