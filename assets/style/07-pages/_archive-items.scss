@@ -955,28 +955,34 @@
 
   .item-content {
     height: var(--archive-row-mobile);
-    /* Extra spazio a destra per evitare collisione con il kebab */
-    padding: 0 calc(var(--space-3) + 48px) 0 var(--space-3);
+    /* Padding uniforme per allineamento title e overline dal kebab */
+    padding: 0 52px 0 var(--space-3);
     justify-content: center;
+  }
+
+  /* Mobile: gap compatto tra overline e title (best practices playlist) */
+  .item-header {
+    gap: 2px; /* Spaziatura stretta stile Spotify */
   }
 
   .item-title {
     -webkit-line-clamp: 1;
     line-clamp: 1;
-    /* Mobile: dimensioni simili a playlist musicali (es. Spotify ~14px) */
-    font-size: 0.875rem; /* 14px - coerente con playlist musicali */
-    line-height: 1.3;
-    font-weight: 600;
-    padding: 0; /* Reset padding per allineamento uniforme */
-    margin: 0; /* Reset margin per allineamento uniforme */
+    /* Mobile: dimensioni ottimizzate stile Spotify (~13px) */
+    font-size: 0.8125rem; /* 13px - best practices playlist mobile */
+    line-height: 1.2; /* Compatto per massimizzare spazio */
+    font-weight: 500; /* Leggermente più leggero per leggibilità */
+    padding: 0;
+    margin: 0;
   }
 
-  /* Mobile: overline dimensioni coerenti con sottotitoli playlist (~12px) */
+  /* Mobile: overline compatto stile sottotitolo playlist (~11px) */
   .item-overline {
-    font-size: 0.75rem; /* 12px - leggibile e coerente */
-    line-height: 1.3;
-    padding: 0; /* Stesso padding del titolo per allineamento perfetto */
-    margin: 0; /* Reset margin per allineamento uniforme */
+    font-size: 0.6875rem; /* 11px - sottotitolo compatto */
+    line-height: 1.2; /* Compatto */
+    font-weight: 400; /* Regular per contrasto con title */
+    padding: 0; /* Stesso padding del titolo - gestito dal parent */
+    margin: 0;
   }
 
   /* Kebab button at right */
