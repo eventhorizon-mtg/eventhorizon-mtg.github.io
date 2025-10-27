@@ -71,7 +71,7 @@
 .cards--stack .card {
   display: flex;
   flex-direction: column;
-  gap: var(--stack-gap);
+  gap: 0; /* REMOVED gap - no spacing between card children */
   border-radius: var(--card-radius);
   border: 1px solid var(--card-border);
   background: var(--card-bg);
