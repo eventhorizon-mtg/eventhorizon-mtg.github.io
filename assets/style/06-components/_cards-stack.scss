@@ -75,7 +75,7 @@
   border-radius: var(--card-radius);
   border: 1px solid var(--card-border);
   background: var(--card-bg);
-  padding: var(--card-padding);
+  padding: 0; /* REMOVED padding - causing spacing on mobile */
   box-shadow: none;
   flex: 0 0 auto;
   width: clamp(280px, 30vw, 350px);
