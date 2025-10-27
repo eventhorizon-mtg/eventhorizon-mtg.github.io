@@ -136,7 +136,7 @@
                 <img
                   class="card__img"
                   src="{{ $thumbURL }}"
-                  width="720" height="1280"
+                  width="1280" height="720"
                   alt="{{ if $it.title }}{{ $it.title }}{{ else }}Immagine contenuto{{ end }}"
                   loading="{{ if eq $i 0 }}eager{{ else }}lazy{{ end }}"
                   fetchpriority="{{ if eq $i 0 }}high{{ else }}low{{ end }}"
@@ -217,7 +217,7 @@
               <h3 class="card__title">Nessun contenuto</h3>
             </header>
             <figure class="card__media">
-              <img class="card__img" src="{{ "images/cards/fblthp_placeholder.webp" | absURL }}" width="720" height="1280" alt="" />
+              <img class="card__img" src="{{ "images/cards/fblthp_placeholder.webp" | absURL }}" width="1280" height="720" alt="" />
             </figure>
             <div class="card__body">
               <p class="card__desc">Contenuti in arrivo.</p>
