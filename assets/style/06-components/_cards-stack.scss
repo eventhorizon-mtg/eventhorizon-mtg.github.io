@@ -746,6 +746,7 @@
       filter: none;
       position: absolute;
       inset: 0;
+      overflow: hidden; /* Ensure border-radius clips children properly */
       --card-mobile-inline: clamp(1.1rem, 4.8vw, 1.6rem);
       --card-mobile-block: clamp(1.1rem, 4.2vw, 1.4rem);
       opacity: 0;
