@@ -120,7 +120,7 @@ collections:
         name: overline
         widget: string
         required: false
-        hint: "Testo sopra il titolo (es. 'LA STORIA DI MAGIC - EPISODIO #06')"
+        hint: "Testo sopra il titolo (es. 'STORIA DI MAGIC · EPISODIO #01')"
 
       - label: "Descrizione"
         name: desc
