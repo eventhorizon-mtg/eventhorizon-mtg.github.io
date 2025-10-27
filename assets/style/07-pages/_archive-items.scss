@@ -986,8 +986,9 @@
 
   .item-content {
     height: var(--archive-row-mobile);
-    /* Padding: spazio per kebab a destra, piccolo gap dopo thumbnail a sinistra */
-    padding: 0 52px 0 var(--space-2-5);
+    /* Padding calcolato dal container del kebab (right + width) */
+    /* Kebab: right=var(--space-1), width=40px → padding = space-1 + 40px */
+    padding: 0 calc(var(--space-1) + 40px) 0 var(--space-2-5);
     justify-content: center;
   }
 
