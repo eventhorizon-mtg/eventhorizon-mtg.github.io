@@ -291,6 +291,13 @@
   }
 }
 
+/* Mobile override: avoid aspect-ratio conflicts on panels */
+@media (max-width: 1023px) {
+  #cards.cards--stack.cards--panels .card .card__media {
+    aspect-ratio: auto;
+  }
+}
+
 @media (min-width: 1024px) {
   .cards--stack {
     --stack-gap: clamp(14px, 1.8vw, 20px);
