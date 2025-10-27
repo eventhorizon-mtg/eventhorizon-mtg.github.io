@@ -800,6 +800,7 @@
       object-fit: cover;
       object-position: center top; /* Allinea l'immagine al top del container */
       border-radius: var(--card-radius) var(--card-radius) 0 0;
+      display: block; /* Elimina spazio extra causato da line-height */
     }
 
     /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
