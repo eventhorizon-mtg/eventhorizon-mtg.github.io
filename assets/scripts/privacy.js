@@ -26,13 +26,17 @@
       setTimeout(() => closeBtn.focus(), 100)
     }
 
-    // Previeni scroll del body
+    // Previeni scroll del body e html (desktop + mobile)
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
   }
 
   // Chiusura modal
   function closeModal() {
     modal.setAttribute('hidden', '')
+
+    // Ripristina scroll del body e html
+    document.documentElement.style.overflow = ''
     document.body.style.overflow = ''
 
     // Ripristina focus
