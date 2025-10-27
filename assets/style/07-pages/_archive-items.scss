@@ -988,7 +988,7 @@
     height: var(--archive-row-mobile);
     /* Padding calcolato dal container del kebab (right + width) */
     /* Kebab: right=var(--space-1), width=40px → padding = space-1 + 40px */
-    padding: 0 calc(var(--space-1) + 40px) 0 var(--space-2-5);
+    padding: 0 calc(var(--space-2-5) + 40px) 0 var(--space-2-5);
     justify-content: center;
   }
 
