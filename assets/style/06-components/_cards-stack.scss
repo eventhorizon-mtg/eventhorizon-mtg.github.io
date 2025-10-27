@@ -799,6 +799,7 @@
       height: 100%;
       object-fit: cover;
       object-position: center top; /* Allinea l'immagine al top del container */
+      border-radius: var(--card-radius) var(--card-radius) 0 0;
     }
 
     /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
