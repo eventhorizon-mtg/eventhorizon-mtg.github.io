@@ -779,6 +779,10 @@
       display: none;
     }
 
+    .card.has-bg-image[data-bg-url] {
+      background-position: center top;
+    }
+
     .card .card__media,
     .card:not(.is-expanded) .card__media {
       position: relative;
