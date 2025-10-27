@@ -950,17 +950,17 @@
     border-radius: 0;
     /* Aggiungi padding interno per compensare l'estensione */
     padding-inline: var(--container-padding);
-    /* Colore piatto per migliore visibilità (no glass effect) */
-    background: var(--color-surface-elevated);
+    /* Sfondo più scuro per migliore contrasto con viola overline */
+    background: var(--color-surface); /* gray-900: #1E2129 - migliore contrasto */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  /* Hover: colore piatto leggermente più chiaro */
+  /* Hover: colore leggermente più chiaro */
   .archive-item article.item:hover,
   .archive-item.is-sheet-open article.item,
   .archive-item article.item.is-open {
-    background: color-mix(in srgb, var(--color-surface-elevated) 90%, var(--color-text) 10%);
+    background: var(--color-surface-variant); /* gray-800: #252A37 - intermedio */
   }
 
   .item-media {
