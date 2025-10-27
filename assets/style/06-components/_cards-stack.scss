@@ -783,8 +783,8 @@
     .card:not(.is-expanded) .card__media {
       position: relative;
       inset: auto;
-      /* L'immagine cresce proporzionalmente basandosi sul 45% dell'altezza della card */
-      flex: 0 0 45%;
+      /* L'immagine cresce proporzionalmente basandosi sul 40% dell'altezza della card */
+      flex: 0 0 40%;
       width: 100%;
       /* Mantiene aspect ratio 16/9 ma può crescere con la card */
       aspect-ratio: 16 / 9;
@@ -867,8 +867,8 @@
 
     .card .card__body,
     .card:not(.is-expanded) .card__body {
-      /* Il body occupa circa il 40% dell'altezza della card per crescere proporzionalmente */
-      flex: 0 0 40%;
+      /* Il body occupa circa il 45% dell'altezza della card (aumentato per compensare media ridotto) */
+      flex: 0 0 45%;
       width: 100%;
       max-width: 100%;
       position: relative;
@@ -1012,14 +1012,14 @@
 
       .card .card__media,
       .card:not(.is-expanded) .card__media {
-        /* Su tablet l'immagine occupa il 48% dell'altezza */
-        flex: 0 0 48%;
+        /* Su tablet l'immagine occupa il 43% dell'altezza */
+        flex: 0 0 43%;
       }
 
       .card .card__body,
       .card:not(.is-expanded) .card__body {
-        /* Il body su tablet occupa il 38% per bilanciare */
-        flex: 0 0 38%;
+        /* Il body su tablet occupa il 43% per bilanciare (più spazio per testo) */
+        flex: 0 0 43%;
       }
     }
 
