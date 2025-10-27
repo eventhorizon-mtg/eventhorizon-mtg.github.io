@@ -994,14 +994,14 @@
 
   /* Mobile: gap compatto tra overline e title (best practices playlist) */
   .item-header {
-    gap: 2px; /* Spaziatura stretta stile Spotify */
+    gap: 2px; /* Spaziatura stretta stile */
     margin-right: var(--space-2); /* Distanza dal kebab per evitare sovrapposizione (~8-16px) */
   }
 
   .item-title {
     -webkit-line-clamp: 1;
     line-clamp: 1;
-    /* Mobile: dimensioni ottimizzate stile Spotify (~13px) */
+    /* Mobile: dimensioni ottimizzate stile (~13px) */
     font-family: "Lexend", var(--font-sans); /* Lexend solo su mobile */
     font-size: 0.8125rem; /* 13px - best practices playlist mobile */
     line-height: 1.2; /* Compatto per massimizzare spazio */
