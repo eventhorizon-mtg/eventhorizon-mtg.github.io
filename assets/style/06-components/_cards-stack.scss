@@ -797,6 +797,8 @@
       overflow: hidden;
       margin: 0;
       border-bottom: none;
+      /* Force media to appear first, before header (which comes first in HTML) */
+      order: -1;
     }
 
     .card .card__img {
