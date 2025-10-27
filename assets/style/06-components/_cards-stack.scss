@@ -298,13 +298,13 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .cards--stack {
-    --stack-gap: clamp(14px, 1.8vw, 20px);
-    --card-padding: clamp(16px, 1.6vw, 22px);
-  }
+  @media (min-width: 1024px) {
+    .cards--stack {
+      --stack-gap: clamp(14px, 1.8vw, 20px);
+      --card-padding: clamp(16px, 1.6vw, 22px);
+    }
 
-  .cards--stack .card__title {
+    .cards--stack .card__title {
     font-size: clamp(1.15rem, 1.8vw, 1.45rem);
   }
 }
@@ -1087,4 +1087,14 @@
 
 
 
+
+/* Stronger mobile fix: ensure media fills the top without ratio/flex conflicts */
+@media (max-width: 1023px) {
+  #cards.cards--stack.cards--panels .card .card__media,
+  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__media {
+    aspect-ratio: auto;
+    height: 33%;
+    flex: 0 0 auto;
+  }
+}
 
