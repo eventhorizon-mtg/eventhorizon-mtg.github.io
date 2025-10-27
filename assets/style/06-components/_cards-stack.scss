@@ -783,6 +783,16 @@
       background-position: center top;
     }
 
+    /* Hide the inline image on mobile when background-image is used, same as desktop */
+    .card.has-bg-image[data-bg-url] .card__img {
+      display: none !important;
+    }
+
+    /* Make media area transparent so the card background shows through */
+    .card.has-bg-image[data-bg-url] .card__media {
+      background: transparent;
+    }
+
     .card .card__media,
     .card:not(.is-expanded) .card__media {
       position: relative;
