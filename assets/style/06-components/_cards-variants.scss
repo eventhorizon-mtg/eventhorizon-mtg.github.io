@@ -9,6 +9,8 @@
   overflow: hidden;
   aspect-ratio: 16 / 9;
   background: var(--color-surface-elevated);
+  /* Reset UA default figure margins to avoid gaps (notably on mobile) */
+  margin: 0;
 }
 
 .card__img {

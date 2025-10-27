@@ -804,7 +804,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center top; /* Allinea l'immagine al top del container */
+      object-position: center; /* Centra l'immagine nel container per evitare gap visivi */
       display: block; /* Elimina spazio extra causato da line-height */
     }
 
