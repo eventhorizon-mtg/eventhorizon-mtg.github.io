@@ -794,8 +794,6 @@
       width: 100%;
       /* Mantiene aspect ratio 16/9 ma può crescere con la card */
       aspect-ratio: 16 / 9;
-      border-radius: var(--card-radius) var(--card-radius) 0 0;
-      overflow: hidden;
       margin: 0;
       border-bottom: none;
       /* Force media to appear first, before header (which comes first in HTML) */
@@ -807,7 +805,6 @@
       height: 100%;
       object-fit: cover;
       object-position: center top; /* Allinea l'immagine al top del container */
-      border-radius: var(--card-radius) var(--card-radius) 0 0;
       display: block; /* Elimina spazio extra causato da line-height */
     }
 
