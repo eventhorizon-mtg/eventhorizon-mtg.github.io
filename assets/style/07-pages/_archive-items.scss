@@ -969,6 +969,7 @@
     -webkit-line-clamp: 1;
     line-clamp: 1;
     /* Mobile: dimensioni ottimizzate stile Spotify (~13px) */
+    font-family: "Lexend", var(--font-sans); /* Lexend solo su mobile */
     font-size: 0.8125rem; /* 13px - best practices playlist mobile */
     line-height: 1.2; /* Compatto per massimizzare spazio */
     font-weight: 500; /* Leggermente più leggero per leggibilità */
@@ -978,6 +979,7 @@
 
   /* Mobile: overline compatto stile sottotitolo playlist (~11px) */
   .item-overline {
+    font-family: "Lexend", var(--font-sans); /* Lexend solo su mobile */
     font-size: 0.6875rem; /* 11px - sottotitolo compatto */
     line-height: 1.2; /* Compatto */
     font-weight: 400; /* Regular per contrasto con title */
