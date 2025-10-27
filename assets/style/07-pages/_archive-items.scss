@@ -930,6 +930,11 @@
     display: none;
   }
 
+  /* Disabilita completamente lo sfondo replicato su mobile */
+  .archive-item::after {
+    display: none; /* Rimuovi sfondo image completamente */
+  }
+
   /* Rimuovi grid su mobile, diventa full-width */
   .archive-item {
     display: block;
@@ -945,13 +950,17 @@
     border-radius: 0;
     /* Aggiungi padding interno per compensare l'estensione */
     padding-inline: var(--container-padding);
+    /* Colore piatto per migliore visibilità (no glass effect) */
+    background: var(--color-surface-elevated);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
-  /* Estendi anche il background image a full-width */
-  .archive-item::after {
-    left: calc(var(--container-padding) * -1); /* Allinea con negative margin */
-    right: calc(var(--container-padding) * -1);
-    border-radius: 0; /* No radius su mobile */
+  /* Hover: colore piatto leggermente più chiaro */
+  .archive-item article.item:hover,
+  .archive-item.is-sheet-open article.item,
+  .archive-item article.item.is-open {
+    background: color-mix(in srgb, var(--color-surface-elevated) 90%, var(--color-text) 10%);
   }
 
   .item-media {
