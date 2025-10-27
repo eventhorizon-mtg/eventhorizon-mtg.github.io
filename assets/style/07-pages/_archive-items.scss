@@ -925,11 +925,33 @@
 
 /* Mobile playlist aesthetics */
 @include bp-down(sm) {
+  /* Nascondi numeri playlist su mobile per look più pulito */
+  .archive-item::before {
+    display: none;
+  }
+
+  /* Rimuovi grid su mobile, diventa full-width */
+  .archive-item {
+    display: block;
+    margin-inline: calc(var(--container-padding) * -1); /* Estendi a full viewport */
+  }
+
   .archive-item article.item {
     height: var(--archive-row-mobile);
     min-height: var(--archive-row-mobile);
     max-height: var(--archive-row-mobile);
-    border-radius: var(--radius-md);
+    /* Playlist style: no border, no radius, full-width */
+    border: none;
+    border-radius: 0;
+    /* Aggiungi padding interno per compensare l'estensione */
+    padding-inline: var(--container-padding);
+  }
+
+  /* Estendi anche il background image a full-width */
+  .archive-item::after {
+    left: calc(var(--container-padding) * -1); /* Allinea con negative margin */
+    right: calc(var(--container-padding) * -1);
+    border-radius: 0; /* No radius su mobile */
   }
 
   .item-media {
@@ -938,25 +960,25 @@
     flex: 0 0 var(--archive-thumb-mobile);
     aspect-ratio: 1 / 1;
     align-self: center;
-    margin-left: var(--space-2);
-    border-radius: var(--radius-md);
+    margin-left: 0; /* Allineato al padding del container */
+    border-radius: var(--radius-sm); /* Radius ridotto per look più moderno */
     overflow: hidden;
     background: var(--color-surface-elevated);
   }
 
   .item-thumb {
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
   }
 
   .item-thumb img {
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     object-fit: cover;
   }
 
   .item-content {
     height: var(--archive-row-mobile);
-    /* Padding uniforme per allineamento title e overline dal kebab */
-    padding: 0 52px 0 var(--space-3);
+    /* Padding: spazio per kebab a destra, piccolo gap dopo thumbnail a sinistra */
+    padding: 0 52px 0 var(--space-2-5);
     justify-content: center;
   }
 
