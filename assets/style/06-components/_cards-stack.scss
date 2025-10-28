@@ -796,8 +796,8 @@
     .card:not(.is-expanded) .card__media {
       position: relative;
       inset: auto;
-      /* Ridotta altezza per eliminare gap superiore - era 33%, poi 30% */
-      flex: 0 0 25%;
+      /* L'immagine cresce proporzionalmente basandosi sul 33% dell'altezza della card */
+      flex: 0 0 33%;
       width: 100%;
       /* Mantiene aspect ratio 16/9 ma può crescere con la card */
       aspect-ratio: 16 / 9;
