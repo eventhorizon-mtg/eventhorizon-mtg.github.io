@@ -799,20 +799,27 @@
       /* L'immagine cresce proporzionalmente basandosi sul 33% dell'altezza della card */
       flex: 0 0 33%;
       width: 100%;
-      /* Mantiene aspect ratio 16/9 ma può crescere con la card */
-      aspect-ratio: 16 / 9;
+      /* NO aspect-ratio su mobile - usiamo height fissa via flex-basis per evitare conflitti */
       margin: 0;
+      padding: 0;
       border-bottom: none;
       /* Force media to appear first, before header (which comes first in HTML) */
       order: -1;
+      overflow: hidden;
+      line-height: 0; /* Eliminates inline/baseline spacing within figure element */
     }
 
     .card .card__img {
+      /* Absolute positioning ensures image fills media container from top-left */
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
+      max-width: none;
+      max-height: none;
       object-fit: cover;
-      object-position: center; /* Centra l'immagine nel container per evitare gap visivi */
-      display: block; /* Elimina spazio extra causato da line-height */
+      object-position: center;
+      display: block;
     }
 
     /* Specificity 1,5,0 matches desktop (via parent #cards block), cascade order wins */
@@ -1088,43 +1095,13 @@
 
 
 
-/* Stronger mobile fix: ensure media fills the top without ratio/flex conflicts */
-@media (max-width: 1023px) {
-  #cards.cards--stack.cards--panels .card .card__media,
-  #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__media {
-    aspect-ratio: auto;
-    height: 33%;
-    flex: 0 0 33%; /* Mantiene consistenza con line 800, evita conflitti flex-basis */
-  }
-}
-
-/* Mobile absolute image: ensure the media image fills its container */
+/* Mobile specific: enforce spacing reset with !important to override any conflicting rules */
 @media (max-width: 1023px) {
   #cards.cards--stack.cards--panels .card .card__media {
-    position: relative;
-    overflow: hidden;
-    /* Complete box model reset to eliminate phantom spacing above images.
-       !important flags ensure this overrides any inherited or conflicting rules from:
-       - UA default figure margins, - Base .card__media rules, - Desktop panel styles.
-       Combined with flex: 0 0 33% (line 1097) and header padding: 0 (line 829). */
+    /* Force override any UA defaults or conflicting desktop rules */
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-    top: 0;
-    align-self: stretch; /* Ensures full width within flex container */
-    line-height: 0; /* Eliminates inline/baseline gaps from text flow */
-  }
-  #cards.cards--stack.cards--panels .card .card__img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;  /* evita vincoli intrinseci che alterano il riempimento */
-    max-height: none; /* impedisce scaling che lascia bande */
-    vertical-align: top; /* elimina eventuali gap di baseline negli UA */
-    object-fit: cover;
-    object-position: center;
-    display: block;
   }
 }
 
