@@ -194,6 +194,15 @@
   #cards.cards--stack.cards--panels .card.is-expanded .card__actions {
     display: flex;
   }
+
+  /* Responsive secondary buttons matching primary CTA sizing */
+  #cards.cards--stack.cards--panels .card.is-expanded .card__actions .btn,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__actions .pill,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__actions .card__btn {
+    font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+    padding: clamp(0.5rem, 1vw, 0.7rem) clamp(0.9rem, 1.8vw, 1.3rem);
+    white-space: nowrap;
+  }
 }
 
 .cards--stack .card__btn {
@@ -546,10 +555,11 @@
   /* Desktop: aggiungi scroll quando card è espansa */
   @media (min-width: 1024px) {
     .card.is-expanded .card__body {
-      max-height: 50vh;
+      flex: 1 1 auto; /* Extend body to fill all available height */
       overflow-y: auto;
       overflow-x: hidden;
       scroll-behavior: smooth;
+      padding: 1rem 1.75rem 1.75rem;
     }
   }
 
@@ -629,6 +639,7 @@
     background-color: rgba(5, 9, 16, 0.88);
     border-color: rgba(20, 32, 54, 0.95);
     box-shadow: 0 0 40px rgba(10, 18, 36, 0.45);
+    border-radius: 0; /* Remove border-radius to allow full-height body */
   }
 
   /* Desktop: when a panel card is expanded, use the card image as full background
@@ -680,6 +691,8 @@
     justify-content: space-between;
     align-items: center;
     gap: clamp(1rem, 2vw, 1.5rem);
+    min-height: 88px; /* Fixed height for consistent header size */
+    flex: 0 0 auto; /* Don't grow or shrink */
   }
 
   .card.is-expanded .card__header-text {
@@ -729,6 +742,14 @@
 
   .card.is-expanded .card__header-cta .card__media-overlay {
     display: none; /* No overlay needed in header */
+  }
+
+  /* Responsive CTA primary button for content cards in header */
+  .card.is-expanded.is-content .card__header-cta .btn--primary-glass,
+  .card.is-expanded.is-content .card__header-cta .btn {
+    font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+    padding: clamp(0.5rem, 1vw, 0.7rem) clamp(0.9rem, 1.8vw, 1.3rem);
+    white-space: nowrap;
   }
 
   .card.is-collapsed {
