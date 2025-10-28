@@ -903,6 +903,7 @@
       margin-top: calc(10%);
       /* Zero top padding - header starts immediately after image */
       padding: 0 var(--card-mobile-inline) 0;
+      padding-bottom: var(--card-mobile-block);
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
