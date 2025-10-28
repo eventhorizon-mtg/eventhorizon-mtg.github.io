@@ -4,7 +4,11 @@ kind: content
 date: 2025-10-16
 title: Test Contenuto Descrittivo Esteso
 overline: Test · Esempio
-desc: Questa è la descrizione breve che appare sempre.
+desc: Questa è la descrizione breve che appare sempre e ha un limite di 400
+  caratteri. Serve a riassumere in modo chiaro e coinvolgente il contenuto
+  principale, catturando l’attenzione di chi legge. Deve essere concisa ma
+  efficace, dare il tono giusto e invitare a scoprire di più senza svelare tutto
+  ciò che segue.
 content: >-
   <p>Questo è il <strong>contenuto esteso</strong> che dovrebbe apparire sia nel
   pannello espanso che nello sheet mobile.</p>
