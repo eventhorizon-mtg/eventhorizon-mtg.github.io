@@ -199,26 +199,26 @@ collections:
             required: false
             default: "btn--primary"
             options:
-              - { label: "Primary (Indigo)", value: "btn--primary" }
-              - { label: "Primary Glass (Indigo trasparente)", value: "btn--primary-glass" }
-              - { label: "Secondary (Magenta)", value: "btn--secondary" }
-              - { label: "Secondary Glass (Magenta trasparente)", value: "btn--secondary-glass" }
-              - { label: "Special (Cyan)", value: "btn--special" }
-              - { label: "Special Glass (Cyan trasparente)", value: "btn--special-glass" }
-              - { label: "Accent/Gold (Oro)", value: "btn--accent" }
-              - { label: "Accent Glass (Oro trasparente)", value: "btn--accent-glass" }
-              - { label: "YouTube (Rosso)", value: "btn--yt" }
-              - { label: "YouTube Glass (Rosso trasparente)", value: "btn--yt-glass" }
-              - { label: "Scryfall (Rosa-Grigio)", value: "btn--scry" }
-              - { label: "Scryfall Glass (Rosa-Grigio trasparente)", value: "btn--scry-glass" }
-              - { label: "EDH (Nero-Giallo)", value: "btn--edh" }
-              - { label: "EDH Glass (Nero-Giallo trasparente)", value: "btn--edh-glass" }
-              - { label: "Moxfield (Viola-Rosa)", value: "btn--mox" }
-              - { label: "Moxfield Glass (Viola-Rosa trasparente)", value: "btn--mox-glass" }
-              - { label: "Archidekt (Grigio-Arancio)", value: "btn--archi" }
-              - { label: "Archidekt Glass (Grigio-Arancio trasparente)", value: "btn--archi-glass" }
-              - { label: "Clear (Trasparente)", value: "btn--clear" }
-              - { label: "Disabled (Disabilitato)", value: "btn--disabled1" }
+              - { label: "Primary", value: "btn--primary" }
+              - { label: "Primary Glass", value: "btn--primary-glass" }
+              - { label: "Secondary", value: "btn--secondary" }
+              - { label: "Secondary Glass", value: "btn--secondary-glass" }
+              - { label: "Special", value: "btn--special" }
+              - { label: "Special Glass", value: "btn--special-glass" }
+              - { label: "Accent/Gold", value: "btn--accent" }
+              - { label: "Accent Glass", value: "btn--accent-glass" }
+              - { label: "YouTube", value: "btn--yt" }
+              - { label: "YouTube Glass", value: "btn--yt-glass" }
+              - { label: "Scryfall", value: "btn--scry" }
+              - { label: "Scryfall Glass", value: "btn--scry-glass" }
+              - { label: "EDHREC", value: "btn--edh" }
+              - { label: "EDHREC Glass", value: "btn--edh-glass" }
+              - { label: "Moxfield", value: "btn--mox" }
+              - { label: "Moxfield Glass", value: "btn--mox-glass" }
+              - { label: "Archidekt", value: "btn--archi" }
+              - { label: "Archidekt Glass", value: "btn--archi-glass" }
+              - { label: "Clear", value: "btn--clear" }
+              - { label: "Disabled", value: "btn--disabled1" }
             hint: "Stile del pulsante/pill"
 
           - label: "Ordine"
