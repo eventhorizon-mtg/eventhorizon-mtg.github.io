@@ -65,10 +65,5 @@ links:
     primary: true
   - label: Link Secondario
     href: https://example.com/secondary
-    btn_class: btn--secondary
+    btn_class: btn--secondary-glass
     sort_order: 2
-  - btn_class: btn--scry
-    primary: false
-    label: Link Terziario
-    href: https://scryfall.com
-    sort_order: 3
