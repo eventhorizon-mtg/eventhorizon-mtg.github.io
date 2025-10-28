@@ -762,9 +762,8 @@
       transform: translateX(6%) scale(0.96);
       cursor: default;
       z-index: 1;
-      transition:
-        opacity var(--dur-anim) var(--ease-anim),
-        transform var(--dur-anim) var(--ease-anim);
+      /* Transitions disabled for immediate card switching without focus effects */
+      transition: none;
     }
 
     .card.is-active {
@@ -839,7 +838,8 @@
       transform: none;
       /* Push header down to start AFTER absolute-positioned media (33% height) */
       margin-top: 33%;
-      padding: var(--card-mobile-block) var(--card-mobile-inline) 0;
+      /* Reduced top padding for tighter spacing with image */
+      padding: calc(var(--card-mobile-block) / 2) var(--card-mobile-inline) 0;
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
