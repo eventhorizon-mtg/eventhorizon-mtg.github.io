@@ -826,7 +826,7 @@
       top: auto;
       inset: auto;
       transform: none;
-      padding: var(--card-mobile-block) var(--card-mobile-inline) calc(var(--card-mobile-block) / 2);
+      padding: var(--card-mobile-block) var(--card-mobile-inline) 0;
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
@@ -1094,7 +1094,7 @@
   #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__media {
     aspect-ratio: auto;
     height: 33%;
-    flex: 0 0 auto;
+    flex: 0 0 33%; /* Mantiene consistenza con line 800, evita conflitti flex-basis */
   }
 }
 
@@ -1103,13 +1103,16 @@
   #cards.cards--stack.cards--panels .card .card__media {
     position: relative;
     overflow: hidden;
-    /* Evita qualsiasi spazio fantasma sopra l'immagine */
+    /* Complete box model reset to eliminate phantom spacing above images.
+       !important flags ensure this overrides any inherited or conflicting rules from:
+       - UA default figure margins, - Base .card__media rules, - Desktop panel styles.
+       Combined with flex: 0 0 33% (line 1097) and header padding: 0 (line 829). */
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     top: 0;
-    align-self: stretch;
-    line-height: 0; /* azzera baseline interna */
+    align-self: stretch; /* Ensures full width within flex container */
+    line-height: 0; /* Eliminates inline/baseline gaps from text flow */
   }
   #cards.cards--stack.cards--panels .card .card__img {
     position: absolute;

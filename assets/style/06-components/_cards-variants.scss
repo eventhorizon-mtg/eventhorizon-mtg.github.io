@@ -188,6 +188,14 @@
   }
 }
 
+/* Mobile override: ensure content card CTA buttons are large enough on small screens */
+@media (max-width: 1023px) {
+  #cards.cards--stack.cards--panels .card.is-content .card__play.btn {
+    font-size: clamp(0.9rem, 3.8vw, 1.1rem);
+    padding: clamp(0.6rem, 3vw, 0.85rem) clamp(1.1rem, 5vw, 1.5rem);
+  }
+}
+
 .card__body {
   display: grid;
   gap: var(--space-2);
