@@ -127,7 +127,7 @@ collections:
         widget: text
         required: true
         hint: |
-          Breve descrizione (MASSIMO 400 caratteri - mostrata sempre su mobile e desktop).
+          Breve descrizione (MASSIMO 350 caratteri - mostrata sempre su mobile e desktop).
           Puoi usare Markdown o HTML per la formattazione.
 
           ESEMPI:
@@ -140,8 +140,8 @@ collections:
           Per l'immagine della card usa il campo "Immagine Card Homepage" qui sotto.
 
         pattern:
-          - "^[\\s\\S]{1,400}$"
-          - "Massimo 400 caratteri consentiti"
+          - "^[\\s\\S]{1,350}$"
+          - "Massimo 350 caratteri consentiti"
 
       - label: "Contenuto Esteso"
         name: content
