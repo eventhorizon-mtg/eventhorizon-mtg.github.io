@@ -794,19 +794,23 @@
 
     .card .card__media,
     .card:not(.is-expanded) .card__media {
-      position: relative;
-      inset: auto;
-      /* L'immagine cresce proporzionalmente basandosi sul 33% dell'altezza della card */
-      flex: 0 0 33%;
+      /* ABSOLUTE positioning to force media EXACTLY at the top of card */
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      /* Fixed height: 33% of card height */
+      height: 33%;
       width: 100%;
-      /* NO aspect-ratio su mobile - usiamo height fissa via flex-basis per evitare conflitti */
+      /* NO flex anymore since we're absolute */
       margin: 0;
       padding: 0;
       border-bottom: none;
-      /* Force media to appear first, before header (which comes first in HTML) */
-      order: -1;
       overflow: hidden;
       line-height: 0; /* Eliminates inline/baseline spacing within figure element */
+      border-top-left-radius: var(--card-radius); /* Match parent's top corners */
+      border-top-right-radius: var(--card-radius);
+      z-index: 1; /* Below header and body */
     }
 
     .card .card__img {
@@ -833,6 +837,8 @@
       top: auto;
       inset: auto;
       transform: none;
+      /* Push header down to start AFTER absolute-positioned media (33% height) */
+      margin-top: 33%;
       padding: var(--card-mobile-block) var(--card-mobile-inline) 0;
       writing-mode: horizontal-tb;
       text-orientation: mixed;
