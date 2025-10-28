@@ -1103,6 +1103,13 @@
   #cards.cards--stack.cards--panels .card .card__media {
     position: relative;
     overflow: hidden;
+    /* Evita qualsiasi spazio fantasma sopra l'immagine */
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    top: 0;
+    align-self: stretch;
+    line-height: 0; /* azzera baseline interna */
   }
   #cards.cards--stack.cards--panels .card .card__img {
     position: absolute;
