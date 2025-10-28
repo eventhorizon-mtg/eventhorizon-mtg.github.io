@@ -861,7 +861,7 @@
       left: 0;
       right: 0;
       /* Fixed height: 33% of card height */
-      height: 33%;
+      height: 25%;
       width: 100%;
       /* NO flex anymore since we're absolute */
       margin: 0;
@@ -903,7 +903,7 @@
       margin-top: calc(1%);
       /* Zero top padding - header starts immediately after image */
       padding: 0 var(--card-mobile-inline) 0;
-      padding-bottom: var(--card-mobile-block);
+      padding-bottom: var(--card-mobile-inline);
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
