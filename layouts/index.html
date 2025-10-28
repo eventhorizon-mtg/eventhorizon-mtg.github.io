@@ -128,8 +128,37 @@
             {{ end }}
             <article class="card card--stack-item card--{{ $kind }} {{ if $isVideo }}is-video{{ else }}is-content{{ end }}{{ if $bgImageURL }} has-bg-image{{ end }}" {{ if $bgImageURL }}data-bg-url="{{ $bgImageURL }}"{{ end }}>
               <header class="card__header">
-                <span class="card__overline">{{ with $it.overline }}{{ . }}{{ else }}&nbsp;{{ end }}</span>
-                <h3 class="card__title">{{ $it.title }}</h3>
+                <div class="card__header-text">
+                  <span class="card__overline">{{ with $it.overline }}{{ . }}{{ else }}&nbsp;{{ end }}</span>
+                  <h3 class="card__title">{{ $it.title }}</h3>
+                </div>
+                <div class="card__header-cta">
+                  {{ if $playHref }}
+                    <span class="card__media-overlay" aria-hidden="true"></span>
+                    {{ $playClasses := "card__play" }}
+                    {{ if $primaryClass }}
+                      {{ $playClasses = printf "%s %s" $playClasses $primaryClass }}
+                    {{ end }}
+                    <a class="{{ $playClasses }}"
+                       href="{{ $playHref }}"
+                       {{ if $playExternal }}target="_blank" rel="noopener noreferrer"{{ end }}
+                       aria-label="{{ if gt (len $primaryLabel) 0 }}{{ $primaryLabel }}{{ else }}Guarda video: {{ $it.title }}{{ end }}">
+                      <svg class="card__play-icon" viewBox="0 0 68 48" aria-hidden="true" focusable="false">
+                        <path class="card__play-shape" d="M66.52 7.85a8.06 8.06 0 00-5.68-5.68C55.16 0 34 0 34 0S12.84 0 7.16 2.17a8.06 8.06 0 00-5.68 5.68A83.5 83.5 0 000 24a83.5 83.5 0 001.48 16.15 8.06 8.06 0 005.68 5.68C12.84 48 34 48 34 48s21.16 0 27.84-2.17a8.06 8.06 0 005.68-5.68A83.5 83.5 0 0068 24a83.5 83.5 0 00-1.48-16.15z" />
+                        <polygon class="card__play-symbol" points="27,14 45,24 27,34" />
+                      </svg>
+                    </a>
+                  {{ else if and (not $isVideo) $hasPrimary }}
+                    <span class="card__media-overlay" aria-hidden="true"></span>
+                    {{ $ctaPlayClasses := "card__play btn btn--primary-glass" }}
+                    <a class="{{ $ctaPlayClasses }}"
+                       href="{{ $ctaHref }}"
+                       {{ if $ctaExternal }}target="_blank" rel="noopener noreferrer"{{ end }}
+                       aria-label="{{ if gt (len $primaryLabel) 0 }}{{ $primaryLabel }}{{ else }}Apri: {{ $it.title }}{{ end }}">
+                      <span>{{ $ctaLabel }}</span>
+                    </a>
+                  {{ end }}
+                </div>
               </header>
 
               <figure class="card__media">
