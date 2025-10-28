@@ -900,7 +900,7 @@
       transform: none;
       /* Push header down to start AFTER absolute-positioned media */
       /* Negative margin to eliminate any gap caused by rounding */
-      margin-top: calc(2% - 1px);
+      margin-top: calc(1% - 1px);
       /* Zero top padding - header starts immediately after image */
       padding: 0 var(--card-mobile-inline) 0;
       padding-bottom: var(--space-1-5);
