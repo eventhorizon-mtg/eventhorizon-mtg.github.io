@@ -71,4 +71,4 @@ links:
     primary: false
     label: Link Terziario
     href: https://scryfall.com
-    sort_order: -1
+    sort_order: 3
