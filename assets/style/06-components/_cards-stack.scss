@@ -1009,7 +1009,7 @@
       gap: 0.5rem;
       /* Reduce distance from text */
       margin-top: var(--space-1);
-      padding: 0 var(--card-mobile-inline);
+      padding: 0;
       padding-bottom: var(--card-mobile-block);
       overflow-x: auto; /* Scroll orizzontale se necessario */
       scrollbar-width: none; /* Nascondi scrollbar Firefox */
