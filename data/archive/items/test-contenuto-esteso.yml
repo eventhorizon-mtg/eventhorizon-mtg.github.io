@@ -61,7 +61,7 @@ tags:
 links:
   - label: Link Primario
     href: https://eventhorizon-mtg.github.io/articles/guida-articoli/
-    btn_class: btn--special-glass
+    btn_class: btn--primary-glass
     sort_order: 1
     primary: true
   - label: Link Secondario
