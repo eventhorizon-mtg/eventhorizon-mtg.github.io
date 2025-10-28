@@ -837,9 +837,10 @@
       inset: auto;
       transform: none;
       /* Push header down to start AFTER absolute-positioned media (33% height) */
-      margin-top: 33%;
-      /* Reduced top padding for tighter spacing with image */
-      padding: calc(var(--card-mobile-block) / 2) var(--card-mobile-inline) 0;
+      /* Negative margin to eliminate any gap caused by rounding */
+      margin-top: calc(20% - 1px);
+      /* Zero top padding - header starts immediately after image */
+      padding: 0 var(--card-mobile-inline) 0;
       writing-mode: horizontal-tb;
       text-orientation: mixed;
       text-align: left;
