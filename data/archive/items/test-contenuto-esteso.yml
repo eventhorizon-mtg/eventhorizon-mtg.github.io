@@ -4,10 +4,11 @@ kind: content
 date: 2025-10-16
 title: Test Contenuto Descrittivo Esteso
 overline: Test · Esempio
-desc: >-
-  Ecco un testo di esattamente 400 caratteri e spazi esclusi.
-
-  Questa è la descrizione breve che appare sempre e ha un limite di 400 caratteri. Deve essere incisiva, chiara e rappresentare al meglio il contenuto a cui si riferisce. In poche parole racconta l’essenza del progetto, comunica il tono e incuriosisce chi legge, spingendolo ad approfondire ciò che segue con interesse autentico e crescente.
+desc: Ecco un testo di esattamente 350 caratteri e spazi inclusi. È un esempio
+  di descrizione breve, pensata per comunicare in modo chiaro e diretto
+  l’essenza di un contenuto. Deve incuriosire senza svelare troppo, mantenere
+  uno stile coerente e offrire al lettore un motivo per proseguire nella
+  scoperta di ciò che segue.
 content: >-
   <p>Questo è il <strong>contenuto esteso</strong> che dovrebbe apparire sia nel
   pannello espanso che nello sheet mobile.</p>
@@ -59,11 +60,11 @@ tags:
   - contenuto
 links:
   - label: Link Primario
-    href: https://example.com/primary
-    btn_class: btn--primary
+    href: https://eventhorizon-mtg.github.io/articles/guida-articoli/
+    btn_class: btn--special-glass
     sort_order: 1
     primary: true
   - label: Link Secondario
-    href: https://example.com/secondary
-    btn_class: btn--secondary-glass
+    href: https://eventhorizon-mtg.github.io/articles/guida-articoli/
+    btn_class: btn--scry-glass
     sort_order: 2
