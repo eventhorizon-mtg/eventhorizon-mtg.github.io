@@ -234,6 +234,28 @@
   overflow-y: auto; /* i testi scorrono sopra lo sheet */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  /* Scrollbar più stretta */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--color-border) transparent; /* Firefox */
+}
+
+/* Scrollbar WebKit (Chrome, Safari, Edge) */
+.archive-sheet__content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.archive-sheet__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.archive-sheet__content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.archive-sheet__content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
 }
 
 /* Stili per il contenuto esteso anche nello sheet */
