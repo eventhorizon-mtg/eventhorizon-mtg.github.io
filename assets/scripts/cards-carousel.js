@@ -363,66 +363,17 @@
     body.classList.toggle('has-overflow', hasOverflow)
   }
 
-  function openModal(card) {
-    const content = card.querySelector('.card__content')
-    if (!content) return
+  function expandPanel(card) {
+    const body = card.querySelector('.card__body')
+    if (!body) return
 
-    // Create modal
-    const modal = document.createElement('div')
-    modal.className = 'card-modal'
-    modal.setAttribute('role', 'dialog')
-    modal.setAttribute('aria-modal', 'true')
-    modal.setAttribute('aria-labelledby', 'modal-title')
+    // Aggiungi classe is-scrollable per espandere il panel e abilitare scroll
+    body.classList.add('is-scrollable')
 
-    const modalContent = document.createElement('div')
-    modalContent.className = 'card-modal__content'
-
-    const closeButton = document.createElement('button')
-    closeButton.className = 'card-modal__close'
-    closeButton.setAttribute('type', 'button')
-    closeButton.setAttribute('aria-label', 'Chiudi')
-    closeButton.innerHTML = '&times;'
-
-    const contentClone = content.cloneNode(true)
-
-    modalContent.appendChild(closeButton)
-    modalContent.appendChild(contentClone)
-    modal.appendChild(modalContent)
-    document.body.appendChild(modal)
-
-    // Lock body scroll
-    document.body.style.overflow = 'hidden'
-
-    // Open modal
+    // Scroll to top del panel
     requestAnimationFrame(() => {
-      modal.classList.add('is-open')
+      body.scrollTop = 0
     })
-
-    // Close handlers
-    const closeModal = () => {
-      modal.classList.remove('is-open')
-      setTimeout(() => {
-        modal.remove()
-        document.body.style.overflow = ''
-      }, 300)
-    }
-
-    closeButton.addEventListener('click', closeModal)
-    modal.addEventListener('click', e => {
-      if (e.target === modal) closeModal()
-    })
-
-    // ESC key
-    const handleEsc = e => {
-      if (e.key === 'Escape') {
-        closeModal()
-        document.removeEventListener('keydown', handleEsc)
-      }
-    }
-    document.addEventListener('keydown', handleEsc)
-
-    // Focus trap
-    closeButton.focus()
   }
 
   // Add ellipsis click handlers
@@ -434,11 +385,11 @@
     const ellipsis = document.createElement('button')
     ellipsis.className = 'card__ellipsis'
     ellipsis.setAttribute('type', 'button')
-    ellipsis.setAttribute('aria-label', 'Leggi tutto')
+    ellipsis.setAttribute('aria-label', 'Espandi contenuto')
     ellipsis.textContent = '⋯'
     ellipsis.addEventListener('click', e => {
       e.stopPropagation()
-      openModal(card)
+      expandPanel(card)
     })
 
     body.appendChild(ellipsis)
@@ -456,7 +407,10 @@
             }, 100)
           } else {
             const body = card.querySelector('.card__body')
-            if (body) body.classList.remove('has-overflow')
+            if (body) {
+              body.classList.remove('has-overflow')
+              body.classList.remove('is-scrollable')
+            }
           }
         }
       })

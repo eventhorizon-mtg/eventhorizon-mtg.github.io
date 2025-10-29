@@ -568,15 +568,37 @@
       border-radius: var(--radius-xl);
       box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      overflow: hidden; /* No scroll interno - gestito con ellipsis */
+      overflow: hidden; /* No scroll di default - abilitato quando espanso */
       z-index: 2; /* Sotto il primary button (z-index: 4) */
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      transition: max-height 0.3s ease;
     }
 
-    /* Ellipsis system: gradient overlay quando c'è overflow */
-    .card.is-expanded .card__body.has-overflow::after {
+    /* Stato espanso: panel più grande con scroll */
+    .card.is-expanded .card__body.is-scrollable {
+      max-height: 90%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar styling per body scrollabile */
+    .card.is-expanded .card__body.is-scrollable::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .card.is-expanded .card__body.is-scrollable::-webkit-scrollbar-thumb {
+      background: rgba(84, 104, 168, 0.5);
+      border-radius: 999px;
+    }
+
+    .card.is-expanded .card__body.is-scrollable::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Ellipsis system: gradient overlay quando c'è overflow (nascosto se scrollable) */
+    .card.is-expanded .card__body.has-overflow:not(.is-scrollable)::after {
       content: "";
       position: absolute;
       bottom: 0;
@@ -591,6 +613,7 @@
       );
       pointer-events: none;
       z-index: 1;
+      transition: opacity 0.3s ease;
     }
 
     /* Ellipsis indicator [...] */
@@ -606,11 +629,12 @@
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.2s ease, color 0.2s ease;
+      transition: opacity 0.3s ease, visibility 0.3s ease, color 0.2s ease;
       user-select: none;
     }
 
-    .card.is-expanded .card__body.has-overflow .card__ellipsis {
+    /* Mostra ellipsis solo se has-overflow e NON scrollable */
+    .card.is-expanded .card__body.has-overflow:not(.is-scrollable) .card__ellipsis {
       opacity: 1;
       visibility: visible;
     }
@@ -1232,97 +1256,3 @@
   }
 }
 
-/* ==========================================================================
-   MODAL per contenuto esteso cards (Desktop only)
-   ========================================================================== */
-
-@media (min-width: 1024px) {
-  .card-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(1rem, 3vw, 2rem);
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .card-modal.is-open {
-    display: flex;
-    opacity: 1;
-  }
-
-  .card-modal__content {
-    position: relative;
-    max-width: 800px;
-    max-height: 80vh;
-    width: 100%;
-    background: var(--color-surface);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 32px 96px rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    overflow-y: auto;
-    padding: clamp(2rem, 4vw, 3rem);
-    animation: modalSlideIn 0.3s ease;
-  }
-
-  @keyframes modalSlideIn {
-    from {
-      transform: translateY(20px) scale(0.96);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-    }
-  }
-
-  .card-modal__close {
-    position: absolute;
-    top: clamp(1rem, 2vw, 1.5rem);
-    right: clamp(1rem, 2vw, 1.5rem);
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--color-text);
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
-    z-index: 1;
-  }
-
-  .card-modal__close:hover,
-  .card-modal__close:focus-visible {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-  }
-
-  .card-modal__close:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  .card-modal__content::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .card-modal__content::-webkit-scrollbar-thumb {
-    background: rgba(84, 104, 168, 0.5);
-    border-radius: 999px;
-  }
-
-  .card-modal__content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-}
