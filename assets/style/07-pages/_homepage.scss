@@ -427,5 +427,15 @@
   }
 }
 
+/* ==========================================
+   HOMEPAGE CARDS - Maiuscolo forzato
+   ========================================== */
+
+/* Maiuscolo solo per le card della homepage */
+.home .card__title,
+.home .card__overline {
+  text-transform: uppercase;
+}
+
 
 
