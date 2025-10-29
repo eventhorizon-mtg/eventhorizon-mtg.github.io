@@ -166,25 +166,36 @@
 }
 
 @media (min-width: 1024px) {
-  #cards.cards--stack.cards--panels .card__play {
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    transform: translate(-50%, -50%);
-    padding: clamp(0.5rem, 1.5vw, 0.75rem);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
-  }
-
-  #cards.cards--stack.cards--panels .card__play:hover,
-  #cards.cards--stack.cards--panels .card__play:focus-visible {
-    transform: translate(-50%, -50%) scale(1.08);
-  }
-
+  /* Desktop: button nascosto quando card NON expanded */
   #cards.cards--stack.cards--panels .card:not(.is-expanded) .card__play {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+  }
+
+  /* Desktop: button floating top-right quando card EXPANDED (nel media overlay) */
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .card__play,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .btn--primary-glass {
+    display: inline-flex !important; /* Override any display:none */
+    position: absolute;
+    top: var(--space-4);
+    right: calc(clamp(3.5rem, 6vw, 5rem) + var(--space-4));
+    left: auto;
+    bottom: auto;
+    transform: none;
+    padding: clamp(0.5rem, 1.5vw, 0.75rem);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .card__play:hover,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .card__play:focus-visible,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .btn--primary-glass:hover,
+  #cards.cards--stack.cards--panels .card.is-expanded .card__media .btn--primary-glass:focus-visible {
+    transform: scale(1.08);
+    box-shadow: 0 24px 52px rgba(0, 0, 0, 0.6);
   }
 }
 

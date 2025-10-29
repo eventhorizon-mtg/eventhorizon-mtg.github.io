@@ -552,14 +552,79 @@
     display: block;
   }
 
-  /* Desktop: aggiungi scroll quando card è espansa */
+  /* Desktop: body panel semi-trasparente centrato quando card espansa */
   @media (min-width: 1024px) {
     .card.is-expanded .card__body {
-      flex: 1 1 auto; /* Extend body to fill all available height */
-      overflow-y: auto;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-      padding: 1rem 1.75rem 1.75rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 75%;
+      max-height: 80%;
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      background: rgba(5, 9, 16, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden; /* No scroll interno - gestito con ellipsis */
+      z-index: 2; /* Sotto il primary button (z-index: 4) */
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Ellipsis system: gradient overlay quando c'è overflow */
+    .card.is-expanded .card__body.has-overflow::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(5, 9, 16, 0.7) 40%,
+        rgba(5, 9, 16, 0.95) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Ellipsis indicator [...] */
+    .card__ellipsis {
+      position: absolute;
+      bottom: clamp(1rem, 2vw, 1.5rem);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      cursor: pointer;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--color-text-muted);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, color 0.2s ease;
+      user-select: none;
+    }
+
+    .card.is-expanded .card__body.has-overflow .card__ellipsis {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .card__ellipsis:hover,
+    .card__ellipsis:focus-visible {
+      color: var(--color-primary);
+      text-shadow: 0 2px 12px rgba(84, 104, 168, 0.8);
+    }
+
+    .card__ellipsis:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 4px;
+      border-radius: 4px;
     }
   }
 
@@ -684,15 +749,28 @@
     border-bottom: 1px solid rgba(8, 11, 22, 0.6);
   }
 
-  /* Desktop expanded: header layout flex-row con CTA a destra */
+  /* Desktop expanded: header resta VERTICALE a destra (no reflow) */
   .card.is-expanded .card__header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: clamp(3.5rem, 6vw, 5rem);
+    padding: clamp(1rem, 2vw, 1.5rem) clamp(0.75rem, 1.2vw, 1rem);
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    text-align: start;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.65rem;
+    overflow: hidden;
+    word-break: break-word;
+    background: rgba(5, 9, 16, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.3);
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: clamp(1rem, 2vw, 1.5rem);
-    min-height: 88px; /* Fixed height for consistent header size */
-    flex: 0 0 auto; /* Don't grow or shrink */
+    flex-direction: column;
   }
 
   .card.is-expanded .card__header-text {
@@ -700,57 +778,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    min-width: 0; /* Prevent text overflow */
   }
 
+  /* Header CTA non usato più in expanded (button sarà floating) */
   .card.is-expanded .card__header-cta {
-    flex: 0 0 auto;
-    align-self: center;
-    display: flex; /* Override default display: none for desktop expanded */
-    align-items: center;
-    justify-content: center;
-    position: relative; /* For overlay positioning */
-  }
-
-  /* Hide play button and CTA in media overlay on desktop expanded (use header version instead) */
-  .card.is-expanded .card__media .card__play,
-  .card.is-expanded .card__media .btn--primary-glass {
     display: none;
   }
 
-  /* Hide media overlay on desktop expanded since buttons moved to header */
-  .card.is-expanded .card__media .card__media-overlay {
-    display: none;
-  }
-
-  /* Adapt play button and CTA styles when in header (override absolute positioning) */
-  .card.is-expanded .card__header-cta .card__play {
-    position: static;
-    transform: none;
-    padding: clamp(0.5rem, 1.2vw, 0.65rem);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  }
-
-  .card.is-expanded .card__header-cta .card__play:hover,
-  .card.is-expanded .card__header-cta .card__play:focus-visible {
-    transform: translateY(-2px) scale(1.05);
-  }
-
-  .card.is-expanded .card__header-cta .card__play-icon {
-    width: clamp(3rem, 5vw, 3.5rem);
-  }
-
-  .card.is-expanded .card__header-cta .card__media-overlay {
-    display: none; /* No overlay needed in header */
-  }
-
-  /* Responsive CTA primary button for content cards in header */
-  .card.is-expanded.is-content .card__header-cta .btn--primary-glass,
-  .card.is-expanded.is-content .card__header-cta .btn {
-    font-size: clamp(0.75rem, 1.2vw, 0.9rem);
-    padding: clamp(0.5rem, 1vw, 0.7rem) clamp(0.9rem, 1.8vw, 1.3rem);
-    white-space: nowrap;
-  }
+  /* Media overlay play button rimane visibile (non più nascosto) */
+  /* Button sarà mostrato come floating top-right quando card expanded */
 
   .card.is-collapsed {
     flex-basis: 10%;
@@ -1196,3 +1232,97 @@
   }
 }
 
+/* ==========================================================================
+   MODAL per contenuto esteso cards (Desktop only)
+   ========================================================================== */
+
+@media (min-width: 1024px) {
+  .card-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-modal.is-open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .card-modal__content {
+    position: relative;
+    max-width: 800px;
+    max-height: 80vh;
+    width: 100%;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 32px 96px rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    padding: clamp(2rem, 4vw, 3rem);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .card-modal__close {
+    position: absolute;
+    top: clamp(1rem, 2vw, 1.5rem);
+    right: clamp(1rem, 2vw, 1.5rem);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    z-index: 1;
+  }
+
+  .card-modal__close:hover,
+  .card-modal__close:focus-visible {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .card-modal__close:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .card-modal__content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .card-modal__content::-webkit-scrollbar-thumb {
+    background: rgba(84, 104, 168, 0.5);
+    border-radius: 999px;
+  }
+
+  .card-modal__content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}

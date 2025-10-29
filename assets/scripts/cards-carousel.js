@@ -341,4 +341,129 @@
   } else if (typeof mediaQuery.addListener === 'function') {
     mediaQuery.addListener(handleMediaChange)
   }
+
+  // ============================================================
+  // OVERFLOW DETECTION & MODAL SYSTEM (Desktop only)
+  // ============================================================
+
+  function checkBodyOverflow(card) {
+    if (isMobile()) return
+
+    const body = card.querySelector('.card__body')
+    if (!body) return
+
+    const content = card.querySelector('.card__content')
+    if (!content || content.textContent.trim() === '') {
+      body.classList.remove('has-overflow')
+      return
+    }
+
+    // Check if content overflows the body panel
+    const hasOverflow = body.scrollHeight > body.clientHeight
+    body.classList.toggle('has-overflow', hasOverflow)
+  }
+
+  function openModal(card) {
+    const content = card.querySelector('.card__content')
+    if (!content) return
+
+    // Create modal
+    const modal = document.createElement('div')
+    modal.className = 'card-modal'
+    modal.setAttribute('role', 'dialog')
+    modal.setAttribute('aria-modal', 'true')
+    modal.setAttribute('aria-labelledby', 'modal-title')
+
+    const modalContent = document.createElement('div')
+    modalContent.className = 'card-modal__content'
+
+    const closeButton = document.createElement('button')
+    closeButton.className = 'card-modal__close'
+    closeButton.setAttribute('type', 'button')
+    closeButton.setAttribute('aria-label', 'Chiudi')
+    closeButton.innerHTML = '&times;'
+
+    const contentClone = content.cloneNode(true)
+
+    modalContent.appendChild(closeButton)
+    modalContent.appendChild(contentClone)
+    modal.appendChild(modalContent)
+    document.body.appendChild(modal)
+
+    // Lock body scroll
+    document.body.style.overflow = 'hidden'
+
+    // Open modal
+    requestAnimationFrame(() => {
+      modal.classList.add('is-open')
+    })
+
+    // Close handlers
+    const closeModal = () => {
+      modal.classList.remove('is-open')
+      setTimeout(() => {
+        modal.remove()
+        document.body.style.overflow = ''
+      }, 300)
+    }
+
+    closeButton.addEventListener('click', closeModal)
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal()
+    })
+
+    // ESC key
+    const handleEsc = e => {
+      if (e.key === 'Escape') {
+        closeModal()
+        document.removeEventListener('keydown', handleEsc)
+      }
+    }
+    document.addEventListener('keydown', handleEsc)
+
+    // Focus trap
+    closeButton.focus()
+  }
+
+  // Add ellipsis click handlers
+  cards.forEach(card => {
+    const body = card.querySelector('.card__body')
+    if (!body) return
+
+    // Create ellipsis element
+    const ellipsis = document.createElement('button')
+    ellipsis.className = 'card__ellipsis'
+    ellipsis.setAttribute('type', 'button')
+    ellipsis.setAttribute('aria-label', 'Leggi tutto')
+    ellipsis.textContent = '⋯'
+    ellipsis.addEventListener('click', e => {
+      e.stopPropagation()
+      openModal(card)
+    })
+
+    body.appendChild(ellipsis)
+  })
+
+  // Monitor card expansion via MutationObserver
+  if (!isMobile() && typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const card = mutation.target
+          if (card.classList.contains('is-expanded')) {
+            setTimeout(() => {
+              checkBodyOverflow(card)
+            }, 100)
+          } else {
+            const body = card.querySelector('.card__body')
+            if (body) body.classList.remove('has-overflow')
+          }
+        }
+      })
+    })
+
+    cards.forEach(card => {
+      observer.observe(card, { attributes: true, attributeFilter: ['class'] })
+    })
+  }
 })()
