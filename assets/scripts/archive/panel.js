@@ -32,6 +32,10 @@
     // Toggle panel visibility
     if (willOpen) {
       panel.hidden = false
+      // Proactively (re)compute overflow on open, even if the panel wasn't hidden before
+      requestAnimationFrame(() => {
+        setTimeout(() => checkOverflow(panel), 120)
+      })
       // Scroll into view if needed (smooth)
       setTimeout(() => {
         if (panel.scrollHeight > 400) {
@@ -39,6 +43,9 @@
         }
       }, 150)
     } else {
+      // Reset state immediately to avoid stale classes if the panel is re-opened quickly
+      panel.classList.remove('is-scrollable', 'has-overflow')
+      panel.scrollTop = 0
       // Wait briefly before hiding
       setTimeout(() => {
         if (!item.classList.contains('is-open')) {
@@ -180,16 +187,40 @@
     })
   }
 
+  // ResizeObserver: re-check overflow when panel content size changes (images/fonts load)
+  const resizeObserver =
+    typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(entries => {
+          entries.forEach(entry => {
+            const panel = entry.target
+            // Only when visible, not already scrollable
+            if (!panel.hasAttribute('hidden') && !panel.classList.contains('is-scrollable')) {
+              checkOverflow(panel)
+            }
+          })
+        })
+      : null
+
+  const observePanelSize = () => {
+    if (!resizeObserver) return
+    document.querySelectorAll('.item-panel').forEach(p => resizeObserver.observe(p))
+  }
+
   // Bootstrap: osserva pannelli già presenti
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', observePanels)
+    document.addEventListener('DOMContentLoaded', () => {
+      observePanels()
+      observePanelSize()
+    })
   } else {
     observePanels()
+    observePanelSize()
   }
 
   // Osserva anche pannelli aggiunti dinamicamente (dopo render)
   const bodyObserver = new MutationObserver(() => {
     observePanels()
+    observePanelSize()
   })
 
   if (document.body) {
