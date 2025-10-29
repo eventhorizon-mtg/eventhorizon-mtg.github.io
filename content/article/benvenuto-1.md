@@ -3,6 +3,11 @@ title = "Benvenuto"
 date = "2025-10-15T18:58:00.000+02:00"
 draft = false
 tags = ["benvenuto"]
+
+[[authors]]
+avatar = "/images/authors/livello-1-copia.png"
+name = "PickleRick"
+link = "https://github.com/eventhorizon-mtg/eventhorizon-mtg.github.io"
 +++
 ## Benvenuto
 
