@@ -28,6 +28,9 @@ docs/lhci/
 *.log
 *.tmp
 
+# Test reports
+lighthouse-*.json
+
 # Backup files
 *.backup
 *.bak
