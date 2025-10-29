@@ -53,6 +53,19 @@
   pointer-events: none;
 }
 
+/* Unified container sizing for article header and body */
+.article-hero .container,
+.article-body.container {
+  max-width: 100%;
+}
+
+@include bp(sm) {
+  .article-hero .container,
+  .article-body.container {
+    max-width: 75ch;
+  }
+}
+
 .article-hero .container {
   position: relative;
   display: grid;
@@ -62,7 +75,6 @@
 @include bp(sm) {
   .article-hero .container {
     gap: var(--space-5);
-    max-width: 75ch;
   }
 }
 
@@ -135,7 +147,7 @@
 @include bp(sm) {
   .article-authors {
     gap: var(--space-3);
-    margin-block-start: var(--space-4);
+    margin-block-start: var(--space-2);
   }
 }
 
@@ -297,7 +309,6 @@
   .article-body {
     gap: var(--space-4);
     line-height: 1.85;
-    max-width: 75ch;
     overflow-x: visible;
   }
 }
