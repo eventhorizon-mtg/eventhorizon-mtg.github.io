@@ -1023,14 +1023,18 @@
   .archive-item.is-video .item-title::before {
     content: "";
     display: inline-block;
-    width: 16px;
-    height: 16px;
+    width: 1em; /* Stessa dimensione del font */
+    height: 1em; /* Stessa dimensione del font */
     flex-shrink: 0;
-    background-image: url('/icons/ph--youtube-logo-light.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.9;
+    background-color: currentColor; /* Eredita il colore del testo */
+    mask-image: url('/icons/ph--youtube-logo-light.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url('/icons/ph--youtube-logo-light.svg');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
   }
 
   /* Mobile: overline compatto stile sottotitolo playlist (~11px) */
