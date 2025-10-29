@@ -242,7 +242,8 @@
   line-height: var(--archive-lh-body);
   margin: 0;
   margin-top: var(--space-12); /* Margin invece di padding - la scrollbar parte dopo questo spazio */
-  text-align: justify; /* Testo giustificato */
+  text-align: justify; 
+  text-align-last: left; /* Evita che l'ultima riga sia giustificata */
 }
 
 .archive-sheet__content .item-content-extended {
