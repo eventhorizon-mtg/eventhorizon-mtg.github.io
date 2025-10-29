@@ -35,7 +35,7 @@
     var(--color-surface) 100%
   );
   padding-block: var(--space-5) var(--space-5);
-  padding-inline: clamp(1rem, var(--space-3), var(--space-3));
+  padding-inline: 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -57,13 +57,13 @@
   position: relative;
   display: grid;
   gap: var(--space-2);
-  padding-inline: clamp(0.5rem, var(--space-1), var(--space-1));
+  padding-inline: clamp(1rem, var(--space-3), var(--space-3));
 }
 
 @include bp(sm) {
   .article-hero .container {
     gap: var(--space-5);
-    padding-inline: var(--container-padding);
+    padding-inline: 0;
   }
 }
 
@@ -101,11 +101,13 @@
   max-width: 100%;
   word-wrap: break-word;
   hyphens: auto;
+  margin-block-start: calc(var(--space-1) * -1);
 }
 
 @include bp(sm) {
   .article-title {
     max-width: 32ch;
+    margin-block-start: calc(var(--space-3) * -1);
   }
 }
 
@@ -789,7 +791,7 @@
 /* Desktop Adjustments */
 @include bp(sm) {
   .article-hero {
-    padding-block: var(--space-10) var(--space-8);
+    padding-block: var(--space-5) var(--space-4);
     padding-inline: 0;
   }
 
@@ -800,7 +802,7 @@
 
 @include bp(md) {
   .article-hero {
-    padding-block: var(--space-12) var(--space-10);
+    padding-block: var(--space-6) var(--space-5);
   }
 
   .article-hero .container {
