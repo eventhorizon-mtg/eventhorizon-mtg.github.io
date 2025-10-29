@@ -1013,6 +1013,26 @@
     margin: 0;
   }
 
+  /* Icona YouTube inline prima del titolo - SOLO per video */
+  .archive-item.is-video .item-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5);
+  }
+
+  .archive-item.is-video .item-title::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    background-image: url('/icons/ph--youtube-logo-light.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.9;
+  }
+
   /* Mobile: overline compatto stile sottotitolo playlist (~11px) */
   .item-overline {
     font-family: "Lexend", var(--font-sans); /* Lexend solo su mobile */
