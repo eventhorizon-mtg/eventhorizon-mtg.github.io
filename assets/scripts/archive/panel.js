@@ -31,6 +31,14 @@
 
     // Toggle panel visibility
     if (willOpen) {
+      // Cancel any pending hide animation
+      const tid = panel.dataset.hideTid
+      if (tid) {
+        clearTimeout(Number(tid))
+        delete panel.dataset.hideTid
+      }
+      // If collapsing, stop and show immediately
+      panel.classList.remove('is-collapsing')
       panel.hidden = false
       // Proactively (re)compute overflow on open, even if the panel wasn't hidden before
       requestAnimationFrame(() => {
@@ -43,15 +51,26 @@
         }
       }, 150)
     } else {
-      // Reset state immediately to avoid stale classes if the panel is re-opened quickly
+      // Start smooth collapse animation
       panel.classList.remove('is-scrollable', 'has-overflow')
       panel.scrollTop = 0
-      // Wait briefly before hiding
-      setTimeout(() => {
-        if (!item.classList.contains('is-open')) {
-          panel.hidden = true
-        }
-      }, 300)
+      panel.classList.add('is-collapsing')
+
+      const onEnd = ev => {
+        if (ev && ev.target !== panel) return
+        panel.removeEventListener('transitionend', onEnd)
+        panel.hidden = true
+        panel.classList.remove('is-collapsing')
+      }
+      panel.addEventListener('transitionend', onEnd)
+      // Fallback in case transitionend doesn't fire
+      const fallbackTid = setTimeout(() => {
+        panel.removeEventListener('transitionend', onEnd)
+        panel.hidden = true
+        panel.classList.remove('is-collapsing')
+        delete panel.dataset.hideTid
+      }, 400)
+      panel.dataset.hideTid = String(fallbackTid)
     }
   }
 

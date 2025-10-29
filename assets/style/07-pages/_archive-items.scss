@@ -546,6 +546,16 @@
   box-sizing: border-box; /* Include padding nella larghezza */
 }
 
+.item-panel.is-collapsing {
+  /* Smooth collapse on close */
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .item-panel[hidden] {
   display: none; /* Completamente nascosto */
 }
