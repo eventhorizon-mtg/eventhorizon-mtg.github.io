@@ -225,7 +225,6 @@
   gap: var(--archive-gap-sheet); /* Riduci spazio tra sezioni interne */
   color: var(--color-text); /* Più visibile */
   line-height: var(--archive-lh-body);
-  padding-top: var(--space-12); /* Spazio sopra - scrollbar parte dopo questo padding */
   padding-bottom: var(--space-0-5); /* Ridotto ulteriormente */
   padding-inline: 0; /* Rimosso padding laterale per massimizzare spazio */
   /* Scroll indicator gradient */
@@ -242,6 +241,7 @@
   color: var(--color-text-muted);
   line-height: var(--archive-lh-body);
   margin: 0;
+  margin-top: var(--space-12); /* Margin invece di padding - la scrollbar parte dopo questo spazio */
   text-align: justify; /* Testo giustificato */
 }
 
