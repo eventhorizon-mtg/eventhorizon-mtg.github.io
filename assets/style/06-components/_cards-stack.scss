@@ -576,6 +576,11 @@
       transition: max-height 0.3s ease;
     }
 
+    /* Testo descrizione sempre giustificato */
+    .card.is-expanded .card__body .card__desc {
+      text-align: justify;
+    }
+
     /* Stato espanso: panel più grande con scroll */
     .card.is-expanded .card__body.is-scrollable {
       max-height: 90%;
