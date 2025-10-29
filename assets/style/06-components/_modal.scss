@@ -24,6 +24,7 @@
   max-width: 640px;
   max-height: 90vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
@@ -121,5 +122,49 @@
 @media (min-height: 860px) {
   .privacy-modal__content {
     max-height: 780px;
+  }
+}
+
+/* -----------------------------------------
+   Mobile refinements
+   - Subtle scrollbar (like archive sheet)
+   - Tighter spacing between <p> and <ul>
+   - Center title in header relative to close (X)
+----------------------------------------- */
+@media (max-width: 767.98px) {
+  /* Subtle scrollbar styling */
+  .privacy-modal__content {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--color-border) transparent;
+  }
+  .privacy-modal__content::-webkit-scrollbar { /* WebKit */
+    width: 6px;
+  }
+  .privacy-modal__content::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+  }
+  .privacy-modal__content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Tighter vertical rhythm between paragraphs and lists */
+  .privacy-modal__body { gap: var(--space-2); }
+  .privacy-modal__body p { margin: 0.25rem 0 0.35rem; }
+  .privacy-modal__body p + ul { margin-top: 0.25rem; }
+
+  /* Center the title while keeping the close button at right */
+  .privacy-modal__header {
+    display: grid;
+    grid-template-columns: 42px 1fr 42px; /* empty | title | close */
+    align-items: center;
+  }
+  .privacy-modal__title {
+    grid-column: 2;
+    text-align: center;
+  }
+  .privacy-modal__close {
+    grid-column: 3;
+    justify-self: end;
   }
 }
