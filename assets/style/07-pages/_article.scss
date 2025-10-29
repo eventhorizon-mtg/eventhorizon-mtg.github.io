@@ -75,7 +75,7 @@
 @include bp(sm) {
   .article-hero .container {
     gap: var(--space-5);
-    padding-inline: 0;
+    /* padding-inline: 0; */
   }
 }
 
