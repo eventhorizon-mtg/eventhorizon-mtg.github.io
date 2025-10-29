@@ -376,24 +376,26 @@
     })
   }
 
-  // Add ellipsis click handlers
-  cards.forEach(card => {
-    const body = card.querySelector('.card__body')
-    if (!body) return
+  // Add ellipsis click handlers (Desktop only)
+  if (!isMobile()) {
+    cards.forEach(card => {
+      const body = card.querySelector('.card__body')
+      if (!body) return
 
-    // Create ellipsis element
-    const ellipsis = document.createElement('button')
-    ellipsis.className = 'card__ellipsis'
-    ellipsis.setAttribute('type', 'button')
-    ellipsis.setAttribute('aria-label', 'Espandi contenuto')
-    ellipsis.textContent = '⋯'
-    ellipsis.addEventListener('click', e => {
-      e.stopPropagation()
-      expandPanel(card)
+      // Create ellipsis element
+      const ellipsis = document.createElement('button')
+      ellipsis.className = 'card__ellipsis'
+      ellipsis.setAttribute('type', 'button')
+      ellipsis.setAttribute('aria-label', 'Espandi contenuto')
+      ellipsis.textContent = '⋯'
+      ellipsis.addEventListener('click', e => {
+        e.stopPropagation()
+        expandPanel(card)
+      })
+
+      body.appendChild(ellipsis)
     })
-
-    body.appendChild(ellipsis)
-  })
+  }
 
   // Monitor card expansion via MutationObserver
   if (!isMobile() && typeof MutationObserver !== 'undefined') {
