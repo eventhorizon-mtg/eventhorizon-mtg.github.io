@@ -6,6 +6,10 @@ date = "2025-10-15T17:16:00+02:00"
 tags = ["guida", "hugo", "articoli", "responsive"]
 cover = ""
 aliases = ["/articles/test-2/"]
+
+[[authors]]
+avatar = "/images/authors/livello-1-copia.png"
+name = "PickleRick"
 +++
 ## Guida rapida: creare un articolo
 
