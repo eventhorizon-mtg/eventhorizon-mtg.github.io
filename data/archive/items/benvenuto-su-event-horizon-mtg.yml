@@ -2,14 +2,14 @@ id: Content001
 slug: Benvenuto
 kind: content
 date: 2025-10-14
-title: BENVENUTO SU EVENT HORIZON MTG!
+title: Benvenuto su EventHorizon MTG!
 overline: ARTICOLO N.1
 desc: Questo è il contenuto breve, appare anche su mobile e ha un limite di 400
   caratteri. Sotto dovresti vedere un tasto oro
-content: <p>Questo è il <strong>contenuto esteso</strong>, dovrebbe apparire
-  sotto la descrizione. <span class="text-color-accent">Testo oro</span> e
-  mettiamo un link di prova con un <a class="btn btn--archi" href="#">BUTTON</a>
-  inline per vedere cosa accade.</p>
+content: '<p style="text-align: justify;">Questo è il <strong>contenuto
+  esteso</strong>, dovrebbe apparire sotto la descrizione. <span
+  class="text-color-accent">Testo oro</span> e mettiamo un link di prova con un
+  <a class="btn btn--archi" href="#">BUTTON</a>e per vedere cosa accade.</p>'
 thumb: https://cards.scryfall.io/art_crop/front/3/8/3826d13f-e10f-4201-b680-51f826ff4ca9.jpg?1608919039
 links:
   - btn_class: btn--primary
