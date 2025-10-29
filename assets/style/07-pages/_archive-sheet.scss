@@ -196,6 +196,7 @@
   transition: color var(--duration-fast) ease;
   position: relative;
   z-index: var(--z-archive-sheet-handle); /* sopra overlay header */
+  text-transform: uppercase;
 }
 
 /* Porta avanti testo e CTA rispetto all'overlay header */
