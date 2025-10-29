@@ -37,24 +37,34 @@ collections:
         default: false
         hint: "Imposta su true per nascondere l'articolo"
 
-      - label: "Descrizione"
-        name: description
-        widget: markdown
+      - label: "Autori"
+        name: authors
+        widget: list
         required: false
-        buttons:
-          - bold
-          - italic
-          - link
-          - quote
-          - code
-          - heading-two
-          - heading-three
-          - bulleted-list
-          - numbered-list
-        sanitize_preview: false
-        modes:
-          - rich_text
-        hint: "Puoi utilizzare Markdown o HTML (con classi .text-center, .text-color-primary, ecc.) per gestire tipografia e colori"
+        hint: "Lista degli autori dell'articolo"
+        fields:
+          - label: "Avatar"
+            name: avatar
+            widget: image
+            required: true
+            media_library:
+              config:
+                multiple: false
+            media_folder: "/static/images/authors"
+            public_folder: "/images/authors"
+            hint: "Immagine avatar (40x40px desktop, 32x32px mobile)"
+
+          - label: "Nome"
+            name: name
+            widget: string
+            required: true
+            hint: "Nome completo dell'autore"
+
+          - label: "Link"
+            name: link
+            widget: string
+            required: false
+            hint: "URL opzionale al profilo dell'autore (es. sito web, social)"
 
       - label: "Tags"
         name: tags

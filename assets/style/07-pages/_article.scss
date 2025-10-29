@@ -123,6 +123,98 @@
   }
 }
 
+/* Article Authors Grid */
+.article-authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+@include bp(sm) {
+  .article-authors {
+    gap: var(--space-3);
+    margin-block-start: var(--space-4);
+  }
+}
+
+.article-authors .author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface-glass);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-soft);
+  transition: var(--transition-all);
+}
+
+@include bp(sm) {
+  .article-authors .author {
+    gap: var(--space-2);
+    padding: var(--space-1-5) var(--space-3);
+  }
+}
+
+.article-authors .author__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-colors);
+}
+
+@include bp(sm) {
+  .article-authors .author__link {
+    gap: var(--space-2);
+  }
+}
+
+.article-authors .author__link:hover,
+.article-authors .author__link:focus-visible {
+  color: var(--color-primary);
+}
+
+.article-authors .author:has(.author__link:hover),
+.article-authors .author:has(.author__link:focus-visible) {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-primary-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.article-authors .author__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  flex-shrink: 0;
+}
+
+@include bp(sm) {
+  .article-authors .author__avatar {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.article-authors .author__name {
+  font-family: var(--font-sans);
+  font-size: clamp(var(--text-xs), 1.5vw, var(--text-sm));
+  font-weight: 500;
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+@include bp(sm) {
+  .article-authors .author__name {
+    font-size: var(--text-sm);
+  }
+}
+
 .article-cover {
   margin-block-start: var(--space-4);
   margin-inline: 0;
@@ -840,6 +932,97 @@
 @include bp(sm) {
   .articles .card__desc {
     line-height: 1.8;
+  }
+}
+
+/* Card Authors - Compact Grid */
+.card__authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1-5);
+  margin-block-start: var(--space-2);
+}
+
+@include bp(sm) {
+  .card__authors {
+    gap: var(--space-2);
+  }
+}
+
+.card__authors .author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-1-5);
+  background: var(--color-surface-glass);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-soft);
+  transition: var(--transition-all);
+}
+
+@include bp(sm) {
+  .card__authors .author {
+    gap: var(--space-1-5);
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+.card__authors .author__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-colors);
+}
+
+@include bp(sm) {
+  .card__authors .author__link {
+    gap: var(--space-1-5);
+  }
+}
+
+.card__authors .author__link:hover,
+.card__authors .author__link:focus-visible {
+  color: var(--color-primary);
+}
+
+.card__authors .author:has(.author__link:hover),
+.card__authors .author:has(.author__link:focus-visible) {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-primary-soft);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.card__authors .author__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  flex-shrink: 0;
+}
+
+@include bp(sm) {
+  .card__authors .author__avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.card__authors .author__name {
+  font-family: var(--font-sans);
+  font-size: clamp(0.65rem, 1.2vw, var(--text-xs));
+  font-weight: 500;
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+@include bp(sm) {
+  .card__authors .author__name {
+    font-size: var(--text-xs);
   }
 }
 

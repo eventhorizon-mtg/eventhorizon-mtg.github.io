@@ -2,7 +2,6 @@
 title = "Benvenuto"
 date = "2025-10-15T18:58:00.000+02:00"
 draft = false
-description = "Che cos'è la sezione Articoli e come verrà usata sul sito."
 tags = ["benvenuto"]
 +++
 ## Benvenuto

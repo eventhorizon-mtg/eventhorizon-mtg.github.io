@@ -7,7 +7,22 @@
         {{ with .Params.tags }} · <span class="tags">{{ delimit . ", " }}</span>{{ end }}
       </p>
       <h1 class="article-title" itemprop="headline">{{ .Title }}</h1>
-      {{ with .Params.description }}<p class="article-desc" itemprop="description">{{ . }}</p>{{ end }}
+      {{ with .Params.authors }}
+      <div class="article-authors">
+        {{ range . }}
+        <div class="author">
+          {{ if .link }}
+          <a href="{{ .link }}" class="author__link" target="_blank" rel="noopener noreferrer">
+          {{ end }}
+            <img src="{{ .avatar | absURL }}" alt="{{ .name }}" class="author__avatar" width="40" height="40" loading="eager" decoding="async">
+            <span class="author__name">{{ .name }}</span>
+          {{ if .link }}
+          </a>
+          {{ end }}
+        </div>
+        {{ end }}
+      </div>
+      {{ end }}
     </div>
     {{ with .Params.cover }}
       <figure class="article-cover" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">

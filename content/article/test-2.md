@@ -3,7 +3,6 @@ draft = false
 slug = "guida-articoli"
 title = "Guida: creare un articolo"
 date = "2025-10-15T17:16:00+02:00"
-description = "Esempio completo di articolo: front matter, slug/alias, cover, immagini, link, tabelle, codice e componenti."
 tags = ["guida", "hugo", "articoli", "responsive"]
 cover = ""
 aliases = ["/articles/test-2/"]
@@ -15,8 +14,8 @@ aliases = ["/articles/test-2/"]
 - Cover consigliata: `static/images/articles/<slug>/cover.webp` e nel front matter `cover = "images/articles/<slug>/cover.webp"`.
 - Immagini nel corpo: usa path assoluti sotto `/images/...` oppure percorsi relativi a `static/`.
 - Link: usa sempre la forma Markdown `[testo](https://...)` (niente URL nude) per evitare problemi di wrapping e lint.
-- Tabelle e codice: sono già gestiti in modo responsive (scroll orizzontale solo quando serve).
-- Bozza: mantieni `draft = true` finché non vuoi pubblicare.
+- Tabelle e codice: sono giï¿½ gestiti in modo responsive (scroll orizzontale solo quando serve).
+- Bozza: mantieni `draft = true` finchï¿½ non vuoi pubblicare.
 - Crea un nuovo articolo:
 
 ```bash
@@ -27,11 +26,11 @@ hugo new article/il-tuo-slug.md
 
 Questo articolo include tutti gli elementi tipici per testare (e mostrare) la resa responsive su vari viewport.
 
-> Nota: questo articolo +¿ un catalogo ESEMPIO COMPLETO di tutte le personalizzazioni che puoi usare nei testi.
+> Nota: questo articolo +ï¿½ un catalogo ESEMPIO COMPLETO di tutte le personalizzazioni che puoi usare nei testi.
 
 ### Test 1: Testo Lungo e Word Breaking
 
-Questo è un paragrafo con una parola estremamente lunga per testare il word breaking: supercalifragilisticexpialidociousantidisestablishmentarianismthisisaverylongwordthatshouldbreakonmobiledevices
+Questo ï¿½ un paragrafo con una parola estremamente lunga per testare il word breaking: supercalifragilisticexpialidociousantidisestablishmentarianismthisisaverylongwordthatshouldbreakonmobiledevices
 
 URL lungo per testare link: <https://www.esempio-di-url-molto-lungo-per-testare-overflow.com/questa/path/molto/lunga/che/dovrebbe/andare/a/capo>
 
@@ -50,20 +49,20 @@ Ecco un esempio di codice inline: `const veryLongVariableNameThatShouldBreakProp
 ### Test 4: Blocco di Codice Lungo
 
 ```javascript
-// Questo +¿ un blocco di codice molto lungo che dovrebbe essere scrollabile orizzontalmente su mobile
+// Questo +ï¿½ un blocco di codice molto lungo che dovrebbe essere scrollabile orizzontalmente su mobile
 function esempioFunzioneConParametriMoltiEUnNomeEstremamenteLungoPerTestareLoScrollOrizzontale(parametro1, parametro2, parametro3, parametro4) {
-  const variabileMoltoLungaPerTestareLoScrollOrizzontale = "Questo +¿ un valore molto lungo";
-  console.log("Questa riga è estremamente lunga e dovrebbe richiedere scroll orizzontale su dispositivi mobili ma non dovrebbe rompere il layout della pagina");
+  const variabileMoltoLungaPerTestareLoScrollOrizzontale = "Questo +ï¿½ un valore molto lungo";
+  console.log("Questa riga ï¿½ estremamente lunga e dovrebbe richiedere scroll orizzontale su dispositivi mobili ma non dovrebbe rompere il layout della pagina");
   return variabileMoltoLungaPerTestareLoScrollOrizzontale.split('').map(char => char.toUpperCase()).join('');
 }
 ```
 
 ### Test 5: Lista con Elementi Lunghi
 
-- Questo +¿ un elemento di lista molto lungo che contiene una descrizione dettagliata per testare come il testo va a capo su dispositivi mobili e se mantiene la corretta indentazione e spaziatura
+- Questo +ï¿½ un elemento di lista molto lungo che contiene una descrizione dettagliata per testare come il testo va a capo su dispositivi mobili e se mantiene la corretta indentazione e spaziatura
 - URL in lista: <https://www.esempio-url-lunghissimo-nella-lista.com/path/molto/lungo/da/testare>
 - Elemento con parola lunga: supercalifragilisticexpialidocious
-- **Elemento enfatizzato**: Testo con formattazione **grassetto** e *corsivo* mescolati insieme con un link [questo è un link molto lungo che dovrebbe andare a capo](https://esempio.com)
+- **Elemento enfatizzato**: Testo con formattazione **grassetto** e *corsivo* mescolati insieme con un link [questo ï¿½ un link molto lungo che dovrebbe andare a capo](https://esempio.com)
 
 ### Test 6: Lista Numerata
 
@@ -73,7 +72,7 @@ function esempioFunzioneConParametriMoltiEUnNomeEstremamenteLungoPerTestareLoScr
 
 ### Test 7: Blockquote
 
-> Questo +¿ un blockquote molto lungo che serve per testare come il testo viene gestito all'interno delle citazioni su diversi viewport. Il blockquote dovrebbe mantenere una buona leggibilit+á anche su dispositivi mobili piccoli e il testo dovrebbe andare a capo correttamente senza causare overflow orizzontale. Questo +¿ particolarmente importante per citazioni che contengono URL lunghi come <https://www.esempio-url-lungo-in-blockquote.com/path/molto/lunga> o parole tecniche lunghe.
+> Questo +ï¿½ un blockquote molto lungo che serve per testare come il testo viene gestito all'interno delle citazioni su diversi viewport. Il blockquote dovrebbe mantenere una buona leggibilit+ï¿½ anche su dispositivi mobili piccoli e il testo dovrebbe andare a capo correttamente senza causare overflow orizzontale. Questo +ï¿½ particolarmente importante per citazioni che contengono URL lunghi come <https://www.esempio-url-lungo-in-blockquote.com/path/molto/lunga> o parole tecniche lunghe.
 
 ### Test 8: Pulsanti
 
@@ -115,7 +114,7 @@ Immagine allineata al centro usando attribute list:
 # Python code con righe molto lunghe
 def funzione_con_nome_estremamente_lungo_per_testare_overflow(parametro_uno, parametro_due, parametro_tre):
     """
-    Questa è una docstring molto lunga che serve per testare come viene gestito
+    Questa ï¿½ una docstring molto lunga che serve per testare come viene gestito
     il testo all'interno dei blocchi di codice su dispositivi mobili.
     """
     dizionario_di_esempio = {
@@ -129,7 +128,7 @@ Esempio di allineamenti del testo:
 
 Paragrafo centrato con attribute list {.text-center}:
 
-Questo testo è centrato
+Questo testo ï¿½ centrato
 {.text-center}
 
 Paragrafo giustificato con shortcode align:
@@ -141,7 +140,7 @@ Questo paragrafo dimostra l'uso dello shortcode di allineamento per giustificare
 ### Test 12: HTML Inline
 
 {{< article-box style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;" >}}
-**Contenitore HTML personalizzato:** Questo testo +¿ all'interno di un div con stili inline per testare la gestione di HTML custom all'interno degli articoli.
+**Contenitore HTML personalizzato:** Questo testo +ï¿½ all'interno di un div con stili inline per testare la gestione di HTML custom all'interno degli articoli.
 
 - Elemento lista dentro HTML
 - Altro elemento con `codice inline`
@@ -150,7 +149,7 @@ Questo paragrafo dimostra l'uso dello shortcode di allineamento per giustificare
 Varianti di box (info/avviso/successo/pericolo):
 
 {{< article-box class="article-box article-box--info" >}}
-Questa è una nota informativa.
+Questa ï¿½ una nota informativa.
 {{< /article-box >}}
 
 {{< article-box class="article-box article-box--warning" >}}
@@ -167,11 +166,11 @@ Errore critico: controlla i log.
 
 ### Test 13: Link Multipli
 
-Ecco alcuni link uno dopo l'altro: [Link 1](https://esempio1.com) -À [Link 2 con testo lungo](https://esempio2.com) -À [Link 3](https://esempio3.com) -À [Link 4 con descrizione estesa](https://esempio4.com)
+Ecco alcuni link uno dopo l'altro: [Link 1](https://esempio1.com) -ï¿½ [Link 2 con testo lungo](https://esempio2.com) -ï¿½ [Link 3](https://esempio3.com) -ï¿½ [Link 4 con descrizione estesa](https://esempio4.com)
 
 Link esterno con testo lungo allineato a destra:
 
-[Questo +¿ un link molto lungo verso una risorsa esterna che dovrebbe andare a capo correttamente senza rompere il layout](https://www.example.com/path/molto/lungo/di/test/che/si/prolunga/ancora/di/piu)
+[Questo +ï¿½ un link molto lungo verso una risorsa esterna che dovrebbe andare a capo correttamente senza rompere il layout](https://www.example.com/path/molto/lungo/di/test/che/si/prolunga/ancora/di/piu)
 {.text-right}
 
 ### Test 14: Nested Lists
@@ -179,7 +178,7 @@ Link esterno con testo lungo allineato a destra:
 - Primo livello
   - Secondo livello item 1
   - Secondo livello item 2 con testo molto lungo per testare l'indentazione su dispositivi mobili
-    - Terzo livello con testo ancora pi+¦ lungo per verificare la gestione delle liste annidate profonde
+    - Terzo livello con testo ancora pi+ï¿½ lungo per verificare la gestione delle liste annidate profonde
   - Ritorno al secondo livello
 - Primo livello item 2
   - Altro elemento secondo livello con `codice inline molto_lungo_per_testare`
@@ -220,12 +219,12 @@ Di seguito una raccolta veloce e copiabile delle personalizzazioni disponibili n
 
 Paragrafo centrato:
 
-Questo paragrafo +¿ centrato
+Questo paragrafo +ï¿½ centrato
 {.text-center}
 
 Paragrafo allineato a destra:
 
-Questo paragrafo +¿ allineato a destra
+Questo paragrafo +ï¿½ allineato a destra
 {.text-right}
 
 Immagine centrata (stessa sintassi):
@@ -251,7 +250,7 @@ Testo centrato usando lo shortcode.
 
 ### Pulsanti: dimensioni
 
-Di default i pulsanti negli articoli sono **piccoli** per integrarsi meglio con il testo. Per usare pulsanti pi+¦ grandi e prominenti, aggiungi la classe `.btn-lg` o `.btn--large`:
+Di default i pulsanti negli articoli sono **piccoli** per integrarsi meglio con il testo. Per usare pulsanti pi+ï¿½ grandi e prominenti, aggiungi la classe `.btn-lg` o `.btn--large`:
 
 **Pulsanti piccoli (default):**
 
@@ -285,7 +284,7 @@ Con lo shortcode `article-buttons`, aggiungi `btn-lg` o `btn--large` alla classe
 
 ### Pulsanti rotondi (icon-only)
 
-I pulsanti rotondi sono bottoni circolari che contengono solo un’icona. La forma è sempre un cerchio perfetto; la dimensione si controlla con la variabile CSS --btn-size (default 44px). Le varianti di colore si ottengono aggiungendo le classi già esistenti (primary/secondary/special/accent e brand glass).
+I pulsanti rotondi sono bottoni circolari che contengono solo unï¿½icona. La forma ï¿½ sempre un cerchio perfetto; la dimensione si controlla con la variabile CSS --btn-size (default 44px). Le varianti di colore si ottengono aggiungendo le classi giï¿½ esistenti (primary/secondary/special/accent e brand glass).
 
 Esempi live:
 
@@ -319,7 +318,7 @@ Snippet base:
 `
 
 Note:
-- Usare sempre ria-label descrittivo (non c’è testo visibile nel bottone).
+- Usare sempre ria-label descrittivo (non cï¿½ï¿½ testo visibile nel bottone).
 - Personalizza la dimensione con --btn-size per coerenza visiva.
 - Le varianti colore non modificano la forma.
 ### Box / Callout
