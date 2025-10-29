@@ -755,17 +755,22 @@
       background-position: center;
       background-repeat: no-repeat;
     }
-    /* Hide media area completely on expanded cards with background image */
+    /* Hide only the image on expanded cards with background image (keep media container for button) */
     .card.is-expanded[data-bg-url] .card__media {
-      display: none;
+      /* Don't hide the whole media container - button is inside! */
+      /* Just make it not take space but keep it for positioning */
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      border: none;
     }
     .card.is-expanded[data-bg-url] .card__img {
       /* Hide the inline image completely to avoid duplication with background */
       display: none !important;
     }
-    /* Keep the media overlay visible for play button contrast */
+    /* Keep the media overlay hidden when using background image */
     .card.is-expanded[data-bg-url] .card__media-overlay {
-      opacity: 0.4;
+      display: none;
     }
   }
 
