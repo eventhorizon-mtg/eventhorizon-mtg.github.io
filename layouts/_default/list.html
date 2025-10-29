@@ -80,7 +80,7 @@
           {{- end -}}
         {{- end -}}
         <li class="archive-item is-{{ $kind }}" style="--item-number: {{ $itemNumber }}" data-item-number="{{ $itemNumber }}">
-          <article class="item" data-item-id="{{ $it.id }}" data-kind="{{ $kind }}" role="button" tabindex="0" aria-label="Apri {{ cond (eq $kind "video") "video" "contenuto" }}: {{ $it.title }}">
+          <article class="item" data-item-id="{{ $it.id }}" data-kind="{{ $kind }}">
             <div class="item-media">
               {{- if $primary -}}
                 <a class="item-thumb" href="{{ $primary }}" target="_blank" rel="noopener" aria-label="Apri: {{ $it.title }}">

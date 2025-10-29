@@ -1,0 +1,12 @@
+# EventHorizon.mtg robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin panel
+User-agent: *
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://eventhorizon-mtg.github.io/sitemap.xml

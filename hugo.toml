@@ -23,7 +23,7 @@ enableRobotsTXT = true
   # Open Graph (fallback globali; sovrascrivibili per pagina con front matter)
   [params.og]
     title = "EventHorizon.mtg"
-    description = "Video e risorse per Magic: The Gathering."
+    description = "Il tuo punto di riferimento per Magic: The Gathering. Video narrativi, mazzi Commander e i nostri articoli."
     image = "images/logo.webp"
     locale = "it_IT"
 
@@ -59,7 +59,7 @@ notAlternative = true
 permalinkable  = true
 
 
-relativeURLs = true
+relativeURLs = false
 
 # Build optimization (Task 1.6)
 [build]
