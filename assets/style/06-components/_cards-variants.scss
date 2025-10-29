@@ -173,12 +173,12 @@
     pointer-events: none;
   }
 
-  /* Desktop: button centrato sopra il body panel quando card EXPANDED */
+  /* Desktop: button centrato quasi attaccato al top del body panel quando card EXPANDED */
   #cards.cards--stack.cards--panels .card.is-expanded .card__media .card__play,
   #cards.cards--stack.cards--panels .card.is-expanded .card__media .btn--primary-glass {
     display: inline-flex !important; /* Override any display:none */
     position: absolute;
-    top: clamp(5%, 8vh, 8%);
+    top: 9.5%;
     left: 50%;
     right: auto;
     bottom: auto;
