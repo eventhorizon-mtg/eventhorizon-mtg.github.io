@@ -558,10 +558,13 @@
   left: 0;
   right: 0;
   height: var(--archive-panel-gradient-height); /* Più alto per area cliccabile */
-  background: linear-gradient(to top,
-    var(--color-surface-glass) 0%,
-    color-mix(in srgb, var(--color-surface-glass) 98%, transparent) 50%,
-    transparent 100%);
+  /* Scurisce il fade per evidenziare meglio il contenuto tronco */
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-surface) 88%, var(--color-overlay) 12%) 0%,
+    color-mix(in srgb, var(--color-surface-glass) 96%, var(--color-overlay) 10%) 55%,
+    transparent 100%
+  );
   pointer-events: none; /* Disabilitato di default */
   opacity: 0; /* Nascosto di default */
   transition: opacity var(--duration-slow) ease;
@@ -597,10 +600,12 @@
 
 /* Hover sul gradient overlay - feedback visivo leggero */
 .item-panel.has-overflow::after:hover {
-  background: linear-gradient(to top,
-    color-mix(in srgb, var(--color-surface-glass) 100%, var(--color-primary) 5%) 0%,
-    color-mix(in srgb, var(--color-surface-glass) 98%, transparent) 50%,
-    transparent 100%);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-surface) 90%, var(--color-primary) 8%) 0%,
+    color-mix(in srgb, var(--color-surface-glass) 96%, transparent) 55%,
+    transparent 100%
+  );
 }
 
 /* Hover su gradient - evidenzia i puntini */
