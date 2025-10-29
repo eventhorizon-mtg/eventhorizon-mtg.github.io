@@ -70,8 +70,8 @@
   position: relative;
   display: grid;
   gap: var(--space-2);
-  /* Ensure same lateral spacing as article body */
-  padding-inline: var(--container-padding);
+  /* Align width with .article-body.container when using ch-based max-width */
+  font-size: clamp(var(--text-sm), 1.8vw, var(--text-lg));
 }
 
 @include bp(sm) {
