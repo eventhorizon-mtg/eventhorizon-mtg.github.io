@@ -58,6 +58,10 @@
   letter-spacing: var(--tracking-normal);
   text-transform: none;
   color: var(--color-text);
+  /* Remove default heading margins and ensure vertical centering */
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 .privacy-modal__close {
@@ -83,6 +87,9 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
   display: grid;
   gap: var(--space-3);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
 }
 
 .privacy-modal__body h3 {
@@ -153,18 +160,7 @@
   .privacy-modal__body p { margin: 0.25rem 0 0.35rem; }
   .privacy-modal__body p + ul { margin-top: 0.25rem; }
 
-  /* Center the title while keeping the close button at right */
-  .privacy-modal__header {
-    display: grid;
-    grid-template-columns: 42px 1fr 42px; /* empty | title | close */
-    align-items: center;
-  }
-  .privacy-modal__title {
-    grid-column: 2;
-    text-align: center;
-  }
-  .privacy-modal__close {
-    grid-column: 3;
-    justify-self: end;
-  }
+  /* Ensure vertical centering of title relative to close (X) */
+  .privacy-modal__header { display: flex; align-items: center; }
+  .privacy-modal__title { margin: 0; text-align: left; display: flex; align-items: center; }
 }
